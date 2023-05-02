@@ -13,7 +13,7 @@ class StoreWithholdingRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('transaction-manage');
+        return access()->allow('create-withholding-cert');
     }
 
     /**

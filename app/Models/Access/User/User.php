@@ -113,4 +113,14 @@ class User extends Authenticatable
             'updated_at'  => $this->updated_at->toIso8601String(),
         ];
     }
+
+    /**
+     * Concatenate first_name and last_name column
+     * 
+     * @return string
+     */
+    public function getFullnameAttribute()
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
 }

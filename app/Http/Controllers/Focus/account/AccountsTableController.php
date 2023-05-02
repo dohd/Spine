@@ -15,9 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\account;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\account\AccountRepository;
@@ -51,22 +51,29 @@ class AccountsTableController extends Controller
      */
     public function __invoke(ManageAccountRequest $request)
     {
-        //
         $core = $this->account->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id', 'number', 'holder'])
             ->addIndexColumn()
-             ->addColumn('debit', function ($account) {
-                return amountFormat($account->amount->sum('debit'));
+            ->addColumn('debit', function ($account) {
+                return numberFormat($account->debit);
             })
             ->addColumn('credit', function ($account) {
-                return amountFormat($account->amount->sum('credit'));
+                return numberFormat($account->credit);
+            })
+            ->addColumn('balance', function ($account) {
+                $balance = $account->credit - $account->debit;
+                if (in_array($account->account_type, ['Asset', 'Expense']))
+                    $balance = $account->debit - $account->credit;
+
+                return numberFormat($balance);
             })
             ->addColumn('account_type', function ($account) {
-                return trans('accounts.' . $account->account_type);
+                return  $account->account_type;
             })
-            ->addColumn('created_at', function ($account) {
-                return dateFormat($account->created_at);
+            ->addColumn('system_type', function ($account) {
+                return $account->system? 'default' : 'custom';
             })
             ->addColumn('actions', function ($account) {
                 return $account->action_buttons;

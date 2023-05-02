@@ -18,9 +18,9 @@ trait RjcAttribute
      public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("project-manage", "biller.rjcs.show").'
-                '.$this->getEditButtonAttribute("project-edit", "biller.rjcs.edit").'
-                '.$this->getDeleteButtonAttribute("project-delete", "biller.rjcs.destroy").'
+         '.$this->getViewButtonAttribute("manage-rjc", "biller.rjcs.show").'
+                '.$this->getEditButtonAttribute("edit-rjc", "biller.rjcs.edit").'
+                '.$this->getDeleteButtonAttribute("delete-rjc", "biller.rjcs.destroy").'
                 ';
     }
 }

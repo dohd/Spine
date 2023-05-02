@@ -27,9 +27,11 @@ class WarehouseRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-       //  ->join('blogs', 'customers.id', '=', 'blogs.id');
-        return $this->query()
-            ->get();
+        $q = $this->query();
+
+        $q->with('products');
+        
+        return $q->get();
     }
 
     /**
@@ -41,7 +43,7 @@ class WarehouseRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        $input = array_map( 'strip_tags', $input);
+        $input = array_map('strip_tags', $input);
         if (Warehouse::create($input)) {
             return true;
         }
@@ -58,8 +60,8 @@ class WarehouseRepository extends BaseRepository
      */
     public function update(Warehouse $warehouse, array $input)
     {
-        $input = array_map( 'strip_tags', $input);
-    	if ($warehouse->update($input))
+        $input = array_map('strip_tags', $input);
+        if ($warehouse->update($input))
             return true;
 
         throw new GeneralException(trans('exceptions.backend.warehouses.update_error'));

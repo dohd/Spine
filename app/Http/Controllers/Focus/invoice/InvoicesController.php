@@ -18,16 +18,12 @@
 
 namespace App\Http\Controllers\Focus\invoice;
 
-use App\Http\Controllers\Focus\printer\PrinterController;
 use App\Http\Controllers\Focus\printer\RegistersController;
 use App\Http\Requests\Focus\invoice\ManagePosRequest;
 use App\Models\account\Account;
 use App\Models\Company\ConfigMeta;
 use App\Models\customer\Customer;
-use App\Models\hrm\Hrm;
-use App\Models\invoice\Draft;
 use App\Models\invoice\Invoice;
-use App\Models\template\Template;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
@@ -37,16 +33,23 @@ use App\Repositories\Focus\invoice\InvoiceRepository;
 use App\Http\Requests\Focus\invoice\ManageInvoiceRequest;
 use App\Http\Requests\Focus\invoice\CreateInvoiceRequest;
 use App\Http\Requests\Focus\invoice\EditInvoiceRequest;
-use App\Http\Requests\Focus\invoice\DeleteInvoiceRequest;
 use App\Http\Responses\RedirectResponse;
+use App\Models\additional\Additional;
 use Illuminate\Support\Facades\Response;
 use App\Models\quote\Quote;
 use App\Models\project\Project;
-use App\Models\transaction\Transaction;
 use App\Models\bank\Bank;
+use App\Models\Company\Company;
+use App\Models\currency\Currency;
+use App\Models\invoice_payment\InvoicePayment;
 use App\Models\lpo\Lpo;
-use mPDF;
-use Bitly;
+use App\Models\term\Term;
+use App\Repositories\Focus\invoice_payment\InvoicePaymentRepository;
+use App\Repositories\Focus\pos\PosRepository;
+use Endroid\QrCode\QrCode;
+use Error;
+use Illuminate\Validation\ValidationException;
+use Storage;
 
 /**
  * InvoicesController
@@ -58,14 +61,22 @@ class InvoicesController extends Controller
      * @var InvoiceRepository
      */
     protected $repository;
+    protected $pos_repository;
+    protected $inv_payment_repository;
 
     /**
      * contructor to initialize repository object
      * @param InvoiceRepository $repository ;
      */
-    public function __construct(InvoiceRepository $repository)
+    public function __construct(
+        InvoiceRepository $repository, 
+        PosRepository $pos_repository, 
+        InvoicePaymentRepository $inv_payment_repository
+    )
     {
         $this->repository = $repository;
+        $this->pos_repository = $pos_repository;
+        $this->inv_payment_repository = $inv_payment_repository;
     }
 
     /**
@@ -76,90 +87,9 @@ class InvoicesController extends Controller
      */
     public function index(ManageInvoiceRequest $request)
     {
-        $input = $request->only('rel_type', 'rel_id', 'md');
-        $segment = array();
-        $words = array();
-        if (isset($input['rel_id']) and isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 1:
-                    $segment = Customer::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    break;
-                case 2:
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    break;
-            }
-        }
-
-        if (isset($input['md'])) {
-            if ($input['md'] == 'sub') {
-                $input['sub_json'] = "sub: 1";
-                $input['sub_url'] = '?md=sub';
-                $input['title'] = trans('invoices.subscriptions');
-                $input['meta'] = 'sub';
-                $input['pre'] = 6;
-            } 
-            elseif ($input['md'] == 'pos') {
-                $input['sub_json'] = "sub: 2";
-                $input['sub_url'] = '?md=pos';
-                $input['title'] = trans('invoices.pos');
-                $input['meta'] = 'pos';
-                $input['pre'] = 10;
-            }
-        } 
-        else {
-            $input['sub_json'] = "sub: 0";
-            $input['sub_url'] = '';
-            $input['title'] = trans('labels.backend.invoices.management');
-            $input['meta'] = 'sub';
-            $input['pre'] = 1;
-        }
-
-        return new ViewResponse('focus.invoices.index', compact('input', 'segment', 'words'));
-    }
-
-    /**
-     * Show the form for creating project invoice
-     */
-    public function create_project_invoice(ManageInvoiceRequest $request)
-    {
-        // extract input fields
-        $inv_customer = request('customer');
-        $inv_quote_ids = request('selected_products');
-
-        if ($inv_customer && $inv_quote_ids) {
-            $quote_ids = explode(',', $inv_quote_ids);
-            $quotes = Quote::whereIn('id', $quote_ids)->get();
-            $customer = Customer::find($inv_customer);
-            $last_invoice = Invoice::orderBy('id', 'desc')->first();
-            $last_tr = Transaction::orderBy('id', 'desc')->first();
-            $banks = Bank::all();
-
-            return view('focus.invoices.create_project_invoice')
-                ->with(compact('quotes', 'customer', 'last_invoice', 'last_tr', 'banks'))
-                ->with(bill_helper(1, 2));
-        }
-
-        $customers = Customer::where('active', '1')->pluck('company', 'id');
-        $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no');
-        $projects = Project::pluck('name', 'id');
-
-        return new ViewResponse('focus.invoices.project_invoice', compact('customers', 'lpos', 'projects'));
-    }
-
-    /**
-     * Project Invoice index page
-     */
-    public function project_invoice(ManageInvoiceRequest $request)
-    {
-        $customers = Customer::where('active', '1')->pluck('company', 'id');
-        $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no');
-        $projects = Project::pluck('name', 'id');
-
-        return new ViewResponse('focus.invoices.project_invoice', compact('customers', 'lpos', 'projects'));
+        $customers = Customer::whereHas('invoices')->get(['id', 'company']);
+        
+        return new ViewResponse('focus.invoices.index', compact('customers'));
     }
 
     /**
@@ -174,31 +104,14 @@ class InvoicesController extends Controller
     }
 
     /**
-     * Store newly created project invoice
+     * Store a newly created resource in storage.
+     *
+     * @param StoreInvoiceRequestNamespace $request
+     * @return \App\Http\Responses\RedirectResponse
      */
-    public function store_project_invoice(Request $request)
+    public function store(CreateInvoiceRequest $request)
     {
-        // extract request input fields
-        $invoice_data = $request->only([
-            'customer_id', 'taxid', 'bank_id', 'tax_id', 'tid', 'invoicedate', 'validity', 
-            'notes', 'subtotal', 'tax', 'total', 'term_id'
-        ]);
-        $dr_data = $request->only(['customer_name', 'dr_account_id', 'tid']);
-        $cr_data = $request->only(['cr_account_id']);
-        $tax_data = $request->only(['tax']);
-        $data_items = $request->only(['description', 'reference', 'unit', 'product_qty', 'product_price', 'quote_id', 'project_id', 'branch_id']);
-
-        $invoice_data['user_id'] = auth()->user()->id;
-        $invoice_data['ins'] = auth()->user()->ins;
-
-        $result = $this->repository->create_poroject_invoice(compact('invoice_data', 'dr_data', 'cr_data', 'tax_data', 'data_items'));
-
-        $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-        $msg = trans('alerts.backend.invoices.created') . '<a href="' . route('biller.print_bill', [$result['id'], 1, $valid_token, 1]) . '" target="_blank" class="btn btn-md bg-purple ml-2"><span class="fa fa-print" aria-hidden="true"></span>Print  </a>  
-            <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> 
-            <a href="' . route('biller.makepayment.receive_single_payment', [$result->id]) . '" class="btn btn-outline-light round btn-min-width bg-warning"><span class="fa fa-plus-circle" aria-hidden="true"></span>Receive Payment  </a>&nbsp; &nbsp;';
-
-        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => $msg]);
+        dd($request->all());
     }
 
     /**
@@ -214,56 +127,21 @@ class InvoicesController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param UpdateInvoiceRequestNamespace $request
-     * @param App\Models\invoice\Invoice $invoice
-     * @return \App\Http\Responses\RedirectResponse
-     */
-    public function update(EditInvoiceRequest $request, Invoice $invoice_r)
-    {
-        //Input received from the request
-        $invoice = $request->only(['customer_id', 'id', 'refer', 'invoicedate', 'invoiceduedate', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'ship_tax', 'term_id', 'tax_id', 'restock', 'recur_after']);
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'old_product_qty', 'unit_m']);
-        //dd($request->id);
-        $invoice['ins'] = auth()->user()->ins;
-        //$invoice['user_id']=auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-        $result = $this->repository->update($invoice_r, compact('invoice', 'invoice_items', 'data2'));
-        $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-        $link = route('biller.print_bill', [$result['id'], 1, $valid_token, 1]);
-        $link_download = route('biller.print_bill', [$result['id'], 1, $valid_token, 2]);
-        $link_preview = route('biller.view_bill', [$result['id'], 1, $valid_token, 0]);
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.updated') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-info btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . $link . '" class="btn btn-purple btn-md"><span class="fa fa-print" aria-hidden="true"></span> ' . trans('general.print') . '  </a> <a href="' . $link_download . '" class="btn btn-warning btn-md"><span class="fa fa-file-pdf-o" aria-hidden="true"></span> ' . trans('general.pdf') . '  </a> <a href="' . $link_preview . '" class="btn btn-purple btn-md"><span class="fa fa-globe" aria-hidden="true"></span> ' . trans('general.preview') . '  </a> <a href="' . route('biller.invoices.create') . '" class="btn btn-blue-grey btn-md"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a> &nbsp; &nbsp;'));
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param DeleteInvoiceRequestNamespace $request
      * @param App\Models\invoice\Invoice $invoice
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Invoice $invoice, DeleteInvoiceRequest $request)
+    public function destroy(Invoice $invoice)
     {
-        $feature = feature(11);
-        $alert = json_decode($feature->value2, true);
-        if ($alert['del_invoice']) {
-
-            $mail = array();
-            $mail['mail_to'][] = $feature->value1;
-            $mail['customer_name'] = $invoice->customer->name;
-            $mail['subject'] = trans('meta.delete_invoice_alert') . ' #' . $invoice->tid;
-            $mail['text'] = trans('invoices.invoice') . ' #' . $invoice->tid . '<br>' . trans('invoices.invoice_date') . ' : ' . dateFormat($invoice->invoicedate) . '<br>' . trans('general.amount') . ' : ' . amountFormat($invoice->total) . '<br>' . trans('general.employee') . ' : ' . $invoice->user->first_name . ' ' . $invoice->user->last_name;
-            business_alerts($mail);
+        try {
+            $this->repository->delete($invoice);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Invoice', $th);
         }
-        //Calling the delete method on repository
-        $this->repository->delete($invoice);
-        //returning with successfull message
-        return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.deleted')));
+        
+        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => trans('alerts.backend.invoices.deleted')]);
     }
 
     /**
@@ -277,53 +155,313 @@ class InvoicesController extends Controller
     {
         $accounts = Account::all();
         $features = ConfigMeta::where('feature_id', 9)->first();
-        if ($invoice->i_class < 2) {
-            $words['prefix'] = prefix(1);
-        } else {
-            $words['prefix'] = prefix(6);
-        }
-        //returning with successfull message
         $invoice['bill_type'] = 1;
-        $words['pay_note'] = trans('invoices.payment_for_invoice') . ' ' . $words['prefix'] . '#' . $invoice->tid;
+        $words = [
+            'prefix' => '',
+            'paynote' => trans('invoices.payment_for_invoice') . ' '. '#' . $invoice->tid
+        ];
+        
         return new ViewResponse('focus.invoices.view', compact('invoice', 'accounts', 'features', 'words'));
+    }    
+
+    /**
+     * Uninvoiced quotes
+     */
+    public function uninvoiced_quote(ManageInvoiceRequest $request)
+    {
+        $customers = Customer::whereHas('quotes', function ($q) {
+            $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
+        })->get(['id', 'company']);
+            
+        $lpos = Lpo::whereHas('quotes', function ($q) {
+            $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
+        })->get(['id', 'lpo_no', 'customer_id']);
+        $projects = Project::whereHas('quote', function ($q) {
+            $q->where(['verified' => 'Yes', 'invoiced' => 'No']);
+        })->get(['id', 'name', 'customer_id']);
+
+        return new ViewResponse('focus.invoices.uninvoiced_quote', compact('customers', 'lpos', 'projects'));
     }
 
-    public function print_document(Invoice $invoice, ManageInvoiceRequest $request)
+    /**
+     * Filter Invoice Products and redirect to Invoice Form
+     */
+    public function filter_invoice_quotes(Request $request)
     {
-        $invoice = $this->repository->find($request->id);
-        switch ($request->type) {
-            case 1:
-                //delivery note
-                $general = array(
-                    'bill_type' => trans('invoices.delivery_note'),
-                    'lang_bill_number' => trans('invoices.delivery_note'),
-                    'lang_bill_date' => trans('invoices.invoice_date'),
-                    'lang_bill_due_date' => trans(
-                        'invoices.invoice_due_date'
-                    ), 'direction' => 'rtl',
-                    'person' => trans('customers.customer'),
-                    'prefix' => 1
-                );
-                $html = view('focus.bill.delivery', compact('invoice', 'general'))->render();
-                $name = 'delivery_note_' . $invoice->tid . '.pdf';
-                break;
-            case 2:
-                //delivery note
-                $general = array(
-                    'bill_type' => trans('invoices.delivery_note'),
-                    'lang_bill_number' => trans('invoices.delivery_note'),
-                    'lang_bill_date' => trans('invoices.invoice_date'),
-                    'lang_bill_due_date' => trans(
-                        'invoices.invoice_due_date'
-                    ), 'direction' => 'rtl',
-                    'person' => trans('customers.customer'),
-                    'prefix' => 2
-                );
+        // extract input fields
+        $customer_id = $request->customer;
+        $quote_ids = explode(',', $request->selected_products);
 
-                $html = view('focus.bill.proforma', compact('invoice', 'general'))->render();
-                $name = 'delivery_note_' . $invoice->tid . '.pdf';
-                break;
+        if (!$customer_id || !$quote_ids) {
+            $customers = Customer::where('active', '1')->pluck('company', 'id');
+            $lpos = Lpo::distinct('lpo_no')->pluck('lpo_no', 'id');
+            $projects = Project::pluck('name', 'id');
+            
+            return redirect()->back()->with('flash_error', 'Please filter records by customer!');
         }
+
+        // set quotes in order of selection
+        $quotes = collect();
+        foreach ($quote_ids as $id) {
+            $quote = Quote::where('id', $id)->with(['verified_products' => function ($q) {
+                $q->orderBy('row_index', 'ASC');
+            }])->first();
+            $quotes->add($quote);
+        }
+
+        $customer = Customer::find($customer_id) ?: new Customer;
+        $accounts = Account::whereHas('accountType', fn($q) => $q->whereIn('name', ['Income', 'Other Income']))->get();
+        $terms = Term::where('type', 1)->get();  // invoice term type is 1
+        $banks = Bank::all();
+        $additionals = Additional::all();
+
+        $ins =  auth()->user()->ins;
+        $last_tid = Invoice::where('ins', $ins)->max('tid');
+        $prefixes = prefixesArray(['invoice', 'quote', 'proforma_invoice', 'purchase_order', 'delivery_note', 'jobcard'], $ins);
+
+        return new ViewResponse('focus.invoices.create_project_invoice',
+            compact('quotes', 'customer', 'last_tid', 'banks', 'accounts', 'terms', 'quote_ids', 'additionals', 'prefixes'),
+        );
+    }
+
+    /**
+     * Store newly created project invoice
+     */
+    public function store_project_invoice(Request $request)
+    {  
+        // extract request input fields
+        $bill = $request->only([
+            'customer_id', 'bank_id', 'tax_id', 'tid', 'invoicedate', 'validity', 'notes', 'term_id', 'account_id',
+            'taxable', 'subtotal', 'tax', 'total', 
+        ]);
+        $bill_items = $request->only([
+            'numbering', 'row_index', 'description', 'reference', 'unit', 'product_qty', 'product_subtotal', 'product_price', 
+            'tax_rate', 'quote_id', 'project_id', 'branch_id'
+        ]);
+
+        $bill['user_id'] = auth()->user()->id;
+        $bill['ins'] = auth()->user()->ins;
+        $bill_items = modify_array($bill_items);
+
+        try {
+            $result = $this->repository->create_project_invoice(compact('bill', 'bill_items'));
+        } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
+            return errorHandler('Error Creating Project Invoice', $th);
+        }
+
+        // print preview
+        $valid_token = token_validator('', 'i' . $result->id . $result->tid, true);
+        $msg = ' <a href="'. route( 'biller.print_bill',[$result->id, 1, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+        
+        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Project Invoice created successfully' . $msg]);
+    }
+
+    /**
+     * Edit Project Invoice Form
+     */
+    public function edit_project_invoice(Invoice $invoice)
+    {
+        $banks = Bank::all();
+        $accounts = Account::whereHas('accountType', function ($query) {
+            $query->whereIn('name', ['Income', 'Other Income']);
+        })->with(['accountType' => function ($query) {
+            $query->select('id', 'name');
+        }])->get();
+
+        $terms = Term::where('type', 1)->get(); // invoice type 1
+        $additionals = Additional::all();
+        $prefixes = prefixesArray(['invoice'], $invoice->ins);
+
+        $params = compact('invoice', 'banks', 'accounts', 'terms', 'additionals', 'prefixes');
+
+        return new ViewResponse('focus.invoices.edit_project_invoice', $params);
+    }
+
+    /**
+     * Edit Project Invoice Form
+     */
+    public function update_project_invoice(Invoice $invoice, Request $request)
+    {
+        // extract request input fields
+        $bill = $request->only([
+            'customer_id', 'bank_id', 'tax_id', 'tid', 'invoicedate', 'validity', 'notes', 'term_id', 'account_id',
+            'taxable', 'subtotal', 'tax', 'total', 
+        ]);
+        $bill_items = $request->only([
+            'id', 'numbering', 'row_index', 'description', 'reference', 'unit', 'product_qty', 
+            'product_subtotal', 'product_price', 'tax_rate', 'quote_id', 'project_id', 'branch_id'
+        ]);
+
+        $bill['user_id'] = auth()->user()->id;
+        $bill['ins'] = auth()->user()->ins;
+
+        $bill_items = modify_array($bill_items);
+
+        try {
+            $result = $this->repository->update_project_invoice($invoice, compact('bill', 'bill_items'));
+        } catch (\Throwable $th) { 
+            if ($th instanceof ValidationException) throw $th;
+            return errorHandler('Error Updating Project Invoice', $th);
+        }
+
+        // print preview
+        $valid_token = token_validator('', 'i' . $result->id . $result->tid, true);
+        $msg = ' <a href="'. route( 'biller.print_bill',[$result->id, 1, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>'; 
+
+        return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Project Invoice Updated successfully' . $msg]);
+    }
+
+
+    /**
+     * Create invoice payment
+     */
+    public function index_payment(Request $request)
+    {
+        $customers = Customer::get(['id', 'company']);
+
+        return new ViewResponse('focus.invoices.index_payment', compact('customers'));
+    }    
+
+    /**
+     * Create invoice payment
+     */
+    public function create_payment(Request $request)
+    {
+        $tid = InvoicePayment::where('ins', auth()->user()->ins)->max('tid');
+
+        $accounts = Account::whereHas('accountType', function ($q) {
+            $q->where('system', 'bank');
+        })->get(['id', 'holder']);
+
+        $unallocated_pmts = InvoicePayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+            ->whereColumn('amount', '!=', 'allocate_ttl')
+            ->orderBy('date', 'asc')->get();
+
+        return new ViewResponse('focus.invoices.create_payment', compact('accounts', 'tid', 'unallocated_pmts'));
+    }
+
+    /**
+     * Store invoice payment
+     */
+    public function store_payment(Request $request)
+    {
+        // extract request input
+        $data = $request->only([
+            'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount', 'allocate_ttl',
+            'payment_mode', 'reference', 'payment_id', 'payment_type'
+        ]);
+        $data_items = $request->only(['invoice_id', 'paid']); 
+        $data_items = modify_array($data_items);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+
+        try {
+            $result = $this->inv_payment_repository->create(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Payment', $th);
+        }
+
+        return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment updated successfully']);
+    }
+
+    /**
+     * Edit invoice payment
+     */
+    public function edit_payment(InvoicePayment $payment)
+    {   
+        $accounts = Account::whereHas('accountType', function ($q) {
+            $q->where('system', 'bank');
+        })->get(['id', 'holder']);
+        $unallocated_pmts = InvoicePayment::whereIn('payment_type', ['on_account', 'advance_payment'])
+            ->whereColumn('amount', '!=', 'allocate_ttl')
+            ->orderBy('date', 'asc')->get();
+
+        return new ViewResponse('focus.invoices.edit_payment', compact('payment', 'accounts', 'unallocated_pmts'));
+    }    
+
+    /**
+     * Show invoice payment
+     */
+    public function show_payment(InvoicePayment $payment)
+    {
+        return new ViewResponse('focus.invoices.view_payment', compact('payment'));
+    }   
+
+    /**
+     * Update invoice payment
+     */
+    public function update_payment(InvoicePayment $payment, Request $request)
+    {
+        // extract request input
+        $data = $request->only([
+            'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount', 'allocate_ttl',
+            'payment_mode', 'reference', 'payment_id', 'payment_type'
+        ]);
+        $data_items = $request->only(['id', 'invoice_id', 'paid']); 
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+        $data_items = modify_array($data_items);
+
+        try {
+            $result = $this->inv_payment_repository->update($payment, compact('data', 'data_items'));
+        } catch (\Throwable $th) { dd($th);
+            return errorHandler('Error Updating Payment', $th);
+        }
+
+        return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment updated successfully']);
+    }    
+
+    /**
+     * Delete payment from storage
+     */
+    public function delete_payment($id)
+    {
+        $payment = InvoicePayment::find($id);
+        try {
+            $this->inv_payment_repository->delete($payment);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Payment', $th);
+        }
+
+        return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment deleted successfully']);
+    }
+
+    /**
+     * Fetch client invoices
+     */
+    public function client_invoices(Request $request)
+    {
+        $invoices = Invoice::where('customer_id', $request->customer_id)
+            ->where('currency_id', 1)
+            ->whereIn('status', ['due', 'partial'])
+            ->orderBy('invoiceduedate', 'desc')
+            ->get();
+
+        return response()->json($invoices);
+    }
+
+    /**
+     * Fetch unallocated payments
+     */
+    public function unallocated_payment(Request $request)
+    {
+        $pmt = InvoicePayment::where(['customer_id' => $request->customer_id, 'is_allocated' => 0])
+            ->with(['account' => function ($q) {
+                $q->select(['id', 'holder']);
+            }])->first();
+
+        return response()->json($pmt);
+    }
+
+    /**
+     * Print invoice payment receipt
+     */
+    public function print_payment(InvoicePayment $paidinvoice)
+    {
+        $html = view('focus.invoices.print_payment', ['resource' => $paidinvoice])->render();
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
         $headers = array(
@@ -332,204 +470,112 @@ class InvoicesController extends Controller
             "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
             "Expires" => "0"
         );
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);
-    }
 
-    public function update_status(Request $request)
-    {
-        switch ($request->bill_type) {
-            case 1:
-                $result = Invoice::where('id', $request->bill_id)->update(array('status' => $request->status));
-                if ($result) echo json_encode(array('status' => 'Success', 'message' => trans('alerts.bills.updated'), 'bill_status' => trans('payments.' . $request->status)));
-                break;
-            case 2:
-                $result = Invoice::where('id', $request->bill_id)->update(array('i_class' => $request->status));
-                if ($result) echo json_encode(array('status' => 'Success', 'message' => trans('alerts.bills.updated'), 'bill_status' => trans('payments.' . $request->status)));
-                break;
-        }
-    }
+        return Response::stream($pdf->Output('payment.pdf', 'I'), 200, $headers);
+    }        
 
+    /**
+     * POS Create 
+     */
     public function pos(ManagePosRequest $request, RegistersController $register)
     {
-        if ($register->status()) {
-            $input = $request->only(['sub', 'p']);
-            $customer = Customer::first();
-            $accounts = Account::all();
+        if (!$register->status()) return view('focus.invoices.pos.open_register');
 
-            $input['sub'] = false;
-            $last_invoice = Invoice::where('i_class', '=', 1)->latest()->first();
-
-            return view('focus.invoices.pos.create')->with(array('last_invoice' => $last_invoice, 'sub' => $input['sub'], 'p' => $request->p, 'accounts' => $accounts, 'customer' => $customer))->with(bill_helper(1, 2))->with(product_helper());
-        } else {
-            return view('focus.invoices.pos.open_register');
-        }
-    }
-
-    public function pos_store(ManagePosRequest $request, PrinterController $printer)
-    {
-
-        //Input received from the request
-        $invoice = $request->only(['customer_id', 'tid', 'refer', 'invoicedate', 'invoiceduedate', 'recur_after', 'sub', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'term_id', 'tax_id', 'p']);
-
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'serial', 'unit_m']);
-
-        $invoice_payment = $request->only(['p_amount', 'p_method', 'p_account', 'b_change']);
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-        //dd($invoice_items);
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $invoice['i_class'] = 1;
-        $result = $this->repository->create(compact('invoice', 'invoice_items', 'data2'));
-        if ($result) {
-            if (isset($result['id'])) $pay = $this->repository->payment($result, $invoice_payment);
-            //return with successfull message
-            $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-            $link = route('biller.print_bill', [$result['id'], 1, $valid_token, 1]);
-            $link_download = route('biller.print_bill', [$result['id'], 1, $valid_token, 2]);
-            $link_preview = route('biller.view_bill', [$result['id'], 1, $valid_token, 0]);
-            $lk = '';
-            $out = '';
-            if (feature(19)->feature_value == 1) $out = $printer->thermal_print($result);
-            if (session('d_id')) {
-                Draft::find(session('d_id'))->delete();
-                session()->forget('d_id');
-            }
-            if (isset($result['p'])) $lk .= '<a href="' . route('biller.projects.show', [$result['p']]) . '" class="btn btn-info btn-md"><span class="fa fa-repeat" aria-hidden="true"></span> ' . trans('invoices.return_project') . '  </a> ';
-            if ($pay) echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-info btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . $link . '" class="btn btn-purple btn-md"><span class="fa fa-print" aria-hidden="true"></span> ' . trans('general.print') . '  </a> <a href="' . $link_download . '" class="btn btn-warning btn-md"><span class="fa fa-file-pdf-o" aria-hidden="true"></span> ' . trans('general.pdf') . '  </a> <a href="' . $link_preview . '" class="btn btn-purple btn-md"><span class="fa fa-globe" aria-hidden="true"></span> ' . trans('general.preview') . '  </a> <a href="' . route('biller.invoices.pos') . '" class="btn btn-blue-grey btn-md"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a> ' . $lk . ' &nbsp; &nbsp;<br>' . $out, 'd_id' => $result['id']));
-            $feature = feature(11);
-            $alert = json_decode($feature->value2, true);
-            if ($alert['new_invoice'] or $alert['cust_new_invoice']) {
-                $template = Template::all()->where('category', '=', 1)->where('other', '=', 1)->first();
-                $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-                $link = route('biller.view_bill', [$result->id, 1, $valid_token, 0]);
-                $data = array(
-                    'Company' => config('core.cname'),
-                    'BillNumber' => $result->tid,
-                    'BillType' => trans('invoices.invoice'),
-                    'URL' => "<a href='$link'>$link</a>",
-                    'Name' => $result->customer->name,
-                    'CompanyDetails' => '<h6><strong>' . config('core.cname') . ',</strong></h6>
-<address>' . config('core.address') . '<br>' . config('core.city') . '</address>
-            ' . config('core.region') . ' : ' . config('core.country') . '<br>  ' . trans('general.email') . ' : ' . config('core.email'),
-                    'DueDate' => dateFormat(date('Y-m-d')),
-                    'Amount' => amountFormat($result->total)
-                );
-                $replaced_body = parse($template['body'], $data, true);
-                $subject = parse($template['title'], $data, true);
-                $mail = array();
-                if ($alert['new_invoice'] and !$alert['cust_new_invoice']) {
-                    $mail['mail_to'] = $feature->value1;
-                } elseif ($alert['cust_new_invoice'] and !$alert['new_invoice']) {
-                    $mail['mail_to'] = $result->customer->email;
-                } else {
-                    $mail['mail_to'][] = $result->customer->email;
-                    $mail['mail_to'][] = $feature->value1;
-                }
-                $mail['customer_name'] = trans('transactions.transaction');
-                $mail['subject'] = $subject;
-                $mail['text'] = $replaced_body;
-                business_alerts($mail);
-            }
-            if ($alert['sms_new_invoice']) {
-                $template = Template::all()->where('category', '=', 2)->where('other', '=', 11)->first();
-                $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-                $link = route('biller.view_bill', [$result->id, 1, $valid_token, 0]);
-                $short_url = ConfigMeta::where('feature_id', '=', 7)->first(array('feature_value', 'value2'));
-                $data['URL'] = $link;
-                if ($short_url['feature_value']) {
-                    config([
-                        'bitly.accesstoken' => $short_url['value2']
-                    ]);
-                    $data['URL'] = Bitly::getUrl($link);
-                }
-                $replaced_body = parse($template['body'], $data, true);
-                $mailer = new \App\Repositories\Focus\general\RosesmsRepository();
-                return $mailer->send_bill_sms($result->customer->phone, $replaced_body, false);
-            }
-        } else {
-            echo json_encode(array('status' => 'Error', 'message' => trans('exceptions.backend.invoices.create_error')));
-        }
-    }
-
-    public function pos_update(ManagePosRequest $request, PrinterController $printer)
-    {
-        //Input received from the request
-        $invoice = $request->only(['customer_id', 'tid', 'refer', 'invoicedate', 'invoiceduedate', 'recur_after', 'sub', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'term_id', 'tax_id', 'p', 'id']);
-
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'serial', 'unit_m']);
-
-        $invoice_payment = $request->only(['p_amount', 'p_method', 'p_account', 'b_change']);
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-        //dd($invoice_items);
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $invoice_ins = Invoice::find($invoice['id']);
-        $result = $this->repository->update($invoice_ins, compact('invoice', 'invoice_items', 'data2'));
-        if (isset($result['id'])) $pay = $this->repository->payment($result, $invoice_payment);
-        //return with successfull message
-        $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-        $link = route('biller.print_bill', [$result['id'], 1, $valid_token, 1]);
-        $link_download = route('biller.print_bill', [$result['id'], 1, $valid_token, 2]);
-        $link_preview = route('biller.view_bill', [$result['id'], 1, $valid_token, 0]);
-        $lk = '';
-        $out = '';
-        if (feature(19)->feature_value == 1) $out = $printer->thermal_print($result);
-        if (isset($result['p'])) $lk .= '<a href="' . route('biller.projects.show', [$result['p']]) . '" class="btn btn-info btn-md"><span class="fa fa-repeat" aria-hidden="true"></span> ' . trans('invoices.return_project') . '  </a> ';
-        if ($pay) echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.invoices.created') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-info btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> <a href="' . $link . '" class="btn btn-purple btn-md"><span class="fa fa-print" aria-hidden="true"></span> ' . trans('general.print') . '  </a> <a href="' . $link_download . '" class="btn btn-warning btn-md"><span class="fa fa-file-pdf-o" aria-hidden="true"></span> ' . trans('general.pdf') . '  </a> <a href="' . $link_preview . '" class="btn btn-purple btn-md"><span class="fa fa-globe" aria-hidden="true"></span> ' . trans('general.preview') . '  </a> <a href="' . route('biller.invoices.pos') . '" class="btn btn-blue-grey btn-md"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a> ' . $lk . ' &nbsp; &nbsp;<br>' . $out, 'd_id' => $result['id']));
-    }
-
-    public function draft_store(ManagePosRequest $request)
-    {
-        //Input received from the request
-        $invoice = $request->only(['customer_id', 'tid', 'refer', 'invoicedate', 'invoiceduedate', 'recur_after', 'sub', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'term_id', 'tax_id', 'p']);
-
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'serial', 'unit_m']);
-
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-        //dd($invoice_items);
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $result = $this->repository->create_draft(compact('invoice', 'invoice_items', 'data2'));
-
-        //return with successfull message
-        $valid_token = token_validator('', 'i' . $result['id'] . $result['tid'], true);
-        $link = route('biller.print_bill', [$result['id'], 1, $valid_token, 1]);
-        $link_download = route('biller.print_bill', [$result['id'], 1, $valid_token, 2]);
-        $link_preview = route('biller.view_bill', [$result['id'], 1, $valid_token, 0]);
-        $lk = '';
-        $out = '';
-
-        echo json_encode(array('status' => 'Done', 'message' => trans('alerts.backend.invoices.draft_created')));
-    }
-
-    public function drafts_load(ManagePosRequest $request)
-    {
-        $drafts = Draft::where('user_id', '=', auth()->user()->id)->orderBy('id', 'desc')->take(20)->get();
-        foreach ($drafts as $draft) {
-            echo '<tr><td>' . $draft->tid . '#' . $draft->id . '<a href="' . route('biller.invoices.draft_view', [$draft->id]) . '"><i class="fa fa-eye" </a></td><td>' . dateTimeFormat($draft->created_at) . '</td><td>' . $draft->user->first_name . '</td></tr>';
-        }
-    }
-
-    public function draft_view(ManagePosRequest $request)
-    {
-        $invoice = Draft::find($request->id);
+        $tid = Invoice::where('ins', auth()->user()->ins)->max('tid');
         $customer = Customer::first();
-        $accounts = Account::all();
+        $currencies = Currency::all();
+        $terms = Term::all();
+        $additionals = Additional::all();
+        $defaults = ConfigMeta::get()->groupBy('feature_id');
+        
+        $pos_account = Account::where('system', 'pos')->first(['id', 'holder']);
+        $accounts = Account::where('account_type', 'Asset')
+            ->whereHas('accountType', fn($q) => $q->where('system', 'bank'))
+            ->get(['id', 'holder', 'number']);
+        
+        $params = compact('customer', 'accounts', 'pos_account', 'tid', 'currencies', 'terms', 'additionals', 'defaults');
+        return view('focus.invoices.pos.create', $params)->with(product_helper());
+    }
 
-        $input['sub'] = false;
-        $last_invoice = Invoice::orderBy('id', 'desc')->where('i_class', '=', 1)->first();
-        $invoice['tid'] = $last_invoice['tid'] + 1;
-        $action = route('biller.invoices.pos_store');
-        session(['d_id' => $invoice['id']]);
-        return view('focus.invoices.pos.edit')->with(array('last_invoice' => $last_invoice, 'sub' => $input['sub'], 'p' => $request->p, 'accounts' => $accounts, 'customer' => $customer, 'invoices' => $invoice, 'action' => $action))->with(bill_helper(1, 2));
+    /**
+     * POS Store 
+     */
+    public function pos_store(CreateInvoiceRequest $request)
+    {
+        if (request('is_pay') && (!request('pmt_reference') || !request('p_account'))) {
+            throw ValidationException::withMessages(['payment reference and payment account is required!']);
+        }
+        
+        // dd($request->all());
+        try {
+            $result = $this->pos_repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating POS Transaction', $th);
+        }
+        
+        return response()->json([
+            'status' => 'Success', 
+            'message' => 'POS Transaction Done Successfully',
+            'invoice' => $result,
+            // 'invoice' => (object) ['id' => 62],
+        ]);
+    }
+
+    /**
+     * TIMS KIT Api Call: Electronic Tax Register (ETR) Invoice
+     */
+    public function attach_etr()
+    {
+        $company = Company::find(auth()->user()->ins); 
+        if (!$company->etr_invoice_endpoint) throw new Error('ETR invoice endpoint not set!');
+
+        $invoice = Invoice::find(request('invoice_id'));
+        if (!array_key_exists('etr_url', $invoice->toArray())) throw new Error('ETR invoice url field not set!');
+        if (!array_key_exists('etr_qrcode', $invoice->toArray())) throw new Error('ETR invoice QRcode field not set!');
+            
+        $payload = config('datecs_etr.invoice');
+
+        if ($invoice->customer) {
+            $customer = $invoice->customer;
+            $payload['buyer'] = [
+                'buyerAddress' => 'string',
+                'buyerName' => $customer->company,
+                'buyerPhone' => $customer->phone,
+                'pinOfBuyer' => 'P123456789P',
+            ];
+        }
+        $payload['items'][0]['unitPrice'] = +$invoice->total;
+        $payload['payment'][0]['amount'] = +$invoice->total;
+        
+        try {
+            $client = new \GuzzleHttp\Client();
+            $client_resp = $client->post($company->etr_invoice_endpoint, [
+                'headers' => [
+                    'Content-Type' => "application/json",
+                    'Accept' => "application/json",
+                ],
+                'json' => $payload,
+            ]);
+            $data = json_decode($client_resp->getBody()->getContents());
+
+            if ($data->messages == 'Success' && isset($data->verificationUrl)) {
+                // extract invoice no
+                $query = parse_url($data->verificationUrl, PHP_URL_QUERY);
+                parse_str($query, $params);
+                $invoice_no = $params['invoiceNo'];
+                // generate QR code
+                $timestamp = date('Y_m_d_H_i_s');
+                $filename = "invoice_{$invoice_no}_{$timestamp}.png";
+                $qrCode = new QrCode($data->verificationUrl);
+                $qrCode->writeFile(Storage::disk('public')->path("qr".DIRECTORY_SEPARATOR."{$filename}"));
+                // update invoice
+                $invoice->update(['etr_url' => $data->verificationUrl, 'etr_qrcode' => $filename]);
+            }
+
+            return (array) $data;
+        } catch (\Throwable $th) {
+            printlog($th->getMessage());
+            throw new Error('ETR Processing error!');
+        }
     }
 }

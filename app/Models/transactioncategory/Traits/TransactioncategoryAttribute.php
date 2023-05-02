@@ -17,8 +17,7 @@ trait TransactioncategoryAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getEditButtonAttribute("business_settings", "biller.transactioncategories.edit").'
-                '.$this->getDeleteButtonAttribute("business_settings", "biller.transactioncategories.destroy").'
-                ';
+        return $this->getEditButtonAttribute("business_settings", "biller.transactioncategories.edit").'';
     }
+    //'.$this->getDeleteButtonAttribute("business_settings", "biller.transactioncategories.destroy").'
 }

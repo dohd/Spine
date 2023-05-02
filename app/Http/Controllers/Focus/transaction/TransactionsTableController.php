@@ -15,9 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\transaction;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\transaction\TransactionRepository;
@@ -34,6 +34,14 @@ class TransactionsTableController extends Controller
      */
     protected $transaction;
 
+
+    /**
+     * list of transaction groups indicating error in double entry
+     * 
+     * @var array $balance_group
+     */
+    protected $balance_groups;
+
     /**
      * contructor to initialize repository object
      * @param TransactionRepository $transaction ;
@@ -49,48 +57,90 @@ class TransactionsTableController extends Controller
      *
      * @return mixed
      */
-    public function __invoke(ManageTransactionRequest $request)
+    public function __invoke()
     {
-        //
         $core = $this->transaction->getForDataTable();
+
+        // balance group
+        $result = $core;
+        $this->balance_groups = $result->groupBy('tid')->reduce(function ($init, $v) {
+            $balance = round($v->sum('credit') - $v->sum('debit'));
+            if ($balance) $init[] = (object) ['tid' => $v->first()->tid, 'balance' => $balance];
+            return $init;
+        }, []);
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('account_id', function ($transaction) {
-                return $transaction->account->holder;
+            ->addColumn('tid', function ($tr) {
+                return 'Tr-' . $tr->tid;                
             })
-           // ->addColumn('trans_category_id', function ($transaction) {
-
-                //return '<a class="font-weight-bold" href="' . route('biller.transactions.index') . '?rel_type=0&rel_id=' . $transaction->category['id'] . '">' . $transaction->category['name'] . '</a>';
-           // })
-            ->addColumn('debit', function ($transaction) {
-                return numberFormat($transaction->debit);
-            })->addColumn('credit', function ($transaction) {
-                return numberFormat($transaction->credit);
+            ->addColumn('tr_type', function ($tr) {
+                $tax_tr_type = $this->tax_transaction('tr_type', $tr);
+                if ($tax_tr_type) return $tax_tr_type;
+                
+                return $tr->category->name;
             })
-            ->addColumn('payer', function ($transaction) {
-
-                if ($transaction->payer_id) {
-                    switch ($transaction->payer_type) {
-                        case 'supplier':
-                            return '<a class="font-weight-bold" href="' . route('biller.transactions.index') . '?rel_type=1&rel_id=' . $transaction->supplier['id'] . '">' . $transaction->supplier['name'] . '</a>';
-                            break;
-                        case 'customer':
-                            return '<a class="font-weight-bold" href="' . route('biller.transactions.index') . '?rel_type=3&rel_id=' . $transaction->customer['id'] . '">' . $transaction->customer['company'] . '</a>';
-                            break;
-                             case 'walkin':
-                            return $transaction->payer;
-                            break;
+            ->addColumn('reference', function ($tr) {
+                $tax_tr = $this->tax_transaction('reference', $tr);
+                if ($tax_tr) return $tax_tr;
+                if ($tr->account) return $tr->account->holder;
+            })
+            ->addColumn('vat_rate', function ($tr) {
+                return $this->tax_transaction('vat_rate', $tr);                
+            })
+            ->addColumn('vat_amount', function ($tr) {
+                return $this->tax_transaction('vat_amount', $tr);
+            })
+            ->addColumn('debit', function ($tr) {
+                return numberFormat($tr->debit);
+            })
+            ->addColumn('credit', function ($tr) {
+                return numberFormat($tr->credit);
+            })
+            ->addColumn('balance', function ($tr) {
+                $balance = 0;
+                foreach($this->balance_groups as $group) {
+                    if ($group->tid == $tr->tid) {
+                        $balance = $group->balance;
+                        break;
                     }
                 }
-                if ($transaction->payer) return $transaction->payer;
-
-            })->addColumn('transaction_date', function ($transaction) {
-                return dateFormat($transaction->transaction_date);
+                
+                return numberFormat($balance);
             })
-            ->addColumn('actions', function ($transaction) {
-                return '<a href="' . route('biller.print_payslip', [$transaction['id'], 1, 1]) . '" class="btn btn-blue round" data-toggle="tooltip" data-placement="top" title="View"><i class="fa fa-print"></i> </a>' . $transaction->action_buttons;
+            ->addColumn('tr_date', function ($tr) {
+                return dateFormat($tr->tr_date);
+            })
+            ->addColumn('created_at', function ($tr) {
+                return $tr->created_at->format('d-m-Y');
+            })
+            ->addColumn('actions', function ($tr) {
+                return $tr->action_buttons;
             })
             ->make(true);
     }
+
+    // tax transaction
+    public function tax_transaction($col='', $tr)
+    {
+        if (request('system') == 'tax') {
+            switch ($col) {
+                case 'reference':
+                    if ($tr->invoice) 
+                        return $tr->invoice->customer->taxid . ' : ' . $tr->invoice->customer->company;
+                    if ($tr->bill)
+                        return $tr->bill->supplier->taxid . ' : ' . $tr->bill->supplier->company;
+                case 'tr_type':
+                    if ($tr->invoice) return 'Sale';
+                    if ($tr->bill) return 'Purchase';
+                case 'vat_rate':
+                    if ($tr->invoice) return $tr->invoice->tax_id;
+                    if ($tr->bill) return $tr->bill->tax;
+                case 'vat_amount':
+                    if ($tr->invoice) return numberFormat($tr->invoice->tax);
+                    if ($tr->bill) return numberFormat($tr->bill->grandtax);
+            }
+        }
+    }    
 }

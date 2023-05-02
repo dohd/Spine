@@ -13,7 +13,7 @@ class ManageLoanRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('transaction-manag');
+        return access()->allow('manage-loan');
     }
 
     /**

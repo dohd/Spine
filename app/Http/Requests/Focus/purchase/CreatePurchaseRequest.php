@@ -13,7 +13,7 @@ class CreatePurchaseRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('project-manage');
+        return access()->allow('create-purchase');
     }
 
     /**

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-
     <style>
         body {
             font-size: 11pt;
@@ -112,29 +111,38 @@
         </small></p>
     <table class="product">
         <thead>
-        <tr>
-            <th class="description">{{trans('products.product_des')}}</th>
-            <th class="quantity">{{trans('products.qty')}}</th>
-            <th class="price">{{trans('general.amount')}}</th>
-        </tr>
+            <tr>
+                <th class="description">Item</th>
+                <th class="quantity">Qty</th>
+                <th class="price">Amount</th>
+            </tr>
         </thead>
         <tbody>
-        @php
-            $height =130;
-           foreach ($invoice->products as $row) {
-            $height +=8;
-            $length=strlen($row['product_name']);
-            $rows=(integer)($length/10);
-            $height +=2*$rows;
-               echo '<tr>
-               <td >' . $row['product_name']. $height.'  </td>
-                <td>' . +$row['product_qty'] . '' . $row['unit'] . '</td>
-               <td>' . numberFormat($row['product_subtotal'], $invoice['currency']) . '</td>
-           </tr>';
-           }
-
-        @endphp
-
+            @php
+                
+            @endphp
+            @foreach ($invoice->products as $row)
+                <tr>
+                    <td>{{ $row->description }}</td>
+                    <td>{{ +$row->product_qty }} {{ 'Lot' }}</td>
+                    <td>{{ numberFormat($row->product_price) }}</td>
+                </tr>
+            @endforeach
+            
+            @php
+               $height = 130;
+            //    foreach ($invoice->products as $row) {
+            //     $height +=8;
+            //     $length=strlen($row['product_name']);
+            //     $rows=(integer)($length/10);
+            //     $height +=2*$rows;
+            //        echo '<tr>
+            //        <td >' . $row['product_name']. $height.'  </td>
+            //         <td>' . +$row['product_qty'] . '' . $row['unit'] . '</td>
+            //        <td>' . numberFormat($row['product_subtotal'], $invoice['currency']) . '</td>
+            //    </tr>';
+            //    }
+            @endphp
         </tbody>
     </table>
     <hr>
@@ -156,10 +164,9 @@
     </table>
     <hr>
     <p class="align_center"><small>{{trans('invoices.short_thank_you_note')}}</small></p>
-    @if(isset($image))
-
+    @if (isset($image))
         @php
-            $height +=40;
+            $height = 180;
         @endphp
         <div class="align_center">
             <small>{{trans('invoices.scan_pay')}}</small><br>
@@ -169,7 +176,7 @@
         <div class="stamp"> {{trans('payments.'.$invoice['status'])}}</div>
     @endif
     @php
-        session(['height' =>$height]);
+        session(['height' => $height]);
     @endphp
 </div>
 </body>

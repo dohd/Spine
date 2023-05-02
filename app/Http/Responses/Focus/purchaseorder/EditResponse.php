@@ -1,8 +1,12 @@
 <?php
 
-namespace App\Http\Responses\Focus\projectstocktransfer;
-use App\Models\customfield\Customfield;
-use App\Models\items\CustomEntry;
+namespace App\Http\Responses\Focus\purchaseorder;
+
+use App\Models\additional\Additional;
+use App\Models\pricegroup\Pricegroup;
+use App\Models\supplier\Supplier;
+use App\Models\term\Term;
+use App\Models\warehouse\Warehouse;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -10,14 +14,14 @@ class EditResponse implements Responsable
     /**
      * @var App\Models\purchaseorder\Purchaseorder
      */
-    protected $purchaseorders;
+    protected $purchaseorder;
 
     /**
-     * @param App\Models\purchaseorder\Purchaseorder $purchaseorders
+     * @param App\Models\purchaseorder\Purchaseorder $purchaseorder
      */
-    public function __construct($purchaseorders)
+    public function __construct($purchaseorder)
     {
-        $this->purchaseorders = $purchaseorders;
+        $this->purchaseorder = $purchaseorder;
     }
 
     /**
@@ -29,26 +33,17 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
+        $po = $this->purchaseorder;
+        $prefixes = prefixesArray(['purchase_order'], $po->ins);
 
-           $fields = Customfield::where('module_id', 9)->get()->groupBy('field_type');
-        $fields_raw = array();
+        $additionals = Additional::all();
+        $pricegroups = Pricegroup::all();
+        $warehouses = Warehouse::all();
+        $supplier = Supplier::where('name', 'Walk-in')->first(['id', 'name']);
+        $price_supplier = Supplier::whereHas('products')->get(['id', 'name']);
+        // Purchase order
+        $terms = Term::where('type', 4)->get();
 
-        if (isset($fields['text'])) {
-            foreach ($fields['text'] as $row) {
-                $data = CustomEntry::where('custom_field_id', '=', $row['id'])->where('module', '=', 9)->where('rid', '=', $this->purchaseorders->id)->first();
-                $fields_raw['text'][] = array('id' => $row['id'], 'name' => $row['name'], 'default_data' => $data['data']);
-            }
-        }
-        if (isset($fields['number'])) {
-            foreach ($fields['number'] as $row) {
-                $data = CustomEntry::where('custom_field_id', '=', $row['id'])->where('module', '=', 9)->where('rid', '=', $this->purchaseorders->id)->first();
-                $fields_raw['number'][] = array('id' => $row['id'], 'name' => $row['name'], 'default_data' => $data['data']);
-            }
-        }
-
-        $fields_data = custom_fields($fields_raw);
-
-        return view('focus.purchaseorders.edit')->with([
-            'purchaseorders' => $this->purchaseorders])->with(bill_helper(3))->with(['fields_data' => $fields_data]);
+        return view('focus.purchaseorders.edit', compact('po', 'additionals','warehouses', 'pricegroups','price_supplier', 'terms', 'prefixes'));
     }
 }

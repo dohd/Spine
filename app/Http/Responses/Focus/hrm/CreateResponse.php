@@ -4,6 +4,8 @@ namespace App\Http\Responses\Focus\hrm;
 
 use App\Models\Access\Role\Role;
 use App\Models\department\Department;
+use App\Models\employee_branch\EmployeeBranch;
+use App\Models\hrm\HrmMeta;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -17,10 +19,15 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $roles=Role::where('status','<',1)->where(function ($query) {
-        $query->where('ins', '=', auth()->user()->ins)->orWhereNull('ins');})->get();
-        $departments = Department::all();
-        $general['create']=1;
-        return view('focus.hrms.create',compact('roles','general','departments'));
+        $roles=Role::where('status','<',1)->where(function ($q) {
+            $q->where('ins', auth()->user()->ins)->orWhereNull('ins');
+        })->get();
+
+        $departments = Department::all()->pluck('name','id');
+        $employee_branch = EmployeeBranch::all()->pluck('name','id');
+        $last_tid = HrmMeta::max('employee_no') + 1;
+        $general['create'] = 1;
+
+        return view('focus.hrms.create', compact('roles','general','departments','last_tid', 'employee_branch'));
     }
 }

@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\assetequipment;
 
 use App\Models\assetequipment\Assetequipment;
@@ -27,7 +28,7 @@ use App\Http\Responses\Focus\assetequipment\EditResponse;
 use App\Repositories\Focus\assetequipment\AssetequipmentRepository;
 use App\Http\Requests\Focus\assetequipment\ManageAssetequipmentRequest;
 use App\Http\Requests\Focus\assetequipment\StoreAssetequipmentRequest;
-
+use App\Models\account\Account;
 
 /**
  * ProductcategoriesController
@@ -70,9 +71,8 @@ class AssetequipmentsController extends Controller
      * @param CreateProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\CreateResponse
      */
-    public function create(StoreAssetequipmentRequest $request)
+    public function create()
     {
-
         return new CreateResponse('focus.assetequipments.create');
     }
 
@@ -89,14 +89,14 @@ class AssetequipmentsController extends Controller
             'account_id' => 'required',
             'account_type' => 'required'
         ]);
-        //Input received from the request
+        // extract request input
         $input = $request->except(['_token', 'ins']);
+
         $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-         
-        $id = $this->repository->create($input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Branch  Successfully Created' . ' <a href="' . route('biller.assetequipments.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.assetequipments.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.assetequipments.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
+
+        $this->repository->create($input);
+
+        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset Equipment Successfully Created']);
     }
 
     /**
@@ -106,9 +106,8 @@ class AssetequipmentsController extends Controller
      * @param EditProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
-    public function edit(Assetequipment $assetequipment, StoreAssetequipmentRequest $request)
+    public function edit(Assetequipment $assetequipment)
     {
-        //dd(0);
         return new EditResponse($assetequipment);
     }
 
@@ -119,10 +118,6 @@ class AssetequipmentsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-
-   
-
-
     public function update(StoreAssetequipmentRequest $request, Assetequipment $assetequipment)
     {
         $request->validate([
@@ -130,13 +125,12 @@ class AssetequipmentsController extends Controller
             'account_id' => 'required',
             'account_type' => 'required'
         ]);
-        //Input received from the request
-        $input = $request->only(['name', 'account_type', 'account_id', 'condtition', 'vendor', 'location', 'serial', 'warranty', 'warranty_expiry_date', 'cost', 'qty' ,'purchase_date' ]);
-        //Update the model using repository update method
-        $this->repository->update($assetequipment, $input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Record  Successfully Updated'  . ' <a href="' . route('biller.assetequipments.show', [$assetequipment->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.assetequipments.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.assetequipments.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
+        // extract request input
+        $input = $request->except(['_token', 'ins']);
 
+        $this->repository->update($assetequipment, $input);
+
+        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset Equipment Successfully Updated']);
     }
 
     /**
@@ -146,14 +140,11 @@ class AssetequipmentsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Assetequipment $assetequipment, StoreAssetequipmentRequest $request)
+    public function destroy(Assetequipment $assetequipment)
     {
-
-        //dd($branch);
-        //Calling the delete method on repository
         $this->repository->delete($assetequipment);
-        //returning with successfull message
-        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Record Successfully Deleted']);
+
+        return new RedirectResponse(route('biller.assetequipments.index'), ['flash_success' => 'Asset Equipment Successfully Deleted']);
     }
 
     /**
@@ -165,54 +156,37 @@ class AssetequipmentsController extends Controller
      */
     public function show(Assetequipment $assetequipment, ManageAssetequipmentRequest $request)
     {
-
-        //returning with successfull message
         return new ViewResponse('focus.assetequipments.view', compact('assetequipment'));
     }
 
+    /**
+     * Load Ledger Account Type
+     */
     public function ledger_load(Request $request)
     {
-        $q = $request->get('id');
-        $result = \App\Models\account\Account::all()->where('account_type', '=', $q);
+        $accounts = Account::where('account_type', $request->account_type)
+            ->where('holder', 'LIKE', '%' . $request->term .'%')
+            ->limit(6)->get();
 
-        return json_encode($result);
+        return response()->json($accounts);
     }
 
-    public function product_search(Request $request, $bill_type)
+    /**
+     * Search asset and equipments 
+     */
+    public function product_search(Request $request)
     {
-    
         if (!access()->allow('product_search')) return false;
 
-        $q = $request->post('keyword');
-        $w = $request->post('wid');
-        $s = $request->post('serial_mode');
-        if ($bill_type == 'label') $q = @$q['term'];
-        $wq = compact('q', 'w');
-            
+        $k = $request->post('keyword');
 
-         $equipments = Assetequipment::where('name', 'LIKE', '%' . $q . '%')
-           -> orWhere('account_type', 'LIKE', '%' . $q . '%')
-            -> orWhereHas('account', function ($query) use ($wq) {
-                $query->where('holder', 'LIKE', '%' . $wq['q'] . '%');
-                return $query;
-            })->limit(6)->get();
-            $output = array();
+        $equipments = Assetequipment::where('name', 'LIKE', '%'.$k.'%')
+            ->orWhere('account_type', 'LIKE', '%'.$k.'%')
+            ->orWhereHas('account', function ($q) use ($k) {
+                $q->where('holder', 'LIKE', '%'.$k.'%');
+            })
+            ->limit(6)->get(['id', 'name', 'account_id', 'account_type']);
 
-            foreach ($equipments as $row) {
-
-                 if ($row->id > 0) {
-         $output[] = array('name' => $row->name.' - '.$row->account_type.' - '.$row->account->holder, 'id' => $row['id'], 'decription' => $row['name'],  'account_id' => $row['account_id'], 'account_type' => $row['account_type'],  'cost' => $row['cost'] );
-            }
-                
-            }
-
-        
-
-        if (count($output) > 0)
-
-            return view('focus.products.partials.search')->withDetails($output);
+        return response()->json($equipments);
     }
-
-    
-
 }

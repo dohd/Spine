@@ -15,25 +15,22 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\project;
 
 use App\Models\hrm\Hrm;
 use App\Models\misc\Misc;
 use App\Models\project\Project;
 use App\Models\project\Task;
-use App\Models\tag\Tag;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
-use App\Http\Responses\Focus\task\CreateResponse;
 use App\Http\Responses\Focus\task\EditResponse;
 use App\Repositories\Focus\project\TaskRepository;
 use App\Http\Requests\Focus\project\ManageTaskRequest;
 use App\Http\Requests\Focus\project\CreateTaskRequest;
-use App\Http\Requests\Focus\project\StoreTaskRequest;
 use App\Http\Requests\Focus\project\EditTaskRequest;
-use App\Http\Requests\Focus\project\UpdateTaskRequest;
 use App\Http\Requests\Focus\project\DeleteTaskRequest;
 
 /**
@@ -84,38 +81,34 @@ class TasksController extends Controller
      */
     public function store(CreateTaskRequest $request)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        $input['ins'] = auth()->user()->ins;
-        $input['creator_id'] = auth()->user()->id;
-        //Create the model using repository create method
-        $result = $this->repository->create($input);
-        //return with successfull message
-        //return new RedirectResponse(route('biller.tasks.index'), ['flash_success' => trans('alerts.backend.tasks.created')]);
-        $tg = '';
-        foreach ($result->tags as $row) {
-            $tg .= '<span class="badge" style="background-color:' . $row['color'] . '">' . $row['name'] . '</span> ';
-        }
+        $result = $this->repository->create($request->except(['_token', 'ins']));
 
-        $btn = '';
-        $btn .= '<a href="' . route("biller.tasks.edit", [$result->id]) . '" data-toggle="tooltip" data-placement="top" title="View" class="success"><i  class="ft-eye"></i></a> ';
-        $btn .= '&nbsp;&nbsp;<a href="' . route("biller.tasks.edit", [$result->id]) . '" data-toggle="tooltip" data-placement="top" title="Edit"><i  class="ft-edit"></i></a>';
-        $btn .= '&nbsp;&nbsp;<a class="danger" href="' . route("biller.tasks.destroy", [$result->id]) . '" table-method="delete" data-trans-button-cancel="' . trans('buttons.general.cancel') . '" data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '" data-trans-title="' . trans('strings.backend.general.are_you_sure') . '" data-toggle="tooltip" data-placement="top" title="Delete"> <i  class="fa fa-trash"></i> </a>';
-        $task_back = task_status($result->status);
-        $status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span>';
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.tasks.created') . ' &nbsp; &nbsp;', 'title' => $result->name, 'short_desc' => $result->short_desc, 'row' => '<tr><td><div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.tasks.show", [$result->id]) . '" >' . $result->name . '</a><div class="float-right">' . $tg . '</div></div><span class="todo-desc">' . $result->short_desc . '</span></div> </div></td><td>' . dateTimeFormat($result->start) . '</td><td>' . dateTimeFormat($result->duedate) . '</td><td>' . $status . '</td><td>' . $btn . '</td></tr>', 't_type' => 3));
-
+        // mail alert
         $feature = feature(11);
         $alert = json_decode($feature->value2, true);
         if ($alert['task_new']) {
-            $mail = array();
-            $mail['mail_to'] = $feature->value1;
-            $mail['customer_name'] = trans('tasks.task');
-            $mail['subject'] = trans('tasks.task') . '#' . $result->name;
-            $mail['text'] = trans('tasks.task') . ' #' . $result->name . '<br>' . trans('tasks.duedate') . '<br> ' . dateTimeFormat($result->duedate) . ' <br> - ' . $result->short_desc;
+            $mail = [
+                'mail_to' => $feature->value1,
+                'customer_name' => trans('tasks.task'),
+                'subject' => trans('tasks.task') . '#' . $result->name,
+                'text' => trans('tasks.task') . ' #' . $result->name . '<br>' . trans('tasks.duedate') . '<br> ' . dateTimeFormat($result->duedate) . ' <br> - ' . $result->short_desc,
+            ];
             business_alerts($mail);
         }
 
+        $tag = '';
+        foreach ($result->tags as $row) {
+            $tag .= '<span class="badge" style="background-color:'. $row['color'] .'">'. $row['name'] .'</span> ';
+        }
+        $btn = '<a href="' . route("biller.tasks.edit", [$result->id]) . '" data-toggle="tooltip" data-placement="top" title="View" class="success"><i  class="ft-eye"></i></a> ';
+        $btn .= '&nbsp;&nbsp;<a href="' . route("biller.tasks.edit", [$result->id]) . '" data-toggle="tooltip" data-placement="top" title="Edit"><i  class="ft-edit"></i></a>';
+        $btn .= '&nbsp;&nbsp;<a class="danger" href="' . route("biller.tasks.destroy", [$result->id]) . '" table-method="delete" data-trans-button-cancel="' . trans('buttons.general.cancel') . '" data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '" data-trans-title="' . trans('strings.backend.general.are_you_sure') . '" data-toggle="tooltip" data-placement="top" title="Delete"> <i  class="fa fa-trash"></i> </a>';
+
+        $task_back = task_status($result->status);
+        $status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span>';
+        $row = '<tr><td><div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.tasks.show", [$result->id]) . '" >' . $result->name . '</a><div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $result->short_desc . '</span></div> </div></td><td>' . dateTimeFormat($result->start) . '</td><td>' . dateTimeFormat($result->duedate) . '</td><td>' . $status . '</td><td>' . $btn . '</td></tr>';
+
+        return response()->json(['status' => 'Success', 'message' => trans('alerts.backend.tasks.created'), 'title' => $result->name, 'short_desc' => $result->short_desc, 'row' => $row, 't_type' => 3]);
     }
 
     /**
@@ -171,28 +164,25 @@ class TasksController extends Controller
      */
     public function load(ManageTaskRequest $request)
     {
+        $task = Task::findOrFail($request->task_id);
 
-        $task = Task::where('id', '=', $request->id)->first();
-        $task['start'] = dateTimeFormat($task['start']);
-        $task['duedate'] = dateTimeFormat($task['duedate']);
-        $task['creator'] = $task->creator->first_name . ' ' . $task->creator->last_name;
-        $c = '';
-        foreach ($task->users as $row) {
-            $c .= $row['first_name'] . ' ' . $row['last_name'] . ', ';
-        }
-        $task['assigned'] = $c;
-
+        $task_users = $task->users->map(fn($v) => $v->full_name)->toArray();
         $task_back = task_status($task->status);
-        $status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span> ';
-        $task['status'] = $status;
-        $s = '';
+        $task->fill([
+            'start' => dateTimeFormat($task['start']),
+            'duedate' => dateTimeFormat($task['duedate']),
+            'creator' => $task->creator? $task->creator->full_name : '', 
+            'assigned' => implode(', ', $task_users),
+            'status' => '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span> ',
+            'status_list' => '',
+        ]);
+
         foreach (status_list() as $row) {
-            if ($row['id'] == @$task_back->id) $s .= '<option value="' . $row['id'] . '" selected>--' . $row['name'] . '--</option>';
-            $s .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
+            if ($row['id'] == @$task_back->id) $task->status_list .= '<option value="' . $row['id'] . '" selected>--' . $row['name'] . '--</option>';
+            else $task->status_list .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
         }
 
-        $task['status_list'] = $s;
-        return json_encode($task->only('id', 'name', 'status', 'start', 'duedate', 'description', 'short_desc', 'priority', 'creator', 'assigned', 'status', 'status_list'));
+        return response()->json($task->only('id', 'name', 'status', 'start', 'duedate', 'description', 'short_desc', 'priority', 'creator', 'assigned', 'status', 'status_list'));
     }
 
     public function update_status(Request $request)
@@ -217,5 +207,4 @@ class TasksController extends Controller
             return json_encode(array('status' => $status));
         }
     }
-
 }

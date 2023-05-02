@@ -48,6 +48,7 @@ class CurrencyRepository extends BaseRepository
         }
         throw new GeneralException(trans('exceptions.backend.currencies.create_error'));
     }
+    
 
     /**
      * For updating the respective Model in storage

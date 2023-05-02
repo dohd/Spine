@@ -15,11 +15,10 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\banktransfer;
 
-use App\Http\Requests\Focus\general\ManageCompanyRequest;
 use App\Models\banktransfer\Banktransfer;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -58,8 +57,8 @@ class BanktransfersController extends Controller
      */
     public function index(ManageBanktransferRequest $request)
     {
-       $words = array();
-         return new ViewResponse('focus.banktransfers.index', compact('words'));
+        $words = array();
+        return new ViewResponse('focus.banktransfers.index', compact('words'));
     }
 
     /**
@@ -68,7 +67,7 @@ class BanktransfersController extends Controller
      * @param CreateBankRequestNamespace $request
      * @return \App\Http\Responses\Focus\bank\CreateResponse
      */
-    public function create(StoreBanktransferRequest $request)
+    public function create()
     {
         return new CreateResponse('focus.banktransfers.create');
     }
@@ -81,44 +80,15 @@ class BanktransfersController extends Controller
      */
     public function store(StoreBanktransferRequest $request)
     {
-
         $request->validate([
             'amount' => 'required',
             'account_id' => 'required',
             'debit_account_id' => 'required|different:account_id',
-            
         ]);
 
+        $this->repository->create($request->except('_token'));
 
-        if($request->input('account_id')==$request->input('debit_account_id') ){
-
-        }
-
-
-      $credit = $request->only(['tid', 'account_id', 'method', 'refer_no', 'note']);
-      $debit= $request->only(['tid', 'method', 'refer_no', 'note']);
-
-
-
-      $credit['ins'] = auth()->user()->ins;
-      $credit['user_id'] = auth()->user()->id;
-      $credit['credit'] = numberClean($request->input('amount'));
-      $credit['transaction_date'] = date_for_database($request->input('transaction_date'));
-
-      $debit['ins'] = auth()->user()->ins;
-      $debit['user_id'] = auth()->user()->id;
-      $debit['account_id'] = numberClean($request->input('debit_account_id'));
-      $debit['debit'] = numberClean($request->input('amount'));
-      $debit['transaction_date'] = date_for_database($request->input('transaction_date'));
-
-
-      $result = $this->repository->create(compact('credit','debit'));
-
-       return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => trans('alerts.backend.banks.created')]);
-
-     
- 
-
+        return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Money Transfer Created Successfully']);
     }
 
     /**
@@ -128,7 +98,7 @@ class BanktransfersController extends Controller
      * @param EditBankRequestNamespace $request
      * @return \App\Http\Responses\Focus\bank\EditResponse
      */
-    public function edit(Banktransfer $banktransfer, StoreBanktransferRequest $request)
+    public function edit(Banktransfer $banktransfer)
     {
         return new EditResponse($banktransfer);
     }
@@ -140,19 +110,17 @@ class BanktransfersController extends Controller
      * @param App\Models\bank\Bank $bank
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function update(StoreBanktransferRequest $request, Charge $charge)
+    public function update(StoreBanktransferRequest $request, Banktransfer $banktransfer)
     {
         $request->validate([
-            'name' => 'required|string',
-            'bank' => 'required|string',
-            'number' => 'required'
+            'amount' => 'required',
+            'account_id' => 'required',
+            'debit_account_id' => 'required|different:account_id',
         ]);
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($charge, $input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => trans('alerts.backend.banktransfers.updated')]);
+
+        $this->repository->update($banktransfer, $request->except('_token'));
+
+        return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Money Tranfer Updated Successfully']);
     }
 
     /**
@@ -162,12 +130,11 @@ class BanktransfersController extends Controller
      * @param App\Models\bank\Bank $bank
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Charge $charge, StoreBanktransferRequest  $request)
+    public function destroy(Banktransfer $banktransfer)
     {
-        //Calling the delete method on repository
-        $this->repository->delete($charge);
-        //returning with successfull message
-        return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => trans('alerts.backend.banktransfers.deleted')]);
+        $this->repository->delete($banktransfer);
+
+        return new RedirectResponse(route('biller.banktransfers.index'), ['flash_success' => 'Money Tranfer Deleted Successfully']);
     }
 
     /**
@@ -177,11 +144,8 @@ class BanktransfersController extends Controller
      * @param App\Models\bank\Bank $bank
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(Charge $charge, ManageBanktransferRequest $request)
+    public function show(Banktransfer $banktransfer)
     {
-
-        //returning with successfull message
-        return new ViewResponse('focus.banktransfers.view', compact('charge'));
+        return new ViewResponse('focus.banktransfers.view', compact('banktransfer'));
     }
-
 }

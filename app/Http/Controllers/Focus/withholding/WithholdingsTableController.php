@@ -15,10 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\withholding;
 
-use App\Http\Requests\Focus\general\ManageCompanyRequest;
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\withholding\WithholdingRepository;
@@ -31,13 +30,13 @@ class WithholdingsTableController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var BankRepository
+     * @var WithholdingRepository
      */
     protected $withholding;
 
     /**
      * contructor to initialize repository object
-     * @param BankRepository $withholding ;
+     * @param WithholdingRepository $withholding ;
      */
     public function __construct(WithholdingRepository $withholding)
     {
@@ -52,26 +51,35 @@ class WithholdingsTableController extends Controller
      */
     public function __invoke(ManageWithholdingRequest $request)
     {
-        //
         $core = $this->withholding->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('account_id', function ($withholding) {
+            ->addColumn('tid', function ($withholding) {
+                return gen4tid('WH-', $withholding->tid);
+            })
+            ->addColumn('customer', function ($withholding) {
                 return $withholding->customer->company;
             })
-             ->addColumn('transaction_date', function ($withholding) {
-                return dateFormat($withholding->transaction_date);
+            ->addColumn('reference', function ($withholding) {
+                return strtoupper($withholding->certificate)  . ' - ' . $withholding->reference;
             })
-              ->addColumn('debit', function ($withholding) {
-                return amountFormat($withholding->debit);
+            ->addColumn('cert_date', function ($withholding) {
+                return dateFormat($withholding->cert_date);
             })
-           ->addColumn('credit', function ($withholding) {
-                return amountFormat($withholding->credit);
+            ->addColumn('amount', function ($withholding) {
+                return numberFormat($withholding->amount);
             })
-
-            ->addColumn('created_at', function ($withholding) {
-                return Carbon::parse($withholding->created_at)->toDateString();
+            ->addColumn('invoice_tid', function ($withholding) {
+                $items = $withholding->items;
+                if ($items->count()) {
+                    $invoice_tids = array();
+                    foreach ($items as $item) {
+                        if ($item->invoice) $invoice_tids[] = gen4tid('Inv-', $item->invoice->tid);
+                    }
+                    return implode(', ', $invoice_tids);
+                }
             })
             ->addColumn('actions', function ($withholding) {
                 return $withholding->action_buttons;

@@ -15,11 +15,10 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\charge;
 
-use App\Http\Requests\Focus\general\ManageCompanyRequest;
 use App\Models\charge\Charge;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -37,13 +36,13 @@ class ChargesController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var BankRepository
+     * @var ChargeRepository
      */
     protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param BankRepository $repository ;
+     * @param ChargeRepository $repository ;
      */
     public function __construct(ChargeRepository $repository)
     {
@@ -58,8 +57,8 @@ class ChargesController extends Controller
      */
     public function index(ManageChargeRequest $request)
     {
-       $words = array();
-         return new ViewResponse('focus.charges.index', compact('words'));
+        $words = array();
+        return new ViewResponse('focus.charges.index', compact('words'));
     }
 
     /**
@@ -81,38 +80,18 @@ class ChargesController extends Controller
      */
     public function store(StoreChargeRequest $request)
     {
-
-        $request->validate([
-            'amount' => 'required',
-            'account_id' => 'required',
-            'expense_account_id' => 'required'
+        // extract input fields
+        $data = $request->only([
+            'tid', 'bank_id', 'expense_id', 'amount', 'payment_mode', 'date',
+            'reference', 'note'
         ]);
 
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
 
-      $credit = $request->only(['tid', 'account_id', 'method', 'refer_no', 'note']);
-      $debit= $request->only(['tid', 'method', 'refer_no', 'note']);
+        $this->repository->create($data);
 
-
-
-      $credit['ins'] = auth()->user()->ins;
-      $credit['user_id'] = auth()->user()->id;
-      $credit['credit'] = numberClean($request->input('amount'));
-      $credit['transaction_date'] = date_for_database($request->input('transaction_date'));
-
-      $debit['ins'] = auth()->user()->ins;
-      $debit['user_id'] = auth()->user()->id;
-      $debit['account_id'] = numberClean($request->input('expense_account_id'));
-      $debit['debit'] = numberClean($request->input('amount'));
-      $debit['transaction_date'] = date_for_database($request->input('transaction_date'));
-
-
-      $result = $this->repository->create(compact('credit','debit'));
-
-       return new RedirectResponse(route('biller.charges.index'), ['flash_success' => trans('alerts.backend.banks.created')]);
-
-     
- 
-
+        return new RedirectResponse(route('biller.charges.index'), ['flash_success' => 'Charge successfully created']);
     }
 
     /**
@@ -146,7 +125,7 @@ class ChargesController extends Controller
         //Update the model using repository update method
         $this->repository->update($charge, $input);
         //return with successfull message
-        return new RedirectResponse(route('biller.charges.index'), ['flash_success' => trans('alerts.backend.charges.updated')]);
+        return new RedirectResponse(route('biller.charges.index'), ['flash_success' => 'Charge successfully updated']);
     }
 
     /**
@@ -161,7 +140,7 @@ class ChargesController extends Controller
         //Calling the delete method on repository
         $this->repository->delete($charge);
         //returning with successfull message
-        return new RedirectResponse(route('biller.charges.index'), ['flash_success' => trans('alerts.backend.charges.deleted')]);
+        return new RedirectResponse(route('biller.charges.index'), ['flash_success' => 'Charge successfully deleted']);
     }
 
     /**
@@ -177,5 +156,4 @@ class ChargesController extends Controller
         //returning with successfull message
         return new ViewResponse('focus.charges.view', compact('charge'));
     }
-
 }

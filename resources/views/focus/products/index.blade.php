@@ -2,233 +2,189 @@
 
 @section ('title', trans('labels.backend.products.management'))
 
-@section('page-header')
-    <h1>{{ trans('labels.backend.products.management') }}</h1>
-@endsection
-
 @section('content')
-    <div class="">
-        <div class="content-wrapper">
-            <div class="content-header row">
-                <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title mb-0">{{ trans('labels.backend.products.management') }}</h4>
-
+<div class="content-wrapper">
+    <div class="content-header row mb-2">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">{{ trans('labels.backend.products.management') }}</h4>
+        </div>
+        <div class="content-header-right col-6">
+            <div class="media width-250 float-right">
+                <div class="media-body media-right text-right">
+                    @include('focus.products.partials.products-header-buttons')
                 </div>
-                <div class="content-header-right col-md-6 col-12">
-                    <div class="media width-250 float-right">
-
-                        <div class="media-body media-right text-right">
-                            @include('focus.products.partials.products-header-buttons')
+            </div>
+        </div>
+    </div>
+    
+    <div class="content-body">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-2 h4">Product Count</div>                            
+                            <div class="col-2 h4 stock-count">0</div>
+                        </div>
+                        <div class="row mb-1">
+                            <div class="col-2 h4">Total Unit Cost</div>                           
+                            <div class="col-4 h4 stock-worth">0.00</div>
+                        </div>
+                        <div class="row">                            
+                            <div class="col-3">
+                                <label for="warehouse" class="h4">Product Location</label>
+                                <select name="warehouse_id" id="warehouse" class="custom-select">
+                                    <option value="">-- select location --</option>
+                                    @foreach ($warehouses as $warehouse)
+                                        <option value="{{ $warehouse->id }}">{{ $warehouse->title }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-3">
+                                <label for="category" class="h4">Product Category</label>
+                                <select name="category_id" id="category" class="custom-select">
+                                    <option value="">-- select category --</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">
+                                            {{ $category->title }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>  
+                            <div class="col-2">
+                                <label for="status" class="text-primary h4">Product Status</label>
+                                <select name="status" id="status" class="custom-select">
+                                    <option value="">-- select status --</option>
+                                    @foreach (['in_stock', 'out_of_stock'] as $status)
+                                        <option value="{{ $status }}">{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>                          
                         </div>
                     </div>
                 </div>
             </div>
-            @if($segment)
+        </div>
+
+        <div class="row">
+            <div class="col-12">
                 <div class="card">
-
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-sm-2">
-                                <p>@if(request('rel_type') == 2){{trans('warehouses.title')}}@else {{trans('productcategories.title')}} @endif </p>
-                            </div>
-                            <div class="col-sm-6">
-                                <p>{{$segment['title']}}</p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-2">
-                                <p>{{trans('productcategories.extra')}}</p>
-                            </div>
-                            <div class="col-sm-6">
-                                <p>{{$segment['extra']}}</p>
-                            </div>
-                        </div> @if(!$segment['c_type'])
-                            <div class="row">
-                                <div class="col-sm-2">
-                                    <p>{{trans('productcategories.total_products')}}</p>
-                                </div>
-                                <div class="col-sm-6">
-                                    <p>{{numberFormat($segment->products->sum('qty'))}}</p>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-2">
-                                    <p>{{trans('productcategories.total_worth')}}</p>
-                                </div>
-                                <div class="col-sm-6">
-                                    <p>{{amountFormat($segment->products->sum('total_value'))}}</p>
-                                </div>
-                            </div>
-
-                    </div>
-                </div>
-            @endif
-
-            @if(isset($segment->subcategories[0]))
-                <div class="card p-1 bg-lighten-5">
-                    <h4 class="mb-0">{{ trans('productcategories.sub_categories') }}</h4>
-                    <table id="productcategories-table"
-                           class="table table-striped table-bordered zero-configuration" cellspacing="0"
-                           width="100%">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>{{ trans('productcategories.title') }}</th>
-                            <th>{{ trans('general.createdat') }}</th>
-                            <th>{{ trans('labels.general.actions') }}</th>
-                        </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            @endif
-            @endif
-            <div class="content-body">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-
-                            <div class="card-content">
-
-                                <div class="card-body">
-
-                                    
-                                    <table id="products-table"
-                                           class="table table-striped table-bordered zero-configuration" cellspacing="0"
-                                           width="100%">
-                                        <thead>
-                                        <tr>
-                                            <th>{{ trans('labels.backend.products.table.id') }}</th>
-                                            <th>{{ trans('products.name') }}</th>
-                                            <th>Code</th>
-                                            <th>{{ trans('products.productcategory_id') }}</th>
-                                            <th>{{ trans('products.warehouse_id') }}</th>
-
-                                            <th>{{ trans('products.qty') }}</th>
-                                            <th>{{ trans('products.price') }}</th>
-                                            <th>{{ trans('general.createdat') }}</th>
-                                            <th>{{ trans('labels.general.actions') }}</th>
-                                        </tr>
-                                        </thead>
-
-
-                                        <tbody>
-                                        <tr>
-                                            <td colspan="100%" class="text-center text-success font-large-1"><i
-                                                        class="fa fa-spinner spinner"></i></td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-
-                            </div>
+                    <div class="card-content">
+                        <div class="card-body">
+                            <table id="productsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>{{ trans('labels.backend.products.table.id') }}</th>
+                                        <th>Description</th>
+                                        <th>Category Name</th>
+                                        <th>product_code</th>
+                                        <th>UOM</th>
+                                        <th>Unit (Qty)</th>
+                                        <th>Purchase Price</th>
+                                        <th>Expiry Date</th>
+                                        <th>{{ trans('labels.general.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="100%" class="text-center text-success font-large-1">
+                                            <i class="fa fa-spinner spinner"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 @endsection
 
 @section('after-scripts')
-    {{-- For DataTables --}}
-    {{ Html::script(mix('js/dataTable.js')) }}
+{{ Html::script(mix('js/dataTable.js')) }}
+{{ Html::script('focus/js/select2.min.js') }}
+<script>
+    const config = {
+        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}" }}
+    };
+    
+    const Index = {
+        status: '',
+        warehouseId: @json(request('warehouse_id')),
+        categoryId: @json(request('productcategory_id')),
 
-    <script>
+        init() {
+            this.drawDataTable();
+            $('#status').change(this.statusChange);
+            $('#warehouse').val(this.warehouseId).change(this.warehouseChange);
+            $('#category').val(this.categoryId).change(this.categoryChange);
+        },
 
-        $(function () {
-            setTimeout(function () {
-                draw_data();
-                sub_draw_data();
-            }, {{config('master.delay')}});
-        });
+        categoryChange() {
+            Index.categoryId = $(this).val();
+            $('#productsTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
 
-        function draw_data() {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
+        warehouseChange() {
+            Index.warehouseId = $(this).val();
+            $('#productsTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
 
-            var dataTable = $('#products-table').dataTable({
+        statusChange() {
+            Index.status = $(this).val();
+            $('#productsTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        drawDataTable() {
+            $('#productsTbl').dataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
                 stateSave: true,
-                language: {
-                    @lang('datatable.strings')
-                },
+                language: {@lang('datatable.strings')},
                 ajax: {
                     url: '{{ route("biller.products.get") }}',
                     type: 'post',
-                    @if($segment) data: {p_rel_id: '{{$segment['id']}}', p_rel_type: '{{$input['rel_type']}}'},@endif },
+                    data: {
+                        warehouse_id: this.warehouseId,
+                        category_id: this.categoryId,
+                        status: this.status
+                    },
+                    dataSrc: ({data}) => {
+                        $('.stock-count').text('0');
+                        $('.stock-worth').text('0.00');
+                        if (data.length && data[0].aggregate) {
+                            const aggr = data[0].aggregate;
+                            $('.stock-count').text(aggr.product_count);
+                            $('.stock-worth').text(aggr.product_worth);
+                        }
+                        return data;
+                    },
+                },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'name', name: 'name'},
-                     {data: 'code', name: 'code'},
-                    {data: 'category', name: 'category'},
-                    {data: 'warehouse', name: 'warehouse'},
+                    {data: 'productcategory_id', name: 'productcategory_id'},
+                    {data: 'code', name: 'code'}, 
+                    {data: 'unit', name: 'unit'},                   
                     {data: 'qty', name: 'qty'},
                     {data: 'price', name: 'price'},
-                    {data: 'created_at', name: '{{config('module.products.table')}}.created_at'},
+                    {data: 'expiry', name: 'expiry'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
-                order: [[0, "asc"]],
+                order: [[0, "desc"]],
                 searchDelay: 500,
                 dom: 'Blfrtip',
-                buttons: {
-                    buttons: [
-
-                        {extend: 'csv', footer: true, exportOptions: {columns: [0, 1, 2, 3, 4, 5, 6]}},
-                        {extend: 'excel', footer: true, exportOptions: {columns: [0, 1, 2, 3, 4, 5, 6]}},
-                        {extend: 'print', footer: true, exportOptions: {columns: [0, 1, 2, 3, 4, 5, 6]}}
-                    ]
-                },
+                buttons: ['csv', 'excel', 'print']
             });
-            $('#products-table_wrapper').removeClass('form-inline');
+        },
+    };    
 
-        }
-
-         function sub_draw_data() {
-         $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-
-            var dataTable = $('#productcategories-table').dataTable({
-                processing: true,
-                serverSide: true,
-                responsive: true,
-                language: {
-                    @lang('datatable.strings')
-                },
-                ajax: {
-                    url: '{{ route("biller.productcategories.get") }}',
-                    type: 'post',
-                      data: {rel_type: '1',rel_id:'{{request('rel_id',0)}}'}
-                },
-                columns: [
-                    {data: 'DT_Row_Index', name: 'id'},
-                    {data: 'name', name: 'name'},
-                    {data: 'created_at', name: '{{config('module.productcategories.table')}}.created_at'},
-                    {data: 'actions', name: 'actions', searchable: false, sortable: false}
-                ],
-                order: [[0, "asc"]],
-                searchDelay: 500,
-                dom: 'Blfrtip',
-                buttons: {
-                    buttons: [
-
-                        {extend: 'csv', footer: true, exportOptions: {columns: [0, 1]}},
-                        {extend: 'excel', footer: true, exportOptions: {columns: [0, 1]}},
-                        {extend: 'print', footer: true, exportOptions: {columns: [0, 1]}}
-                    ]
-                }
-            });
-            $('#productcategories-table_wrapper').removeClass('form-inline');
-        }
-
-    </script>
+    $(() => Index.init());
+</script>
 @endsection

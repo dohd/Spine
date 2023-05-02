@@ -3,30 +3,25 @@
 namespace App\Imports;
 
 use App\Models\equipment\Equipment;
-use App\Models\region\Region;
-use App\Models\branch\Branch;
-use App\Models\equipmentcategory\EquipmentCategory;
-use App\Models\section\Section;
+use Error;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
-use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Row;
 
 class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation, WithStartRow
 {
     /**
-     * @param array $row
      *
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @var int $row_count
      */
-    private $rows = 0;
-    private $records;
+    private $row_count = 0;
 
+    /**
+     *
+     * @var array $data
+     */
     private $data;
 
     public function __construct(array $data = [])
@@ -34,97 +29,56 @@ class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation
         $this->data = $data;
     }
 
-
+    /**
+     * 
+     * @param Illuminate\Support\Collection $rows
+     * @return void
+     */
     public function collection(Collection $rows)
-    {
-          if (isset($this->data['customer'])) $customer = $this->data['customer']; else return false;
-           //if (isset($this->data['warehouse'])) $warehouse = $this->data['warehouse']; else return false;
-        ++$this->rows;
-        foreach ($rows as $row) {
-            if (count($row) == 19) {
+    {        
+        $columns = [
+            'equip_serial','unique_id','capacity','location','machine_gas','make_and_type',
+            'model_and_model_no','equipment_category_id','service_rate','building','floor'
+        ];
+        $tid = Equipment::where('ins', auth()->user()->ins)->max('tid') + 1;
 
-
-               //Add region
-                    //Check if region exists else create new
-                    $region_name = $row[0];
-                    if (!empty($region_name)) {
-                        $region = Region::firstOrCreate(
-                            ['name' => $region_name,'ins' => auth()->user()->ins]
-                        );
-                        $region_id = $region->id;
-                    }
-
-                       //Add branch
-                    //Check if branch exists else create new
-                    $branch_name = $row[1];
-                    if (!empty($branch_name)) {
-                        $branch = Branch::firstOrCreate(
-                            ['name' => $branch_name,'ins' => auth()->user()->ins]
-                        );
-                        $branch_id = $branch->id;
-                    }
-
-
-
-                       //Add section
-                    //Check if section exists else create new
-                    $section_name = $row[2];
-                    if (!empty($section_name)) {
-                        $section = Section::firstOrCreate(
-                            ['name' => $section_name,'ins' => auth()->user()->ins]
-                        );
-                        $section_id = $section->id;
-                    }
-
-                       $category_name = $row[4];
-                    if (!empty($category_name)) {
-                        $category = EquipmentCategory::firstOrCreate(
-                            ['name' => $category_name,'ins' => auth()->user()->ins]
-                        );
-                        $category_id = $category->id;
-                    }
-
-                    
-
-
-                $equipment = new  Equipment([
-                   'customer_id'=>$customer,
-                   'region_id' =>$region_id,
-                    'branch_id' => $branch_id,
-                    'section_id' => $section_id,
-                    'location' => $row[3],
-                    'equipment_category_id' => $category_id,
-                    'unit_type' => $row[5],
-                    'make_type' => $row[6],
-                    'capacity' => $row[7],
-                    'machine_gas' => $row[8],
-                    'model' => $row[9],
-                    'equip_serial' => $row[10],
-                    'unique_id' => $row[11],
-                    'related_equipments' => $row[12],
-                    'main_duration' => $row[13],
-                    'service_rate' => $row[14],
-                    'attendance_rate' => $row[15],
-                    'total_rate' => $row[16],
-                    'actual_extra' => $row[17],
-                    'equip_status' => $row[18],
-                    'ins' => auth()->user()->ins
-
-                ]);
+        $row_count = 0;
+        $label_count = count($columns);
+        foreach ($rows as $i => $row) {
+            $row = array_slice($row->toArray(), 0, $label_count);
             
-                $equipment->save();
-
-             
+            if ($i == 0) {
+                $omitted_cols = array_diff($columns, $row);
+                if ($omitted_cols) throw new Error('Please check uploaded template! Template column label mismatch: ' . implode(', ', $omitted_cols));
+                continue;
             }
-            else {
-               return false;
-           }
+
+            $row_data = array_combine($columns, $row);
+            $row_data = array_replace($row_data, [
+                'make_type' => $row_data['make_and_type'],
+                'model' => $row_data['model_and_model_no'],
+                'tid' => $tid,
+                'customer_id' => $this->data['customer_id'],
+                'branch_id' => $this->data['branch_id'],
+                'ins' => auth()->user()->ins,
+            ]);
+            unset($row_data['make_and_type'], $row_data['model_and_model_no']);
+            foreach ($row_data as $key => $val) {
+                if ($key == 'service_rate') 
+                    $row_data[$key] = numberClean($row_data['service_rate']);
+                if (strcasecmp($val, 'null') == 0) $row_data[$key] = null;
+            }
+
+            $result = Equipment::create($row_data);
+            if ($result) {
+                $row_count++;
+                $tid++;
+            }
         }
 
-
+        if (!$row_count) throw new Error('Please fill template with required data');
+        $this->row_count = $row_count;
     }
-
-
 
     public function rules(): array
     {
@@ -141,7 +95,7 @@ class EquipmentsImport implements ToCollection, WithBatchInserts, WithValidation
 
     public function getRowCount(): int
     {
-        return $this->rows;
+        return $this->row_count;
     }
 
     public function startRow(): int

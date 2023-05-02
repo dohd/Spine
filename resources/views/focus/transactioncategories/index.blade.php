@@ -38,6 +38,8 @@
                                         <tr>
                                             <th>#</th>
                                             <th>{{ trans('general.title') }}</th>
+                                            <th>Category</th>
+                                            <th>Description</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -83,6 +85,8 @@
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'name', name: 'name'},
+                    {data: 'parent', name: 'parent'},
+                    {data: 'note', name: 'note'},
                     {data: 'created_at', name: 'created_at'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],

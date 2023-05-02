@@ -2,8 +2,11 @@
 
 namespace App\Http\Responses\Focus\quote;
 
+use App\Models\additional\Additional;
 use App\Models\bank\Bank;
+use App\Models\customer\Customer;
 use App\Models\lead\Lead;
+use App\Models\quote\Quote;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -31,62 +34,73 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $quote = $this->quote;
+        $words['title'] = 'Edit Quote';
+        $revisions = range(1, 5);
 
-        $products = $quote->products()->orderBy('row_index')->get();
-        // open leads (status = 0)
-        $leads = Lead::where('status', 0)->get();
+        $banks = Bank::all();
+        $leads = Lead::where('status', 0)->orderBy('id', 'DESC')->get();
+        $additionals = Additional::all();
+        $price_customers = Customer::whereHas('products')->get(['id', 'company']);
 
-        // default parameters
-        $params = array('quote', 'products', 'leads');
-        if ($quote->bank_id ) $banks = Bank::all();
-        
-        // if copy page 
-        if (request('page') == 'copy') {
-            // copy proforma invoice
-            if (isset($banks)) {
-                $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', '>', 0)->first('tid');
+        $lastquote = new Quote;
+        $lastquote->tid = $quote->query()->where('ins', $quote->ins)->where('bank_id', 0)->max('tid');
+        $lastpi = new Quote;
+        $lastpi->tid = $quote->query()->where('ins', $quote->ins)->where('bank_id', '>', 0)->max('tid');
 
-                return view('focus.quotes.edit_pi')
-                    ->with(compact('banks', 'last_quote', ...$params))
-                    ->with(bill_helper(2, 4));
-            }
+        $prefixes = prefixesArray(['quote', 'proforma_invoice', 'lead'], $quote->ins);
 
-            $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', 0)->first('tid');
+        $common_params = ['lastquote', 'quote', 'leads', 'words', 'additionals', 'price_customers', 'prefixes'];
+
+        // copy quote to quote
+        if (request('task') == 'quote_to_quote') {
+            $words['title'] = 'Copy Quote to Quote';
+
             return view('focus.quotes.edit')
-                ->with(compact('last_quote', ...$params))
+                ->with(compact(...$common_params))
+                ->with(bill_helper(2, 4));
+        }
+        // copy quote to pi
+        if (request('task') == 'quote_to_pi') {
+            $words['title'] = 'Copy Quote to PI';
+            $lastquote = $lastpi;
+
+            return view('focus.quotes.edit')
+                ->with(compact('banks', ...$common_params))
+                ->with(bill_helper(2, 4));
+        }
+        // copy pi to pi
+        if (request('task') == 'pi_to_pi') {
+            $words['title'] = 'Copy PI to PI';
+            $lastquote = $lastpi;
+
+            return view('focus.quotes.edit')
+                ->with(compact('banks', ...$common_params))
+                ->with(bill_helper(2, 4));
+        }
+        // copy pi to quote
+        if (request('task') == 'pi_to_quote') {
+            $words['title'] = 'Copy PI to Quote';
+
+            return view('focus.quotes.edit')
+                ->with(compact(...$common_params))
                 ->with(bill_helper(2, 4));
         }
 
-        // copy quote to pi page
-        if (request('page') == 'copy_to_pi') {
-            $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', '>', 0)->first('tid');
-            $banks = Bank::all();
+        // append previous lead when editing
+        $leads[] = Lead::find($quote->lead_id);
+        $words['edit_mode'] = true;
 
-            return view('focus.quotes.edit_pi')
-                ->with(compact('banks', 'last_quote', ...$params))
-                ->with(bill_helper(2, 4));
-        }
-
-        // copy pi to quote page
-        if (request('page') == 'copy_to_qt') {
-            $last_quote = $quote->orderBy('id', 'desc')->where('bank_id', 0)->first('tid');
-            $copy_from_pi = true;
-
-            return view('focus.quotes.edit')
-                ->with(compact('last_quote', 'copy_from_pi', ...$params))
-                ->with(bill_helper(2, 4));        
-        }
-
-        // $leads = Lead::all();
         // edit proforma invoice
-        if (isset($banks)) {            
-            return view('focus.quotes.edit_pi')
-                ->with(compact('banks', ...$params))
+        if ($quote->bank_id) {    
+            $words['title'] = 'Edit Proforma Invoice';
+
+            return view('focus.quotes.edit')
+                ->with(compact('banks','revisions', ...$common_params))
                 ->with(bill_helper(2, 4));
         }
         // edit quote
         return view('focus.quotes.edit')
-            ->with(compact(...$params))
+            ->with(compact('revisions', ...$common_params))
             ->with(bill_helper(2, 4));
     }
 }

@@ -15,16 +15,15 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\product;
 
-use App\Models\product\Product;
 use App\Http\Controllers\Controller;
-use App\Models\product\ProductVariation;
-use App\Repositories\Focus\product\ProductVariationRepository;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\product\ProductRepository;
 use App\Http\Requests\Focus\product\ManageProductRequest;
-use Illuminate\Support\Facades\Storage;
+use App\Models\productcategory\Productcategory;
+use DB;
 
 /**
  * Class ProductsTableController.
@@ -35,102 +34,98 @@ class ProductsTableController extends Controller
      * variable to store the repository object
      * @var ProductRepository
      */
-    protected $product;
-    protected $product_variation;
+    protected $repository;
+
+    // standard product
+    protected $standard_product;
 
     /**
      * contructor to initialize repository object
-     * @param ProductRepository $product ;
+     * @param ProductRepository $repository ;
      */
-    public function __construct(ProductRepository $product, ProductVariationRepository $product_variation)
+    public function __construct(ProductRepository $repository)
     {
-        $this->product = $product;
-        $this->product_variation = $product_variation;
+        $this->repository = $repository;
     }
 
     /**
      * This method return the data of the model
      * @param ManageProductRequest $request
-     *
      * @return mixed
      */
-    public function __invoke(ManageProductRequest $request)
+    public function __invoke()
     {
-
-        if (request('p_rel_id') and (request('p_rel_type') == 2)) {
-            $core = $this->product_variation->getForDataTable();
-
-            return Datatables::of($core)
-                ->addIndexColumn()
-                ->addColumn('name', function ($item) {
-                    return '<a class="font-weight-bold" href="' . route('biller.products.show', [$item->product->id]) . '">' . $item->product->name . '</a> <small> ' . $item->name . '</small>';
-                })
-                ->addColumn('warehouse', function ($item) {
-
-                    return $item->warehouse['title'] . '<img class="media-object img-lg border"
-                                                                      src="' . Storage::disk('public')->url('app/public/img/products/' . @$item['image']) . '"
-                                                                      alt="Product Image">';
-                })
-                ->addColumn('code', function ($item) {
-
-                    return  $item->standard->code;
-                })
-                ->addColumn('category', function ($item) {
-                    return $item->product->category->title;
-                })
-                ->addColumn('qty', function ($item) {
-                    return numberFormat($item['qty']) . ' ' . $item->unit;
-                })
-                ->addColumn('created_at', function ($item) {
-                    return dateFormat($item->created_at);
-                })
-                ->addColumn('price', function ($item) {
-                    return amountFormat($item['price']);
-                })
-                ->addColumn('actions', function ($item) {
-                    return $item->product->action_buttons;
-                })->rawColumns(['name', 'warehouse', 'category', 'qty', 'created_at', 'price', 'actions'])
-                ->make(true);
-
-
-        } else {
-
-
-            $core = $this->product->getForDataTable();
-
-
-            return Datatables::of($core)
-                ->addIndexColumn()
-                ->addColumn('name', function ($item) {
-                    return '<a class="font-weight-bold" href="' . route('biller.products.show', [$item->id]) . '">' . $item->name . '</a>';
-                })
-                ->addColumn('code', function ($item) {
-
-                    return  $item->standard->code;
-                })
-                ->addColumn('warehouse', function ($item) {
-
-                    return $item->standard['warehouse']['title'] . '<img class="media-object img-lg border"
-                                                                      src="' . Storage::disk('public')->url('app/public/img/products/' . @$item->standard['image']) . '"
-                                                                      alt="Product Image">';
-                })
-                ->addColumn('category', function ($item) {
-                    return $item->category->title;
-                })
-                ->addColumn('qty', function ($item) {
-                    return numberFormat($item->standard['qty']) . ' ' . $item->unit;
-                })
-                ->addColumn('created_at', function ($item) {
-                    return dateFormat($item->created_at);
-                })
-                ->addColumn('price', function ($item) {
-                    return amountFormat($item->standard['price']);
-                })
-                ->addColumn('actions', function ($item) {
-                    return $item->action_buttons;
-                })->rawColumns(['name', 'warehouse', 'category', 'qty', 'created_at', 'price', 'actions'])
-                ->make(true);
-
+        $query = $this->repository->getForDataTable();
+        $query_1 = clone $query;
+        // aggregate
+        $product_count = 0;
+        $product_worth = 0;
+        foreach ($query_1->get() as $product) {
+            $product_count += $product->variations()->count();
+            $product_worth += $product->variations()->sum(DB::raw('purchase_price*qty'));
         }
+        $product_worth = amountFormat($product_worth);
+        $aggregate = compact('product_count', 'product_worth');
+       
+        return Datatables::of($query)
+            ->escapeColumns(['id'])
+            ->addIndexColumn()
+            ->addColumn('name', function ($product) {
+                $this->standard_product = $product->standard ?: $product;
+                return '<a class="font-weight-bold" href="' . route('biller.products.show', [$product->id]) . '">' . $product->name . '</a>';
+            })
+             ->filterColumn('name', function($query, $name) {
+                $query->where('name', 'LIKE', "%{$name}%");
+            })
+            ->addColumn('productcategory_id', function ($product) {
+                $this->standard_product = $product->standard ?: $product;
+                $name = Productcategory::where('id',$product->productcategory_id)->first();
+                return  $name->title;
+            })
+            ->addColumn('code', function ($product) {
+                $code = $this->standard_product->code;
+                if ($code) 
+                return '<a class="font-weight-bold" href="' . route('biller.products.view', [$code]) . '">' . $code . '</a>';
+            })
+            ->filterColumn('code', function($query, $code) {
+
+                $query->whereHas('variations', fn($q) => $q->where('code', 'LIKE', "%{$code}%"));
+            })
+            ->addColumn('qty', function ($product) {
+                return $product->variations->sum('qty');       
+            })
+            ->addColumn('unit', function ($product) {
+                $unit = $product->unit;
+                if ($unit) return $unit->code;  
+            })
+            ->addColumn('price', function ($product) {
+                return NumberFormat($this->standard_product->purchase_price);
+            })
+            ->addColumn('total', function ($product) {
+                $total = 0;
+                foreach ($product->variations as $product_var) {
+                    $total += $this->standard_product->purchase_price * $product_var->qty;
+                }
+                return NumberFormat($total);
+            })
+            ->addColumn('created_at', function ($product) {
+                return $product->created_at->format('d-m-Y');
+            })
+            ->orderColumn('created_at', '-created_at $1')
+           ->addColumn('expiry', function ($product) {
+                $expiry = $this->standard_product->expiry;
+                if ($expiry) {
+                    return dateFormat($expiry);
+                }
+               return '';
+            })
+            ->addColumn('actions', function ($product) {
+                if ($product->action_buttons) return $product->action_buttons;
+                if (isset($product->product->action_buttons)) return $product->product->action_buttons;
+            })
+            ->addColumn('aggregate', function () use($aggregate) {
+                return $aggregate;
+            })
+            ->make(true);
     }
 }

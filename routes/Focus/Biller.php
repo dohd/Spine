@@ -4,13 +4,48 @@
  * FocusRoutes
  *
  */
+
+// Utility bills
+Route::group(['namespace' => 'utility_bill'], function () {
+    Route::get('utility-bills/create-kra', 'UtilityBillController@create_kra_bill')->name('utility-bills.create_kra_bill');
+
+    Route::post('utility-bills/employee_bills', 'UtilityBillController@employee_bills')->name('utility-bills.employee_bills');
+    Route::post('utility-bills/goods-receive-note', 'UtilityBillController@goods_receive_note')->name('utility-bills.goods_receive_note');
+    Route::post('utility-bills/store-kra', 'UtilityBillController@store_kra_bill')->name('utility-bills.store_kra_bill');
+    Route::post('utility-bills/store-kra', 'UtilityBillController@store_kra_bill')->name('utility-bills.store_kra_bill');
+    Route::resource('utility-bills', 'UtilityBillController');
+    // data table
+    Route::post('utility-bills/get', 'UtilityBillTableController')->name('utility-bills.get');
+});
+
+// supplier bill payment
+Route::group(['namespace' => 'billpayment'], function () {
+    Route::resource('billpayments', 'BillPaymentController');
+    // data table
+    Route::post('billpayments/get', 'BillPaymentTableController')->name('billpayments.get');
+  });
+  
+
+//  Accounts
 Route::group(['namespace' => 'account'], function () {
+    Route::get('accounts/profit_and_loss/{type}', 'AccountsController@profit_and_loss')->name('accounts.profit_and_loss');
     Route::get('accounts/balancesheet/{type}', 'AccountsController@balance_sheet')->name('accounts.balance_sheet');
     Route::get('accounts/trialbalance/{type}', 'AccountsController@trial_balance')->name('accounts.trial_balance');
+    Route::get('accounts/project_gross_profit', 'AccountsController@project_gross_profit')->name('accounts.project_gross_profit');
+    Route::get('accounts/cashbook', 'AccountsController@cashbook')->name('accounts.cashbook');
+
+    Route::post('accounts/search_next_account_no', 'AccountsController@search_next_account_no')->name('accounts.search_next_account_no');
+    Route::post('accounts/search', 'AccountsController@account_search')->name('accounts.account_search');
     Route::resource('accounts', 'AccountsController');
     //For Datatable
+    Route::post('accounts/cashbook/transactions', 'CashbookTableController')->name('accounts.get_cashbook');
+    Route::post('accounts/project_gross_profit/get', 'ProjectGrossProfitTableController')->name('accounts.get_project_gross_profit');
     Route::post('accounts/get', 'AccountsTableController')->name('accounts.get');
-    Route::post('accounts/search/{bill_type}', 'AccountsController@account_search')->name('accounts.account_search');
+});
+Route::group(['namespace' => 'allowance'], function () {
+    Route::resource('allowances', 'AllowancesController');
+    //For Datatable
+    Route::post('allowances/get', 'AllowancesTableController')->name('allowances.get');
 });
 
 Route::group(['namespace' => 'additional'], function () {
@@ -22,9 +57,63 @@ Route::group(['namespace' => 'additional'], function () {
 Route::group(['namespace' => 'assetequipment'], function () {
     Route::resource('assetequipments', 'AssetequipmentsController');
     Route::post('assetequipments/ledger_load', 'AssetequipmentsController@ledger_load')->name('assetequipments.ledger_load');
-    Route::post('assetequipments/search/{bill_type}', 'AssetequipmentsController@product_search')->name('assetequipments.product_search');
+    Route::post('assetequipments/search', 'AssetequipmentsController@product_search')->name('assetequipments.product_search');
     //For Datatable
     Route::post('assetequipments/get', 'AssetequipmentsTableController')->name('assetequipments.get');
+});
+
+Route::group(['namespace' => 'assetissuance'], function () {
+    Route::resource('assetissuance', 'AssetissuanceController');
+    Route::post('assetissuance/ledger_load', 'AssetissuanceController@ledger_load')->name('assetissuance.ledger_load');
+    Route::post('assetissuance/search', 'AssetissuanceController@product_search')->name('assetissuance.product_search');
+    Route::post('assetissuance/select', 'AssetissuanceController@select')->name('assetissuance.select');
+    Route::post('assetissuance/{id}/shows', 'AssetissuanceController@shows')->name('assetissuance.shows');
+    //For Datatable
+    Route::post('assetissuance/get', 'AssetissuanceTableController')->name('assetissuance.get');
+});
+
+Route::group(['namespace' => 'assetreturned'], function () {
+    
+    Route::post('assetreturned/ledger_load', 'AssetreturnedController@ledger_load')->name('assetreturned.ledger_load');
+    Route::post('assetreturned/search', 'AssetreturnedController@product_search')->name('assetreturned.product_search');
+    Route::post('assetreturned/select', 'AssetreturnedController@select')->name('assetreturned.select');
+    Route::get('assetreturned/items', 'AssetreturnedController@items')->name('assetreturned.items');
+    Route::post('assetreturned/send', 'AssetreturnedController@send')->name('assetreturned.send');
+    Route::post('assetreturned/{id}/shows', 'AssetreturnedController@shows')->name('assetreturned.shows');
+    Route::resource('assetreturned', 'AssetreturnedController');
+    //For Datatable
+    Route::post('assetreturned/get', 'AssetreturnedTableController')->name('assetreturned.get');
+});
+
+Route::group(['namespace' => 'surcharge'], function () {
+    Route::get('surcharges/load_items/{requisition}', 'SurchargeController@load_items')->name('surcharge.load_items');
+    Route::post('surcharges/select', 'SurchargeController@select')->name('surcharge.select');
+    Route::post('surcharges/get_issuance', 'SurchargeController@get_issuance')->name('surcharge.get_issuance');
+    Route::get('surcharges/load/{id}', 'SurchargeController@load')->name('surcharges.load');
+    Route::put('surcharges/pay/{items}', 'SurchargeController@pay')->name('surcharges.pay');
+    Route::put('surcharges/send', 'SurchargeController@send')->name('surcharges.send');
+    Route::resource('surcharges', 'SurchargeController');
+
+    //For Datatable
+    Route::post('surcharges/get', 'SurchargeTableController')->name('surcharges.get');
+});
+
+Route::group(['namespace' => 'toolkit'], function () {
+    Route::post('toolkits/select', 'ToolkitController@select')->name('toolkits.select');
+    Route::post('toolkits/load', 'ToolkitController@load')->name('toolkits.load');
+    Route::resource('toolkits', 'ToolkitController');
+
+    //For Datatable
+    Route::post('toolkits/get', 'ToolkitTableController')->name('toolkits.get');
+});
+
+Route::group(['namespace' => 'workshift'], function () {
+    Route::post('workshifts/select', 'WorkshiftController@select')->name('workshifts.select');
+    Route::post('workshifts/load', 'WorkshiftController@load')->name('workshifts.load');
+    Route::resource('workshifts', 'WorkshiftController');
+
+    //For Datatable
+    Route::post('workshifts/get', 'WorkshiftTableController')->name('workshifts.get');
 });
 
 Route::group(['namespace' => 'bank'], function () {
@@ -38,8 +127,7 @@ Route::group(['namespace' => 'banktransfer'], function () {
     Route::post('banktransfers/get', 'BanktransfersTableController')->name('banktransfers.get');
 });
 Route::group(['namespace' => 'branch'], function () {
-    Route::get('branches/branch_load', 'BranchesController@branch_load')->name('branches.branch_load');
-
+    Route::post('branches/select', 'BranchesController@select')->name('branches.select');
     Route::resource('branches', 'BranchesController');
     //For Datatable
     Route::post('branches/get', 'BranchesTableController')->name('branches.get');
@@ -82,10 +170,37 @@ Route::group(['namespace' => 'department'], function () {
     Route::post('departments/get', 'DepartmentsTableController')->name('departments.get');
 });
 
-Route::group(['namespace' => 'deptor'], function () {
-    Route::resource('deptors', 'DeptorsController');
+Route::group(['namespace' => 'employee_branch'], function () {
+    Route::resource('employee_branch', 'EmployeeBranchController');
     //For Datatable
-    Route::post('deptors/get', 'DeptorsTableController')->name('deptors.get');
+    Route::post('employee_branch/get', 'EmployeeBranchTableController')->name('employee_branch.get');
+});
+
+Route::group(['namespace' => 'jobtitle'], function () {
+    Route::post('jobtitles/select', 'JobTitleController@select')->name('jobtitles.select');
+    Route::resource('jobtitles', 'JobTitleController');
+    //For Datatable
+    Route::post('jobtitles/get', 'JobTitleTableController')->name('jobtitles.get');
+});
+
+Route::group(['namespace' => 'benefit'], function () {
+    Route::post('benefits/select', 'BenefitController@select')->name('benefits.select');
+    Route::resource('benefits', 'BenefitController');
+    //For Datatable
+    Route::post('benefits/get', 'BenefitTableController')->name('benefits.get');
+});
+
+Route::group(['namespace' => 'deduction'], function () {
+    Route::post('deductions/select', 'DeductionController@select')->name('deductions.select');
+    Route::resource('deductions', 'DeductionController');
+    //For Datatable
+    Route::post('deductions/get', 'DeductionTableController')->name('deductions.get');
+});
+Route::group(['namespace' => 'overtimerate'], function () {
+    Route::post('overtimerates/select', 'OvertimeRateController@select')->name('overtimerates.select');
+    Route::resource('overtimerates', 'OvertimeRateController');
+    //For Datatable
+    Route::post('overtimerates/get', 'OvertimeRateTableController')->name('overtimerates.get');
 });
 
 Route::group(['namespace' => 'deptor'], function () {
@@ -94,11 +209,38 @@ Route::group(['namespace' => 'deptor'], function () {
     Route::post('deptors/get', 'DeptorsTableController')->name('deptors.get');
 });
 
+Route::group(['namespace' => 'deptor'], function () {
+    Route::resource('deptors', 'DeptorsController');
+    //For Datatable
+    Route::post('deptors/get', 'DeptorsTableController')->name('deptors.get');
+});
+
+Route::group(['namespace' => 'employeesalary'], function () {
+    Route::resource('employeesalaries', 'EmployeeSalariesController');
+    //For Datatable
+    Route::post('salaries/get', 'SalariesTableController')->name('salaries.get');
+    Route::post('employeesalaries/get', 'EmployeeSalariesTableController')->name('employeesalaries.get');
+});
+
+Route::group(['namespace' => 'queuerequisition'], function () {
+    Route::post('queuerequisitions/status', 'QueueRequisitionController@status')->name('queuerequisitions.status');
+    Route::post('queuerequisitions/goods', 'QueueRequisitionController@goods')->name('queuerequisitions.goods');
+    Route::post('queuerequisitions/select_queuerequisition', 'QueueRequisitionController@select_queuerequisition')->name('queuerequisitions.select_queuerequisition');
+    //update_description
+    Route::post('queuerequisitions/update_description', 'QueueRequisitionController@update_description')->name('queuerequisitions.update_description');
+    Route::post('queuerequisitions/select', 'QueueRequisitionController@select')->name('queuerequisitions.select');
+    Route::resource('queuerequisitions', 'QueueRequisitionController');
+    //For Datatable
+    Route::post('queuerequisitions/get', 'QueueRequisitionTableController')->name('queuerequisitions.get');
+    //Route::post('que/get', 'queTableController')->name('que.get');
+});
 
 Route::group(['namespace' => 'equipment'], function () {
     Route::resource('equipments', 'EquipmentsController');
     Route::post('equipments/equipment_load', 'EquipmentsController@equipment_load')->name('equipments.equipment_load');
     Route::post('equipments/search/{id}', 'EquipmentsController@equipment_search')->name('equipments.equipment_search');
+    Route::post('equipments/attach', 'EquipmentsController@attach')->name('equipments.attach');
+    Route::post('equipments/dettach', 'EquipmentsController@dettach')->name('equipments.dettach');
 
     //For Datatable
     Route::post('equipments/get', 'EquipmentsTableController')->name('equipments.get');
@@ -120,16 +262,13 @@ Route::group(['namespace' => 'event'], function () {
 });
 
 Route::group(['namespace' => 'djc'], function () {
-    Route::delete('djcs/delete_item/{id}', 'DjcsController@delete_item')->name('djcs.delete_item');
-    
     Route::resource('djcs', 'DjcsController');
     //For Datatable
     Route::post('djcs/get', 'DjcsTableController')->name('djcs.get');
 });
 
 Route::group(['namespace' => 'rjc'], function () {
-    Route::delete('rjcs/delete_item/{id}', 'RjcsController@delete_item')->name('rjcs.delete_item');
-
+    Route::post('rjcs/project_extra_details', 'RjcsController@project_extra_details')->name('rjcs.project_extra_details');
     Route::resource('rjcs', 'RjcsController');
     //For Datatable
     Route::post('rjcs/get', 'RjcsTableController')->name('rjcs.get');
@@ -144,20 +283,65 @@ Route::group(['namespace' => 'jobschedule'], function () {
     //For Datatable
     Route::post('jobschedules/get', 'JobschedulesTableController')->name('jobschedules.get');
 });
+
 Route::group(['namespace' => 'lead'], function () {
-    Route::resource('leads', 'LeadsController');
+    Route::patch('leads/update_status/{lead}', 'LeadsController@update_status')->name('leads.update_status');
+    Route::patch('leads/update_reminder/{lead}', 'LeadsController@update_reminder')->name('leads.update_reminder');
     Route::post('leads/lead_search', 'LeadsController@lead_search')->name('leads.lead_search');
-    Route::post('leads/{id}/update_status', 'LeadsController@update_status')->name('leads.update_status');
+    Route::resource('leads', 'LeadsController');
 
     //For Datatable
     Route::post('leads/get', 'LeadsTableController')->name('leads.get');
 });
+Route::group(['namespace' => 'prospect'], function () {
+    Route::patch('prospects/update_status/{prospect}', 'ProspectsController@update_status')->name('prospects.update_status');
+    Route::resource('prospects', 'ProspectsController');
+
+    //For Datatable
+     Route::post('prospects/get', 'ProspectsTableController')->name('prospects.get');
+     Route::post('prospects/followup', 'ProspectsController@followup')->name('prospects.followup');
+});
+Route::group(['namespace' => 'remark'], function () {
+    Route::patch('remarks/update_status/{remark}', 'ProspectsController@update_status')->name('remarks.update_status');
+    Route::resource('remarks', 'RemarksController');
+
+    //For Datatable
+    // Route::post('remarks/get', 'RemarksTableController')->name('remarks.get');
+     
+});
+Route::group(['namespace' => 'lender'], function () {
+    Route::resource('lenders', 'LendersController');
+
+    //For Datatable
+    Route::post('lenders/get', 'LendersTableController')->name('lenders.get');
+});
 
 Route::group(['namespace' => 'loan'], function () {
+    Route::get('loans/lender_loans', 'LoansController@lender_loans')->name('loans.lender_loans');
+    Route::post('loans/lenders', 'LoansController@lenders')->name('loans.lenders');
+    Route::get('loans/pay_loans', 'LoansController@pay_loans')->name('loans.pay_loans');
+    Route::post('loans/store_loans', 'LoansController@store_loans')->name('loans.store_loans');
+    Route::get('loans/approve/{loan}', 'LoansController@approve_loan')->name('loans.approve_loan');
     Route::resource('loans', 'LoansController');
     //For Datatable
-    //Route::post('loans/get', 'DeptorsTableController')->name('deptors.get');
+    Route::post('loans/get', 'LoansTableController')->name('loans.get');
 });
+
+Route::group(['namespace' => 'journal'], function () {
+    Route::post('journals/journal_accounts', 'JournalsController@journal_accounts')->name('journals.journal_accounts');
+    Route::resource('journals', 'JournalsController');
+    //For Datatable
+    Route::post('journals/get', 'JournalsTableController')->name('journals.get');
+});
+
+Route::group(['namespace' => 'reconciliation'], function () {
+    Route::get('reconciliations/last_reconciliation', 'ReconciliationsController@last_reconciliation')->name('reconciliations.last_reconciliation');
+    Route::get('reconciliations/ledger_transactions', 'ReconciliationsController@ledger_transactions')->name('reconciliations.ledger_transactions');
+    Route::resource('reconciliations', 'ReconciliationsController');
+    //For Datatable
+    Route::post('reconciliations/get', 'ReconciliationsTableController')->name('reconciliations.get');
+});
+
 
 Route::group(['namespace' => 'makepayment'], function () {
     Route::resource('makepayments', 'MakepaymentsController');
@@ -205,6 +389,20 @@ Route::group(['namespace' => 'pricegroup'], function () {
     Route::post('pricegroups/get', 'PricegroupsTableController')->name('pricegroups.get');
 });
 
+Route::group(['namespace' => 'client_product'], function () {
+    Route::resource('client_products', 'ClientProductsController');
+    //For Datatable
+    Route::post('client_products/get', 'ClientProductsTableController')->name('client_products.get');
+});
+
+Route::group(['namespace' => 'pricelistSupplier'], function () {
+    Route::get('pricelistsSupplier/list', 'PriceListsController@list')->name('pricelistsSupplier.list');
+    Route::resource('pricelistsSupplier', 'PriceListsController');
+    //For Datatable
+    Route::post('pricelists/get', 'PriceListTableController')->name('pricelistsSupplier.get');
+    Route::post('pricelists/gets', 'SupplierPriceListTableController')->name('pricelistsSupplier.gets');
+});
+
 
 Route::group(['namespace' => 'productcategory'], function () {
     Route::resource('productcategories', 'ProductcategoriesController');
@@ -217,15 +415,10 @@ Route::group(['namespace' => 'projectstocktransfer'], function () {
     Route::post('projectstocktransfers/get', 'ProjectstocktransfersTableController')->name('projectstocktransfers.get');
 });
 
-Route::group(['namespace' => 'stockissuance'], function () {
-    Route::get('issue_stock/{quote}', 'StockIssuanceController@issue_stock')->name('stockissuance.issue_stock');
-    Route::resource('stockissuance', 'StockIssuanceController');
-    // for dataTable
-    Route::post('stockissuance/get', 'StockIssuanceTableController')->name('stockissuance.get');
-});
-
 Route::group(['namespace' => 'lpo'], function () {
     Route::post('lpo/update_lpo', 'LpoController@update_lpo')->name('lpo.update_lpo');
+    Route::get('lpo/delete_lpo/{id}', 'LpoController@delete_lpo')->name('lpo.delete_lpo');
+
     Route::resource('lpo', 'LpoController');
     // for dataTable
     Route::post('lpo/get', 'LpoTableController')->name('lpo.get');
@@ -239,15 +432,13 @@ Route::group(['namespace' => 'productvariable'], function () {
 Route::group(['namespace' => 'purchase'], function () {
     Route::resource('purchases', 'PurchasesController');
     Route::post('purchases/customer_load', 'PurchasesController@customer_load')->name('purchases.customer_load');
+    Route::post('purchases/quote', 'PurchasesController@quote_product_search')->name('purchase.quote_purchase_search');
+
 
     //For Datatable
     Route::post('purchases/get', 'PurchasesTableController')->name('purchases.get');
 });
-Route::group(['namespace' => 'purchaseorder'], function () {
-    Route::resource('purchaseorders', 'PurchaseordersController');
-    //For Datatable
-    Route::post('purchaseorders/get', 'PurchaseordersTableController')->name('purchaseorders.get');
-});
+
 Route::group(['namespace' => 'projectequipment'], function () {
     Route::resource('projectequipments', 'ProjectequipmentsController');
     Route::post('projectequipments/write_job_card', 'ProjectequipmentsController@write_job_card')->name('projectequipments.write_job_card');
@@ -257,25 +448,27 @@ Route::group(['namespace' => 'projectequipment'], function () {
 Route::group(['namespace' => 'quote'], function () {
     Route::post('quotes/convert', 'QuotesController@convert')->name('quotes.convert');
     Route::post('quotes/approve_quote/{quote}', 'QuotesController@approve_quote')->name('quotes.approve_quote');
-   
+
+    Route::post('quotes/close_quote/{quote}', 'QuotesController@close_quote')->name('quotes.close_quote');
     Route::post('quotes/storeverified', 'QuotesController@storeverified')->name('quotes.storeverified');
     Route::get('quotes/customer_quotes', 'QuotesController@customer_quotes')->name('quotes.customer_quotes');
-    Route::get('quotes/verify/{quote}', 'QuotesController@verify')->name('quotes.verify');
-    Route::get('quotes/verified_jcs/{id}', 'QuotesController@fetch_verified_jcs')->name('quotes.fetch_verified_jcs');
+    Route::get('quotes/verify/{quote}', 'QuotesController@verify_quote')->name('quotes.verify');
+    Route::post('quotes/verified_jcs/{id}', 'QuotesController@fetch_verified_jcs')->name('quotes.fetch_verified_jcs');
+    Route::get('quotes/get_verify', 'QuotesController@get_verify_quote')->name('quotes.get_verify_quote');
+    Route::get('quotes/turn_around', 'QuotesController@turn_around')->name('quotes.turn_around');
 
-    Route::get('quotes/project_quotes', 'QuotesController@project_quotes')->name('quotes.project_quotes');
-
-    Route::delete('quotes/delete_product/{id}', 'QuotesController@delete_product')->name('quotes.delete_product');
-    Route::delete('quotes/verified_item/{id}', 'QuotesController@delete_verified_item')->name('quotes.delete_verified_item');
-    Route::delete('quotes/verified_jcs/{id}', 'QuotesController@delete_verified_jcs')->name('quotes.delete_verified_jcs');
-    Route::delete('quotes/reset_verified/{id}', 'QuotesController@reset_verified')->name('quotes.reset_verified');
+    // should be delete methods
+    Route::get('quotes/delete_product/{id}', 'QuotesController@delete_product')->name('quotes.delete_product');
+    Route::get('quotes/verified_item/{id}', 'QuotesController@delete_verified_item')->name('quotes.delete_verified_item');
+    Route::get('quotes/verified_jcs/{id}', 'QuotesController@delete_verified_jcs')->name('quotes.delete_verified_jcs');
+    Route::get('quotes/reset_verified/{id}', 'QuotesController@reset_verified')->name('quotes.reset_verified');
 
     Route::post('quotes/lpo', 'QuotesController@update_lpo')->name('quotes.lpo');
     Route::resource('quotes', 'QuotesController');
     //For Datatable
     Route::post('quotes/get_project', 'QuoteVerifyTableController')->name('quotes.get_project');
     Route::post('quotes/get', 'QuotesTableController')->name('quotes.get');
-    Route::post('quotes/get_univoiced_quote', 'QuoteInvoiceTableController')->name('quotes.get_univoiced_quote');
+    Route::post('turn_around/search', 'TurnAroundTimeTableController')->name('turn_around.search');
 });
 
 Route::group(['namespace' => 'region'], function () {
@@ -320,6 +513,7 @@ Route::group(['namespace' => 'gateway'], function () {
 });
 Route::group(['namespace' => 'warehouse'], function () {
     Route::resource('warehouses', 'WarehousesController');
+    Route::post('warehouses/products', 'WarehousesController@warehouse_products')->name('warehouse_products.get');
     //For Datatable
     Route::post('warehouses/get', 'WarehousesTableController')->name('warehouses.get');
 });
@@ -328,3 +522,11 @@ Route::group(['namespace' => 'withholding'], function () {
     //For Datatable
     Route::post('withholdings/get', 'WithholdingsTableController')->name('withholdings.get');
 });
+
+Route::group(['namespace' => 'creditnote'], function () {
+    Route::get('creditnotes/print_creditnote/{creditnote}', 'CreditNotesController@print_creditnote')->name('creditnotes.print_creditnote');
+    Route::resource('creditnotes', 'CreditNotesController');
+    // for DataTable
+    Route::post('creditnotes/get', 'CreditNotesTableController')->name('creditnotes.get');
+});
+

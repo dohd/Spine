@@ -2,8 +2,11 @@
 
 namespace App\Http\Responses\Focus\purchase;
 
-use App\Models\project\Budget;
+use App\Models\additional\Additional;
+use App\Models\pricegroup\Pricegroup;
 use App\Models\purchase\Purchase;
+use App\Models\supplier\Supplier;
+use App\Models\warehouse\Warehouse;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -17,21 +20,13 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $bill_types = bill_helper(3, 9);
+        $additionals = Additional::all();
+        $pricegroups = Pricegroup::all();
+        $warehouses = Warehouse::all();
+        $last_tid = Purchase::where('ins', auth()->user()->ins)->max('tid');
+        $supplier = Supplier::where('name', 'Walk-in')->first(['id', 'name']);
+        $price_supplier = Supplier::whereHas('products')->get(['id', 'name']);
 
-        // extract projects having all quotes budgeted
-        $projects = array();
-        $budgeted_quote_ids = Budget::get()->pluck('quote_id')->toArray();
-        foreach($bill_types['projects'] as $project) {
-            $quote_ids = $project->quotes->pluck('id')->toArray();
-            $unbudgeted_ids = array_diff($quote_ids, $budgeted_quote_ids);
-            if (!$unbudgeted_ids) $projects[] = $project;
-        }
-        $bill_types['projects'] = $projects;  
-
-        // assign last_it to resource being created    
-        $bill_types['last_id'] = Purchase::orderBy('id', 'desc')->first();
-
-        return view('focus.purchases.create', $bill_types);
+        return view('focus.purchases.create', compact('last_tid', 'additionals', 'supplier', 'pricegroups', 'warehouses','price_supplier'));
     }
 }

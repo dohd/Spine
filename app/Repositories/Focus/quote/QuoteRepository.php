@@ -10,10 +10,10 @@ use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
 
 use App\Models\lead\Lead;
-use App\Models\lpo\Lpo;
-use App\Models\project\Budget;
+use App\Models\project\BudgetSkillset;
 use App\Models\verifiedjcs\VerifiedJc;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class QuoteRepository.
@@ -33,122 +33,265 @@ class QuoteRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query();
-        // distinguish pi from quote
-        if (request('pi_page') == 1) $q->where('bank_id', '>', 0);
-        else $q->where('bank_id', 0);
+        $q = $this->query()->with('currency');
         
-        $q->when(request('i_rel_type') == 1, function ($q) {
-            return $q->where('customer_id', request('i_rel_id', 0));
+        $q->when(request('page') == 'pi', fn($q) => $q->where('bank_id', '>', 0));
+        $q->when(request('page') == 'qt', fn($q) => $q->where('bank_id', 0));
+        
+        $q->when(request('start_date') && request('end_date'), function ($q) {
+            $q->whereBetween('date', array_map(fn($v) => date_for_database($v), [request('start_date'), request('end_date')]));
         });
-        if (request('start_date') && request('end_date')) {
-            $q->whereBetween('invoicedate', [
-                date_for_database(request('start_date')), 
-                date_for_database(request('end_date'))
-            ]);
+
+        // client filter
+        $q->when(request('client_id'), fn($q) => $q->where('customer_id', request('client_id')));
+        
+        // status criteria filter
+        $status = true;
+        if (request('status_filter')) {
+            switch (request('status_filter')) {
+                case 'Unapproved':
+                    $q->whereNull('approved_by');
+                    break;
+                case 'Approved & Unbudgeted':
+                    $q->whereNotNull('approved_by')->whereNull('project_quote_id');
+                    break;
+                case 'Budgeted & Unverified':
+                    $q->whereNotNull('project_quote_id')->whereNull('verified_by');
+                    break;
+                case 'Verified with LPO & Uninvoiced':
+                    $q->whereNotNull('verified_by')->whereNotNull('lpo_id')->where('invoiced', 'No');
+                    break;
+                case 'Verified without LPO & Uninvoiced':
+                    $q->whereNotNull('verified_by')->whereNull('lpo_id')->where('invoiced', 'No');
+                    break;
+                case 'Approved without LPO & Uninvoiced':
+                    $q->whereNotNull('approved_by')->whereNull('lpo_id')->where('invoiced', 'No');
+                    break;
+                case 'Invoiced & Due':
+                    // quotes in due invoices
+                    $q->whereHas('invoice_product', function ($q) {
+                        $q->whereHas('invoice', function ($q) {
+                            $q->where('status', 'due');
+                        });
+                    });
+                    break;
+                case 'Invoiced & Partially Paid':
+                    // quotes in partially paid invoices
+                    $q->whereHas('invoice_product', function ($q) {
+                        $q->whereHas('invoice', function ($q) {
+                            $q->where('status', 'partial');
+                        });
+                    });
+                    break;
+                case 'Invoiced & Paid':
+                    // quotes in partially paid invoices
+                    $q->whereHas('invoice_product', function ($q) {
+                        $q->whereHas('invoice', function ($q) {
+                            $q->where('status', 'paid');
+                        });
+                    });
+                    break;
+                case 'Cancelled':
+                    $status = false;
+                    $q->where('status', 'cancelled');
+                    break;
+            }
         }
 
-        // order by latest updated record
-        $q->orderBy('updated_at', 'desc');
+        $q->when($status, fn($q) => $q->where('status', '!=', 'cancelled'));
+        
+         // project quote filter
+        $q->when(request('project_id'), function($q) {
+            if (request('quote_ids')) $q->whereIn('id', explode(',', request('quote_ids')));
+            else $q->whereIn('id', [0]);
+        });
 
         return $q->get([
-            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'invoicedate', 'invoiceduedate', 
-            'total', 'status', 'bank_id', 'verified', 'revision', 'client_ref'
+            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'date', 'total', 'status', 'bank_id', 
+            'verified', 'revision', 'client_ref', 'lpo_id', 'currency_id', 'approved_date','project_closure_date'
         ]);
     }
 
+    /**
+     * Quotes pending verification
+     */
     public function getForVerifyDataTable()
     {
-        $q = $this->query();
-
-        $q->when(request('i_rel_type') == 1, function ($q) {
-            return $q->where('customer_id', request('i_rel_id', 0));
+        $q = $this->query()->where(function($q) { 
+            $q->whereHas('budget')->orWhere('quote_type', 'standard'); 
         });
 
-        if (request('start_date') && request('end_date')) {
-            $q->whereBetween('invoicedate', [
-                date_for_database(request('start_date')), 
-                date_for_database(request('end_date'))
-            ]);
-        }
-
-        // Quotes included in a project
-        $q->whereNotNull('project_quote_id');
-        // Budgeted quotes
-        $quote_ids = Budget::get()->pluck('quote_id');
-        $q->whereIn('id', $quote_ids);
+        $q->when(request('start_date') && request('end_date'), function ($q) {
+            $q->whereBetween('date', array_map(fn($v) => date_for_database($v), [request('start_date'), request('end_date')]));
+        });
+        $q->when(request('customer_id'), fn($q) => $q->where('customer_id', request('customer_id')));
+        $q->when(request('verify_state'), fn($q) => $q->where('verified', request('verify_state')));
         
         return $q->get([
-            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'invoicedate', 'invoiceduedate', 
-            'total', 'bank_id', 'verified', 'client_ref'
+            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'total', 'bank_id', 'verified',
+            'client_ref', 'lpo_id', 'revision', 'issuance_status', 'verified_total','project_closure_date','approved_date'
         ]);
     }
 
-    public function getSelfDataTable($self_id = false)
+    /**
+     * Quotes pending invoicing
+     */
+    public function getForVerifyNotInvoicedDataTable()
     {
-        if ($self_id) {
-            $q = $this->query()->withoutGlobalScopes();
-            $q->where('customer_id', '=', $self_id);
-
-            return $q->get(['id', 'tid', 'customer_id', 'invoicedate', 'invoiceduedate', 'total', 'status']);
-        }
+        $q = $this->query();
+        // verified and uninvoiced quotes
+        $q->where(['verified' => 'Yes', 'invoiced' => 'No'])->whereDoesntHave('invoice_product');
+                
+        $q->when(request('customer_id'), fn($q) => $q->where('customer_id', request('customer_id')));
+        $q->when(request('lpo_number'), fn($q) => $q->where('lpo_id', request('lpo_number')));
+        $q->when(request('project_id'), function ($q) {
+            $q->whereIn('id', function($q) {
+                $q->select('quote_id')->from('project_quotes')->where('project_id', request('project_id'));
+            });
+        });
+        
+        return $q->get([
+            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'date', 
+            'total', 'bank_id', 'verified_total', 'lpo_id', 'project_quote_id', 'currency_id'
+        ]);
     }
+    public function getForTurnAroundTime()
+    {
+        $q = $this->query()->with('currency')->whereNotNull('approved_by');
+        
+        $q->when(request('page') == 'pi', fn($q) => $q->where('bank_id', '>', 0));
+        $q->when(request('page') == 'qt', fn($q) => $q->where('bank_id', 0));
+        
+        $q->when(request('start_date') && request('end_date'), function ($q) {
+            $q->whereBetween('date', array_map(fn($v) => date_for_database($v), [request('start_date'), request('end_date')]));
+        });
+
+        // client filter
+        $q->when(request('client_id'), fn($q) => $q->where('customer_id', request('client_id')));
+
+        $status = true;
+        if (request('status_filter')) {
+            switch (request('status_filter')) {
+                case 'Unapproved':
+                    $q->whereNull('approved_by');
+                    break;
+                case 'Approved & Uninvoiced':
+                    $q->whereNotNull('approved_by')->doesntHave('invoice_product');
+                    break;
+                case 'Approved & Unbudgeted':
+                    $q->whereNotNull('approved_by')->whereNull('project_quote_id');
+                    break;
+                case 'Budgeted & Unverified':
+                    $q->whereNotNull('project_quote_id')->whereNull('verified_by');
+                    break;
+                case 'Verified with LPO & Uninvoiced':
+                    $q->whereNotNull('verified_by')->whereNotNull('lpo_id')->where('invoiced', 'No');
+                    break;
+                case 'Verified without LPO & Uninvoiced':
+                    $q->whereNotNull('verified_by')->whereNull('lpo_id')->where('invoiced', 'No');
+                    break;
+                case 'Approved without LPO & Uninvoiced':
+                    $q->whereNotNull('approved_by')->whereNull('lpo_id')->where('invoiced', 'No');
+                    break;
+                case 'Invoiced & Due':
+                    // quotes in due invoices
+                    $q->whereHas('invoice_product', function ($q) {
+                        $q->whereHas('invoice', function ($q) {
+                            $q->where('status', 'due');
+                        });
+                    });
+                    break;
+                case 'Invoiced & Partially Paid':
+                    // quotes in partially paid invoices
+                    $q->whereHas('invoice_product', function ($q) {
+                        $q->whereHas('invoice', function ($q) {
+                            $q->where('status', 'partial');
+                        });
+                    });
+                    break;
+                case 'Invoiced & Paid':
+                    // quotes in partially paid invoices
+                    $q->whereHas('invoice_product', function ($q) {
+                        $q->whereHas('invoice', function ($q) {
+                            $q->where('status', 'paid');
+                        });
+                    });
+                    break;
+                case 'Cancelled':
+                    $status = false;
+                    $q->where('status', 'cancelled');
+                    break;
+            }
+        }
+        $q->when($status, fn($q) => $q->where('status', '!=', 'cancelled'));
+        
+
+        // project quote filter
+        $q->when(request('project_id'), function($q) {
+            if (request('quote_ids')) $q->whereIn('id', explode(',', request('quote_ids')));
+            else $q->whereIn('id', [0]);
+        });
+        
+        return $q->get([
+            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'date', 'total', 'status', 'bank_id', 
+            'verified', 'revision', 'client_ref', 'lpo_id', 'currency_id', 'approved_date','project_closure_date'
+        ]);
+    }
+
 
     /**
      * For Creating the respective model in storage
      *
      * @param array $input
      * @throws GeneralException
-     * @return bool
+     * @return $quote
      */
     public function create(array $input)
     {
         DB::beginTransaction();
 
-        $quote = $input['data'];
-        // format date values
-        foreach ($quote as $key => $value) {
-            if (in_array($key, ['invoicedate', 'reference_date'])) {
-                $quote[$key] = date_for_database($value);
-            }
-        }
-        $duedate = $quote['invoicedate'] . ' + ' . $quote['validity'] . ' days';
-        $quote['invoiceduedate'] = date_for_database($duedate);
-
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            if (in_array($key, ['date', 'reference_date']))
+                $data[$key] = date_for_database($val);
+            if (in_array($key, ['total', 'subtotal', 'tax']))
+                $data[$key] = numberClean($val);
+        }   
         // increament tid
-        $ref = Quote::orderBy('tid', 'desc')->where('bank_id', 0)->first('tid');
-        if (isset($quote['bank_id'])) {
-            $ref = Quote::orderBy('tid', 'desc')->where('bank_id', '>', 0)->first('tid');
+        $tid = 0;
+        if (isset($data['bank_id'])) {
+            $tid = Quote::where('ins', $data['ins'])
+                ->where('bank_id', '>', 0)->max('tid');
+        } else {
+            $tid = Quote::where('ins', $data['ins'])
+                ->where('bank_id', 0)->max('tid');
         }
-        if (isset($ref) && $quote['tid'] <= $ref->tid) {
-            $quote['tid'] = $ref->tid + 1;
-        }  
+        if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
 
-        $lead = Lead::find($quote['lead_id']);
-        if (isset($lead)) {
-            $quote['customer_id'] = $lead->client_id;
-            $quote['branch_id'] = $lead->branch_id;    
-        }
-        // Close Lead (status = 1)
-        $lead->update(['status' => 1, 'reason' => 'won']);
+        // close lead
+        Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
+        $result = Quote::create($data);
 
-        $result = Quote::create($quote);
+        // quote line items
+        $data_items = $input['data_items'];
+        $data_items = array_map(function ($v) use($result) {
+            return array_replace($v, [
+                'quote_id' => $result->id, 
+                'ins' => $result->ins,
+                'product_price' =>  floatval(str_replace(',', '', $v['product_price'])),
+                'product_subtotal' => floatval(str_replace(',', '', $v['product_subtotal'])),
+                'buy_price' => floatval(str_replace(',', '', $v['buy_price'])),
+            ]);
+        }, $data_items);
+        QuoteItem::insert($data_items);
 
-        // quote items
-        $quote_items = array();
-        $item = $input['data_items'];
-        for ($i = 0; $i < count($item['product_name']); $i++) {
-            $row = array('quote_id' => $result['id'], 'ins' => $result['ins']);
-            foreach (array_keys($item) as $key) {
-                if (isset($item[$key][$i])) {
-                    $row[$key] = $item[$key][$i];
-                } 
-                else $row[$key] = NULL;
-            }
-            $quote_items[] = $row;
-        }
-        QuoteItem::insert($quote_items);
-
+        // quote labour items
+        $skill_items = $input['skill_items'];
+        $skill_items = array_map(function ($v) use($result) {
+            return array_replace($v, ['quote_id' => $result->id]);
+        }, $skill_items);
+        BudgetSkillset::insert($skill_items);
+        
         if ($result) {
             DB::commit();
             return $result;
@@ -163,68 +306,63 @@ class QuoteRepository extends BaseRepository
      * @param Quote $quote
      * @param  $input
      * @throws GeneralException
-     * return bool
+     * @return $quote
      */
-    public function update(array $input)
+    public function update($quote, array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
-        $quote = $input['data'];
-        // change date values to database format
-        foreach ($quote as $key => $value) {
-            if ($key == 'invoicedate' || $key == 'reference_date') {
-                $quote[$key] = date_for_database($value);
-            }
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            if (in_array($key, ['date', 'reference_date']))
+                $data[$key] = date_for_database($val);
+            if (in_array($key, ['total', 'subtotal', 'tax'])) 
+                $data[$key] = numberClean($val);
+        }   
+        // update lead status
+        if ($quote->lead_id != $data['lead_id']) {
+            $quote->lead->update(['status' => 0, 'reason' => 'new']);
+            Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
         }
-        $duedate = $quote['invoicedate'].' + '.$quote['validity'].' days';
-        $quote['invoiceduedate'] = date_for_database($duedate);
+        unset($data['tid']);
+        $result = $quote->update($data);
 
-        $result = Quote::find($quote['id']);
-        // If lead is updated, open previous lead
-        if ($result->lead_id != $quote['lead_id']) {
-            $lead = Lead::find($quote['lead_id']);
-            $quote['customer_id'] = $lead->client_id;
-            $quote['branch_id'] = $lead->branch_id;
-            // open previous lead (status = 0)
-            $lead->update(['status' => 0, 'reason' => 'new']);
-        }
-        $result->update($quote);
+        $data_items = $input['data_items'];
+        // remove omitted items
+        $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
+        $quote->products()->whereNotIn('id', $item_ids)->delete();
 
-        // quote items
-        $quote_items = array();
-        $item = $input['data_items'];
-        for ($i = 0; $i < count($item['product_name']); $i++) {
-            $row = array('quote_id' => $quote['id'], 'ins' => $quote['ins']);
-            foreach (array_keys($item) as $key) {
-                if (isset($item[$key][$i])) {
-                    $row[$key] = $item[$key][$i];
-                } 
-                else $row[$key] = NULL;
+        // create or update items
+        foreach($data_items as $item) {
+            foreach ($item as $key => $val) {
+                if (in_array($key, ['product_price', 'product_subtotal', 'buy_price']))
+                    $item[$key] = floatval(str_replace(',', '', $val));
             }
-            $quote_items[] = $row;
-        }
-
-        // update or create new quote item
-        foreach($quote_items as $item) {
-            $quote_item = QuoteItem::firstOrNew([
-                'id' => $item['item_id'],
-                'quote_id' => $item['quote_id'],
-            ]);
-            // assign properties to the item
-            foreach($item as $key => $value) {
-                $quote_item[$key] = $value;
-            }
-            // remove stale attributes and save
-            unset($quote_item['item_id']);
-            if ($quote_item['id'] == 0) unset($quote_item['id']);
+            $quote_item = QuoteItem::firstOrNew(['id' => $item['id']]);
+            $quote_item->fill(array_replace($item, ['quote_id' => $quote['id'], 'ins' => $quote['ins']]));
+            if (!$quote_item->id) unset($quote_item->id);
             $quote_item->save();
+        }
+
+        $skill_items = $input['skill_items'];
+        // remove omitted items
+        $skill_ids = array_map(function ($v) { return $v['skill_id']; }, $skill_items);
+        $quote->skill_items()->whereNotIn('id', $skill_ids)->delete();
+        // create or update items
+        foreach($skill_items as $item) {
+            $skillset = BudgetSkillset::firstOrNew(['id' => $item['skill_id']]);         
+            $skillset->fill(array_replace($item, ['quote_id' => $quote->id]));
+            if (!$skillset->id) unset($skillset->id);
+            unset($skillset->skill_id);
+            $skillset->save();
         }
 
         if ($result) {
             DB::commit();
-            return $quote;    
+            return $quote;      
         }
-
+               
         throw new GeneralException('Error Updating Quote');
     }
 
@@ -237,146 +375,90 @@ class QuoteRepository extends BaseRepository
      */
     public function delete($quote)
     {
-        if ($quote->delete()) return true;
+        DB::beginTransaction();
+
+        $type = $quote->bank_id ? 'PI' : 'Quote';
+        if ($quote->project_quote) 
+            throw ValidationException::withMessages([$type . ' is attached to a project!']);
+            
+        if ($quote->delete()) {
+            if ($quote->lead) $quote->lead->update(['status' => 0, 'reason' => 'new']);
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.quotes.delete_error'));
     }
 
-    // Delete Quote product
-    public function delete_product($id)
-    {        
-        if (QuoteItem::destroy($id)) return true;
 
-        throw new GeneralException(trans('Error deleting product'));
-    }
-
+    /**
+     * Verify Budgeted Project Quote
+     */
     public function verify(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
-        // quote properties
-        $quote_data = $input['quote'];
-        $quote_id = $quote_data['id'];
-        $verify_no = $quote_data['verify_no'];
-        $ins = auth()->user()->ins;
-
-        // quote items
-        $quote_items = array();
-        $item = $input['quote_items'];
-        for ($i = 0; $i < count($item['product_name']); $i++) {
-            $row = compact('quote_id', 'ins');
-            foreach (array_keys($item) as $key) {
-                if (isset($item[$key][$i])) {
-                    $row[$key] = $item[$key][$i];
-                } 
-                else $row[$key] = NULL;
-            }
-            $quote_items[] = $row;
-        }
-        
-        // job cards
-        $job_cards = array();
-        $jc_count = count($input['job_cards']['reference']);
-        $item = $input['job_cards'];
-        for ($i = 0; $i < $jc_count; $i++) {
-            $row = compact('quote_id', 'verify_no');
-            foreach (array_keys($item) as $key) {
-                if ($key == 'date') {
-                    $item[$key][$i] = date_for_database($item[$key][$i]);
-                }
-                $row[$key] = $item[$key][$i];             
-            }
-            $job_cards[] = $row;
-        }
-
-        // update or create new quote_item
-        foreach($quote_items as $item) {
-            $quote_item = VerifiedItem::firstOrNew([
-                'id' => $item['item_id'],
-                'quote_id' => $item['quote_id'],
-            ]);
-            // assign properties to the item
-            foreach($item as $key => $value) {
-                $quote_item[$key] = $value;
-            }
-            // remove stale attributes and save
-            unset($quote_item['item_id']);
-            if ($quote_item['id'] == 0) unset($quote_item['id']);
-            $quote_item->save();
-        }
-        // update or create new job_card
-        foreach($job_cards as $item) {
-            $job_card = VerifiedJc::firstOrNew([
-                'id' => $item['jcitem_id'],
-                'quote_id' => $item['quote_id'],
-            ]);
-            // assign properties to the item
-            foreach($item as $key => $value) {
-                $job_card[$key] = $value;
-            }
-            // remove stale attributes and save
-            unset($job_card['jcitem_id']);                
-            if ($job_card['id'] == 0) unset($job_card['id']);
-            $job_card->save();
-        }
-        
-        $qt = Quote::find($quote_id);
-        $result = $qt->update([
+        $data = $input['data'];
+        $quote = Quote::find($data['id']);
+        $result = $quote->update([
             'verified' => 'Yes', 
             'verification_date' => date('Y-m-d'),
             'verified_by' => auth()->user()->id,
-            'gen_remark' => $quote_data['gen_remark'],
-            'verified_amount' => $quote_data['subtotal'],
-            'verified_total' => $quote_data['total'],
-            'verified_tax' => $quote_data['tax']
+            'gen_remark' => $data['gen_remark'],
+            'project_closure_date' => date_for_database($data['project_closure_date']),
+            'verified_amount' => numberClean($data['subtotal']),
+            'verified_total' => numberClean($data['total']),
+            'verified_tax' => numberClean($data['tax']), 
         ]);
+
+        $data_items = $input['data_items'];
+        // delete omitted items
+        $item_ids = array_map(fn($v) => $v['item_id'], $data_items);
+        VerifiedItem::where('quote_id', $data['id'])->whereNotIn('id', $item_ids)->delete();
+        // update or create verified item
+        foreach ($data_items as $item) {
+            $item = array_replace($item, [
+                'quote_id' => $data['id'],
+                'product_qty' => numberClean($item['product_qty']),
+                'product_price' => floatval(str_replace(',', '', $item['product_price'])),
+                'product_subtotal' => floatval(str_replace(',', '', $item['product_subtotal'])),
+                'ins' => auth()->user()->ins
+            ]);
+            $verify_item = VerifiedItem::firstOrNew(['id' => $item['item_id']]);
+            $verify_item->fill($item);
+            if (!$verify_item->id) unset($verify_item->id);
+            unset($verify_item->item_id);
+            $verify_item->save();
+        }
+
+        $job_cards = $input['job_cards'];
+        // delete omitted items
+        $item_ids = array_map(fn($v) => $v['jcitem_id'], $job_cards);
+        VerifiedJc::where('quote_id', $data['id'])->whereNotIn('id', $item_ids)->delete();        
+        // duplicate jobcard reference
+        $references = array_map(fn($v) => $v['reference'], $job_cards);
+        $references = VerifiedJc::whereIn('reference', $references)->pluck('reference')->toArray();
+        // update or create verified jobcards
+        foreach ($job_cards as $item) {
+            // skip duplicate reference
+            if (in_array($item['reference'], $references) && !$item['jcitem_id']) continue;
+            $item = array_replace($item, [
+                'quote_id' => $data['id'],
+                'date' => date_for_database($item['date']),
+            ]);
+            $jobcard = VerifiedJc::firstOrNew(['id' => $item['jcitem_id']]);
+            $jobcard->fill($item);
+            if (!$jobcard->id) unset($jobcard->id);
+            unset($jobcard->jcitem_id);
+            $jobcard->save();
+        }
+
         if ($result) {
             DB::commit();
-            return $qt;
+            return $quote;      
         }
         
         throw new GeneralException('Error Verifying Quote');
-    }
-
-    // Delete verified Quote product
-    public function delete_verified_item($id)
-    {        
-        if (VerifiedItem::destroy($id)) return true;
-
-        throw new GeneralException(trans('Error deleting verified product'));
-    }
-
-    // Delete verified Job card
-    public function delete_verified_jcs($id)
-    {        
-        if (VerifiedJc::destroy($id)) return true;
-
-        throw new GeneralException(trans('Error deleting verified job card'));
-    }
-    
-    public function getForVerifyNotInvoicedDataTable()
-    {
-        $q = $this->query();
-
-        if (request('customer_id')) {
-            $q->where('customer_id', request('customer_id'));
-        }
-
-        if (request('lpo_number')) {
-            $lpo = Lpo::where('lpo_no', request('lpo_number'))->first(['lpo_no']);
-            if (isset($lpo)) $q->where('lpo_number', $lpo->lpo_no);
-        }
-
-        if (request('project_id')) {
-            $q->where('project_quote_id', request('project_id'));
-        }
-        
-        // Verified and Not invoiced 
-        $q->where(['invoiced' => 'No', 'verified' => 'Yes'])->orderBy('id', 'desc');
-
-        return $q->get([
-            'id', 'notes', 'tid', 'customer_id', 'lead_id', 'branch_id', 'invoicedate', 'invoiceduedate', 
-            'total', 'bank_id', 'verified_total', 'lpo_id', 'project_quote_id'
-        ]);
     }
 }

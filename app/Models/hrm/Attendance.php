@@ -8,11 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Attendance extends Model
 {
-      use ModelTrait,
-         	AttendanceRelationship {
-            // HrmAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
-        /**
+    use ModelTrait, AttendanceRelationship;
+         
+    /**
      * NOTE : If you want to implement Soft Deletes in this model,
      * then follow the steps here : https://laravel.com/docs/5.4/eloquent#soft-deleting
      */
@@ -28,16 +26,14 @@ class Attendance extends Model
      * @var array
      */
     protected $fillable = [
-
+        
     ];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -64,11 +60,23 @@ class Attendance extends Model
     {
         parent::__construct($attributes);
     }
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->user_id = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
 }

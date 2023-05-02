@@ -1,7 +1,13 @@
 <?php
 
-namespace App\Http\Responses\Focus\projectstocktransfer;
+namespace App\Http\Responses\Focus\purchaseorder;
+
+use App\Models\additional\Additional;
+use App\Models\pricegroup\Pricegroup;
 use App\Models\purchaseorder\Purchaseorder;
+use App\Models\supplier\Supplier;
+use App\Models\term\Term;
+use App\Models\warehouse\Warehouse;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -15,8 +21,17 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['purchase_order'], $ins);
+        $last_tid = Purchaseorder::where('ins', $ins)->max('tid');
+        $warehouses = Warehouse::all();
+        $additionals = Additional::all();
+        $pricegroups = Pricegroup::all();
+        $supplier = Supplier::where('name', 'Walk-in')->first(['id', 'name']);
+        $price_supplier = Supplier::whereHas('products')->get(['id', 'name']);
+        // Purchase order
+        $terms = Term::where('type', 4)->get();
 
-         $last_invoice=Purchaseorder::orderBy('id', 'desc')->where('i_class','=',0)->first();
-        return view('focus.purchaseorders.create')->with(array('last_invoice'=>$last_invoice))->with(bill_helper(3,9));
+        return view('focus.purchaseorders.create', compact('last_tid','warehouses', 'additionals', 'pricegroups','price_supplier','price_supplier', 'terms', 'prefixes'));
     }
 }

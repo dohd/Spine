@@ -3,6 +3,7 @@
 namespace App\Http\Responses\Focus\equipment;
 
 use App\Models\equipment\Equipment;
+use App\Models\equipmentcategory\EquipmentCategory;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -16,8 +17,9 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-          $equipment=Equipment::all();
-          $last_id=Equipment::orderBy('id', 'desc')->first();
-        return view('focus.equipments.create',compact('equipment','last_id'));
+        $tid = Equipment::where('ins', auth()->user()->ins)->max('tid');
+        $categories = EquipmentCategory::all();
+        
+        return view('focus.equipments.create', compact('tid', 'categories'));
     }
 }

@@ -5,12 +5,9 @@
  *
  */
 //General Application
-Route::get('test', 'Focus\general\TestController@showLoginForm')->name('test');
-Route::post('test_login', function() {
-    return '<h1> Logged in as '. request('email') .'</h1>';
-})->name('biller.test_login');
-
+ Route::get('testemail', 'Focus\general\TestController@testemail')->name('testemail');
 Route::get('login', 'Focus\general\CoreController@showLoginForm')->middleware('install')->name('login');
+// Route::get('login', 'Focus\general\CoreController@showLoginForm')->name('login');
 Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
     //publicUserLoggedOut
     Route::get('', 'general\CoreController@showLoginForm')->name('index');
@@ -29,12 +26,15 @@ Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
 
     Route::group(['namespace' => 'communication', 'middleware' => 'valid_token'], function () {
         Route::get('view_bill/{id}/{type}/{token}/{pdf}', 'BillsController@index')->name('view_bill');
-        Route::get('print_bill/{id}/{type}/{token}/{pdf}', 'BillsController@print_pdf')->name('print_bill');
+
+        Route::get('print_purchaseorder/{id}/{type}/{token}/{pdf}', 'BillsController@print_purchaseorder')->name('print_purchaseorder');
+        Route::get('print_bill/{id}/{type}/{token}/{pdf}', 'BillsController@print_invoice')->name('print_bill');
         Route::get('print_djc/{id}/{type}/{token}/{pdf}', 'BillsController@print_djc_pdf')->name('print_djc');
         Route::get('print_quote/{id}/{type}/{token}/{pdf}', 'BillsController@print_quote_pdf')->name('print_quote');
         Route::get('print_verified_quote/{id}/{type}/{token}/{pdf}', 'BillsController@print_verified_quote_pdf')->name('print_verified_quote');
         Route::get('print_rjc/{id}/{type}/{token}/{pdf}', 'BillsController@print_rjc_pdf')->name('print_rjc');
         Route::get('print_budget/{id}/{type}/{token}/{pdf}', 'BillsController@print_budget_pdf')->name('print_budget');
+        Route::get('print_budget_quote/{id}/{type}/{token}/{pdf}', 'BillsController@print_budget_quote_pdf')->name('print_budget_quote');
 
         Route::get('print_compact/{id}/{type}/{token}/{pdf}', 'BillsController@print_compact')->name('print_compact');
         Route::get('view_bank/{id}/{type}/{token}', 'BillsController@view_bank')->name('view_bank');
@@ -61,6 +61,8 @@ Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
         Route::post('bill_payment', 'PaymentsController@payment')->name('bill_payment');
         Route::post('bulk_payment', 'PaymentsController@bill_bulk_payment')->name('bill_bulk_payment');
         Route::post('receive_payment', 'PaymentsController@receive_payment')->name('receive_payment');
+        // 
+        Route::get('payment/transactions/{transaction}', 'PaymentsController@show_transaction_payment')->name('show_transaction_payment');
     });
 
     //public

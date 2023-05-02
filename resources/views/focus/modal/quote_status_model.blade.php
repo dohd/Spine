@@ -12,9 +12,9 @@
                             <label for="status">{{trans('general.mark_as')}}</label>
                             <select name="status" class="form-control mb-1" required>
                                 <option value="">-- Select Status --</option>
-                                <option value="pending">{{ trans('payments.pending') }}</option>
-                                <option value="approved">{{ trans('payments.approved') }}</option>
-                                <option value="cancelled">{{ trans('payments.canceled') }}</option>
+                                @foreach (['pending', 'approved', 'cancelled'] as $val)
+                                    <option value="{{ $val }}">{{ ucfirst($val) }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -27,12 +27,9 @@
                         <div class="col mb-1"><label for="approval-method">Approval Method</label>
                             <select class="form-control mb-1" name="approved_method" id="approvedmethod" required>
                                 <option value="">-- Select Method --</option>
-                                <option value="Email">Email</option>
-                                <option value="SMS">SMS</option>
-                                <option value="Whatsapp">Whatsapp</option>
-                                <option value="Call">Call</option>
-                                <option value="LPO">LPO</option>
-                                <option value="Others">Others</option>
+                                @foreach (['email', 'sms', 'whatsapp', 'call', 'lpo', 'other'] as $val)
+                                    <option value="{{ $val }}">{{ ucfirst($val) }}</option>
+                                @endforeach                                
                             </select>
                         </div>
                     </div>
@@ -43,7 +40,7 @@
                     </div>
                     <div class="row">
                         <div class="col mb-1"><label for="note">{{trans('general.note')}}</label>
-                            <input type="text" class="form-control" name="approval_note" placeholder="{{trans('general.note')}}" required />
+                            <textarea class="form-control" name="approval_note" placeholder="{{trans('general.note')}}" rows="5" required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">

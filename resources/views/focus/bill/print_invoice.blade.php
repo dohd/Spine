@@ -1,6 +1,6 @@
 <html>
-
 <head>
+	<title>Invoice</title>
 	<style>
 		body {
 			font-family: "Times New Roman", Times, serif;
@@ -115,8 +115,7 @@
 		.header-table tr td:first-child {
 			color: #0f4d9b;
 			font-size: 9pt;
-			width: 60%;
-			text-align: left;
+			width: 100%;
 		}
 
 		.address {
@@ -148,7 +147,6 @@
 		}
 	</style>
 </head>
-
 <body>
 	<htmlpagefooter name="myfooter">
 		<div class="footer">
@@ -159,33 +157,7 @@
 	<table class="header-table">
 		<tr>
 			<td>
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/logo.jpg') }}" style="width:350px;" /><br>
-				<p class="header-table-text"> Supply, Installation, Maintenance & Repair of:</p>
-				<table class="header-table-child">
-					<tr>
-						<td>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Air Conditioners & Refrigerators </div>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Coldrooms & Chillers </div>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Mechanical Ventilation Systems</div>
-						</td>
-						<td>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Laboratory Fume Cupboards</div>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Steam Bath and Saunas</div>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Raised Floors / Access Panels</div>
-						</td>
-					</tr>
-					<tr>
-						<td>... and General Suppliers</td>
-					</tr>
-				</table>
-			</td>
-			<td class="address"><br><br>
-				Lean Aircons Building, Opp NextGen Mall<br>
-				Mombasa Road, Nairobi - Kenya<br>
-				P.O Box 36082 - 00200.<br>
-				Cell : +254 732 345 393, +254 713 773 333<br>
-				info@leanventures.co.ke<br>
-				leannventures@gmail.com
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/' . $company->logo) }}" style="object-fit:contain" width="100%" />
 			</td>
 		</tr>
 	</table>
@@ -202,89 +174,195 @@
 		<tr>
 			<td width="50%">
 				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br><br>
-				<b>Client Name :</b> {{ $invoice->customer->company }}<br>
-				<b>Client Tax Pin : </b>{{ $invoice->customer->taxid }}<br>
-				<b>Address :</b> {{ $invoice->customer->address }}<br>
-				<b>Email :</b> {{ $invoice->customer->email }}<br>
-				<b>Cell :</b> {{ $invoice->customer->phone }}<br>
+				@if ($resource->customer)
+					<b>Client Name :</b> {{ $resource->customer->company }}<br>
+					<b>Client Tax Pin : </b>{{ $resource->customer->taxid }}<br>
+					<b>Address :</b> {{ $resource->customer->address }}<br>
+					<b>Email :</b> {{ $resource->customer->email }}<br>
+					<b>Cell :</b> {{ $resource->customer->phone }}<br>
+				@else
+					@php
+						$customer = '';
+						$lead = '';
+						$quote = isset($resource->products->first()->quote)? $resource->products->first()->quote : '';
+						if ($quote && $quote->customer) $customer = $quote->customer;
+						elseif ($quote && $quote->lead) $lead = $quote->lead;
+					@endphp
+					@if ($customer)
+						<b>Client Name</b> {{ $customer->company }}<br>
+						<b>Client Tax Pin : </b>{{ $customer->taxid }}<br>
+						<b>Address :</b> {{ $customer->address }}<br>
+						<b>Email :</b> {{ $customer->email }}<br>
+						<b>Cell :</b> {{ $customer->phone }}<br>
+					@elseif ($lead)
+						<b>Client Name</b> {{ $lead->client_name }}<br>
+						<b>Client Tax Pin : </b>{{ '' }}<br>
+						<b>Address :</b> {{ $lead->client_address }}<br>
+						<b>Email :</b> {{ $lead->client_email }}<br>
+						<b>Cell :</b> {{ $lead->client_contact }}<br>
+					@endif
+				@endif 
 			</td>
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
 				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>				
-				<b>Invoice No :</b> {{ sprintf('%04d', $invoice->tid) }}<br><br>
-				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br>
-				<b>Overdue after :</b> {{ $invoice->validity ? $invoice->validity . ' days' : '' }}<br>
-				<b>KRA Pin : </b>P051516705D<br>
+				<b>Invoice No :</b> {{ gen4tid('', $resource->tid) }}<br>
+				<b>Date :</b> {{ dateFormat($resource->invoicedate, 'd-M-Y') }}<br>
+				<b>Overdue after :</b> {{ $resource->validity ? $resource->validity . ' days' : 'On Receipt' }}<br>
+				<b>KRA Pin :</b> {{ $company->taxid }}<br>
+				@php
+					if ($resource->etr_url) {
+						parse_str(parse_url($resource->etr_url, PHP_URL_QUERY), $params);
+						$invoice_no = $params['invoiceNo'];
+						echo '<b>ETR Invoice No :</b> ' . $invoice_no;
+					}
+				@endphp
 			</td>
 		</tr>
 	</table><br>
 
 	<table  class="ref" cellpadding="10">
-		<tr><td colspan="2">Ref : <b>{{ $invoice->notes }}</b></td></tr>
+		<tr><td colspan="2">Ref : <b>{{ $resource->notes }}</b></td></tr>
 	</table><br>
 
 	<table class="items" cellpadding="8">
 		<thead>
 			<tr>
 				<td width="6%">No.</td>
-				<td width="24%"> REFERENCE</td>
-				<td width="24%"> DESCRIPTION</td>
+
+				@if (
+					(@$resource['products'][0]['reference'] == @$resource['products'][1]['reference']) ||
+					(!@$resource->products->first()->reference)
+				)
+					<td colspan="2">DESCRIPTION</td>
+				@else
+					<td width="24%">REFERENCE</td>
+					<td width="24%">DESCRIPTION</td>
+				@endif
+
 				<td width="8%">QTY</td>
 				<td width="8%">UoM</td>
 				<td width="14%">RATE</td>
-				<td width="14%">AMOUNT(Ksh)</td>
+
+				@php
+					$code = '';
+					$inv_product = 	$resource->products->first();
+					if ($inv_product && isset($inv_product->quote->currency)) {
+						$code = $inv_product->quote->currency->code;
+					} 
+				@endphp
+				<td width="14%">AMOUNT {{ $code? "({$code})" : '' }}</td>
 			</tr>
 		</thead>
 		<tbody>
-			@foreach($invoice->products as $k => $val)
-				<tr>
-					<td>{{ $k+1 }}</td>					
-					<td>{{ $val->reference }}</td>
-					<td>{{ $val->description }}</td>
-					<td class="align-c">{{ (int) $val->product_qty }}</td>
-					<td class="align-c">{{ $val->unit }}</td>
-					<td class="align-r">{{ number_format($val->product_price, 2) }}</td>
-					<td class="align-r">{{ number_format($val->product_qty * $val->product_price, 2) }}</td>
-				</tr>
+			<!-- Product rows -->
+			@foreach($resource->products as $i => $item)
+				@if ($item->unit)
+					<!-- Item Row -->
+					<tr>
+						<td>{{ $item->numbering ?? $i+1 }}</td>
+
+						@if (
+							(@$resource['products'][0]['reference'] == @$resource['products'][1]['reference']) ||
+							(!@$resource->products->first()->reference)
+						)
+							<td colspan="2">{{ $item->description }}</td>
+						@else
+							<td>{{ $item->reference }}</td>
+							<td>{{ $item->description }}ee</td>
+						@endif
+				
+						<td class="align-c">{{ $item->product_qty > 0? +$item->product_qty : '' }}</td>
+						<td class="align-c">{{ $item->unit }}</td>
+
+						@if ($item->product_price > 0 && $item->product_subtotal == 0)
+							<td class="align-r">{{ $item->product_price > 0? numberFormat($item->product_price) : '' }}</td>
+							<td class="align-r">{{ $item->product_qty > 0? numberFormat($item->product_qty * $item->product_price) : '' }}</td>
+						@elseif ($item->product_price > 0 && $item->product_subtotal > 0)
+							<td class="align-r">{{ $item->product_subtotal > 0? numberFormat($item->product_subtotal) : '' }}</td>
+							<td class="align-r">{{ $item->product_qty > 0? numberFormat($item->product_qty * $item->product_subtotal) : '' }}</td>
+						@endif
+					</tr>
+				@else
+					<!-- Title Row -->
+					<tr>
+						<td>{{ $item->numbering ?? $i+1 }}</td>
+						@if (
+							(@$resource['products'][0]['reference'] == @$resource['products'][1]['reference']) ||
+							(!@$resource->products->first()->reference)
+						)
+							<td colspan="2">{{ $item->description }}</td>
+						@else
+							<td></td>
+							<td></td>
+						@endif
+						@foreach (range(1,4) as $j)
+							<td></td>
+						@endforeach
+					</tr>
+				@endif
 			@endforeach
-			<!-- empty row with dynamic height-->
-			<tr>
-				<td height="{{ 400-30*count($invoice->products) }}"></td>
-				@for($i = 0; $i < 6; $i++) 
-					<td></td>
-				@endfor
-			</tr>
-			<tr>
-				<td colspan="5" class="bd-t" rowspan="2">
-					@if ($invoice->bank_id)
-						<span class="customer-dt-title">BANK DETAILS:</span><br>
-						<b>Account Name :</b> Lean Ventures Limited<br>
-						<b>Account Number :</b> 1267496231<br>
-						<b>Bank :</b> KCB &nbsp;&nbsp;<b>Branch :</b> Nextgen Mall <br>
-						<b>Currency :</b> Kenya Shillings &nbsp;&nbsp;<b>Swift Code :</b> KCBLKENX <br>
-						(KCB Mpesa Paybill: 522 522)
+			<!-- End Product rows -->
+
+			<!-- Empty rows -->
+			@for ($i = count($resource->products); $i < 5; $i++)
+				<tr>
+					@if (
+						(@$resource['products'][0]['reference'] == @$resource['products'][1]['reference']) ||
+						(!@$resource->products->first()->reference)
+					)
+						@for($j = 0; $j < 6; $j++)
+							@if ($j == 1)
+								<td colspan="2"></td>
+							@else
+								<td></td>
+							@endif
+						@endfor
+					@else
+						@for($j = 0; $j < 7; $j++)
+							<td></td>
+						@endfor
 					@endif
+				</tr>
+			@endfor
+			<!-- End Empty rows -->
+
+			<tr>
+				<td colspan="3" class="bd-t" rowspan="3">
+					@if ($resource->bank)
+						<span class="customer-dt-title">BANK DETAILS:</span><br>
+						<b>Account Name :</b> {{ $resource->bank->name }}<br>
+						<b>Account Number :</b> {{ $resource->bank->number }}<br>
+						<b>Bank :</b> {{ $resource->bank->bank }} &nbsp;&nbsp;<b>Branch :</b> {{ $resource->bank->branch }} <br>
+						<b>Currency :</b> {{ $resource->currency? $resource->currency->code : 'Kenyan Shillings' }} &nbsp;&nbsp;<b>Swift Code :</b> {{ $resource->bank->code }} <br>
+						{{ $resource->bank->paybill? "({$resource->bank->paybill})" : '' }}<br><br>
+					@endif
+					<b>Terms: </b> {{ $resource->term? $resource->term->title : '' }}<br>
+				</td>
+				{{-- ETR QR-code --}}
+				<td colspan="2" class="bd-t" rowspan="3" style="border-left: hidden; padding-top: 1em;">
+					{{-- Storage::path("public/qr/{$resource->etr_qrcode}") --}}
+					{{-- <img src="{{ '' }}" style="object-fit:contain" width="10%"/> --}}
 				</td>
 				<td class="bd align-r">Sub Total:</td>
-				@if ($invoice->print_type == 'inclusive')
-					<td class="bd align-r">{{ number_format($invoice->total, 2) }}</td>
+				@if ($resource->print_type == 'inclusive')
+					<td class="bd align-r">{{ numberFormat($resource->total) }}</td>
 				@else
-					<td class="bd align-r">{{ number_format($invoice->subtotal, 2) }}</td>
+					<td class="bd align-r">{{ numberFormat($resource->subtotal) }}</td>
 				@endif
 			</tr>
 			<tr>
-				@if ($invoice->print_type == 'inclusive')
-					<td class="align-r">VAT {{ $invoice->tax_id }}%</td>
-					<td class="align-r">{{ $invoice->tax_id ? 'INCLUSIVE' : 'NONE' }}</td>
+				@if ($resource->print_type == 'inclusive')
+					<td class="align-r">VAT {{ $resource->tax_id }}%</td>
+					<td class="align-r">{{ $resource->tax_id ? 'INCLUSIVE' : 'NONE' }}</td>
 				@else
-					<td class="align-r">Tax {{ $invoice->tax_id ? $invoice->tax_id . '%' : 'Off' }}</td>
-					<td class="align-r">{{ number_format($invoice->tax, 2) }}</td>
+					<td class="align-r">Tax {{ $resource->tax_id ? $resource->tax_id . '%' : 'Off' }}</td>
+					<td class="align-r">{{ numberFormat($resource->tax) }}</td>
 				@endif
 			</tr>
 			<tr>
-				<td colspan="5"></td>
 				<td class="bd align-r"><b>Grand Total:</b></td>
-				<td class="bd align-r">{{ number_format($invoice->total, 2) }}</td>
+				<td class="bd align-r">{{ numberFormat($resource->total) }}</td>
 			</tr>
 		</tbody>
 	</table>

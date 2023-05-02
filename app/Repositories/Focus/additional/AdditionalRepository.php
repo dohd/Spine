@@ -2,12 +2,9 @@
 
 namespace App\Repositories\Focus\additional;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\additional\Additional;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class AdditionalRepository.
@@ -27,9 +24,7 @@ class AdditionalRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-
-        return $this->query()
-            ->get(['id','name','class','created_at']);
+        return $this->query()->get();
     }
 
     /**
@@ -41,10 +36,10 @@ class AdditionalRepository extends BaseRepository
      */
     public function create(array $input)
     {
-         $input['name']=strip_tags($input['name']);
-        if (Additional::create($input)) {
-            return true;
-        }
+        $input['name'] = strip_tags($input['name']);
+        if (Additional::create($input)) return true;
+            
+        
         throw new GeneralException(trans('exceptions.backend.additionals.create_error'));
     }
 
@@ -58,10 +53,9 @@ class AdditionalRepository extends BaseRepository
      */
     public function update(Additional $additional, array $input)
     {
-        $input['name']=strip_tags($input['name']);
-    	if ($additional->update($input))
-            return true;
-
+        $input['name'] = strip_tags($input['name']);
+        if ($additional->update($input)) return true;
+            
         throw new GeneralException(trans('exceptions.backend.additionals.update_error'));
     }
 
@@ -74,9 +68,7 @@ class AdditionalRepository extends BaseRepository
      */
     public function delete(Additional $additional)
     {
-        if ($additional->delete()) {
-            return true;
-        }
+        if ($additional->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.additionals.delete_error'));
     }

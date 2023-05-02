@@ -18,7 +18,6 @@
 namespace App\Http\Controllers\Focus\spvariations;
 
 use App\Models\pricegroup\PriceGroupVariation;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -58,16 +57,11 @@ class SpVariablesController extends Controller
     public function index(ManageSpVariableRequest $request)
     {
         $input = $request->only('rel_id');
-        $rel_id=$input['rel_id'];
+        $rel_id = $request->rel_id;
         $segment = false;
-        if (isset($input['rel_id'])) {
-            $segment = PriceGroupVariation::find($input['rel_id']);
-        }
+        if ($rel_id) $segment = PriceGroupVariation::find($rel_id);            
         
-
-        return new ViewResponse('focus.spvariations.index', compact('rel_id', 'segment'));
-
-        
+        return new ViewResponse('focus.spvariations.index', compact('rel_id', 'segment', 'input'));
     }
 
     /**

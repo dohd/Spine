@@ -11,7 +11,6 @@
             </div>
             <div class="content-header-right col-md-6 col-12">
                 <div class="media width-250 float-right">
-
                     <div class="media-body media-right text-right">
                         @include('focus.branches.partials.branches-header-buttons')
                     </div>
@@ -28,12 +27,12 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Company</th>
+                                            <th>#Code</th>
                                             <th>Branch</th>
-                                            <th>Physical Address</th>
+                                            <th>Customer</th>
+                                            <th>Location</th>
                                             <th>Contact Person</th>
                                             <th>Branch Contact</th>
-                                            <th>{{ trans('general.createdat') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                     </thead>
@@ -60,9 +59,7 @@
 <script>
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
-    $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-    });
+    $.ajaxSetup({headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
     function draw_data() {        
         const tableLan = { @lang('datatable.strings') }
@@ -73,7 +70,7 @@
             language: tableLan,
             ajax: {
                 url: '{{ route("biller.branches.get") }}',
-                type: 'post',
+                type: 'POST',
                 data: { c_type: 0 }
             },
             columns: [{
@@ -81,12 +78,16 @@
                     name: 'id'
                 },
                 {
-                    data: 'customer',
-                    name: 'customer'
+                    data: 'branch_code',
+                    name: 'branch_code'
                 },
                 {
                     data: 'name',
                     name: 'name'
+                },
+                {
+                    data: 'customer',
+                    name: 'customer'
                 },
                 {
                     data: 'location',
@@ -99,10 +100,6 @@
                 {
                     data: 'contact_phone',
                     name: 'contact_phone'
-                },
-                {
-                    data: 'created_at',
-                    name: "{{ config('module.branches.table')}}.created_at"
                 },
                 {
                     data: 'actions',

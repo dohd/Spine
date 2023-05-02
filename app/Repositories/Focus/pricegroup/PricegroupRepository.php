@@ -42,9 +42,12 @@ class PricegroupRepository extends BaseRepository
     public function create(array $input)
     {
         $input = array_map( 'strip_tags', $input);
-        if (Pricegroup::create($input)) {
-            return true;
-        }
+        if (!isset($input['is_client'])) $input['is_client'] = 0;
+        $is_exist = Pricegroup::where(['ref_id' => $input['ref_id'], 'is_client' => $input['is_client']])->count();
+        if ($is_exist) return false;
+
+        if (Pricegroup::create($input)) return true;
+            
         throw new GeneralException(trans('exceptions.backend.pricegroups.create_error'));
     }
 
@@ -59,9 +62,8 @@ class PricegroupRepository extends BaseRepository
     public function update(Pricegroup $pricegroup, array $input)
     {
         $input = array_map( 'strip_tags', $input);
-    	if ($pricegroup->update($input))
-            return true;
-
+    	if ($pricegroup->update($input)) return true;
+            
         throw new GeneralException(trans('exceptions.backend.pricegroups.update_error'));
     }
 

@@ -4,7 +4,12 @@ namespace App\Repositories\Focus\lead;
 
 use App\Models\lead\Lead;
 use App\Exceptions\GeneralException;
+use App\Models\djc\Djc;
+use App\Models\items\Prefix;
+use App\Models\quote\Quote;
 use App\Repositories\BaseRepository;
+use DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProductcategoryRepository.
@@ -24,7 +29,7 @@ class LeadRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()->get();
+        return $this->query();
     }
 
     /**
@@ -37,15 +42,11 @@ class LeadRepository extends BaseRepository
     public function create(array $data)
     {
         $data['date_of_request'] = date_for_database($data['date_of_request']);
-        // increament reference
-        $lead = Lead::orderBy('reference', 'desc')->first('reference');
-        if (isset($lead) && $data['reference'] <= $lead->reference) {
-            $data['reference'] = $lead->reference + 1;
-        }
+        $tid = Lead::max('reference');
+        if ($data['reference'] <= $tid) $data['reference'] = $tid+1;
 
         $result = Lead::create($data);
-
-        if ($result) return $result;
+        return $result;
 
         throw new GeneralException('Error Creating Lead');
     }
@@ -53,15 +54,25 @@ class LeadRepository extends BaseRepository
     /**
      * For updating the respective Model in storage
      *
-     * @param Productcategory $productcategory
+     * @param \App\Models\Lead $lead
      * @param  $input
      * @throws GeneralException
      * return bool
      */
     public function update(Lead $lead, array $data)
     {
-        $data = array_map('strip_tags', $data);
-        if ($lead->update($data)) return true;
+        DB::beginTransaction();
+
+        $params = ['customer_id' => @$data['customer_id'], 'branch_id' => @$data['branch_id']];
+        if ($lead->quote) $lead->quote->update($params);
+        if ($lead->djc) $lead->djc->update($params);
+
+        $result = $lead->update($data);
+
+        if ($result) {
+            DB::commit();
+            return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
@@ -69,16 +80,22 @@ class LeadRepository extends BaseRepository
     /**
      * For deleting the respective model from storage
      *
-     * @param Productcategory $productcategory
+     * @param \App\Models\lead\Lead $lead
      * @throws GeneralException
      * @return bool
      */
     public function delete(Lead $lead)
     {
-        if ($lead->delete()) {
-            return true;
-        }
+        $prefix = Prefix::where('note', 'lead')->first();
+        $tid = gen4tid("{$prefix}-", $lead->reference);
 
+        if ($lead->djcs->count()) 
+            throw ValidationException::withMessages(["{$tid} is attached to DJC Report!"]);
+        if ($lead->quotes->count()) 
+            throw ValidationException::withMessages(["{$tid} is attached to Quote!"]);
+            
+        if ($lead->delete()) return true;
+        
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 }

@@ -2,15 +2,9 @@
 
 namespace App\Repositories\Focus\product;
 
-use App\Models\product\ProductMeta;
 use App\Models\product\ProductVariation;
-use DB;
-use Carbon\Carbon;
-use App\Models\product\Product;
-use App\Exceptions\GeneralException;
+
 use App\Repositories\BaseRepository;
-use Illuminate\Support\Facades\Storage;
-use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
  * Class ProductRepository.

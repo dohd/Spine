@@ -30,7 +30,7 @@ class TransactioncategoryRepository extends BaseRepository
     {
 
         return $this->query()
-            ->get(['id','name','created_at']);
+            ->get(['id','name','note','sub_category','sub_category_id','created_at']);
     }
 
     /**

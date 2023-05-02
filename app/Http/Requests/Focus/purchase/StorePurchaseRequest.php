@@ -13,7 +13,7 @@ class StorePurchaseRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('transaction-manage');
+        return access()->allow('create-purchase');
     }
 
     /**
@@ -31,9 +31,9 @@ class StorePurchaseRequest extends FormRequest
         $rules = array();
         if ($this->getMethod() == 'POST') {
             $rules = [
-                'credit_account_id' => 'required|integer|min:1',
-                'tid' => 'required|integer|min:1',
-                'finaltotals' => 'required',
+                // 'credit_account_id' => 'required|integer|min:1',
+                // 'tid' => 'required|integer|min:1',
+                // 'finaltotals' => 'required',
                 //'term_id' => 'required|integer|min:1',
             ];
         }

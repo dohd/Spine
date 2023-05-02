@@ -15,202 +15,76 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\equipment;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\equipment\EquipmentRepository;
 use App\Http\Requests\Focus\equipment\ManageEquipmentRequest;
-use App\Models\projectequipment\Projectequipment;
 
 /**
  * Class BranchTableController.
  */
 class EquipmentsTableController extends Controller
 {
-    /**
-     * variable to store the repository object
-     * @var ProductcategoryRepository
-     */
-    protected $equipment;
+  /**
+   * variable to store the repository object
+   * @var EquipmentRepository
+   */
+  protected $repository;
 
-    /**
-     * contructor to initialize repository object
-     * @param ProductcategoryRepository $productcategory ;
-     */
-    public function __construct(EquipmentRepository $equipment)
-    {
+  /**
+   * contructor to initialize repository object
+   * @param EquipmentRepository $repository ;
+   */
+  public function __construct(EquipmentRepository $repository)
+  {
 
-        $this->equipment = $equipment;
-    }
+    $this->repository = $repository;
+  }
 
-    /**
-     * This method return the data of the model
-     * @param ManageProductcategoryRequest $request
-     *
-     * @return mixed
-     */
-    public function __invoke(ManageEquipmentRequest $request)
-    {
+  /**
+   * This method return the data of the model
+   * @param ManageProductcategoryRequest $request
+   *
+   * @return mixed
+   */
+  public function __invoke(ManageEquipmentRequest $request)
+  {
+    $query = $this->repository->getForDataTable();
+    $prefixes = prefixesArray(['equipment'], auth()->user()->ins);
     
-
-      if (request('rel_type') == 1) {
-
-        $core = $this->equipment->getForDataTable();
-        return Datatables::of($core)
-            ->escapeColumns(['id'])
-            ->addIndexColumn()
-               ->addColumn('customer', function ($equipment) {
-                  return $equipment->customer->company;
-                })
-                 ->addColumn('region', function ($equipment) {
-                  return $equipment->region->name;
-                })
-                   ->addColumn('branch', function ($equipment) {
-                  return $equipment->branch->name;
-                })
-
-                ->addColumn('section', function ($equipment) {
-                  return $equipment->project_section->name;
-                })
-                 ->addColumn('category', function ($equipment) {
-                  return $equipment->category->name;
-                })
-
-                
-
-            ->addColumn('unit_type', function ($equipment) {
-                $unit_type="InDoor";
-                if($equipment->unit_type==2){
-                     $unit_type="OutDoor";
-
-                }else if($equipment->unit_type==3){
-                $unit_type="StandAlone";
-                }
-                return $unit_type;
-
-            })
-
-              ->addColumn('status', function ($equipment) {
-                $equipments=Projectequipment::where('equipment_id',$equipment->id)->where('schedule_id',request('rel_id'))->first();
-
-                if($equipments){
-       return '<span class="badge" style="background-color:#12C538">Loaded</span>';
-                }else{
-
-                     return '<span class="badge" style="background-color:#f48fb1">Not Loaded</span>';
-
-                }
-
-                
-
-                })
-
-
-
-               ->addColumn('relationship', function ($equipment) {
-                if($equipment->rel_id>0){
-                  return $equipment->indoor->unique_id;
-                }else{
-                    return '';
-                }
-                })
-             ->addColumn('last_maint_date', function ($equipment) {
-                return dateFormat($equipment->last_maint_date);
-
-            })
-           
-
-           
-
-             
-             
-            ->addColumn('name', function ($equipment) {
-                return '<a class="font-weight-bold" href="' . route('biller.products.index') . '?rel_type=' . $equipment->id . '&rel_id=' . $equipment->id . '">' . $equipment->name . '</a>';
-            })
-            ->addColumn('mass_delete', function ($equipment) {
-                    return  '<input type="checkbox" class="row-select" value="' . $equipment->id .'">' ;
-                })
-        
-            // ->addColumn('location', function ($branch) {
-                    //return $branch->location;
-              //  })
-         
-            ->addColumn('created_at', function ($equipment) {
-                return dateFormat($equipment->created_at);
-            })
-          
-            ->make(true);
-
-        }else{
-
-
-
-$core = $this->equipment->getForDataTable();
-        return Datatables::of($core)
-            ->escapeColumns(['id'])
-            ->addIndexColumn()
-               ->addColumn('customer', function ($equipment) {
-                  return $equipment->customer->company.' '.$equipment->branch->name;
-                })
-
-
-
-             ->addColumn('unit_type', function ($equipment) {
-                $unit_type="InDoor";
-                if($equipment->unit_type==2){
-                     $unit_type="OutDoor";
-
-                }else if($equipment->unit_type==3){
-                $unit_type="StandAlone";
-                }
-                return $unit_type;
-
-            })
-
-               ->addColumn('relationship', function ($equipment) {
-                if($equipment->rel_id>0){
-                  return $equipment->indoor->unique_id;
-                }else{
-                    return '';
-                }
-                })
-             ->addColumn('last_maint_date', function ($equipment) {
-                return dateFormat($equipment->last_maint_date);
-
-            })
-             ->addColumn('next_maintenance_date', function ($equipment) {
-                return dateFormat($equipment->next_maintenance_date);
-
-            })
-
-
-           
-
-             
-             
-            ->addColumn('name', function ($equipment) {
-                return '<a class="font-weight-bold" href="' . route('biller.products.index') . '?rel_type=' . $equipment->id . '&rel_id=' . $equipment->id . '">' . $equipment->name . '</a>';
-            })
-        
-            // ->addColumn('location', function ($branch) {
-                    //return $branch->location;
-              //  })
-         
-            ->addColumn('created_at', function ($equipment) {
-                return dateFormat($equipment->created_at);
-            })
-            ->addColumn('actions', function ($equipment) {
-                return $equipment->action_buttons;
-               // return '<a class="btn btn-purple round" href="' . route('biller.branches.index') . '?rel_type=' . $branch->id . '&rel_id=' . $branch->id . '" title="List"><i class="fa fa-list"></i></a>' . $branch->action_buttons;
-            })
-            ->make(true);
-
-
-
-
-
+    return Datatables::of($query)
+      ->escapeColumns(['id'])
+      ->addIndexColumn()
+      ->editColumn('tid', function ($equipment) use($prefixes) {
+        return gen4tid("{$prefixes[0]}-", $equipment->tid);
+      })
+      ->filterColumn('tid', function($query, $tid) use ($prefixes){
+        $arr = explode('-',$tid);
+        if (strtolower($arr[0]) == strtolower($prefixes[0]) && isset($arr[1])) {
+            $query->where('tid', floatval($arr[1]));
         }
-    }
+        elseif (floatval($tid)) {
+            $query->where('tid', floatval($tid));
+        }
+    })
+      ->addColumn('customer', function ($equipment) {
+        $customer = $equipment->customer;
+        $branch = $equipment->branch;
+        if ($customer && $branch)
+          return "{$customer->company} - {$branch->name}";
+      })
+      ->editColumn('capacity', function ($equipment) {
+        return $equipment->capacity;
+      })
+      ->addColumn('service_rate', function ($equipment) {
+        return numberFormat($equipment->service_rate);
+      })
+      ->addColumn('actions', function ($equipment) {
+        return $equipment->action_buttons;
+      })
+      ->make(true);
+  }
 }

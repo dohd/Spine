@@ -18,7 +18,6 @@
 namespace App\Http\Controllers\Focus\pricegroup;
 
 use App\Models\pricegroup\Pricegroup;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -27,7 +26,7 @@ use App\Http\Responses\Focus\pricegroup\EditResponse;
 use App\Repositories\Focus\pricegroup\PricegroupRepository;
 use App\Http\Requests\Focus\pricegroup\ManagePricegroupRequest;
 use App\Http\Requests\Focus\pricegroup\StorePricegroupRequest;
-
+use Illuminate\Validation\ValidationException;
 
 /**
  * WarehousesController
@@ -57,7 +56,6 @@ class PricegroupsController extends Controller
      */
     public function index(ManagePricegroupRequest $request)
     {
-
         return new ViewResponse('focus.pricegroups.index');
     }
 
@@ -85,7 +83,9 @@ class PricegroupsController extends Controller
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
         //Create the model using repository create method
-        $this->repository->create($input);
+        $result = $this->repository->create($input);
+        if (!$result) throw ValidationException::withMessages(['ref_id' => 'Duplicate Price Group is not allowed']);
+
         //return with successfull message
         return new RedirectResponse(route('biller.pricegroups.index'), ['flash_success' => trans('alerts.backend.pricegroups.created')]);
     }

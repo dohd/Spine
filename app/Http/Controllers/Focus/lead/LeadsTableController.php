@@ -49,24 +49,35 @@ class LeadsTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->lead->getForDataTable();
+        $query = $this->lead->getForDataTable();
 
-        return Datatables::of($core)
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['lead'], $ins);
+
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('reference', function ($lead) {
-                return 'Tkt-'.sprintf('%04d', $lead->reference);
+            ->editColumn('reference', function ($lead) use($prefixes) {
+                return gen4tid("{$prefixes[0]}-", $lead->reference);
+            })
+            ->filterColumn('reference', function($query, $reference) use($prefixes) {
+                $arr = explode('-', $reference);
+                if (strtolower($arr[0]) == strtolower($prefixes[0]) && isset($arr[1])) {
+                    $query->where('reference', floatval($arr[1]));
+                } elseif (floatval($reference)) {
+                    $query->where('reference', floatval($reference));
+                }
             })
             ->addColumn('client_name', function ($lead) {
-                $customer = isset($lead->customer) ?  $lead->customer->company : '';
-                $branch = isset($lead->branch) ? $lead->branch->name : '';
-                if ($customer && $branch) return $customer . ' - ' .$branch;
-               
-                return $lead->client_name;
+                $client_name = $lead->client_name;
+                if ($lead->customer) $client_name = $lead->customer->company;
+                if ($client_name && $lead->branch) $client_name .= " - {$lead->branch->name}";
+                return $client_name;
             })
-            ->addColumn('created_at', function ($lead) {
-                return dateFormat($lead->created_at);
+            ->addColumn('date_of_request', function ($lead) {
+                return dateFormat($lead->date_of_request);
             })
+            ->orderColumn('date_of_request', '-date_of_request $1')
             ->addColumn('actions', function ($lead) {
                 return $lead->action_buttons;
             })

@@ -4,11 +4,11 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-6 col-12 mb-2">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
             <h4 class="content-header-title">Tickets Management</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-6">
             <div class="media width-250 float-right mr-3">
                 <div class="media-body media-right text-right">
                     @include('focus.leads.partials.leads-header-buttons')
@@ -19,21 +19,38 @@
     
     <div class="card">
         <div class="card-header">
-            {{-- 
-            <button type="button" class="btn btn-success font-weight-bold" data-toggle="modal" data-target="#status-modal">
-                <i class="fa fa-pencil"></i> Status
-            </button>
-            --}}
-
-            <a href="{{ route('biller.leads.edit', [$lead, 'page=copy']) }}" class="btn btn-warning"><i class="fa fa-clone" aria-hidden="true"></i> Copy</a>
+            <div class="button-group">
+                <a href="#" class="btn btn-info btn-sm mr-1" data-toggle="modal" data-target="#statusModal">
+                    <i class="fa fa-pencil" aria-hidden="true"></i> Status
+                </a>
+                <a href="{{ route('biller.leads.edit', [$lead, 'page=copy']) }}" class="btn btn-warning btn-sm mr-1">
+                    <i class="fa fa-clone" aria-hidden="true"></i> Copy
+                </a> 
+                <a href="#" class="btn btn-danger btn-sm mr-1" data-toggle="modal" data-target="#reminderModal">
+                    <i class="fa fa-bell-o" aria-hidden="true"></i> Add Reminder
+                </a>   
+                 @if (!$days)
+                <span class="text-success float-right">Notification Not Set</span>
+                @elseif ($days > 10)
+                <span class="text-primary float-right"><b>{{$days}}</b>: Days Remaining</span>
+                @elseif($days <= 10)
+                <span class="text-danger float-right"><b>{{$days}}</b>: Days Remaining</span>
+                
+                @endif   
+            </div>
+            
+            
+            <h5 class="card-title mt-1"><b>Title:</b>&nbsp;&nbsp;{{ $lead->title }}</h5>
         </div>
         <div class="card-body">
-            <h5 class="card-title mb-1"><b>Title:</b>&nbsp;&nbsp;{{ $lead->title }}</h5>
             <table id="leads-table" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
                 <tbody>
                     <tr>
                         <th>Reference</th>
-                        <td>{{ 'Tkt-'.sprintf('%04d', $lead->reference) }}</td>
+                        @php
+                            $prefixes = prefixesArray(['lead'], $lead->ins);
+                        @endphp
+                        <td>{{ gen4tid("{$prefixes[0]}-", $lead->reference) }}</td>
                     </tr>
                     <tr>
                         <th>Status</th>
@@ -71,17 +88,12 @@
                         <th>Client Address</th>
                         <td>{{ $lead->customer? $lead->customer->address : $lead->client_address }}</td>
                     </tr>   
-                    <tr><th></th></tr>                                     
                     <tr>
-                        <th>Date of Request</th>
+                        <th>Callout Date</th>
                         <td>{{ dateFormat($lead->date_of_request) }}</td>
-                    </tr>
+                    </tr>                    
                     <tr>
-                        <th>Cost</th>
-                        <td>{{ $lead->cost }}</td>
-                    </tr>
-                    <tr>
-                        <th>Assigned to</th>
+                        <th>Requested By</th>
                         <td>{{ $lead->assign_to }}</td>
                     </tr>
                     <tr>
@@ -90,7 +102,7 @@
                     </tr>
                     <tr>
                         <th>Note</th>
-                        <td>{{ $lead->note }}</td>
+                        <td>{!! $lead->note !!}</td>
                     </tr>
                     <tr>
                         <th>Created at</th>
@@ -102,14 +114,5 @@
     </div>
 </div>
 @include('focus.leads.partials.status_modal')
-@endsection
-
-@section('after-scripts')
-{{-- For DataTables --}}
-{{ Html::script(mix('js/dataTable.js')) }}
-<script>
-    // default status modal select value
-    $('#status').val("{{ $lead->status }}");
-    $('#reason').val("{{ $lead->reason }}");
-</script>
+@include('focus.leads.partials.reminder_modal')
 @endsection

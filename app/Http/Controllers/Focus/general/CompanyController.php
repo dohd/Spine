@@ -78,26 +78,25 @@ class CompanyController extends Controller
 
     public function update(ManageCompanyRequest $request)
     {
-        $data = $request->only(['cname', 'address', 'city', 'region', 'country', 'postbox', 'taxid', 'logo', 'theme_logo', 'icon', 'phone', 'email']);
+        $data = $request->only([
+            'cname', 'address', 'city', 'region', 'country', 'postbox', 'taxid', 'logo', 'theme_logo', 
+            'icon', 'phone', 'email', 'clock_in', 'clock_out', 'etr_code'
+        ]);
         $data2 = $request->only(['custom_field']);
 
-        if (!empty($data['logo'])) {
+        if (isset($data['logo'])) 
             $request->validate([
                 'logo' => 'mimes:jpeg,png',
             ]);
-        }
-        if (!empty($data['theme_logo'])) {
+        if (isset($data['theme_logo'])) 
             $request->validate([
                 'theme_logo' => 'mimes:jpeg,png',
             ]);
-        }
-        if (!empty($data['icon'])) {
+        if (isset($data['icon']))
             $request->validate([
                 'icon' => 'mimes:ico',
             ]);
-
-        }
-
+        
         $result = $this->repository->update(compact('data', 'data2'));
 
         return new RedirectResponse(route('biller.business.settings'), ['flash_success' => trans('business.updated')]);
@@ -346,11 +345,16 @@ class CompanyController extends Controller
 
     public function clear_cache()
     {
-        if (single_ton()) {
-            Artisan::call('cache:clear');
-            Artisan::call('route:cache');
-            Artisan::call('config:cache');
-            return "Cache is cleared";
+         try {
+            if (single_ton()) {
+                Artisan::call('cache:clear');
+                Artisan::call('route:cache');
+                Artisan::call('config:cache');
+                return "Cache is cleared";
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            return "Something went wrong!";
         }
     }
 

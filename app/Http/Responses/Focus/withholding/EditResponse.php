@@ -29,9 +29,9 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-         $customers=Customer::all();
+        $customers = Customer::all();
         return view('focus.withholdings.edit')->with([
-            'withholding' => $this->withholding,'customers'=>$customers
+            'withholding' => $this->withholding, 'customers' => $customers
         ]);
     }
 }

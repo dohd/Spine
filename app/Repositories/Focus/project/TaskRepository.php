@@ -61,74 +61,84 @@ class TaskRepository extends BaseRepository
      * For Creating the respective model in storage
      *
      * @param array $input
-     * @return bool
+     * @return Task $task
      * @throws GeneralException
      */
     public function create(array $input)
     {
-
+        // dd($input);
+        DB::beginTransaction();
 
         $employees = @$input['employees'];
         $tags = @$input['tags'];
         $projects = @$input['projects'];
         $calender = @$input['link_to_calender'];
         $color = @$input['color'];
-        unset($input['tags']);
-        unset($input['employees']);
-        unset($input['projects']);
-        unset($input['link_to_calender']);
-        unset($input['color']);
-        $user_id = auth()->user()->id;
+
+        $input = array_diff_key($input, array_flip(['tags', 'employees', 'projects', 'link_to_calender', 'color']));
         $input['start'] = datetime_for_database($input['start'] . ' ' . $input['time_from']);
         $input['duedate'] = datetime_for_database($input['duedate'] . ' ' . $input['time_to']);
-        unset($input['time_from']);
-        unset($input['time_to']);
-        $input = array_map( 'strip_tags', $input);
+        if ($employees) $input['creator_id'] = current($employees);
+        unset($input['time_from'], $input['time_to']);
+        
         $result = Task::create($input);
 
+        $tag_group = [];
+        if (is_array($tags)) {
+            foreach ($tags as $row) {
+                $tag_group[] = ['todolist_id' => $result->id, 'related' => 1, 'rid' => $row];
+            }
+        }
 
+        $employee_group = [];
+        if (is_array($employees)) {
+            foreach ($employees as $row) {
+                $tag_group[] = array('todolist_id' => $result->id, 'related' => 2, 'rid' => $row);
+                $employee_group[] = $row;
+            }
+        }
+
+        $project_group = [];
+        if (is_array($projects)) {
+            foreach ($projects as $row) {
+                if (project_access($row)) 
+                    $project_group[] = ['project_id' => $row, 'related' => 4, 'rid' => $result->id];
+            }
+            ProjectRelations::insert($project_group);
+        }
+        TaskRelations::insert($tag_group);
+
+        if ($calender) {
+            $data = [
+                'title' => trans('tasks.task') . ' - ' . $input['name'], 
+                'description' => $input['short_desc'], 
+                'start' => $input['start'], 
+                'end' => $input['duedate'], 
+                'color' => $color,
+            ];
+            $event = Event::create($data);
+            EventRelation::create(['event_id' => $event->id, 'related' => 2, 'r_id' => $result->id]);
+        }
+
+        $message = [
+            'title' => trans('tasks.task') . ' - ' . $input['name'], 
+            'icon' => 'fa-bullhorn', 
+            'background' => 'bg-success', 
+            'data' => $input['short_desc']
+        ];
+        if ($employee_group) {
+            $users = User::whereIn('id', $employee_group)->get();
+            \Illuminate\Support\Facades\Notification::send($users, new Rose('', $message));
+        } else {
+            $notification = new Rose(auth()->user(), $message);
+            auth()->user()->notify($notification);
+        }
+        
         if ($result) {
-            $tag_group = array();
-            if (is_array($tags)) {
-                foreach ($tags as $row) {
-                    $tag_group[] = array('todolist_id' => $result->id, 'related' => 1, 'rid' => $row);
-                }
-            }
-
-            if (is_array($employees)) {
-                $emp_group = array();
-                foreach ($employees as $row) {
-                    $tag_group[] = array('todolist_id' => $result->id, 'related' => 2, 'rid' => $row);
-                    $emp_group[] = $row;
-                }
-            }
-            if (is_array($projects)) {
-                $p_group = array();
-                foreach ($projects as $row) {
-                    if (project_access($row)) $p_group[] = array('project_id' => $row, 'related' => 4, 'rid' => $result->id);
-                }
-                ProjectRelations::insert($p_group);
-
-            }
-            TaskRelations::insert($tag_group);
-            if ($calender) {
-                $event = Event::create(array('title' => trans('tasks.task') . ' - ' . $input['name'], 'description' => $input['short_desc'], 'start' => $input['start'], 'end' => $input['duedate'], 'color' => $color, 'user_id' => $user_id, 'ins' => $input['ins']));
-                EventRelation::create(array('event_id' => $event->id, 'related' => 2, 'r_id' => $result->id));
-            }
-
-            $message = array('title' => trans('tasks.task') . ' - ' . $input['name'], 'icon' => 'fa-bullhorn', 'background' => 'bg-success', 'data' => $input['short_desc']);
-
-            if (is_array(@$emp_group)) {
-                $users = User::whereIn('id', $emp_group)->get();
-                \Illuminate\Support\Facades\Notification::send($users, new Rose('', $message));
-            } else {
-                $notification = new Rose(auth()->user(), $message);
-                auth()->user()->notify($notification);
-            }
-
-
+            DB::commit();
             return $result;
         }
+
         throw new GeneralException(trans('exceptions.backend.tasks.create_error'));
     }
 

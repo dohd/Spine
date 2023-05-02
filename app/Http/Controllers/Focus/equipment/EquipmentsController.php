@@ -28,7 +28,9 @@ use App\Http\Responses\Focus\equipment\EditResponse;
 use App\Repositories\Focus\equipment\EquipmentRepository;
 use App\Http\Requests\Focus\equipment\ManageEquipmentRequest;
 use App\Http\Requests\Focus\equipment\StoreEquipmentRequest;
-
+use App\Models\branch\Branch;
+use App\Models\customer\Customer;
+use App\Models\equipmenttoolkit\EquipmentToolKit;
 
 /**
  * ProductcategoriesController
@@ -59,10 +61,10 @@ class EquipmentsController extends Controller
     public function index(ManageEquipmentRequest $request)
     {
 
-        // $core = $this->branch->getForDataTable();
-        // dd($core );
+       $customers = Customer::get(['id', 'company']);
+       $branches = Branch::where('name', '!=', 'All Branches')->get(['id', 'name', 'customer_id']);
 
-        return new ViewResponse('focus.equipments.index');
+        return new ViewResponse('focus.equipments.index', compact('customers', 'branches'));
     }
 
     /**
@@ -73,7 +75,6 @@ class EquipmentsController extends Controller
      */
     public function create(StoreEquipmentRequest $request)
     {
-
         return new CreateResponse('focus.equipments.create');
     }
 
@@ -85,20 +86,9 @@ class EquipmentsController extends Controller
      */
     public function store(StoreEquipmentRequest $request)
     {
-        $request->validate([
-            'manufacturer' => 'required',
-            'location' => 'required',
-            'unit_type' => 'required',
+        $this->repository->create($request->except('_token'));
 
-        ]);
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-
-        $id = $this->repository->create($input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Odu  Successfully Created' . ' <a href="' . route('biller.equipments.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.equipments.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.equipments.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
+        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment Created Successfully']);
     }
 
     /**
@@ -108,9 +98,8 @@ class EquipmentsController extends Controller
      * @param EditProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
-    public function edit(Equipment $equipment, StoreEquipmentRequest $request)
+    public function edit(Equipment $equipment)
     {
-        //dd($equipment);
         return new EditResponse($equipment);
     }
 
@@ -121,33 +110,11 @@ class EquipmentsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-
-    public function equipment_load(Request $request)
-    {
-
-        $q = $request->get('id');
-        if ($q == 1) {
-            $result = Equipment::all()->where('rel_id', '=', $q);
-            return json_encode($result);
-        } else {
-            $result = "";
-            return json_encode($result);
-        }
-    }
-
-
     public function update(StoreEquipmentRequest $request, Equipment $equipment)
     {
-        $request->validate([
-            'name' => 'required',
-            'location' => 'required'
-        ]);
-        //Input received from the request
-        $input = $request->only(['name', 'rel_id', 'location', 'contact_name', 'contact_phone']);
-        //Update the model using repository update method
-        $this->repository->update($equipment, $input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipments  Successfully Updated'  . ' <a href="' . route('biller.equipments.show', [$branch->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.equipments.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.equipments.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
+        $this->repository->update($equipment, $request->except('_token'));
+
+        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment  Updated Successfully']);
     }
 
     /**
@@ -157,14 +124,12 @@ class EquipmentsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Odu $odu, StoreOduRequest $request)
+    public function destroy(Equipment $equipment)
     {
 
-        //dd($branch);
-        //Calling the delete method on repository
-        $this->repository->delete($odu);
-        //returning with successfull message
-        return new RedirectResponse(route('biller.odus.index'), ['flash_success' => 'ODU Successfully Deleted']);
+        $this->repository->delete($equipment);
+
+        return new RedirectResponse(route('biller.equipments.index'), ['flash_success' => 'Equipment Deleted Successfully']);
     }
 
     /**
@@ -174,41 +139,71 @@ class EquipmentsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(odu $odu, ManageOduRequest $request)
+    public function show(Equipment $equipment)
     {
-
-        //returning with successfull message
-        return new ViewResponse('focus.odus.view', compact('odu'));
+        //dd($equipment->toolkits);
+        return new ViewResponse('focus.equipments.view', compact('equipment'));
     }
 
     /**
      * Fetch customer equipments
      */
-    public function equipment_search(Request $request, $id)
+    public function equipment_search(Request $request)
     {
-        $key_word = $request->post('keyword');
-        $equipments = Equipment::where('unique_id', 'LIKE', '%' . $key_word. '%')
-            ->where('customer_id', $id)
-            ->limit(6)
-            ->with(['customer'])
-            ->get();
-
-        // transform equipemts
-        $output = array();
-        foreach ($equipments as $row) {
-            $output[] = array(
-                'name' => $row->unique_id,
-                'customer' => $row->customer->company, 
-                'unit_type' => $row->unit_type, 
-                'make_type' => $row->make_type, 
-                'id' => $row->id, 
-                'capacity' => $row->capacity, 
-                'location' => $row->location, 
-                'next_maintenance_date' => $row->next_maintenance_date, 
-                'last_maint_date' => $row->last_maint_date,
-            );
-        }
+        $k = $request->post('keyword');
         
-        return view('focus.djcs.partials.search')->withDetails($output);
+        $equipments = Equipment::when(request('branch_id'), function ($q) {
+            $q->where('branch_id', request('branch_id'));
+        })->when(request('customer_id'), function ($q) {
+            $q->where('customer_id', request('customer_id'));
+        })->when(request('schedule_id'), function ($q) {
+            // unserviced equipments
+            $q->whereHas('contract_equipments', function ($q) {
+                $q->where('schedule_id', request('schedule_id'));
+            })->where(function ($q) {
+                $q->doesntHave('contract_service_items', 'or', function ($q) {
+                    $q->whereHas('contractservice', function ($q) {
+                        $q->where('schedule_id', request('schedule_id'));
+                    });
+                });
+            });
+        })
+        ->where(function ($q) use($k) {
+            $q->where('tid', 'LIKE', '%' . $k . '%')
+            ->orWhere('make_type', 'LIKE', '%' . $k . '%')
+            ->orWhere('location', 'LIKE', '%' . $k . '%');
+        })->limit(10)->get();
+
+        return response()->json($equipments);
+    }
+
+    // 
+    public function equipment_load()
+    {
+        $equipments = array();
+        if (request('id') != 1) 
+            $equipments = Equipment::get();
+        
+        return response()->json($equipments);
+    }
+    public function attach(Request $request)
+    {
+        if(EquipmentToolKit::where('equipment_id',$request->equipment_id)->where('tool_id',$request->toolkit_id)->exists()){
+            return new RedirectResponse(route('biller.equipments.show',$request->equipment_id), ['flash_success' => 'ToolKit Already Attached']);
+        }
+        $equipment_toolkit = new EquipmentToolKit();
+        $equipment_toolkit->equipment_id = $request->equipment_id;
+        $equipment_toolkit->tool_id = $request->toolkit_id;
+        $equipment_toolkit['ins'] = auth()->user()->ins;
+        $equipment_toolkit['user_id'] = auth()->user()->id;
+        $equipment_toolkit->save();
+        return new RedirectResponse(route('biller.equipments.show',$request->equipment_id), ['flash_success' => 'ToolKit Attached Successfully']);
+    }
+    public function dettach(Request $request)
+    {
+        // dd($request->all());
+        $dettach_equipment = EquipmentToolKit::where('equipment_id',$request->equipment_id)->where('tool_id',$request->toolkit_name)->get()->first();
+        $dettach_equipment->delete();
+        return new RedirectResponse(route('biller.equipments.show',$request->equipment_id), ['flash_success' => 'ToolKit Dettached Successfully']);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models\lead;
 
+use App\Models\items\Prefix;
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\lead\Traits\LeadAttribute;
@@ -11,9 +12,9 @@ class Lead extends Model
 {
     use ModelTrait,
         LeadAttribute,
-    	LeadRelationship {
-            // ProductcategoryAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+        LeadRelationship {
+        // ProductcategoryAttribute::getEditButtonAttribute insteadof ModelTrait;
+    }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -30,17 +31,13 @@ class Lead extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -67,11 +64,23 @@ class Lead extends Model
     {
         parent::__construct($attributes);
     }
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
-            $builder->where('ins', '=', auth()->user()->ins);
-    });
+        parent::boot();
+
+        static::creating(function ($instance) {
+            // $instance->user_id = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
+            $builder->where('ins', auth()->user()->ins);
+        });
     }
 }

@@ -19,8 +19,8 @@ trait WarehouseAttribute
     {
         return '
          '.$this->getViewButtonAttribute("manage-warehouse", "biller.warehouses.show").'
-                '.$this->getEditButtonAttribute("warehouse-data", "biller.warehouses.edit").'
-                '.$this->getDeleteButtonAttribute("warehouse-data", "biller.warehouses.destroy").'
+                '.$this->getEditButtonAttribute("edit-warehouse", "biller.warehouses.edit").'
+                '.$this->getDeleteButtonAttribute("delete-warehouse", "biller.warehouses.destroy").'
                 ';
     }
 }

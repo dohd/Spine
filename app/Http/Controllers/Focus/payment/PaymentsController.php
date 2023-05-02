@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\payment;
 
 use App\Http\Requests\Focus\payment\MakePaymentRequest;
@@ -30,14 +31,23 @@ use App\Models\supplier\Supplier;
 use App\Models\transaction\Transaction;
 use App\Models\transaction\TransactionHistory;
 use App\Models\transactioncategory\Transactioncategory;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
+
 /**
  * InvoicesController
  */
 class PaymentsController extends Controller
 {
-
+    public function show_transaction_payment(Transaction $transaction)
+    {
+        $payment = (object) array();
+        if ($transaction->user_type == 'supplier') $payment = $transaction->paidbill;
+        else if ($transaction->user_type == 'customer') $payment = $transaction->paidinvoice;
+            
+        return new ViewResponse('focus.payments.view', compact('payment'));
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -68,7 +78,7 @@ class PaymentsController extends Controller
         //Input received from the request
         //$transaction = $request->only(['amount', 'payment_date', 'method', 'account_id', 'note', 'bill_id', 'relation_id', 'type_id']);
 
-         $transaction = $request->only(['id','bill_id','payer_id', 'tid', 'method', 'refer_no', 'note', 'account_id','amount_paid','transaction_date']);
+        $transaction = $request->only(['id', 'bill_id', 'payer_id', 'tid', 'method', 'refer_no', 'note', 'account_id', 'amount_paid', 'transaction_date']);
 
 
         $amount = numberClean($transaction['amount_paid']);
@@ -93,15 +103,15 @@ class PaymentsController extends Controller
     {
         DB::beginTransaction();
 
-       $purchases_trans_category_id = Transactioncategory::where('code', 'bc_transactions')->first();
-       $purchases_trans_category_id=$purchases_trans_category_id->id;
+        $purchases_trans_category_id = Transactioncategory::where('code', 'bc_transactions')->first();
+        $purchases_trans_category_id = $purchases_trans_category_id->id;
 
         $bill = Invoice::find($transaction['bill_id']);
-                $transaction['payer_id'] = $bill->customer_id;
-                $transaction['payer'] = $bill->customer->name;
-                $default_category = $purchases_trans_category_id;
-                $transaction['trans_category_id'] = $purchases_trans_category_id;
-                $transaction['credit'] = 0;
+        $transaction['payer_id'] = $bill->customer_id;
+        $transaction['payer'] = $bill->customer->name;
+        $default_category = $purchases_trans_category_id;
+        $transaction['trans_category_id'] = $purchases_trans_category_id;
+        $transaction['credit'] = 0;
 
 
         if ($bill->id) {
@@ -121,64 +131,62 @@ class PaymentsController extends Controller
             if ($dual_entry['feature_value']) {
                 $transaction2 = $transaction;
 
-                        $invoice = Transaction::find($transaction['id']);
-                        $transaction2['account_id'] = $invoice->account_id;
-                        $transaction2['trans_category_id'] = $invoice->trans_category_id;
-                        $transaction2['credit'] = $transaction['debit'];
-                        $transaction2['second_trans'] = 1;
-                        $transaction2['transaction_type'] ='sales';
-                        $transaction2['debit'] = 0;
-                
-                }
-                try {
-                    Transaction::create($transaction2);
-                } catch (\Illuminate\Database\QueryException $e) {
-                    DB::rollback();
-                    echo json_encode(array('status' => 'Error', 'message' => trans('exceptions.valid_entry_account') . $e->getCode()));
-                    return false;
-                }
+                $invoice = Transaction::find($transaction['id']);
+                $transaction2['account_id'] = $invoice->account_id;
+                $transaction2['trans_category_id'] = $invoice->trans_category_id;
+                $transaction2['credit'] = $transaction['debit'];
+                $transaction2['second_trans'] = 1;
+                $transaction2['transaction_type'] = 'sales';
+                $transaction2['debit'] = 0;
+            }
+            try {
+                Transaction::create($transaction2);
+            } catch (\Illuminate\Database\QueryException $e) {
+                DB::rollback();
+                echo json_encode(array('status' => 'Error', 'message' => trans('exceptions.valid_entry_account') . $e->getCode()));
+                return false;
+            }
 
-            
+
 
 
 
             $update_value = [
-                 [
-                     'id' => $transaction['id'],
-                     'total_paid_amount' => $transaction['credit'],
-                     
-                 ] ,
-                 
+                [
+                    'id' => $transaction['id'],
+                    'total_paid_amount' => $transaction['credit'],
+
+                ],
+
             ];
             $sales = new Transaction;
             $index = 'id';
 
-            Batch::update($sales, $update_value, $index, true,'+');
+            Batch::update($sales, $update_value, $index, true, '+');
 
 
 
 
 
-           if ($result->id ) {
+            if ($result->id) {
                 $account = Account::find($transaction['account_id']);
-                
-                   $account->balance = $account->balance + $transaction['credit'];
 
-                        $due = $bill->total - $bill->pamnt - $transaction['credit'];
-                        $due2 = $bill->pamnt + $transaction['credit'];
-                  
-              
+                $account->balance = $account->balance + $transaction['credit'];
+
+                $due = $bill->total - $bill->pamnt - $transaction['credit'];
+                $due2 = $bill->pamnt + $transaction['credit'];
+
+
                 $account->save();
 
                 if ($dual_entry['feature_value']) {
                     $account = Account::find($transaction2['account_id']);
-                   
-                       
-                            $account->balance = $account->balance - $transaction2['debit'];
-                         
-                    }
-                    $account->save();
-                
+
+
+                    $account->balance = $account->balance - $transaction2['debit'];
+                }
+                $account->save();
+
 
 
                 $bill->pmethod = $transaction['method'];
@@ -186,7 +194,6 @@ class PaymentsController extends Controller
                 if ($due <= 0.00) {
                     $bill->pamnt = $bill->total;
                     $bill->status = 'paid';
-
                 } elseif ($due2 < $bill->total and $transaction['credit'] > 0) {
 
                     $bill->pamnt = $bill->pamnt + $transaction['credit'];
@@ -200,11 +207,9 @@ class PaymentsController extends Controller
 
             $transaction['row'] = ' <tr><th scope="row">*</th><td><a href="' . route('biller.print_payslip', [$result->id, 1, 1]) . '" class="btn btn-blue btn-sm"><span class="fa fa-print" aria-hidden="true"></span></a> <p class="text-muted">' . $transaction['payment_date'] . '</p></td><td><p class="text-muted">' . $transaction['method'] . '</p></td><td class="text-right">' . amountFormat(@$transaction['debit']) . '</td><td class="text-right">' . amountFormat($transaction['credit']) . '</td><td class="">' . $transaction['note'] . '</td></tr>';
 
-           // echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.transactions.created') . ' <a href="' . route('biller.print_payslip', [$result->id, 1, 1]) . '" class="btn btn-primary btn-lg"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '</a> &nbsp; &nbsp;', 'par1' => trans('payments.' . $bill->status), 'par2' => $transaction['method'], 'par3' => $transaction['row'], 'payment_made' => numberFormat($bill->pamnt), 'payment_due' => numberFormat($due), 'remains' => numberFormat($due)));
+            // echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.transactions.created') . ' <a href="' . route('biller.print_payslip', [$result->id, 1, 1]) . '" class="btn btn-primary btn-lg"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '</a> &nbsp; &nbsp;', 'par1' => trans('payments.' . $bill->status), 'par2' => $transaction['method'], 'par3' => $transaction['row'], 'payment_made' => numberFormat($bill->pamnt), 'payment_due' => numberFormat($due), 'remains' => numberFormat($due)));
 
-             echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.created') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a><a href="' . route('biller.invoices.create').'" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span>Add Another Transaction  </a> &nbsp; &nbsp;'));
-
-             
+            echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.created') . ' <a href="' . route('biller.invoices.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a><a href="' . route('biller.invoices.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span>Add Another Transaction  </a> &nbsp; &nbsp;'));
         } else {
             echo json_encode(array('status' => 'Error', 'message' => trans('general.error')));
         }
@@ -221,7 +226,7 @@ class PaymentsController extends Controller
         DB::beginTransaction();
 
         switch ($transaction['relation_id']) {
-            case 0 :
+            case 0:
                 $bill = Invoice::find($transaction['bill_id']);
                 $transaction['payer_id'] = $bill->customer_id;
                 $transaction['payer'] = $bill->customer->name;
@@ -246,7 +251,6 @@ class PaymentsController extends Controller
                 $transaction['credit'] = 0;
                 $transaction['trans_category_id'] = $default_category['feature_value'];
                 break;
-
         }
 
 
@@ -268,12 +272,10 @@ class PaymentsController extends Controller
                     $bill->customer->save();
                     $note = trans('payments.paid_amount') . ' ' . amountFormat($available_balance);
                     TransactionHistory::create(array('party_id' => $bill->customer->id, 'user_id' => auth()->user()->id, 'note' => $note . ' ' . $transaction['note'], 'relation_id' => 11, 'ins' => auth()->user()->ins));
-
                 } else {
                     echo json_encode(array('status' => 'Success', 'message' => trans('transactions.zero_balance')));
                     exit();
                 }
-
             }
 
             try {
@@ -287,17 +289,17 @@ class PaymentsController extends Controller
             if ($dual_entry['feature_value']) {
                 $transaction2 = $transaction;
                 switch ($transaction['relation_id']) {
-                    case 0 :
+                    case 0:
                         $transaction2['account_id'] = $dual_entry['value1'];
                         $transaction2['debit'] = $transaction['credit'];
                         $transaction2['credit'] = $transaction['debit'];
                         break;
-                    case 5 :
+                    case 5:
                         $transaction2['account_id'] = $dual_entry['value2'];
                         $transaction2['debit'] = $transaction['credit'];
                         $transaction2['credit'] = $transaction['debit'];
                         break;
-                    case 9 :
+                    case 9:
                         $transaction2['account_id'] = $dual_entry['value2'];
                         $transaction2['debit'] = $transaction['credit'];
                         $transaction2['credit'] = $transaction['debit'];
@@ -310,14 +312,13 @@ class PaymentsController extends Controller
                     echo json_encode(array('status' => 'Error', 'message' => trans('exceptions.valid_entry_account') . $e->getCode()));
                     return false;
                 }
-
             }
 
 
             if ($result->id && $sign == '+') {
                 $account = Account::find($transaction['account_id']);
                 switch ($transaction['relation_id']) {
-                    case 0 :
+                    case 0:
                         $account->balance = $account->balance + $transaction['credit'];
 
                         $due = $bill->total - $bill->pamnt - $transaction['credit'];
@@ -342,7 +343,7 @@ class PaymentsController extends Controller
                 if ($dual_entry['feature_value']) {
                     $account = Account::find($transaction2['account_id']);
                     switch ($transaction['relation_id']) {
-                        case 0 :
+                        case 0:
                             $account->balance = $account->balance - $transaction2['debit'];
                             break;
                         case 5:
@@ -361,7 +362,6 @@ class PaymentsController extends Controller
                 if ($due <= 0.00) {
                     $bill->pamnt = $bill->total;
                     $bill->status = 'paid';
-
                 } elseif ($due2 < $bill->total and $transaction['credit'] > 0) {
 
                     $bill->pamnt = $bill->pamnt + $transaction['credit'];
@@ -397,8 +397,6 @@ class PaymentsController extends Controller
         unset($transaction['amount']);
         unset($transaction['cid']);
         $this->bulk_payment($transaction);
-
-
     }
 
     private function bulk_payment($transaction, $sign = '+')
@@ -406,7 +404,7 @@ class PaymentsController extends Controller
         DB::beginTransaction();
 
         switch ($transaction['relation_id']) {
-            case 0 :
+            case 0:
                 $person = Customer::find($transaction['payer_id']);
                 $default_category = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 8)->first('feature_value');
                 $transaction['trans_category_id'] = $default_category['feature_value'];
@@ -416,7 +414,6 @@ class PaymentsController extends Controller
                 $default_category = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 8)->first('feature_value');
                 $transaction['trans_category_id'] = $default_category['feature_value'];
                 break;
-
         }
 
 
@@ -440,7 +437,6 @@ class PaymentsController extends Controller
                         $item->save();
                         $amount_posted = $amount_posted - $item->total;
                         $paid_static += $item->total;
-
                     } elseif ($item->status == 'partial' and $amount_posted >= ($item->total - $item->pamnt)) {
                         $amount = $item->total - $item->pamnt;
                         $item->pamnt += $amount;
@@ -472,12 +468,12 @@ class PaymentsController extends Controller
                 if ($dual_entry['feature_value']) {
                     $transaction2 = $transaction;
                     switch ($transaction['relation_id']) {
-                        case 0 :
+                        case 0:
                             $transaction2['account_id'] = $dual_entry['value1'];
                             $transaction2['debit'] = $transaction['credit'];
                             $transaction2['credit'] = $transaction['debit'];
                             break;
-                        case 9 :
+                        case 9:
                             $transaction2['account_id'] = $dual_entry['value2'];
                             $transaction2['debit'] = $transaction['credit'];
                             $transaction2['credit'] = $transaction['debit'];
@@ -496,7 +492,7 @@ class PaymentsController extends Controller
                 if ($result->id && $sign == '+') {
                     $account = Account::find($transaction['account_id']);
                     switch ($transaction['relation_id']) {
-                        case 0 :
+                        case 0:
                             $account->balance = $account->balance + $transaction['credit'];
                             break;
 
@@ -510,7 +506,7 @@ class PaymentsController extends Controller
                     if ($dual_entry['feature_value']) {
                         $account = Account::find($transaction2['account_id']);
                         switch ($transaction['relation_id']) {
-                            case 0 :
+                            case 0:
                                 $account->balance = $account->balance - $transaction2['debit'];
                                 break;
 
@@ -520,14 +516,11 @@ class PaymentsController extends Controller
                         }
                         $account->save();
                     }
-
                 }
 
 
                 DB::commit();
             }
         }
-
-
     }
 }

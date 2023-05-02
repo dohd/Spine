@@ -5,12 +5,19 @@ namespace App\Models\quote\Traits;
 use App\Models\Access\User\User;
 use App\Models\customer\Customer;
 use App\Models\branch\Branch;
+use App\Models\currency\Currency;
+use App\Models\invoice\Invoice;
+use App\Models\items\InvoiceItem;
 use App\Models\items\MetaEntry;
 use App\Models\items\QuoteItem;
+use App\Models\items\VerifiedItem;
 use App\Models\lead\Lead;
 use App\Models\lpo\Lpo;
 use App\Models\project\Budget;
+use App\Models\project\BudgetSkillset;
+use App\Models\project\Project;
 use App\Models\project\ProjectQuote;
+use App\Models\projectstock\Projectstock;
 use App\Models\term\Term;
 use App\Models\verifiedjcs\VerifiedJc;
 
@@ -19,6 +26,42 @@ use App\Models\verifiedjcs\VerifiedJc;
  */
 trait QuoteRelationship
 {
+    public function project()
+    {
+        // return $this->hasOne(Project::class, 'main_quote_id');
+        return $this->hasOneThrough(Project::class, ProjectQuote::class, 'quote_id', 'id', 'id', 'project_id')->withoutGlobalScopes();
+    }
+
+    public function projectstock()
+    {
+        return $this->hasMany(Projectstock::class);
+    }
+
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'project_quotes', 'quote_id', 'project_id');
+    }
+
+    public function skill_items()
+    {
+        return $this->hasMany(BudgetSkillset::class);
+    }
+
+    public function invoice_product()
+    {
+        return $this->hasOne('App\Models\items\InvoiceItem')->withoutGlobalScopes();
+    }
+
+    public function invoice()
+    {
+        return $this->hasOneThrough(Invoice::class, InvoiceItem::class, 'quote_id', 'id', 'id', 'quote_id')->withoutGlobalScopes();
+    }
+
+    public function budget()
+    {
+        return $this->hasOne(Budget::class);
+    }
+
     public function budgets()
     {
         return $this->hasMany(Budget::class);
@@ -44,9 +87,14 @@ trait QuoteRelationship
         return $this->belongsTo(Customer::class);
     }
 
+    public function verified_products()
+    {
+        return $this->hasMany(VerifiedItem::class)->orderBy('row_index', 'ASC');
+    }
+
     public function products()
     {
-        return $this->hasMany(QuoteItem::class);
+        return $this->hasMany(QuoteItem::class)->orderBy('row_index', 'ASC');
     }
 
     public function user()
@@ -62,6 +110,11 @@ trait QuoteRelationship
     public function attachment()
     {
         return $this->hasMany(MetaEntry::class, 'rel_id')->where('rel_type', '=', 4)->withoutGlobalScopes();
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function client()

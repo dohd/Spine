@@ -3,17 +3,36 @@
 namespace App\Models\customer\Traits;
 
 use App\Models\branch\Branch;
-use App\Models\branch\CustomerBranch;
-use App\Models\customfield\Customfield;
+use App\Models\client_product\ClientProduct;
+use App\Models\lead\Lead;
 use App\Models\transaction\Transaction;
 use App\Models\project\Project;
-
+use App\Models\quote\Quote;
 
 /**
  * Class CustomerRelationship
  */
 trait CustomerRelationship
 {
+    function quotes() {
+        return $this->hasMany(Quote::class);
+    }
+
+    public function products()
+    {
+        return $this->hasMany(ClientProduct::class);
+    }
+
+    public function client_products()
+    {
+        return $this->hasMany(ClientProduct::class);
+    }
+
+    public function leads()
+    {
+        return $this->hasMany(Lead::class, 'client_id');
+    }
+
     public function branches()
     {
         return $this->hasMany(Branch::class);
@@ -42,10 +61,5 @@ trait CustomerRelationship
     public function project()
     {
         return $this->belongsTo(Project::class);
-    }
-
-    public function transactions()
-    {
-        return $this->hasMany('App\Models\transaction\Transaction', 'payer_id')->where('relation_id', '=', 0)->orWhere('relation_id', '=', 21)->withoutGlobalScopes();
     }
 }

@@ -1,36 +1,46 @@
 @extends ('core.layouts.app')
+
 @section ('title', trans('import.import'))
+
 @section('content')
-    <div class="">
-        <div class="content-wrapper">
-            <div class="content-header row">
-                <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title mb-0">{{ trans('features.import') }}</h4>
-
+<div class="content-wrapper">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">{{ trans('features.import') }}</h4>
+        </div>
+    </div>
+    <div class="content-body">
+        <div class="card">
+            <div class="card-body">
+                <div class="card-block">
+                    <h4>{{ $data['title'] }}</h4><hr>
+                    <p class="alert alert-light mb-2">
+                        Imported data format should be as per downloaded template file. 
+                        <a href="{{ asset('storage/app/public/sample/' . $data['type'] . '.csv') }}" download>
+                            <b>{{ trans('import.download_template') }}</b> ({{ $data['title'] }}).
+                        </a>
+                    </p>
+                    <p><b>Import File: </b>{{ $data['type'] }}.csv or {{ $data['type'] }}.xls or {{ $data['type'] }}.xlsx</p>
+                    {{-- Include template import form --}}
+                    @include('focus.import.partials.' . $data['type'])
                 </div>
-
-            </div>
-            <div class="content-body">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="card-block"><h4>{{$words['title']}}</h4>
-
-                            <hr>
-                            <p class="alert alert-light mb-3">{{trans('import.as_per_template')}}. <a
-                                        href="{{route('biller.import.sample',[$words['template_path'].'.csv'])}}"
-                                        target="_blank"><strong>{{trans('import.download_template')}}</strong>
-                                    ({{$words['title']}})</a>. </p>
-                            <p><strong class="mb-2">File : csv, xls or xlsx</strong></p>
-                            @include('focus.import.partials.'.$words['template_path'])
-
-
-                        </div>
-
-
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
+</div>
 @endsection
+
+<script>
+    window.onload = function() {
+        const dataType = @json($data['type']);
+        $('#download-btn').click(function () {
+            if (dataType == 'equipments') {
+                const anchor = document.createElement('a');
+                const href = @json(route('biller.import.sample_template', 'equipment_categories'));
+                setTimeout(() => {
+                    $(anchor).attr({href, target: '_blank',}).get(0).click();
+                }, 1000);
+            }
+        });
+    }
+</script>

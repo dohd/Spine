@@ -1,112 +1,110 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.invoices.management'))
+@section ('title', 'Project Invoice Management')
 
 @section('content')
-<div class="">
-    <div class="content-wrapper">
-        <div class="content-header row">
-            <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class="content-header-title mb-0">{{ $input['title'] }}</h4>
+<div class="content-wrapper">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">Project Invoice Management</h4>
+        </div>
+        <div class="col-6">
+            <div class="btn-group float-right">
+                @include('focus.invoices.partials.invoices-header-buttons')
             </div>
-            <div class="content-header-right col-md-6 col-12">
-                <div class="media width-250 float-right">
-                    <div class="media-body media-right text-right">
-                        @include('focus.invoices.partials.invoices-header-buttons',$input)
+        </div>
+    </div>
+
+    <div class="content-body">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row form-group">
+                            <div class="col-4">
+                                <label for="customer">Customer</label>
+                                <select name="customer_id" id="customer" class="form-control" data-placeholder="Choose Customer">
+                                    @foreach ($customers as $customer)
+                                        <option value="{{ $customer->id }}">{{ $customer->company }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <label for="invoice_status">Invoice Status</label>
+                                <select name="invoice_status" id="inv_status" class="custom-select">
+                                    <option value="">-- select status --</option>
+                                    @foreach (['not yet due', 'due'] as $status)
+                                        <option value="{{ $status }}">{{ ucfirst($status) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <label for="payment_status">Payment Status</label>
+                                <select name="payment_status" id="pmt_status" class="custom-select">
+                                    <option value="">-- select status --</option>
+                                    @foreach (['unpaid', 'partially paid', 'paid'] as $status)
+                                        <option value="{{ $status }}">{{ ucfirst($status) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>                            
+                        </div>
+                        <div class="row">
+                            <div class="col-2">
+                                <label for="amount">Total Amount (Ksh.)</label>
+                                <input type="text" id="amount_total" class="form-control" readonly>
+                            </div>                            
+                            <div class="col-2">
+                                <label for="unallocate">Outstanding (Ksh.)</label>
+                                <input type="text" id="balance_total" class="form-control" readonly>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        @if($segment)
-            @php
-                $total=$segment->invoices->sum('total');
-                $paid=$segment->invoices->sum('pamnt');
-                $due=$total-$paid;
-            @endphp
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{$words['name']}} </p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{$words['name_data']}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{trans('customers.email')}}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{$segment->email}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{trans('general.total_amount')}}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{amountFormat($total)}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{trans('payments.paid_amount')}}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{amountFormat($paid)}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <p>{{trans('general.balance_due')}}</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <p>{{amountFormat($due)}}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-        <div class="content-body">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-2">{{ trans('general.search_date')}} </div>
-                                    <div class="col-md-2">
-                                        <input type="text" name="start_date" id="start_date" class="date30 form-control form-control-sm datepicker">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="text" name="end_date" id="end_date" class="form-control form-control-sm datepicker">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
-                                    </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2">{{ trans('general.search_date')}} </div>
+                                <div class="col-md-2">
+                                    <input type="text" name="start_date" id="start_date" class="date30 form-control form-control-sm datepicker">
                                 </div>
-                                <hr>
-                                <table id="invoices-table_{{ $input['meta'] }}" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Invoice No</th>
-                                            <th>{{ trans('customers.customer') }}</th>
-                                            <th>{{ trans('invoices.invoice_date') }}</th>
-                                            <th>{{ trans('general.amount') }}</th>
-                                            <th>{{ trans('general.status') }}</th>
-                                            <th>{{ trans('invoices.invoice_due_date') }}</th>
-                                            <th>{{ trans('labels.general.actions') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="8" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="col-md-2">
+                                    <input type="text" name="end_date" id="end_date" class="form-control form-control-sm datepicker">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm" />
+                                </div>
                             </div>
+                            <hr>
+                            <table id="invoiceTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Customer</th>
+                                        <th>#Inv No</th>                                        
+                                        <th>Subject</th>
+                                        <th>Inv Date</th>
+                                        <th>Due Date</th>
+                                        <th>{{ trans('general.amount') }}</th>
+                                        <th>Outstanding</th>                                       
+                                        <th>#Quote / PI No</th>
+                                        <th>Last PMT Date</th>
+                                        <th>{{ trans('labels.general.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="100%" class="text-center text-success font-large-1">
+                                            <i class="fa fa-spinner spinner"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -117,121 +115,158 @@
 @endsection
 
 @section('after-scripts')
-{{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
-
+{{ Html::script('focus/js/select2.min.js') }}
 <script>
-    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+    const config = {
+        ajax: { headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }},
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+    };
 
-    const meta = @json($input['meta']);
-    $('#invoices-table_'+ meta +'_wrapper').removeClass('form-inline');
-    
-    $('#search').click(function() {
-        var start_date = $('#start_date').val();
-        var end_date = $('#end_date').val();
-        if (start_date && end_date) {
-            $('#invoices-table_'+ meta).DataTable().destroy();
-            draw_data(start_date, end_date);
-        } 
-        else alert("Date range is Required");
-    });
+    const Index = {
+        startDate: '',
+        endDate: '',
+        customerId: '',
+        invoiceStatus: '',
+        paymentStatus: '',
 
-    // Initialize datepicker
-    $('.datepicker')
-        .datepicker({ format: "{{ config('core.user_date_format') }}"})
-        .datepicker('setDate', new Date());
+        init() {
+            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+            this.drawDataTable();
 
-    function draw_data(start_date = '', end_date = '') {
-        $.ajaxSetup({
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
-        });
+            $('#inv_status').change(this.invoiceStatusChange);
+            $('#pmt_status').change(this.paymentStatusChange);
+            $('#customer').select2({allowClear: true}).val('').trigger('change')
+            .change(this.customerChange);
 
-        const segmentId = @json($segment);
-        const relType = @json($input);
-        const subJson = @json($input)['sub_json'];
-        const tableLan = { @lang('datatable.strings') };
+            $('#search').click(this.searchClick);
+        },
 
-        var dataTable = $('#invoices-table_' + meta).dataTable({
-            processing: true,
-            stateSave: true,
-            serverSide: true,
-            responsive: true,
-            deferRender: true,
-            language: tableLan,
-            ajax: {
-                url: "{{ route('biller.invoices.get') }}",
-                type: 'post',
-                data: {
-                    i_rel_id: segmentId['id'],
-                    i_rel_type: relType['rel_type'],
-                    subJson: { subJson },
-                    start_date: start_date,
-                    end_date: end_date
-                },
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
-                },
-                {
-                    data: 'tid',
-                    name: 'tid'
-                },
-                {
-                    data: 'customer',
-                    name: 'customer'
-                },
-                {
-                    data: 'invoicedate',
-                    name: 'invoicedate'
-                },
-                {
-                    data: 'total',
-                    name: 'total'
-                },
-                {
-                    data: 'status',
-                    name: 'status'
-                },
-                {
-                    data: 'invoiceduedate',
-                    name: 'invoiceduedate'
-                },
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    searchable: false,
-                    sortable: false
-                }
-            ],
-            orderBy: [[0, "desc"]],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: {
-                buttons: [{
-                        extend: 'csv',
-                        footer: true,
-                        exportOptions: {
-                            columns: [1, 2, 3, 4, 5]
+        searchClick() {
+            Index.startDate = $('#start_date').val();
+            Index.endDate =  $('#end_date').val();
+            if (!Index.startDate || !Index.endDate ) 
+                return alert("Date range is Required");
+
+            $('#invoiceTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        invoiceStatusChange() {
+            const lastOpt = $('#pmt_status option:eq(-1)');
+            if ($(this).val() == 'due') {
+                lastOpt.addClass('d-none');
+            } else lastOpt.removeClass('d-none');
+                
+            Index.invoiceStatus = $(this).val();
+            $('#invoiceTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        paymentStatusChange() {
+            const lastOpt = $('#inv_status option:eq(-1)');
+            if ($(this).val() == 'paid') {
+                lastOpt.addClass('d-none');
+            } else lastOpt.removeClass('d-none');
+
+            Index.paymentStatus = $(this).val();
+            $('#invoiceTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        customerChange() {
+            Index.customerId = $(this).val();
+            $('#invoiceTbl').DataTable().destroy();
+            return Index.drawDataTable();
+        },
+
+        drawDataTable() {
+            $('#invoiceTbl').dataTable({
+                processing: true,
+                stateSave: true,
+                responsive: true,
+                deferRender: true,
+                language: {@lang('datatable.strings')},
+                ajax: {
+                    url: "{{ route('biller.invoices.get') }}",
+                    type: 'post',
+                    data: {
+                        start_date: this.startDate, 
+                        end_date: this.endDate, 
+                        customer_id: this.customerId,
+                        invoice_status: this.invoiceStatus,
+                        payment_status: this.paymentStatus
+                    },
+                    dataSrc: ({data}) => {
+                        $('#amount_total').val('');
+                        $('#balance_total').val('');
+                        if (data.length) {
+                            const aggregate = data[0].aggregate;
+                            $('#amount_total').val(aggregate.amount_total);
+                            $('#balance_total').val(aggregate.balance_total);
                         }
+                        return data;
+                    },
+                },
+                columns: [{
+                        data: 'DT_Row_Index',
+                        name: 'id'
                     },
                     {
-                        extend: 'excel',
-                        footer: true,
-                        exportOptions: {
-                            columns: [1, 2, 3, 4, 5]
-                        }
+                        data: 'customer',
+                        name: 'customer'
                     },
                     {
-                        extend: 'print',
-                        footer: true,
-                        exportOptions: {
-                            columns: [1, 2, 3, 4, 5]
-                        }
+                        data: 'tid',
+                        name: 'tid'
+                    },
+                    {
+                        data: 'notes',
+                        name: 'notes'
+                    },
+                    {
+                        data: 'invoicedate',
+                        name: 'invoicedate'
+                    },
+                    {
+                        data: 'invoiceduedate',
+                        name: 'invoiceduedate'
+                    },
+                    {
+                        data: 'total',
+                        name: 'total'
+                    },
+                    {
+                        data: 'balance',
+                        name: 'balance'
+                    },                    
+                    {
+                        data: 'quote_tid',
+                        name: 'quote_tid'
+                    },
+                    {
+                        data: 'last_pmt',
+                        name: 'last_pmt'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false
                     }
-                ]
-            }
-        });
-    }
+                ],
+                columnDefs: [
+                    { type: "custom-number-sort", targets: [6, 7] },
+                    { type: "custom-date-sort", targets: [4, 5, 9] }
+                ],
+                orderBy: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel', 'print'],
+            });
+        },
+    };
+    
+    $(() => Index.init());
 </script>
 @endsection

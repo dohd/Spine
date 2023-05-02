@@ -1,5 +1,6 @@
 <html>
 <head>
+	<title>Picking List / Budget</title>
 	<style>
 		body {
 			font-family: "Times New Roman", Times, serif;
@@ -132,31 +133,7 @@
 	<table class="header-table">
 		<tr>
 			<td>
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/logo.jpg') }}" style="width:350px;" /><br>
-				<p class="header-table-text"> Supply, Installation, Maintenance & Repair of:</p>
-				<table class="header-table-child">
-					<tr>
-						<td>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Air Conditioners & Refrigerators </div>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Coldrooms & Chillers </div>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Mechanical Ventilation Systems</div>
-						</td>
-						<td>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Laboratory Fume Cupboards</div>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Steam Bath and Saunas</div>
-							<div><img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" class="bullets" /> Raised Floors / Access Panels</div>
-						</td>
-					</tr>
-					<tr><td>... and General Suppliers</td></tr>
-				</table>								
-			</td>
-			<td class="address"><br><br>
-				Lean Aircons Building, Opp NextGen Mall<br>
-				Mombasa Road, Nairobi - Kenya<br>
-				P.O Box 36082 - 00200.<br>
-				Cell : +254 732 345 393, +254 713 773 333<br>
-				info@leanventures.co.ke<br>
-				leannventures@gmail.com
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/' . $company->logo) }}" style="object-fit:contain" width="100%"/>
 			</td>
 		</tr>
 	</table>
@@ -164,13 +141,7 @@
 		<tr>
 			<td class="doc-title-td">
 				<span class='doc-title'>
-					<b>
-						@if ($invoice->bank_id)
-							PROFORMA INVOICE
-						@else
-							QUOTATION
-						@endif
-					</b>
+					<b>Picking List / Budget</b>
 				</span>				
 			</td>
 		</tr>
@@ -180,17 +151,17 @@
 			<td width="50%">
 				<span class="customer-dt-title">CUSTOMER DETAILS:</span><br><br>
 				@php
-					$clientname = $invoice->lead->client_name;
-					$branch = 'Head Office';
-					$address = $invoice->lead->client_address;
-					$email = $invoice->lead->client_email;
-					$cell = $invoice->lead->client_contact;
-					if ($invoice->client) {
-						$clientname = $invoice->client->company;						
-						$branch = $invoice->branch->name;
-						$address = $invoice->client->address;
-						$email = $invoice->client->email;
-						$cell = $invoice->client->phone;
+					$clientname = $resource->lead->client_name;
+					$branch = '';
+					$address = $resource->lead->client_address;
+					$email = $resource->lead->client_email;
+					$cell = $resource->lead->client_contact;
+					if ($resource->client) {
+						$clientname = $resource->client->company;						
+						$branch = $resource->branch? $resource->branch->name : '';
+						$address = $resource->client->address;
+						$email = $resource->client->email;
+						$cell = $resource->client->phone;
 					}					
 				@endphp
 				<b>Client Name :</b> {{ $clientname }}<br>
@@ -198,32 +169,36 @@
 				<b>Address :</b> {{ $address }}<br>
 				<b>Email :</b> {{ $email }}<br>
 				<b>Cell :</b> {{ $cell }}<br>
-				<b>Attention :</b> {{ $invoice->attention }}<br>
+				<b>Attention :</b> {{ $resource->attention }}<br>
 			</td>
 			<td width="5%">&nbsp;</td>
 			<td width="45%">
 				<span class="customer-dt-title">REFERENCE DETAILS:</span><br><br>
-				<b>Date :</b> {{ dateFormat($invoice->invoicedate, 'd-M-Y') }}<br>
+				<b>Date :</b> {{ dateFormat($resource->invoicedate, 'd-M-Y') }}<br>
 				@php
-					$tid = sprintf('%04d', $invoice->tid);
+					$tid = sprintf('%04d', $resource->tid);
 					$field_name = 'Quotation No';
 					$field_value = 'QT-' . $tid;
-					if ($invoice->bank_id) {
+					if ($resource->bank_id) {
 						$field_name = 'Proforma No';
 						$field_value = 'PI-' . $tid;
 					}
 				@endphp
 				<b>{{ $field_name }} :</b> {{ $field_value }}<br>				
-				<b>Valid Till :</b> {{ dateFormat($invoice->invoiceduedate, 'd-M-Y') }} <br>
+				<b>Valid Till :</b> {{ dateFormat($resource->invoiceduedate, 'd-M-Y') }} <br>
 				<b>Currency :</b> Kenya Shillings <br><br>
-				<b>Client Ref: </b> {{ $invoice->client_ref }}
+				<b>Client Ref: </b> {{ $resource->client_ref }}
 			</td>
 		</tr>
 	</table><br>
 	<table  class="ref" cellpadding="10">
-		<tr><td colspan="2">Ref : <b>{{ $invoice->notes }}</b></td></tr>
+		<tr><td colspan="2">Ref : <b>{{ $resource->notes }}</b></td></tr>
 	</table>
 	<br>
+	{{-- budget items --}}
+	@php
+		$budget = $resource->budgets()->first();                
+	@endphp
 	<table class="items" cellpadding="8">
 		<thead>
 			<tr>
@@ -233,36 +208,66 @@
 				<td width="10%">UoM</td>				
 			</tr>
 		</thead>
-		<tbody>
-            @php
-                $budget = $invoice->budgets()->first();                
-            @endphp
-			@foreach($budget->products as $product)
-				@if ($product->a_type == 1)					
+		<tbody>            
+			@foreach($budget->items as $item)
+				@if ($item->a_type == 1)					
 					<tr>
-						<td>{{ $product->numbering }}</td>
-						<td>{{ $product->product_name }}</td>
-						<td class="align-c">{{ (int) $product->new_qty }}</td>
-						<td class="align-c">{{ $product->unit }}</td>						
+						<td>{{ $item->numbering }}</td>
+						<td>{{ $item->product_name }}</td>
+						<td class="align-c">{{ +$item->new_qty }}</td>
+						<td class="align-c">{{ $item->unit }}</td>						
 					</tr>
 				@else
 					<tr>
-						<td><b>{{ $product->numbering }}<b></td>
-						<td><b>{{ $product->product_name }}</b></td>
+						<td><b>{{ $item->numbering }}<b></td>
+						<td><b>{{ $item->product_name }}</b></td>
 						@for($i = 0; $i < 2; $i++) 
 							<td></td>
 						@endfor
 					</tr>
 				@endif				
 			@endforeach
-			<!-- empty row with dynamic height-->
-			<tr>
-				<td height="{{ 400 - 30 * count($invoice->products) }}"></td>
-				@for($i = 0; $i < 3; $i++) 
-                    <td></td>
-                @endfor
-			</tr>			
+			<!-- 20 dynamic empty rows -->
+			@for ($i = count($resource->products); $i < 15; $i++)
+				<tr>
+					@for($j = 0; $j < 4; $j++) 
+						<td></td>
+					@endfor
+				</tr>
+			@endfor
+			<!--  -->
 		</tbody>
 	</table>
+	<br>
+	@isset($budget)
+		<div style="width: 100%;">
+			<div style="float: left; width: 50%">
+				<table class="items" cellpadding="8">
+					<thead>
+						<tr>
+							<td width="8%">No.</td>
+							<td width="42%">Skill Type</td>
+							<td width="10%">Working Hours</td>
+							<td width="10%">No. Technicians</td>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach ($budget->skillsets as $k => $val)
+							<tr>
+								<td>{{ $k+1 }}</td>
+								<td>{{ $val->skill }}</td>
+								<td>{{ $val->hours }}</td>
+								<td>{{ $val->no_technician }}</td>
+							</tr>
+						@endforeach						
+					</tbody>
+				</table>
+			</div>
+			<div style="float: left; margin-left: 5%">
+				<b>Tools Required & Notes :</b><br>
+				{!! $budget->note !!}
+			</div>		
+		</div>	
+	@endisset
 </body>
 </html>

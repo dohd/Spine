@@ -4,26 +4,39 @@ namespace App\Models\Access\User\Traits\Relationship;
 
 use App\Models\Access\User\SocialLogin;
 use App\Models\Company\Company;
+use App\Models\leave\Leave;
 use App\Models\System\Session;
+use App\Models\Access\Permission\PermissionUser;
+use App\Models\Access\Permission\Permission;
 
 /**
  * Class UserRelationship.
  */
 trait UserRelationship
 {
-    /**
-     * Many-to-Many relations with Role.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
+    public function leaves()
+    {
+        return $this->hasMany(Leave::class, 'employee_id');
+    }
+
     public function roles()
     {
         return $this->belongsToMany(config('access.role'), config('access.role_user_table'), 'user_id', 'role_id');
     }
 
-        public function business()
+    public function business()
     {
-        return $this->hasOne(Company::class,'id','ins');
+        return $this->hasOne(Company::class, 'id', 'ins');
+    }
+
+    public function providers()
+    {
+        return $this->hasMany(SocialLogin::class);
+    }
+
+    public function sessions()
+    {
+        return $this->hasMany(Session::class);
     }
 
     /**
@@ -37,19 +50,11 @@ trait UserRelationship
         return $this->belongsToMany(config('access.permission'), config('access.permission_user_table'), 'user_id', 'permission_id');
     }
 
-    /**
-     * @return mixed
-     */
-    public function providers()
+    public function user_associated_permission()
     {
-        return $this->hasMany(SocialLogin::class);
-    }
+        //user current permission
+        //  return $this->hasManyThrough(Permission::class, PermissionUser::class, 'permission_id','id', 'id','user_id')->withoutGlobalScopes();
 
-    /**
-     * @return mixed
-     */
-    public function sessions()
-    {
-        return $this->hasMany(Session::class);
+        return $this->belongsToMany(Permission::class, PermissionUser::class, 'user_id', 'permission_id', 'id', 'id')->withoutGlobalScopes();
     }
 }

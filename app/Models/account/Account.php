@@ -11,9 +11,9 @@ class Account extends Model
 {
     use ModelTrait,
         AccountAttribute,
-    	AccountRelationship {
-            // AccountAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+        AccountRelationship {
+        // AccountAttribute::getEditButtonAttribute insteadof ModelTrait;
+    }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -30,17 +30,13 @@ class Account extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -69,9 +65,9 @@ class Account extends Model
     }
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
-            $builder->where('ins', '=', auth()->user()->ins);
-    });
+        parent::boot();
+        static::addGlobalScope('ins', function ($builder) {
+            $builder->where('ins', auth()->user()->ins);
+        });
     }
 }

@@ -17,9 +17,6 @@
  */
 namespace App\Http\Controllers\Focus\withholding;
 
-use App\Http\Requests\Focus\general\ManageCompanyRequest;
-use App\Models\withholding\Witholding;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -28,7 +25,7 @@ use App\Http\Responses\Focus\withholding\EditResponse;
 use App\Repositories\Focus\withholding\WithholdingRepository;
 use App\Http\Requests\Focus\withholding\ManageWithholdingRequest;
 use App\Http\Requests\Focus\withholding\StoreWithholdingRequest;
-
+use App\Models\withholding\Withholding;
 
 /**
  * BanksController
@@ -58,8 +55,7 @@ class WithholdingsController extends Controller
      */
     public function index(ManageWithholdingRequest $request)
     {
-       $words = array();
-         return new ViewResponse('focus.withholdings.index', compact('words'));
+        return new ViewResponse('focus.withholdings.index');
     }
 
     /**
@@ -81,42 +77,22 @@ class WithholdingsController extends Controller
      */
     public function store(StoreWithholdingRequest $request)
     {
-
-        $request->validate([
-            'amount' => 'required',
-            'account_id' => 'required',
-            'debited_account_id' => 'required',
-            'refer_no' => 'required',
+        // extract request fields
+        $data = $request->only([
+            'customer_id', 'tid', 'certificate', 'cert_date', 'tr_date', 'amount', 'reference', 'allocate_ttl', 
+            'note', 'withholding_tax_id'
         ]);
+        $data_items = $request->only(['invoice_id', 'paid']);
 
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
 
-      $credit = $request->only(['tid', 'account_id', 'note']);
-      $debit= $request->only(['tid', 'refer_no', 'transaction_type', 'note']);
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($v) { return $v['paid']; });
 
+        $this->repository->create(compact('data', 'data_items'));
 
-
-      $credit['ins'] = auth()->user()->ins;
-      $credit['user_id'] = auth()->user()->id;
-      $credit['credit'] = numberClean($request->input('amount'));
-      $credit['transaction_date'] = date_for_database($request->input('transaction_date'));
-     
-      
-
-      $debit['ins'] = auth()->user()->ins;
-      $debit['user_id'] = auth()->user()->id;
-      $debit['account_id'] = numberClean($request->input('debited_account_id'));
-      $debit['debit'] = numberClean($request->input('amount'));
-      $debit['transaction_date'] = date_for_database($request->input('transaction_date'));
-      $debit['due_date'] = date_for_database($request->input('due_date'));
-
-
-      $result = $this->repository->create(compact('credit','debit'));
-
-       return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => trans('alerts.backend.withholdings.created')]);
-
-     
- 
-
+       return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding Certificate Created Successfully']);
     }
 
     /**
@@ -126,8 +102,10 @@ class WithholdingsController extends Controller
      * @param EditBankRequestNamespace $request
      * @return \App\Http\Responses\Focus\bank\EditResponse
      */
-    public function edit(Withholding $withholding, StoreWithholdingRequest $request)
+    public function edit(Withholding $withholding)
     {
+        return redirect(route('biller.withholdings.index'));
+
         return new EditResponse($withholding);
     }
 
@@ -140,17 +118,9 @@ class WithholdingsController extends Controller
      */
     public function update(StoreWithholdingRequest $request, Withholding $withholding)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'bank' => 'required|string',
-            'number' => 'required'
-        ]);
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($witholding, $input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => trans('alerts.backend.withholdings.updated')]);
+        $this->repository->update($withholding, $request->except('_token'));
+
+        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding Certificate Updated Successfully']);
     }
 
     /**
@@ -160,12 +130,11 @@ class WithholdingsController extends Controller
      * @param App\Models\bank\Bank $bank
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Withholding $withholding, StoreWithholdingRequest  $request)
+    public function destroy(Withholding $withholding)
     {
-        //Calling the delete method on repository
         $this->repository->delete($withholding);
-        //returning with successfull message
-        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => trans('alerts.backend.witholdings.deleted')]);
+
+        return new RedirectResponse(route('biller.withholdings.index'), ['flash_success' => 'Withholding Certificate Deleted Successfully']);
     }
 
     /**
@@ -175,11 +144,8 @@ class WithholdingsController extends Controller
      * @param App\Models\bank\Bank $bank
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(Withholding $withholding, ManageWithholdingRequest $request)
+    public function show(Withholding $withholding)
     {
-
-        //returning with successfull message
-        return new ViewResponse('focus.withholdings.view', compact('charge'));
+        return new ViewResponse('focus.withholdings.view', compact('withholding'));
     }
-
 }

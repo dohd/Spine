@@ -302,8 +302,8 @@
                                                 @foreach($projects as $project)
                                     <option value="{{$project->id}}"
                                         data-type1="{{$project->customer_project->id}}" data-type2="{{$project->branch->id}}" 
-                                        data-type3="{{$project->customer_project->company}} {{$project->branch->name}}-{{$project->name}}-{{$project->project_number}}"
-                                        > {{$project->customer_project->company}} {{$project->branch->name}}-{{$project->name}}-{{$project->project_number}}</option>
+                                        data-type3="{{$project->customer_project->company}} {{$project->branch->name}}-{{$project->name}}-{{$project->tid}}"
+                                        > {{$project->customer_project->company}} {{$project->branch->name}}-{{$project->name}}-{{$project->tid}}</option>
                                                 @endforeach
 
                                                         </select>

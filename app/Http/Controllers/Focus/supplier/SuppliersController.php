@@ -19,19 +19,16 @@ namespace App\Http\Controllers\Focus\supplier;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Focus\purchaseorder\CreatePurchaseorderRequest;
-use App\Http\Requests\Focus\supplier\CreateSupplierRequest;
-use App\Http\Requests\Focus\supplier\DeleteSupplierRequest;
-use App\Http\Requests\Focus\supplier\EditSupplierRequest;
 use App\Http\Requests\Focus\supplier\ManageSupplierRequest;
 use App\Http\Requests\Focus\supplier\StoreSupplierRequest;
-use App\Http\Requests\Focus\supplier\UpdateSupplierRequest;
-use App\Http\Requests\Request;
 use App\Http\Responses\Focus\supplier\CreateResponse;
 use App\Http\Responses\Focus\supplier\EditResponse;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\supplier\Supplier;
+use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\supplier\SupplierRepository;
+use DateTime;
 
 /**
  * SuppliersController
@@ -83,18 +80,28 @@ class SuppliersController extends Controller
      */
     public function store(StoreSupplierRequest $request)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $result = $this->repository->create($input);
-        //return with successfull message
+        // extract request input
+        $data = $request->only([
+            'name', 'phone', 'email', 'address', 'city', 'region', 'country', 'postbox', 'email', 'picture',
+            'company', 'taxid', 'docid', 'custom1', 'employee_id', 'active', 'password', 'role_id', 'remember_token',
+            'contact_person_info'
+        ]);
+        $account_data = $request->only([
+            'account_name', 'account_no', 'open_balance', 'open_balance_date', 'open_balance_note', 
+            'expense_account_id'
+        ]);
+        $payment_data = $request->only(['bank', 'bank_code', 'payment_terms', 'credit_limit', 'mpesa_payment']);
+
+        $data['ins'] = auth()->user()->ins;
+
+        $result = $this->repository->create(compact('data', 'account_data', 'payment_data'));
+
         if ($request->ajax()) {
             $result['random_password'] = null;
-            echo json_encode($result);
-        } else {
-            return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.created')]);
-        }
+            return response()->json($result);
+        } 
+
+        return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.created')]);
     }
 
     /**
@@ -118,11 +125,20 @@ class SuppliersController extends Controller
      */
     public function update(StoreSupplierRequest $request, Supplier $supplier)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($supplier, $input);
-        //return with successfull message
+        // extract request input
+        $data = $request->only([
+            'name', 'phone', 'email', 'address', 'city', 'region', 'country', 'postbox', 'email', 'picture',
+            'company', 'taxid', 'docid', 'custom1', 'employee_id', 'active', 'password', 'role_id', 'remember_token',
+            'contact_person_info'
+        ]);
+        $account_data = $request->only([
+            'account_name', 'account_no', 'open_balance', 'open_balance_date', 'open_balance_note', 
+            'expense_account_id'
+        ]);
+        $payment_data = $request->only(['bank', 'bank_code', 'payment_terms', 'credit_limit', 'mpesa_payment']);
+
+        $result = $this->repository->update($supplier, compact('data', 'account_data', 'payment_data'));        
+       
         return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.updated')]);
     }
 
@@ -133,11 +149,10 @@ class SuppliersController extends Controller
      * @param App\Models\supplier\Supplier $supplier
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Supplier $supplier, StoreSupplierRequest $request)
+    public function destroy(Supplier $supplier)
     {
-        //Calling the delete method on repository
         $this->repository->delete($supplier);
-        //returning with successfull message
+
         return new RedirectResponse(route('biller.suppliers.index'), ['flash_success' => trans('alerts.backend.suppliers.deleted')]);
     }
 
@@ -150,25 +165,85 @@ class SuppliersController extends Controller
      */
     public function show(Supplier $supplier, ManageSupplierRequest $request)
     {
+        // 5 date intervals of between 0 - 120+ days prior 
+        $intervals = array();
+        for ($i = 0; $i < 5; $i++) {
+            $from = date('Y-m-d');
+            $to = date('Y-m-d', strtotime($from . ' - 30 days'));
+            if ($i > 0) {
+                $prev = $intervals[$i-1][1];
+                $from = date('Y-m-d', strtotime($prev . ' - 1 day'));
+                $to = date('Y-m-d', strtotime($from . ' - 28 days'));
+            }
+            $intervals[] = [$from, $to];
+        }
 
-        //returning with successfull message
-        return new ViewResponse('focus.suppliers.view', compact('supplier'));
+        // statement on bills 
+        $bills = collect();
+        $bills_statement = $this->repository->getStatementForDataTable($supplier->id);
+        foreach ($bills_statement as $row) {
+            if ($row->type == 'bill') $bills->add($row);
+            else {
+                $last_bill = $bills->last();
+                if ($last_bill->bill_id == $row->bill_id) {
+                    $last_bill->debit += $row->debit;
+                }
+            }
+        }
+
+        // aging balance from extracted invoices
+        $aging_cluster = array_fill(0, 5, 0);
+        foreach ($bills as $bill) {
+            $due_date = new DateTime($bill->date);
+            $debt_amount = $bill->credit - $bill->debit;
+            // over payment
+            if ($debt_amount < 0) {
+                $supplier->on_account += $debt_amount * -1;
+                $debt_amount = 0;
+            }
+            // due_date between 0 - 120 days
+            foreach ($intervals as $i => $dates) {
+                $start  = new DateTime($dates[0]);
+                $end = new DateTime($dates[1]);
+                if ($start >= $due_date && $end <= $due_date) {
+                    $aging_cluster[$i] += $debt_amount;
+                    break;
+                }
+            }
+            // due_date in 120+ days
+            if ($due_date < new DateTime($intervals[4][1])) {
+                $aging_cluster[4] += $debt_amount;
+            }
+        }
+
+        // supplier debt balance
+        $account_balance = collect($aging_cluster)->sum() - $supplier->on_account;
+
+        return new ViewResponse('focus.suppliers.view', compact('supplier', 'account_balance', 'aging_cluster'));
     }
 
     public function search(CreatePurchaseorderRequest $request)
     {
-
         $q = $request->post('keyword');
-        $user = Supplier::where('name', 'LIKE', '%' . $q . '%')->where('active', '=', 1)->orWhere('email', 'LIKE', '%' . $q . '')->limit(6)->get(array('id', 'name', 'phone', 'address', 'city', 'email'));
-        if (count($user) > 0) return view('focus.suppliers.partials.search')->with(compact('user'));
+        $user = Supplier::where('name', 'LIKE', '%' . $q . '%')
+            ->where('active', 1)
+            ->orWhere('email', 'LIKE', '%' . $q . '')
+            ->limit(6)->get(['id', 'name', 'phone', 'address', 'city', 'email']);
+
+        return view('focus.suppliers.partials.search')->with(compact('user'));
     }
 
+    /**
+     * Supllier select dropdown
+     */
     public function select(ManageSupplierRequest $request)
     {
+        $q = $request->keyword;
+        $suppliers = Supplier::where('name', 'LIKE', '%'.$q.'%')
+            ->where('active', 1)->orWhere('email', 'LIKE', '%'.$q.'')
+            ->limit(6)->get(['id', 'name', 'phone', 'address', 'city', 'email', 'taxid']);
 
-        $q = $request->post('person');
-        $user = Supplier::where('name', 'LIKE', '%' . @$q['term'] . '%')->where('active', '=', 1)->orWhere('email', 'LIKE', '%' . @$q['term'] . '')->limit(6)->get(array('id', 'name', 'phone', 'address', 'city', 'email'));
-        if (count($user) > 0) return json_encode($user);
+        return response()->json($suppliers);
     }
 
     public function active(ManageSupplierRequest $request)
@@ -180,4 +255,57 @@ class SuppliersController extends Controller
         Supplier::where('id', '=', $cid)->update(array('active' => $active));
     }
 
+    /**
+     * Get Purchase Orders
+     */
+    public function purchaseorders()
+    {
+        $purchase_orders = [];
+        $supplier = Supplier::find(request('supplier_id'));
+        if ($supplier) {
+            if (request('type') == 'grn') {
+                $purchase_orders =  $supplier->purchase_orders()->whereIn('status', ['Pending', 'Partial'])->get();
+            } else $purchase_orders =  $supplier->purchase_orders;
+        }
+
+        return response()->json($purchase_orders);
+    }
+
+    /**
+     * Get Goods receive note
+     */
+    public function goods_receive_note()
+    {
+        $supplier = Supplier::find(request('supplier_id'));
+        $grns = $supplier? $supplier->goods_receive_notes : [];
+
+        return response()->json($grns);
+    }
+
+    /**
+     * Get Supplier Bills
+     */
+    public function bills()
+    {
+        $bills = UtilityBill::where('supplier_id', request('supplier_id'))
+            ->whereColumn('amount_paid', '<', 'total')
+            ->with([
+                'supplier' => fn($q) => $q->select('id', 'name'),
+                'purchase' => fn($q) => $q->select('id', 'suppliername', 'note'),
+                'grn' => fn($q) => $q->select('id', 'note'),
+            ])
+            ->orderBy('due_date', 'asc')->get()
+            ->map(function ($v) {
+                if ($v->document_type == 'direct_purchase') {
+                    $v->suppliername = $v->purchase->suppliername;
+                    if ($v->grn) unset($v->grn);
+                } elseif ($v->document_type == 'goods_receive_note') {
+                   if ($v->purchase) unset($v->purchase);
+                }
+                
+                return $v;
+            }); 
+        
+        return response()->json($bills);
+    }
 }

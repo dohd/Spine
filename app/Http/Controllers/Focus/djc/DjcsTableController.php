@@ -49,30 +49,33 @@ class DjcsTableController extends Controller
     {
         $core = $this->djc->getForDataTable();
 
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['djc_report', 'lead'], $ins);
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('tid', function($djc) {
-                return 'DjR-' . sprintf('%04d', $djc->tid);
+            ->addColumn('tid', function($djc) use($prefixes) {
+                return gen4tid("{$prefixes[0]}-", $djc->tid);
             })
             ->addColumn('customer', function ($djc) {
-                $company = isset($djc->client) ? $djc->client->company : '';
-                $branch = isset($djc->branch) ? $djc->branch->name : '';
-                if ($company && $branch)
-                    return $company . ' - ' . $branch 
-                        .' <a class="font-weight-bold" href="' . route('biller.customers.show', [$djc->client->id]) . '"><i class="ft-eye"></i></a>';
+                $link = '';
+                if ($djc->client) {
+                    $customer = $djc->client->company;
+                    if ($djc->branch) $customer .= " - {$djc->branch->name}";
+                    $link = $customer . ' <a class="font-weight-bold" href="'. route('biller.customers.show', $djc->client) .'"><i class="ft-eye"></i></a>';
+                }
+                return $link;
             })
             ->addColumn('created_at', function ($djc) {
                 return dateFormat($djc->created_at);
             })
-            ->addColumn('lead_tid', function($djc) {
-                return 'Tkt-' . sprintf('%04d', $djc->lead->reference);
+            ->addColumn('lead_tid', function($djc) use($prefixes) {
+                if ($djc->lead)
+                return gen4tid("{$prefixes[1]}-", $djc->lead->reference);
             })
             ->addColumn('actions', function ($djc) {
-                $valid_token = token_validator('', 'd' . $djc->id, true);
-                $link = route('biller.print_djc', [$djc->id, 10, $valid_token, 1]);
-
-                return '<a href="' . $link . '" target="_blank"  class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
+                return '<a href="' . route('biller.print_djc', [$djc->id, 10, token_validator('', "d{$djc->id}", true), 1]) . '" target="_blank"  class="btn btn-purple round"><i class="fa fa-print"></i></a> '
                     . $djc->action_buttons;
             })
             ->make(true);

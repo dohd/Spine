@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Responses\Focus\purchaseorder;
-use App\Models\customfield\Customfield;
-use App\Models\items\CustomEntry;
+namespace App\Http\Responses\Focus\projectstocktransfer;
+
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -10,14 +9,14 @@ class EditResponse implements Responsable
     /**
      * @var App\Models\purchaseorder\Purchaseorder
      */
-    protected $purchaseorders;
+    protected $project;
 
     /**
-     * @param App\Models\purchaseorder\Purchaseorder $purchaseorders
+     * @param App\Models\purchaseorder\Purchaseorder $purchaseorder
      */
-    public function __construct($purchaseorders)
+    public function __construct($project)
     {
-        $this->purchaseorders = $purchaseorders;
+        $this->project = $project;
     }
 
     /**
@@ -29,26 +28,8 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
+        $project = $this->project;
 
-           $fields = Customfield::where('module_id', 9)->get()->groupBy('field_type');
-        $fields_raw = array();
-
-        if (isset($fields['text'])) {
-            foreach ($fields['text'] as $row) {
-                $data = CustomEntry::where('custom_field_id', '=', $row['id'])->where('module', '=', 9)->where('rid', '=', $this->purchaseorders->id)->first();
-                $fields_raw['text'][] = array('id' => $row['id'], 'name' => $row['name'], 'default_data' => $data['data']);
-            }
-        }
-        if (isset($fields['number'])) {
-            foreach ($fields['number'] as $row) {
-                $data = CustomEntry::where('custom_field_id', '=', $row['id'])->where('module', '=', 9)->where('rid', '=', $this->purchaseorders->id)->first();
-                $fields_raw['number'][] = array('id' => $row['id'], 'name' => $row['name'], 'default_data' => $data['data']);
-            }
-        }
-
-        $fields_data = custom_fields($fields_raw);
-
-        return view('focus.purchaseorders.edit')->with([
-            'purchaseorders' => $this->purchaseorders])->with(bill_helper(3))->with(['fields_data' => $fields_data]);
+        return view('focus.projectstocktransfaer.edit', compact('project'));
     }
 }

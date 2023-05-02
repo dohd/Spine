@@ -2,7 +2,6 @@
 
 namespace App\Repositories\Focus\project;
 
-use App\Models\event\EventRelation;
 use App\Models\project\Project;
 use App\Exceptions\GeneralException;
 use App\Models\project\Budget;
@@ -12,6 +11,13 @@ use App\Models\project\ProjectQuote;
 use App\Models\quote\Quote;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use App\Models\Access\User\User;
+use App\Models\event\Event;
+use App\Models\event\EventRelation;
+use App\Models\project\ProjectLog;
+use App\Models\project\ProjectRelations;
+use App\Notifications\Rose;
 
 /**
  * Class ProjectRepository.
@@ -29,11 +35,9 @@ class ProjectRepository extends BaseRepository
      * the grid
      * @return mixed
      */
-    public function getForDataTable($c = true)
+    public function getForDataTable()
     {
-        $q = $this->query()->withoutGlobalScopes();
-
-        return $q->get();
+        return $this->query()->get();
     }
 
     /**
@@ -43,34 +47,69 @@ class ProjectRepository extends BaseRepository
      * @return bool
      * @throws GeneralException
      */
-    public function create(array $data)
+    public function create(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
+        
+        $employees = @$input['employees'];
+        $tags = @$input['tags'];
+        $calender = @$input['link_to_calender'];
+        $color = @$input['color'];
+        $customer = @$input['customer'];
 
-        $project = $data['project'];
-        $project['ins'] = auth()->user()->ins;
-        $project['status'] = 1;
+        $input = array_diff_key($input, array_flip(['tags', 'employees', 'customer', 'link_to_calender', 'color']));
+        $input['worth'] = numberClean($input['worth']);
+        $input['start_date'] = datetime_for_database("{$input['start_date']} {$input['time_from']}");
+        $input['end_date'] = datetime_for_database("{$input['end_date']} {$input['time_to']}");
+        unset($input['time_from'], $input['time_to']);
 
-        $main_quote = $data['project_quotes']['main_quote'];
-        $project['main_quote_id'] = $main_quote;
-        $ref = Project::orderBy('project_number', 'desc')->first('project_number');
-        if (isset($ref) && $project['project_number'] <= $ref->project_number) {
-            $project['project_number'] = $ref->project_number + 1;
+        $tid = Project::max('tid');
+        if (@$input['tid'] <= $tid) $input['tid'] = $tid+1;
+        $result = Project::create($input);
+
+        $tag_group = [];
+        if (is_array($tags)) {
+            foreach ($tags as $row) {
+                $tag_group[] = ['project_id' => $result->id, 'related' => 1, 'rid' => $row];
+            }
         }
-        $result = Project::create($project);
 
-        // project quotes
-        $proj_quotes[] = array('project_id' => $result['id'], 'quote_id' => $main_quote);
-        if (isset($data['project_quotes']['other_quote'])) {
-            $other_quote = $data['project_quotes']['other_quote'];
-            foreach ($other_quote as $value) {
-                $proj_quotes[] = array('project_id' => $result['id'], 'quote_id' => $value);
-            }            
+        $employee_group = [];
+        if (is_array($employees)) {
+            foreach ($employees as $row) {
+                $tag_group[] = ['project_id' => $result->id, 'related' => 2, 'rid' => $row];
+                $employee_group[] = $row;
+            }
         }
-        // create project quote and update related foreign key
-        foreach($proj_quotes as $value) {
-            $id = ProjectQuote::insertGetId($value);
-            Quote::find($value['quote_id'])->update(['project_quote_id' => $id]);
+
+        if ($customer > 0) $tag_group[] = ['project_id' => $result->id, 'related' => 8, 'rid' => $customer];
+        $tag_group[] = ['project_id' => $result->id, 'related' => 3, 'rid' => $result->user_id];
+        ProjectRelations::insert($tag_group);
+
+        $data = ['project_id' => $result->id, 'value' => '[' . trans('general.create') . '] ' . $result->name, 'user_id' => $result->user_id];
+        ProjectLog::create($data);
+        if ($calender) {
+            $data = [
+                'title' => trans('projects.project') . ' - ' . $input['name'], 
+                'description' => $input['short_desc'], 
+                'start' => $input['start_date'], 
+                'end' => $input['end_date'], 
+                'color' => $color, 
+                'user_id' => $result->user_id, 
+                'ins' => $result['ins']
+            ];
+            $event = Event::create($data);
+            EventRelation::create(['event_id' => $event->id, 'related' => 1, 'r_id' => $result->id]);
+        }
+        $message = array('title' => trans('projects.project') . ' - ' . $result->name, 'icon' => 'fa-bullhorn', 'background' => 'bg-success', 'data' => $input['short_desc']);
+
+        if (is_array(@$employee_group)) {
+            $users = User::whereIn('id', $employee_group)->get();
+            \Illuminate\Support\Facades\Notification::send($users, new Rose('', $message));
+        } else {
+            $notification = new Rose(auth()->user(), $message);
+            auth()->user()->notify($notification);
         }
 
         if ($result) {
@@ -91,108 +130,129 @@ class ProjectRepository extends BaseRepository
      */
     public function update($project, array $input)
     {
+        // dd($input);
         DB::beginTransaction();
-        // update project
-        $quotes = $input['quotes'];
-        $data = array_merge($input['data'], ['main_quote_id' => $quotes['main_quote']]);
-        $result = $project->update($data);
 
-        // project quotes
-        $proj_quotes[] = array('project_id' => $project->id, 'quote_id' => $quotes['main_quote']);
-        if (isset($input['quotes']['other_quote'])) {
-            $other_quote = $input['quotes']['other_quote'];
-            foreach ($other_quote as $value) {
-                $proj_quotes[] = array('project_id' => $project->id, 'quote_id' => $value);
-            }         
-        }
-        // create or update project quotes
-        foreach($proj_quotes as $value) {
-            $quote = ProjectQuote::firstOrNew($value);
-            $quote->save();
-            Quote::find($value['quote_id'])->update(['project_quote_id' => $quote->id]);
+        $employees = @$input['employees'];
+        $tags = @$input['tags'];
+        $calender = @$input['link_to_calender'];
+        $color = @$input['color'];
+        $customer = @$input['customer'];
+
+        $input = array_diff_key($input, array_flip(['tags', 'employees', 'customer', 'link_to_calender', 'color']));
+        $input['worth'] = numberClean($input['worth']);
+        $input['start_date'] = datetime_for_database("{$input['start_date']} {$input['time_from']}");
+        $input['end_date'] = datetime_for_database("{$input['end_date']} {$input['time_to']}");
+        unset($input['time_from'], $input['time_to']);
+
+        $result = $project->update($input);
+
+        ProjectRelations::whereIn('related', range(1,3))->where('project_id', $project->id)->delete();
+        $event_rel = EventRelation::where(['related' => 1, 'r_id' => $project->id])->first();
+        if ($event_rel) {
+            $event_rel->event->delete();
+            $event_rel->delete();
         }
 
+        $tag_group = [];
+        if (is_array($tags)) {
+            foreach ($tags as $row) {
+                $tag_group[] = ['project_id' => $project->id, 'related' => 1, 'rid' => $row];
+            }
+        }
+        if (is_array($employees)) {
+            foreach ($employees as $row) {
+                $tag_group[] = ['project_id' => $project->id, 'related' => 2, 'rid' => $row];
+            }
+        }
+        if ($customer > 0) $tag_group[] = ['project_id' => $project->id, 'related' => 8, 'rid' => $customer];
+            
+        $tag_group[] = ['project_id' => $project->id, 'related' => 3, 'rid' => $project->user_id];
+        ProjectRelations::insert($tag_group);
+
+        $data = ['project_id' => $project->id, 'value' => '[' . trans('general.edit') . '] ' . $project->name, 'user_id' => $project->user_id];
+        ProjectLog::create($data);
+        if ($calender) {
+            $data = ['title' => trans('projects.project') . ' - ' . $input['name'], 'description' => $input['short_desc'], 'start' => $input['start_date'], 'end' => $input['end_date'], 'color' => $color, 'user_id' => $project->user_id, 'ins' => $project->ins];
+            $event = Event::create($data);
+            EventRelation::create(['event_id' => $event->id, 'related' => 1, 'r_id' => $project->id]);
+        }
+        
         if ($result) {
             DB::commit();
-            return true;
+            return $result;
         }
 
         throw new GeneralException(trans('exceptions.backend.projects.update_error'));
     }
 
     /**
-     * For deleting the respective model from storage
-     *
-     * @param Project $project
-     * @return bool
-     * @throws GeneralException
+     * For delete respective model from storage
+     * 
+     *  @param \App\Models\project\Project $project 
      */
     public function delete($project)
-    {
-        // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
-        if (true) {
-            if ($project->delete()) {
-                $event_rel = EventRelation::where(['related' => 1, 'r_id' => $project->id])->first();
-                if (isset($event_rel)) {
-                    $event_rel->event->delete();
-                    $event_rel->delete();
-                }
+    {  
+        DB::beginTransaction();
 
-                return true;
-            }
+        if ($project->budget && $project->purchase_items->count()) {
+            throw ValidationException::withMessages(['Not allowed! Project has expense']);
+        } elseif ($project->budget) {
+            $project->budget->delete();
+        }
+
+        if ($project->delete()) {
+            DB::commit();
+            return true;
         }
 
         throw new GeneralException(trans('exceptions.backend.projects.delete_error'));
-    }
+    }    
 
     /**
      * store a newly created Project Quote Budget
      * @param Request request
      */
-    public function store_budget($input)
+    public function create_budget($input)
     {                
+        // dd($input);
         DB::beginTransaction();
-        // convert strings to float
+        
+        $data = $input['data'];
         $keys = array('quote_total', 'budget_total', 'labour_total');
-        foreach ($input['budget'] as $key => $val) {
-            if (in_array($key, $keys)) {
-                $input['budget'][$key] = numberClean($val);
-            }
-        }
-                       
-        $budget = Budget::create($input['budget']);
+        foreach ($data as $key => $val) {
+            if (in_array($key, $keys, 1)) 
+                $data[$key] = numberClean($val);
+        }                
+        $result = Budget::create($data);
 
-        // budget items
-        $budget_items = array();
-        $item = $input['budget_items'];
-        for ($i = 0; $i < count($item['product_name']); $i++) {
-            $row = array('budget_id' => $budget->id);
-            foreach (array_keys($item) as $key) {
-                if (isset($item[$key][$i])) {
-                    $val = $item[$key][$i];
-                    $row[$key] = ($key == 'price') ? numberClean($val) : $val;
-                }
-                else $row[$key] = NULL;
-            }
-            $budget_items[] = $row;
-        }
-        BudgetItem::insert($budget_items);
+        $data_items = $input['data_items'];
+        $data_items = array_map(function ($v) use($result) {
+            return array_replace($v, [
+                'budget_id' => $result->id,
+                'price' => numberClean($v['price'])
+            ]);
+        }, $data_items); 
+        BudgetItem::insert($data_items);
 
-        // budget skillset
-        $budget_skillset = array();
-        $item = $input['budget_skillset'];
-        for ($i = 0; $i < count($item['skill']); $i++) {
-            $row = array('budget_id' => $budget->id);
-            foreach (array_keys($item) as $key) {
-                if (isset($item[$key][$i])) {
-                    $row[$key] = $item[$key][$i];
-                }
-            }
-            $budget_skillset[] = $row;
+        $data_skillset = $input['data_skillset'];
+        foreach ($data_skillset as $item) {
+            $item = array_replace($item, [
+                'charge' => numberClean($item['charge']),
+                'budget_id' => $result->id,
+                'quote_id' => $result->quote_id
+            ]);
+            $skillset = BudgetSkillset::firstOrNew(['id' => $item['skillitem_id']]);
+            $skillset->fill($item);
+            if (!$skillset->id) unset($skillset->id);
+            unset($skillset->skillitem_id);
+            $skillset->save();
         }
-        BudgetSkillset::insert($budget_skillset);
-
-        if ($budget) return DB::commit();
+        
+        if ($result) {
+            DB::commit();
+            return $result; 
+        }
     }
     
     /**
@@ -201,72 +261,53 @@ class ProjectRepository extends BaseRepository
      */
     public function update_budget($budget, $input)
     {   
+        // dd($input);
         DB::beginTransaction();
-        // convert strings to float
+
+        $data = $input['data'];
         $keys = array('quote_total', 'budget_total', 'labour_total');
-        foreach ($input['budget'] as $key => $val) {
-            if (in_array($key, $keys)) {
-                $input['budget'][$key] = numberClean($val);
-            }
-        }
-        $budget->update($input['budget']);
+        foreach ($data as $key => $val) {
+            if (in_array($key, $keys)) 
+                $data[$key] = numberClean($val);
+        }   
+        $result = $budget->update($data);
 
-        // budget items
-        $budget_items = array();
-        $item = $input['budget_items'];
-        for ($i = 0; $i < count($item['product_name']); $i++) {
-            $row = array('budget_id' => $budget->id);
-            foreach (array_keys($item) as $key) {
-                if (isset($item[$key][$i])) {
-                    $val = $item[$key][$i];
-                    $row[$key] = ($key == 'price') ? numberClean($val) : $val;
-                }
-                else $row[$key] = NULL;
-            }
-            $budget_items[] = $row;
-        }
-        // update or create new budget_item
-        foreach($budget_items as $item) {
-            $budget_item = BudgetItem::firstOrNew([
-                'id' => $item['item_id'],
-                'budget_id' => $item['budget_id'],
+        $data_items = $input['data_items'];
+        // delete omitted line items
+        $budget->items()->whereNotIn('id', array_map(fn($v) => $v['item_id'], $data_items))->delete();
+        // new or update item
+        foreach($data_items as $item) {
+            $item = array_replace($item, [
+                'price' => numberClean($item['price']),
+                'new_qty' => numberClean($item['new_qty']),
+                'budget_id' => $budget->id,
             ]);
-            // assign properties to the item
-            foreach($item as $key => $value) {
-                $budget_item[$key] = $value;
-            }
-            // remove stale attributes and save
-            unset($budget_item['item_id']);
-            if ($budget_item['id'] == 0) unset($budget_item['id']);
-            $budget_item->save();
+            $new_item = BudgetItem::firstOrNew(['id' => $item['item_id']]);
+            $new_item->fill($item);
+            if (!$new_item->id) unset($new_item->id);
+            unset($new_item->item_id);
+            $new_item->save();
         }
 
-        // budget skillset
-        $budget_skillset = array();
-        $item = $input['budget_skillset'];
-        for ($i = 0; $i < count($item['skill']); $i++) {
-            $row = array('budget_id' => $budget->id);
-            foreach (array_keys($item) as $key) {
-                $row[$key] = $item[$key][$i];
-            }
-            $budget_skillset[] = $row;
-        }
-        // update or create new budget_skillset
-        foreach($budget_skillset as $item) {
-            $skillset = BudgetSkillset::firstOrNew([
+        $data_skillset = $input['data_skillset'];
+        // delete omitted labour items
+        $budget->skillsets()->whereNotIn('id', array_map(fn($v) => $v['skillitem_id'], $data_skillset))->delete();
+        // create or update items
+        foreach($data_skillset as $item) {
+            $item['charge'] = numberClean($item['charge']);
+            $new_item = BudgetSkillset::firstOrNew([
                 'id' => $item['skillitem_id'],
-                'budget_id' => $item['budget_id'],
+                'budget_id' => $budget->id,
             ]);
-            // assign properties to the item
-            foreach($item as $key => $value) {
-                $skillset[$key] = $value;
-            }
-            // remove stale attributes and save
-            unset($skillset['skillitem_id']);
-            if ($skillset['id'] == 0) unset($skillset['id']);
-            $skillset->save();
+            $new_item->fill($item);
+            if (!$new_item->id) unset($new_item->id);
+            unset($new_item->skillitem_id);
+            $new_item->save();
         }
         
-        if ($budget) return DB::commit();
-    }             
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
+    }   
 }

@@ -52,7 +52,7 @@
                             </tr>
                             <tr>
                                 <th>Project No.</th>
-                                <td>{{ $rjc->project->project_number }}</td>
+                                <td>{{ $rjc->project->tid }}</td>
                             </tr>
                             <tr>
                                 <th>Region</th>

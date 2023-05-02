@@ -3,50 +3,62 @@
 @section ('title', 'Tickets Management')
 
 @section('content')
-<div>
-    <div class="content-wrapper">
-        <div class="content-header row">
-            <div class="content-header-left col-md-6 col-12 mb-2">
-                <h4 class="content-header-title">Tickets Management</h4>
-            </div>
-            <div class="content-header-right col-md-6 col-12">
-                <div class="media width-250 float-right mr-3">
-                    <div class="media-body media-right text-right">
-                        @include('focus.leads.partials.leads-header-buttons')
-                    </div>
+<div class="content-wrapper">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">Tickets Management</h4>
+        </div>
+        <div class="content-header-right col-6">
+            <div class="media width-250 float-right mr-3">
+                <div class="media-body media-right text-right">
+                    @include('focus.leads.partials.leads-header-buttons')
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="content-body">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-body">
-                                <table id="leads-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Ticket No</th>
-                                            <th>Title</th>
-                                            <th>New/Existing</th>
-                                            <th>Client & Branch</th>
-                                            <th>Source</th>
-                                            <th>{{ trans('general.createdat') }}</th>
-                                            <th>Client Ref</th>
-                                            <th>{{ trans('labels.general.actions') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="100%" class="text-center text-success font-large-1">
-                                                <i class="fa fa-spinner spinner"></i>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+    <div class="content-body">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row no-gutters">
+                            <div class="col-sm-3 col-md-2 h4">Open Tickets</div>
+                            <div class="col-sm-2 col-md-1 h4 text-primary font-weight-bold">{{ $open_lead }}</div>
+                            <div class="col-sm-12 col-md-1 h4 text-primary font-weight-bold">{{ numberFormat(div_num($open_lead, $total_lead) * 100) }}%</div>
+                        </div>
+                        <div class="row no-gutters">
+                            <div class="col-sm-3 col-md-2 h4">Closed Tickets</div>
+                            <div class="col-sm-2 col-md-1 h4 text-success font-weight-bold">{{ $closed_lead }}</div>
+                            <div class="col-sm-12 col-md-1 h4 text-success font-weight-bold">{{ numberFormat(div_num($closed_lead, $total_lead) * 100) }}%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <table id="leads-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Ticket No</th>
+                                        <th>Client & Branch</th>
+                                        <th>Title</th>
+                                        <th>New/Existing</th>
+                                        <th>Source</th>
+                                        <th>Callout Date</th>
+                                        <th>Client Ref</th>
+                                        <th>{{ trans('labels.general.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="100%" class="text-center text-success font-large-1">
+                                            <i class="fa fa-spinner spinner"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -54,29 +66,21 @@
         </div>
     </div>
 </div>
+
 @endsection
 
 @section('after-scripts')
-{{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
-
 <script>
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } });
 
     function draw_data() {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
-        const datatableLang = { @lang("datatable.strings") };
-
-        var dataTable = $('#leads-table').dataTable({
+        const dataTable = $('#leads-table').dataTable({
+            stateSave: true,
             processing: true,
-            serverSide: true,
             responsive: true,
-            language: datatableLang,
+            language: {@lang("datatable.strings")},
             ajax: {
                 url: '{{ route("biller.leads.get") }}',
                 type: 'post',
@@ -91,6 +95,10 @@
                     name: 'reference'
                 },
                 {
+                    data: 'client_name',
+                    name: 'client_name'
+                },
+                {
                     data: 'title',
                     name: 'title'
                 },
@@ -99,16 +107,12 @@
                     name: 'client_status'
                 },
                 {
-                    data: 'client_name',
-                    name: 'client_name'
-                },
-                {
                     data: 'source',
                     name: 'source'
                 },
                 {
-                    data: 'created_at',
-                    name: "{{ config('module.leads.table') }}.created_at"
+                    data: 'date_of_request',
+                    name: 'date_of_request',
                 },
                 {
                     data: 'client_ref',
@@ -121,34 +125,13 @@
                     sortable: false
                 }
             ],
+            columnDefs: [
+                { type: "custom-date-sort", targets: [6] }
+            ],
             order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
-            buttons: {
-                buttons: [
-                    {
-                        extend: 'csv',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'excel',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    }
-                ]
-            }
+            buttons: ['csv', 'excel', 'print'],
         });
     }
 </script>

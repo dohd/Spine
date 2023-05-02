@@ -13,7 +13,7 @@ class ManageDeptorRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('manage-customer');
+        return access()->allow('manage-client');
     }
 
     /**

@@ -2,13 +2,16 @@
 
 namespace App\Models\project\Traits;
 
+use App\Models\Access\User\User;
 use App\Models\branch\Branch;
 use App\Models\customer\Customer;
 use App\Models\event\Event;
 use App\Models\event\EventRelation;
 use App\Models\hrm\Hrm;
+use App\Models\items\PurchaseItem;
 use App\Models\misc\Misc;
 use App\Models\note\Note;
+use App\Models\project\Budget;
 use App\Models\project\Project;
 use App\Models\project\ProjectLog;
 use App\Models\project\ProjectMeta;
@@ -24,9 +27,39 @@ use App\Models\rjc\Rjc;
  */
 trait ProjectRelationship
 {
+    public function misc()
+    {
+        return $this->belongsTo(Misc::class, 'status');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'ended_by');
+    }
+    
+    public function purchase_items()
+    {
+        return $this->hasMany(PurchaseItem::class, 'itemproject_id');
+    }
+
+    public function budget()
+    {
+        return $this->hasOneThrough(Budget::class, Quote::class, 'id', 'quote_id', 'main_quote_id', 'id')->withoutGlobalScopes();
+    }
+
+    public function quote()
+    {
+        return $this->belongsTo(Quote::class, 'main_quote_id');
+    }
+
     public function quotes()
     {
-        return $this->hasManyThrough(Quote::class, ProjectQuote::class);
+        return $this->hasManyThrough(Quote::class, ProjectQuote::class, 'project_id', 'id', 'id', 'quote_id');
+    }
+
+    public function rjc()
+    {
+        return $this->hasOne(Rjc::class);
     }
 
     public function rjcs()
@@ -55,12 +88,7 @@ trait ProjectRelationship
     }
     public function branch()
     {
-        return $this->belongsTo(Branch::class, 'branch_id');
-    }
-
-    public function customer()
-    {
-        return $this->hasOneThrough(Customer::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 8)->withoutGlobalScopes();
+        return $this->belongsTo(Branch::class);
     }
 
     public function tasks()
@@ -101,6 +129,11 @@ trait ProjectRelationship
     public function events()
     {
         return $this->hasOneThrough(Event::class, EventRelation::class, 'r_id', 'id', 'id', 'event_id')->where('related', '=', 1)->withoutGlobalScopes();
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 
     public function customer_project()

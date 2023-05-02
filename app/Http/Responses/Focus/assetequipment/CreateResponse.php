@@ -2,7 +2,6 @@
 
 namespace App\Http\Responses\Focus\assetequipment;
 
-use App\Models\assetequipment\Assetequipment;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -16,10 +15,6 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-     
-         $assetequipments=Assetequipment::all();
-         
-        return view('focus.assetequipments.create',compact('assetequipments'));
-
+        return view('focus.assetequipments.create');
     }
 }

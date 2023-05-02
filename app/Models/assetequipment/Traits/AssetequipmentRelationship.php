@@ -26,26 +26,26 @@ trait AssetequipmentRelationship
 
     public function invoices()
     {
-        return $this->hasMany('App\Models\invoice\Invoice')->orderBy('id','DESC');
+        return $this->hasMany('App\Models\invoice\Invoice')->orderBy('id', 'DESC');
     }
 
-       public function amount()
-        {
-             return $this->hasMany(Transaction::class,'payer_id');
-        }
+    public function amount()
+    {
+        return $this->hasMany(Transaction::class, 'payer_id');
+    }
 
     public function project()
     {
         return $this->belongsTo(Project::class);
     }
 
-       public function account()
+    public function account()
     {
         return $this->belongsTo(Account::class);
     }
 
-           public function transactions()
+    public function transactions()
     {
-        return $this->hasMany('App\Models\transaction\Transaction','payer_id')->where('relation_id','=',0)->orWhere('relation_id','=',21)->withoutGlobalScopes();
+        return $this->hasMany('App\Models\transaction\Transaction', 'payer_id')->where('relation_id', '=', 0)->orWhere('relation_id', '=', 21)->withoutGlobalScopes();
     }
 }

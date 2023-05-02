@@ -15,23 +15,22 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\transaction;
+
 use App\Models\account\Account;
 use App\Models\customer\Customer;
 use App\Models\hrm\Hrm;
 use App\Models\supplier\Supplier;
 use App\Models\transaction\Transaction;
-use App\Models\transactioncategory\Transactioncategory;
 use App\Http\Controllers\Controller;
-use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Http\Responses\Focus\transaction\CreateResponse;
-use App\Http\Responses\Focus\transaction\EditResponse;
 use App\Repositories\Focus\transaction\TransactionRepository;
 use App\Http\Requests\Focus\transaction\ManageTransactionRequest;
 
 use App\Http\Requests\Focus\transaction\StoreTransactionRequest;
-
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -62,54 +61,60 @@ class TransactionsController extends Controller
      */
     public function index(ManageTransactionRequest $request)
     {
+        // extract request fields
+        $rel_type = $request->rel_type;
+        $rel_id = $request->rel_id;
+        $is_tax = $request->system == 'tax';
 
-        $input = $request->only('rel_type', 'rel_id');
-        $segment = false;
+        $input = compact('rel_id', 'rel_type');
+        $account_section = $this->account_section($input['rel_id'], $input['rel_type']);
+
+        return new ViewResponse('focus.transactions.index', compact('input', 'is_tax') + $account_section);
+    }
+
+    /**
+     * Account Ledger section
+     */
+    public function account_section($rel_id, $rel_type)
+    {
+        $segment = (object) array();
         $words = array();
-        if (isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 0 :
-                    $segment = Transactioncategory::find($input['rel_id']);
-                    $words['name'] = trans('transactioncategories.transactioncategory');
-                    $words['name_data'] = $segment->name;
-                    break;
-                case 1 :
-                    $segment = Customer::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    $words['url'] = '<a href="' . route('biller.customers.show', [$segment['id']]) . '"><i
-                                            class="fa fa-user"></i> ' . $segment['name'] . ' </a>';
-                    break;
-                case 2 :
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    $words['url'] = '<a href="' . route('biller.hrms.show', [$segment['id']]) . '"><i
-                                            class="fa fa-user"></i> ' . $words['name_data'] . ' </a>';
-                    break;
-                case 3 :
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    $words['url'] = '<a href="' . route('biller.hrms.show', [$segment['id']]) . '"><i
-                                            class="fa fa-user"></i> ' . $words['name_data'] . ' </a>';
-                    break;
-                case 4 :
-                    $segment = Supplier::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    $words['url'] = '<a href="' . route('biller.customers.show', [$segment['id']]) . '"><i
-                                            class="fa fa-user"></i> ' . $segment['name'] . ' </a>';
-                    break;
-                case 9 :
-                    $segment = Account::find($input['rel_id']);
-                    $words['name'] = trans('accounts.holder');
-                    $words['name_data'] = $segment->holder;
-                    break;
-            }
-
+        switch ($rel_type) {
+            case 1:
+                $segment = Customer::find($rel_id);
+                $words['name'] = trans('customers.title');
+                $words['name_data'] = $segment->name;
+                $words['url'] = '<a href="' . route('biller.customers.show', [$segment['id']]) . '">
+                    <i class="fa fa-user"></i> ' . $segment['name'] . ' </a>';
+                break;
+            case 2:
+                $segment = Hrm::find($rel_id);
+                $words['name'] = trans('hrms.employee');
+                $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
+                $words['url'] = '<a href="' . route('biller.hrms.show', [$segment['id']]) . '">
+                    <i class="fa fa-user"></i> ' . $words['name_data'] . ' </a>';
+                break;
+            case 3:
+                $segment = Hrm::find($rel_id);
+                $words['name'] = trans('hrms.employee');
+                $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
+                $words['url'] = '<a href="' . route('biller.hrms.show', [$segment['id']]) . '">
+                    <i class="fa fa-user"></i> ' . $words['name_data'] . ' </a>';
+                break;
+            case 4:
+                $segment = Supplier::find($rel_id);
+                $words['name'] = trans('customers.title');
+                $words['name_data'] = $segment->name;
+                $words['url'] = '<a href="' . route('biller.customers.show', [$segment['id']]) . '">
+                    <i class="fa fa-user"></i> ' . $segment['name'] . ' </a>';
+                break;
+            case 9:
+                $segment = Account::find($rel_id);
+                $words['name'] = trans('accounts.holder');
+                $words['name_data'] = $segment->holder;
+                break;
         }
-        return view('focus.transactions.index', compact('input', 'segment', 'words'));
+        return compact('words', 'segment');
     }
 
     /**
@@ -124,87 +129,80 @@ class TransactionsController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Remove the specified resource from storage.
      *
-     * @param StoreTransactionRequestNamespace $request
+     * @param DeleteTransactionRequestNamespace $request
+     * @param App\Models\transaction\Transaction $transaction
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function store(StoreTransactionRequest $request)
+    public function destroy(Transaction $transaction)
     {
+        $result = $this->repository->delete($transaction);
 
-          $invoice = $request->only(['tid', 'transaction_date', 'account_id', 'debit', 'credit', 'note']);
-          $invoice['user_id'] = auth()->user()->id;
-          $invoice['ins'] = auth()->user()->ins;
-        
-          $result = $this->repository->create(compact('invoice'));
+        $msg = ['flash_success' => 'Transaction deleted successfully'];
+        if (!$result) $msg = ['flash_error' => 'Reconciled transaction cannot be deleted'];
 
-           echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.transactions.created') . '<a href="' . route('biller.transactions.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.transactions.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>'));
+        return redirect()->back()->with($msg);
+    }
 
-
-
-
-        //return new RedirectResponse(route('biller.transactions.show', [$result->id]), ['flash_success' => trans('alerts.backend.transactions.created') . ' <a href="' . route('biller.transactions.show', [$result->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.transactions.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.transactions.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
-        // return new RedirectResponse(route('biller.transactions.index'), ['flash_success' => trans('alerts.backend.transactions.created')]);
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Transaction $transaction, ManageTransactionRequest $request)
+    {
+        return new ViewResponse('focus.transactions.view', compact('transaction'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param App\Models\transaction\Transaction $transaction
-     * @param EditTransactionRequestNamespace $request
-     * @return \App\Http\Responses\Focus\transaction\EditResponse
+     * @param App\Models\Transaction $transaction,
+     * @param EditProductcategoryRequestNamespace $request
+     * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
-    public function edit(Transaction $transaction, StoreTransactionRequest $request)
+    public function edit(Transaction $transaction)
     {
-        return new EditResponse($transaction);
+        // 
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param UpdateTransactionRequestNamespace $request
-     * @param App\Models\transaction\Transaction $transaction
-     * @return \App\Http\Responses\RedirectResponse
+     * Update the specified resource.
+     * 
+     * @param App\Models\Transaction $transaction
+     * @param EditProductcategoryRequestNamespace $request
+     * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
-    public function update(StoreTransactionRequest $request, Transaction $transaction)
+    public function update(Request $request, Transaction $transaction)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
+        // extract input fields
+        $input = $request->except('_token');
+        $input['user_id'] = auth()->user()->id;
+    
         //Update the model using repository update method
         $this->repository->update($transaction, $input);
-        //return with successfull message
-        return new RedirectResponse(route('biller.transactions.index'), ['flash_success' => trans('alerts.backend.transactions.updated')]);
+
+        return redirect()->back()->with(['flash_success' => 'Transaction updated successfully']);
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param DeleteTransactionRequestNamespace $request
-     * @param App\Models\transaction\Transaction $transaction
-     * @return \App\Http\Responses\RedirectResponse
+     * Search transaction account
      */
-    public function destroy(Transaction $transaction, StoreTransactionRequest $request)
+    public function account_search(Request $request)
     {
-        //Calling the delete method on repository
-        $this->repository->delete($transaction);
-        //returning with successfull message
-        return new RedirectResponse(route('biller.transactions.index'), ['flash_success' => trans('alerts.backend.transactions.deleted')]);
+        $q = $request->keyword;
+        $accounts = Account::where('holder', 'LIKE', '%' . $q . '%')
+            ->orWhere('number', 'LIKE', '%' . $q . '%')
+            ->limit(6)->get(['id', 'holder']);
+
+        return response()->json($accounts);
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param DeleteTransactionRequestNamespace $request
-     * @param App\Models\transaction\Transaction $transaction
-     * @return \App\Http\Responses\RedirectResponse
+     * Payer search
      */
-    public function show(Transaction $transaction, ManageTransactionRequest $request)
-    {
-
-        //returning with successfull message
-        return new ViewResponse('focus.transactions.view', compact('transaction'));
-    }
-
     public function payer_search(ManageTransactionRequest $request)
     {
         $q = $request->post('keyword');
@@ -225,13 +223,9 @@ class TransactionsController extends Controller
                 break;
             default:
                 $user = false;
-
         }
 
         if (!$q) return false;
         if (count($user) > 0) return view('focus.transactions.partials.search')->with(compact('user', 't'));
-
     }
-
-
 }

@@ -3,17 +3,17 @@
 namespace App\Repositories\Focus\withholding;
 
 use DB;
-use Carbon\Carbon;
 use App\Models\withholding\Withholding;
 use App\Exceptions\GeneralException;
-use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\items\PurchaseItem;
+use App\Models\account\Account;
+use App\Models\items\WithholdingItem;
+use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
+use App\Repositories\BaseRepository;
 
 
 /**
- * Class BankRepository.
+ * Class WithholdingRepository.
  */
 class WithholdingRepository extends BaseRepository
 {
@@ -30,9 +30,7 @@ class WithholdingRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-
-        return $this->query()->where('tax_type','withholding_tax')
-        ->get();
+        return $this->query()->get();
     }
 
     /**
@@ -44,55 +42,60 @@ class WithholdingRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        //credit entry
-       $account_receivable = Withholding::find($input['credit']['account_id']);
-       //$credit_trans_category_id=$credit_trans_category_id->id;
-
-        $input['credit']['tid'] = $input['credit']['tid'];
-        $input['credit']['account_id'] =  $account_receivable->account_id;
-        $input['credit']['note'] = strip_tags(@$input['credit']['note']);
-        $input['credit']['trans_category_id'] =$account_receivable->trans_category_id;
-        $input['credit']['transaction_type'] =$account_receivable->transaction_type;
-        $input['credit']['payer_id'] =$account_receivable->payer_id;
-        $input['credit']['branch_id'] =$account_receivable->branch_id;
-        $input['credit']['project_id'] =$account_receivable->project_id;
-        $input['credit']['invoice_id'] =$account_receivable->invoice_id;
-        $input['credit']['bill_id'] =$input['credit']['account_id'];
-
-        
-       
-
+        // dd($input);
         DB::beginTransaction();
-        $input['credit'] = array_map( 'strip_tags', $input['credit']);
-        $result = Withholding::create($input['credit']);
 
-
-        if ($result) {
-
-         //begin debit entry for bank charges
-       $debit_trans_category_id = Transactioncategory::where('code', 'p_taxes')->first();
-       $debit_trans_category_id=$debit_trans_category_id->id;
-
-
-        $input['debit']['tid'] = $input['debit']['tid'];
-        $input['debit']['bill_id'] = $result->id;
-        $input['debit']['trans_category_id'] = $debit_trans_category_id;
-        $input['debit']['refer_no'] = $input['debit']['refer_no'];
-        $input['debit']['note'] = strip_tags(@$input['debit']['note']);
-        $input['debit']['tax_type'] ='withholding_tax';
-        $input['debit']['payer_id'] = $account_receivable->payer_id;
-        $input['debit']['second_trans'] = 1;
-        $input['debit']['transaction_type'] =$input['debit']['transaction_type'];
-        $input['debit'] = array_map( 'strip_tags', $input['debit']);
-        $input['debit']['invoice_id'] =$account_receivable->invoice_id;
-         Withholding::create($input['debit']);
-
-
-
-
-            DB::commit();
-            return $result;
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            if (in_array($key, ['cert_date', 'tr_date']))
+                $data[$key] = date_for_database($val);
+            if (in_array($key, ['amount', 'allocate_ttl']))
+                $data[$key] = numberClean($val);
         }
+
+        $result = (object) array();
+        $is_payment = empty($data['withholding_tax_id']);
+        if ($is_payment) {
+            unset($data['withholding_tax_id']);
+            $result = Withholding::create($data);
+
+            $unallocated = $result->amount - $result->allocate_ttl;
+            $result->customer->increment('on_account', $unallocated);    
+        } else {
+            $result = Withholding::find($data['withholding_tax_id']);
+            $result->increment('allocate_ttl', $data['allocate_ttl']);
+
+            $allocated = $result->amount - $result->allocate_ttl;
+            $result->customer->decrement('on_account', $allocated);    
+        }
+
+        // allocated items
+        $data_items = $input['data_items'];
+        if ($data_items) {
+            $data_items = array_map(function ($v) use($result) {
+                return array_replace($v, [
+                    'withholding_id' => $result->id,
+                    'paid' => numberClean($v['paid'])
+                ]);
+            }, $data_items);
+            WithholdingItem::insert($data_items);
+
+            // increment invoice amount paid and update status
+            foreach ($result->items as $item) {
+                $invoice = $item->invoice;
+                $invoice->increment('amountpaid', $item->paid);
+                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
+                elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
+                else $invoice->update(['status' => 'paid']);
+            }
+        }
+        
+        /**accounting */
+        if ($is_payment) $this->post_transaction($result);
+        
+        DB::commit();
+        if ($result) return true;
+
         throw new GeneralException(trans('exceptions.backend.withholdings.create_error'));
     }
 
@@ -104,12 +107,10 @@ class WithholdingRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Withholding $charge, array $input)
+    public function update($withholding, array $input)
     {
-        $input = array_map( 'strip_tags', $input);
-    	if ($charge->update($input))
-            return true;
-
+        dd($input);
+        
         throw new GeneralException(trans('exceptions.backend.withholdings.update_error'));
     }
 
@@ -120,12 +121,76 @@ class WithholdingRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Withholding $withholding)
+    public function delete($withholding)
     {
-        if ($withholding->delete()) {
+        DB::beginTransaction();
+        
+        // reverse client unallocated amount
+        $unallocated = $withholding->amount - $withholding->allocate_ttl;
+        $withholding->customer->decrement('on_account', $unallocated);
+
+        // reverse invoice amount paid and update status
+        foreach ($withholding->items as $item) {
+            if ($item->invoice) {
+                $invoice = $item->invoice;
+                $invoice->decrement('amountpaid', $item->paid);
+                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);    
+                elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
+                else $invoice->update(['status' => 'paid']);
+            }
+        }
+
+        $withholding->transactions()->delete();
+        aggregate_account_transactions();
+
+        $result = $withholding->delete();
+        if ($result) {
+            DB::commit();
             return true;
         }
 
         throw new GeneralException(trans('exceptions.backend.withholdings.delete_error'));
+    }
+
+    /**
+     * Withholding Transaction
+     */
+    public function post_transaction($result)
+    {
+        // credit Accounts Receivable (Debtors)
+        $account = Account::where('system', 'receivable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'withholding')->first(['id', 'code']);
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
+        $cr_data = [
+            'tid' => $tid,
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $result->amount,
+            'tr_date' => $result->tr_date,
+            'due_date' => $result->tr_date,
+            'user_id' => $result->user_id,
+            'note' => $result->note,
+            'ins' => $result->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $result->id,
+            'user_type' => 'customer',
+            'is_primary' => 1,
+        ];
+        Transaction::create($cr_data);
+
+        // debit Withholding Account
+        $account = Account::when($result->certificate == 'vat', function ($q) {
+            $q->where('system', 'withholding_vat');
+        })->when($result->certificate == 'tax', function ($q) {
+            $q->where('system', 'withholding_inc');
+        })->first();
+
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $dr_data = array_replace($cr_data, [
+            'account_id' => $account->id,
+            'debit' => $result->amount
+        ]);
+        Transaction::create($dr_data);
+        aggregate_account_transactions();            
     }
 }

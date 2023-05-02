@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Responses\Focus\purchase;
-use App\Models\customfield\Customfield;
-use App\Models\items\CustomEntry;
-use App\Models\purchase\Purchase;
+
+use App\Models\additional\Additional;
+use App\Models\pricegroup\Pricegroup;
+use App\Models\supplier\Supplier;
+use App\Models\warehouse\Warehouse;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -30,15 +32,13 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
+        $purchase = $this->purchase;
+        $additionals = Additional::all();
+        $pricegroups = Pricegroup::all();
+        $warehouses = Warehouse::all();
+        $supplier = Supplier::where('name', 'Walk-in')->first(['id', 'name']);
+        $price_supplier = Supplier::all();
 
-
-
- $items_tab_one = Purchase::where('tid', $this->purchase->tid)->where('bill_id', $this->purchase->id)->where('transaction_tab', 1)->get();
-  $items_tab_two = Purchase::where('tid', $this->purchase->tid)->where('bill_id', $this->purchase->id)->where('transaction_tab', 2)->get();
-   $items_tab_three = Purchase::where('tid', $this->purchase->tid)->where('bill_id', $this->purchase->id)->where('transaction_tab', 3)->get();
- 
-
-        return view('focus.purchases.edit')->with([
-            'purchase' => $this->purchase,'purchase_items_tab_one'=> $items_tab_one, 'purchase_items_tab_two'=> $items_tab_two, 'purchase_items_tab_three'=> $items_tab_three])->with(bill_helper(3));
+        return view('focus.purchases.edit', compact('purchase', 'additionals', 'pricegroups','price_supplier', 'warehouses'));
     }
 }

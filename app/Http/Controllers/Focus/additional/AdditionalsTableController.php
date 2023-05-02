@@ -18,7 +18,6 @@
 namespace App\Http\Controllers\Focus\additional;
 
 use App\Http\Requests\Focus\general\ManageCompanyRequest;
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\additional\AdditionalRepository;
@@ -52,24 +51,14 @@ class AdditionalsTableController extends Controller
      */
     public function __invoke(ManageCompanyRequest $request)
     {
-        //
         $core = $this->additional->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('class', function ($term) {
-                $ty = '';
-                switch ($term->class) {
-                    case 1 :
-                        $ty = trans('general.tax');
-                        break;
-                    case 2 :
-                        $ty = trans('general.discount');
-                        break;
-
-                }
-
-                return $ty;
+            ->addColumn('is_default', function ($term) {
+                if (!$term->is_default) return 'No';
+                return 'Yes';
             })
             ->addColumn('created_at', function ($additional) {
                 return dateFormat($additional->created_at);

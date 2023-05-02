@@ -24,16 +24,9 @@ class BranchRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        
-       $q = $this->query();
-       $q->whereNotIn('name', ['Head Office', 'All Branches']);
-       
-      // $q->when(!request('rel_type'), function ($q) {
-           // return $q->where('c_type', '=',request('rel_type',0));
-        //});
-       //$q->when(request('rel_type'), function ($q) {
-           // return $q->where('rel_id', '=',request('rel_id',0));
-       // });
+
+        $q = $this->query();
+        $q->whereNotIn('name', ['Head Office', 'All Branches']);
 
         return $q->get();
     }
@@ -47,9 +40,9 @@ class BranchRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        $input = array_map( 'strip_tags', $input);
-       $c=Branch::create($input);
-       if ($c->id) return $c->id;
+        $input = array_map('strip_tags', $input);
+        $c = Branch::create($input);
+        if ($c->id) return $c->id;
         throw new GeneralException('Error Creating Branch');
     }
 
@@ -63,8 +56,8 @@ class BranchRepository extends BaseRepository
      */
     public function update(Branch $branch, array $input)
     {
-        $input = array_map( 'strip_tags', $input);
-    	if ($branch->update($input))
+        $input = array_map('strip_tags', $input);
+        if ($branch->update($input))
             return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
@@ -79,9 +72,8 @@ class BranchRepository extends BaseRepository
      */
     public function delete(Branch $branch)
     {
-        if ($branch->delete()) {
-            return true;
-        }
+        if ($branch->leads()->first()) return;
+        return $branch->delete();
 
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }

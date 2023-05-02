@@ -2,12 +2,10 @@
 
 namespace App\Repositories\Focus\equipment;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\equipment\Equipment;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class ProductcategoryRepository.
@@ -27,22 +25,33 @@ class EquipmentRepository extends BaseRepository
      */
     public function getForDataTable()
     {
+        $q = $this->query();
         
-       $q=$this->query();
-      $q->when(request('region_id'), function ($q) {
-            return $q->where('region_id', '=',request('region_id',0));
+        $q->when(request('customer_id'), function ($q) {
+            $q->where('customer_id', request('customer_id'));
+        })->when(request('branch_id'), function ($q) {
+            $q->where('branch_id', request('branch_id'));
+        })->when(request('schedule_id'), function ($q) {
+            // fetch schedule equipments
+            $q->whereHas('contract_equipments', function($q) {
+                $q->where('schedule_id', request('schedule_id'));
+            });
+        })->when(request('is_serviced') == '0', function ($q) {
+            // fetch unserviced equipments
+            $q->whereHas('contract_equipments', function($q) {
+                $q->where('schedule_id', request('schedule_id'));
+            })->where(function ($q) {
+                $q->doesntHave('contract_service_items', 'or', function ($q) {
+                    $q->whereHas('contractservice', function ($q) {
+                        $q->where('schedule_id', request('schedule_id'));
+                    });
+                });
+            });
         });
-       $q->when(request('branch_id'), function ($q) {
-            return $q->where('branch_id', '=',request('branch_id',0));
-       });
-        $q->when(request('section_id'), function ($q) {
-            return $q->where('section_id', '=',request('section_id',0));
-       });
-         $q->when(request('rel_id'), function ($q) {
-            return $q->where('customer_id', '=',request('rel_id',0));
-       });
-
-        return $q->get();
+        
+        
+        $q->with(['customer', 'branch']);
+        return $q;
     }
 
     /**
@@ -54,11 +63,15 @@ class EquipmentRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        $input['installation_date'] = datetime_for_database($input['installation_date']);
-        $input['next_maintenance_date'] = datetime_for_database($input['next_maintenance_date']);
-        $input = array_map( 'strip_tags', $input);
-       $c=Equipment::create($input);
-       if ($c->id) return $c->id;
+        // dd($input);
+        foreach ($input as $key => $val) {
+            if ($key == 'install_date') $input[$key] = date_for_database($val);
+            if ($key == 'service_rate') $input[$key] = numberClean($val);
+        }
+
+        $result = Equipment::create($input);
+        if ($result) return $result;
+
         throw new GeneralException('Error Creating Equipment');
     }
 
@@ -72,10 +85,14 @@ class EquipmentRepository extends BaseRepository
      */
     public function update(Equipment $equipment, array $input)
     {
-        $input = array_map( 'strip_tags', $input);
-    	if ($equipment->update($input))
-            return true;
-
+        // dd($input);
+        foreach ($input as $key => $val) {
+            if ($key == 'install_date') $input[$key] = date_for_database($val);
+            if ($key == 'service_rate') $input[$key] = numberClean($val);
+        }
+        
+        if ($equipment->update($input)) return true;
+            
         throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
@@ -86,12 +103,15 @@ class EquipmentRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Equipment $equipment)
+    public function delete($equipment)
     {
-        if ($equipment->delete()) {
-            return true;
+        if ($equipment->contract_service) {
+            $service = $equipment->contract_service;
+            throw ValidationException::withMessages(["Equipment is attached to a report! Jobcard No. {$service->jobcard_no}"]);
         }
-
+        
+        if ($equipment->delete()) return true;
+            
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 }

@@ -1,15 +1,15 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'LPO Management')
+@section ('title', 'Client PO Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="alert alert-warning alert-dismissible d-none lpo-alert">
-        <strong>Forbidden!</strong> Cannot delete LPO attached to quote
+        <strong>Forbidden!</strong><span class="lpoMsg"></span>
     </div> 
     <div class="content-header row">        
         <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="content-header-title">LPO Management</h4>
+            <h4 class="content-header-title">Client Purchase Order Management</h4>
         </div>
         <div class="content-header-right col">
             <div class="media width-250 float-right">
@@ -50,85 +50,92 @@
         </div>
     </div>
 </div>    
-@include('focus.lpo.modal.lpo_new')
-@include('focus.lpo.modal.lpo_edit')
+@include('focus.lpo.partials.edit-lpo')
+@include('focus.lpo.partials.create-lpo')
 @endsection
 
 @section('after-scripts')
-{{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('core/app-assets/vendors/js/extensions/moment.min.js') }}
 {{ Html::script('focus/js/select2.min.js') }}
-
 <script>
-    // draw dataTable data
-    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
+    const config = {
+        ajaxSetup: { headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} },
+        datepicker: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+    };
 
-    // ajax header set up
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
+    $.ajaxSetup(config.ajaxSetup);
+    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
 
     // Delete LPO
     $(document).on('click', 'a.delete-lpo', function(e) {
         e.preventDefault();
-        if (confirm('Are you sure to delete this item ?')) {
-            $.ajax({
-                url: $(this).attr('href'),
-                method: 'DELETE'
-            })
-            .done(function() { location.reload(); })
-            .fail(function(err) {
-                $('.lpo-alert').removeClass('d-none');
-                setTimeout(() => $('.lpo-alert').addClass('d-none'), 3000);
-            })
-        }
+        const url = $(this).attr('href');
+        swal(
+            {
+                title: 'Are you sure to delete this ?',
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: 'Delete',
+                confirmButtonColor: '#DD6B55'
+            }, 
+            function() {
+                $.ajax({ url })
+                .done(() => location.reload())
+                .fail((err) => {
+                    if (err.status === 403) {
+                        $('.lpo-alert').removeClass('d-none');
+                        $('.lpoMsg').text(err.responseJSON.message);
+                        setTimeout(() => $('.lpo-alert').addClass('d-none'), 5000);
+                    }
+                })            
+            }
+        );     
     });
     
     // Fetch update data
     $(document).on('click', 'a.update-lpo', function(e) {
         e.preventDefault();
         const id = $(this).attr('href');
-        $.ajax({ 
-            url: baseurl + `lpo/${id}/edit`, 
-            method: 'GET'
-        })
+
+        $.ajax({ url: baseurl + `lpo/${id}/edit`, })
         .done(function(data) { 
             const {customer, branch, lpo} = data;
-            const $form = $("#updateLpoForm");
-            $form.find('#lpo_id').val(lpo.id);
-            $form.find("#person").append(new Option(customer.name, customer.id, 'selected', true));
-            $form.find("#branch_id").append(new Option(branch.name, branch.id, 'selected', true));
-            $form.find('#date').val(lpo.date);
-            $form.find('#lpo_no').val(lpo.lpo_no);
-            $form.find('#amount').val(lpo.amount);
-            $form.find('#remark').val(lpo.remark);
-            return;
+            const formId = '#updateLpoForm ';
+            $(formId+'#lpo_id').val(lpo.id);
+            $(formId+'#person').append(new Option(customer.name, customer.id, 'selected', true));
+            $(formId+'#branch_id').append(new Option(branch.name, branch.id, 'selected', true));
+
+            $(formId+'#lpo_no').val(lpo.lpo_no);
+            $(formId+'#amount').val(accounting.formatNumber(lpo.amount));
+            $(formId+'#remark').val(lpo.remark);
+
+            setTimeout(() => {
+                $(formId+'#date').datepicker('setDate', new Date(lpo.date));;
+            }, 500);
         });
-        return;
     });
     
     // On modal open
     $(document).on('shown.bs.modal', '#updateLpoModal, #AddLpoModal', function() {
-        const $modal = $(this);
-        // submit form
-        $modal.on('click', '#create-btn, #update-btn', function() {
-            if ($(this).is('#create-btn')) $('#createLpoForm').submit();
-            if ($(this).is('#update-btn')) $('#updateLpoForm').submit();
-        });
-        
+        const modal = $(this);
+
+        // init datepicker
+        modal.find('.datepicker')
+        .datepicker(config.datepicker)
+        .datepicker('setDate', new Date());
+
         // initialize customer select2
-        $modal.find("#person").select2({
-            tags: [],
+        const person = modal.find("#person");
+        person.select2({
+            dropdownParent: modal,
             ajax: {
-                url: "{{route('biller.customers.select')}}",
+                url: "{{ route('biller.customers.select') }}",
                 dataType: 'json',
                 type: 'POST',
                 quietMillis: 50,
-                data: function(person) {
-                    return { person };
+                data: function(params) { 
+                    return { search: params.term }
                 },
                 processResults: function(data) {
                     return {
@@ -144,14 +151,15 @@
         });
 
         // on selecting customer fetch branches
-        $modal.find("#person").on('change', function() {
-            var id = $('#person :selected').val();
-            // fetch customer branches
-            $modal.find("#branch_id").html('').select2({
+        const branch =  modal.find("#branch_id");
+        person.on('change', function() {
+            branch.html('').select2({
+                dropdownParent: modal,
                 ajax: {
-                    url: "{{route('biller.branches.branch_load')}}?id=" + id,
-                    dataType: 'json',
+                    url: "{{ route('biller.branches.select') }}",
+                    type: 'POST',
                     quietMillis: 50,
+                    data: ({term}) => ({search: term, customer_id: person.val()}),
                     processResults: function(data) {
                         return {
                             results: $.map(data, function(item) {
@@ -165,17 +173,23 @@
                 }
             });
         }); 
+
+        // LPO amount change
+        const amount =  modal.find("#amount");
+        amount.change(function() {
+            const el = $(this);
+            const value = accounting.unformat(el.val());
+            el.val(accounting.formatNumber(value));
+        });
     });
     
     // fetch table data
     function draw_data() {
-        const tableLang = { @lang('datatable.strings') };
         var dataTable = $('#lpo-table').dataTable({
             processing: true,
-            serverSide: true,
             responsive: true,
             stateSave: true,
-            language: tableLang,
+            language: {@lang('datatable.strings')},
             ajax: {
                 url: "{{ route('biller.lpo.get') }}",
                 type: 'post',
@@ -219,35 +233,13 @@
                     sortable: false
                 }
             ],
+            columnDefs: [
+                { type: "custom-number-sort", targets: [3, 7] },
+            ],
             order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
-            buttons: {
-                buttons: [
-
-                    {
-                        extend: 'csv',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'excel',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        footer: true,
-                        exportOptions: {
-                            columns: [0, 1]
-                        }
-                    }
-                ]
-            }
+            buttons: ['csv', 'excel', 'print']
         });
     }
 </script>

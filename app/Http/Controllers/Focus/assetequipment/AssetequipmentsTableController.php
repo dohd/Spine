@@ -15,9 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\assetequipment;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\assetequipment\AssetequipmentRepository;
@@ -52,33 +52,20 @@ class AssetequipmentsTableController extends Controller
      */
     public function __invoke(ManageAssetequipmentRequest $request)
     {
-  
-
         $core = $this->assetequipment->getForDataTable();
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            //->addColumn('customer', function ($branch) {
-                 // return $branch->customer->company;
-                //})
             ->addColumn('name', function ($assetequipment) {
-                return '<a class="font-weight-bold" href="' . route('biller.assetequipments.index') . '?rel_type=' . $assetequipment->id . '&rel_id=' . $assetequipment->id . '">' . $assetequipment->name . '</a>';
+                return $assetequipment->name;
             })
-            ->addColumn('cost', function ($assetequipment) {
-                    return numberFormat($assetequipment['cost']);
-                })
-
-             ->addColumn('qty', function ($assetequipment) {
-                    return numberFormat($assetequipment['qty']);
-                })
-                ->addColumn('account_id', function ($assetequipment) {
-                  return $assetequipment->account->holder;
-                })
-
-             
-         
+            ->addColumn('account_name', function ($assetequipment) {
+                if ($assetequipment->account) 
+                return $assetequipment->account->holder;
+            })
             ->addColumn('created_at', function ($assetequipment) {
-                return dateFormat($assetequipment->created_at);
+                return $assetequipment->created_at->format('d-m-Y');
             })
             ->addColumn('actions', function ($assetequipment) {
                 return $assetequipment->action_buttons;

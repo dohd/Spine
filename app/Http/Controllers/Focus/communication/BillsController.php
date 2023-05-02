@@ -48,6 +48,14 @@ class BillsController extends Controller
 
     public $pheight;
 
+    // pdf print request headers
+    protected $headers = [
+        "Content-type" => "application/pdf",
+        "Pragma" => "no-cache",
+        "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+        "Expires" => "0"
+    ];
+
     public function __construct()
     {
         $this->pheight = 0;
@@ -58,26 +66,33 @@ class BillsController extends Controller
     {
         $data = $this->bill_details($request);
         session(['bill_url' => $data['link']['preview']]);
+
         return view('focus.bill.preview', $data);
     }
 
+    public function print_purchaseorder(Request $request)
+    {
+        $data = $this->bill_details($request);
 
-    public function print_pdf(Request $request)
+        $html = view('focus.bill.print_purchaseorder', $data)->render();
+        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf->WriteHTML($html);
+
+        return Response::stream($pdf->Output('purchaseorder.pdf', 'I'), 200, $this->headers);
+    }
+
+
+    public function print_invoice(Request $request)
     {
         $data = $this->bill_details($request);
 
         $html = view('focus.bill.print_invoice', $data)->render();
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
-         
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
         
-        return Response::stream($pdf->Output($data['invoice']['title'] . '_' . $data['invoice']['tid'] . '.pdf', 'I'), 200, $headers);
+        $name = $data['resource']['title'] . '_' . $data['resource']['tid'] . '.pdf';
+
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
     }
 
     public function print_djc_pdf(Request $request)
@@ -85,46 +100,27 @@ class BillsController extends Controller
         $data = $this->bill_details($request);
 
         $html = view('focus.bill.print_djc', $data)->render();
-        // print_log(json_encode($data, JSON_PRETTY_PRINT));
-        $pdf_config = array_merge(config('pdf'), ['margin_left' => 4, 'margin_right' => 4]);
-        $pdf = new \Mpdf\Mpdf($pdf_config);
+        $pdf = new \Mpdf\Mpdf(config('pdf') + ['margin_left' => 4, 'margin_right' => 4]);
         $pdf->WriteHTML($html);
 
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
-
-        $tid = $data['invoice']['tid'];
+        $tid = $data['resource']['tid'];
         $name = 'DjR-' . sprintf('%04d', $tid) . '.pdf';
 
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);    
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);    
     }
 
     public function print_rjc_pdf(Request $request)
     {
         $data = $this->bill_details($request);
         
-        // print_log(json_encode($data, JSON_PRETTY_PRINT));
         $html = view('focus.bill.print_rjc', $data)->render();
-        
-        $pdf_config = array_merge(config('pdf'), ['margin_left' => 4, 'margin_right' => 4]);
-        $pdf = new \Mpdf\Mpdf($pdf_config);
+        $pdf = new \Mpdf\Mpdf(config('pdf') + ['margin_left' => 4, 'margin_right' => 4]);
         $pdf->WriteHTML($html);
 
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
-
-        $tid = $data['invoice']['tid'];
+        $tid = $data['resource']['tid'];
         $name = 'RjR-' . sprintf('%04d', $tid) . '.pdf';
 
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);    
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);    
     }
 
     public function print_quote_pdf(Request $request)
@@ -132,25 +128,15 @@ class BillsController extends Controller
         $data = $this->bill_details($request);
 
         $html = view('focus.bill.print_quote', $data)->render();
-        // print_log(json_encode($data, JSON_PRETTY_PRINT));
-
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
 
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
+        $tid = $data['resource']['tid'];
+        $prefixes = prefixesArray(['quote', 'proforma_invoice'], auth()->user()->ins);
+        $name = gen4tid($data['resource']['bank_id']? "{$prefixes[1]}-" : "{$prefixes[0]}-", $tid);
+        $name .= '.pdf';
 
-        $tid = $data['invoice']['tid'];
-        $name = 'QT-' . sprintf('%04d', $tid) . '.pdf';
-        if ($data['invoice']['bank_id']) {
-            $name = 'PI-' . sprintf('%04d', $tid) . '.pdf';
-        }
-
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
     }
 
     public function print_verified_quote_pdf(Request $request)
@@ -158,25 +144,16 @@ class BillsController extends Controller
         $data = $this->bill_details($request);
 
         $html = view('focus.bill.print_verified_quote', $data)->render();
-        // print_log(json_encode($data, JSON_PRETTY_PRINT));
-
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
 
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
-
-        $tid = $data['invoice']['tid'];
+        $tid = $data['resource']['tid'];
         $name = 'QT-' . sprintf('%04d', $tid) . '-V.pdf';
-        if ($data['invoice']['bank_id']) {
+        if ($data['resource']['bank_id']) {
             $name = 'PI-' . sprintf('%04d', $tid) . '-V.pdf';
         }
 
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
     }
 
     public function print_budget_pdf(Request $request)
@@ -184,30 +161,37 @@ class BillsController extends Controller
         $data = $this->bill_details($request);
 
         $html = view('focus.bill.print_project_budget', $data)->render();
-        // print_log(json_encode($data, JSON_PRETTY_PRINT));
-
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
 
-        $headers = array(
-            "Content-type" => "application/pdf",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        );
-
-        $tid = $data['invoice']['tid'];
+        $tid = $data['resource']['tid'];
         $name = 'QT-' . sprintf('%04d', $tid) . '_project_budget' . '.pdf';
-        if ($data['invoice']['bank_id']) {
+        if ($data['resource']['bank_id']) {
             $name = 'PI-' . sprintf('%04d', $tid) . '_project_budget' . '.pdf';
         }
 
-        return Response::stream($pdf->Output($name, 'I'), 200, $headers);
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
+    }
+
+    public function print_budget_quote_pdf(Request $request)
+    {
+        $data = $this->bill_details($request);
+
+        $html = view('focus.bill.print_budget_quote', $data)->render();
+        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf->WriteHTML($html);
+
+        $tid = $data['resource']['tid'];
+        $name = 'QT-' . sprintf('%04d', $tid) . '_project_budget' . '.pdf';
+        if ($data['resource']['bank_id']) {
+            $name = 'PI-' . sprintf('%04d', $tid) . '_project_budget' . '.pdf';
+        }
+
+        return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
     }
 
     public function print_compact(Request $request)
     {
-
         $data = $this->bill_details($request);
 
         $this->pheight = 0;
@@ -573,12 +557,12 @@ class BillsController extends Controller
             $data = [
                 'transaction_id' => $payment->getId(),
                 'payment_amount' => $payment->transactions[0]->amount->total,
-                'payment_status' => $payment->getState(),
+                'status' => $payment->getState(),
                 'invoice_id' => $payment->transactions[0]->invoice_number,
                 'sign' => $payment->transactions[0]->custom
             ];
 
-            if ($data['payment_status'] === 'approved' and $sign == $data['sign']) {
+            if ($data['status'] === 'approved' and $sign == $data['sign']) {
                 $invoice = Invoice::withoutGlobalScopes()->find($data['invoice_id']);
                 $online_pay_account = ConfigMeta::withoutGlobalScopes()->where('feature_id', '=', 6)->where('ins', '=', $invoice['ins'])->first('feature_value');
                 $transaction['ins'] = $invoice['ins'];

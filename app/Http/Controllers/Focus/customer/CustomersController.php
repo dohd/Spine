@@ -17,13 +17,7 @@
  */
 namespace App\Http\Controllers\Focus\customer;
 
-use App\Http\Requests\Focus\general\CommunicationRequest;
-use App\Models\account\Account;
 use App\Models\customer\Customer;
-use App\Models\customergroup\CustomerGroupEntry;
-use App\Models\transaction\TransactionHistory;
-use App\Repositories\Focus\general\RosemailerRepository;
-use App\Repositories\Focus\general\RosesmsRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
@@ -34,7 +28,9 @@ use App\Repositories\Focus\customer\CustomerRepository;
 use App\Http\Requests\Focus\customer\ManageCustomerRequest;
 use App\Http\Requests\Focus\customer\CreateCustomerRequest;
 use App\Http\Requests\Focus\customer\EditCustomerRequest;
-use App\Http\Requests\Focus\customer\DeleteCustomerRequest;
+use App\Models\Company\Company;
+use DateTime;
+use Illuminate\Http\Response;
 
 /**
  * CustomersController
@@ -62,16 +58,9 @@ class CustomersController extends Controller
      * @param App\Http\Requests\Focus\customer\ManageCustomerRequest $request
      * @return \App\Http\Responses\ViewResponse
      */
-    public function index(ManageCustomerRequest $request)
+    public function index()
     {
-        $input = $request->only('rel_type', 'rel_id', 'due_filter');
-
-        $segment = array();
-        if (isset($input['rel_id'])) {
-            $segment = CustomerGroupEntry::where('customer_group_id', '=', $input['rel_id'])->first();
-        }
-
-        return new ViewResponse('focus.customers.index', compact('input', 'segment'));
+        return new ViewResponse('focus.customers.index');
     }
 
     /**
@@ -95,33 +84,24 @@ class CustomersController extends Controller
     public function store(CreateCustomerRequest $request)
     {
         $request->validate([
-            'name' => 'required',
-            'phone' => 'required',
-            'email' => 'required',
+            'company' => 'required',
         ]);
-        //Input received from the request
-        $data = $request->except(['_token', 'ins', 'balance', 'custom_field']);
-        $data2 = $request->only(['custom_field']);
-        if (!$data['password'] || strlen($data['password']) < 6) $data['password'] = rand(111111, 999999);
 
-        //dd($input);
-        $data['ins'] = auth()->user()->ins;
-        $data2['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $result = $this->repository->create(compact('data', 'data2'));
+        // extract input fields
+        $input = $request->except(['_token', 'ins', 'balance']);
+
+        $input['ins'] = auth()->user()->ins;
+        if (!$request->password || strlen($request->password) < 6) 
+            $input['password'] = rand(111111, 999999);
+
+        $result = $this->repository->create($input);
+
         if (!$result) return redirect()->back();
-
-        //return with successfull message
-        if ($request->ajax()) {
-            $result['random_password'] = $data['password'];
-            return response()->json($result);
-        }
-
+        // case ajax request
+        $result['random_password'] = $input['password'];
+        if ($request->ajax()) return response()->json($result);
+            
         return new RedirectResponse(route('biller.customers.index'), ['flash_success' => trans('alerts.backend.customers.created')]);
-
-        // if (isset($data['rel_id']) && $result->id) 
-        //     return new RedirectResponse(route('biller.customers.show', [$data['rel_id']]), ['flash_success' => trans('customers.created_contact') . $pass_u . ' <a href="' . route('biller.customers.show', [$data['rel_id']]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customers.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customers.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a> ']);
-        // return new RedirectResponse(route('biller.customers.show', [$result->id]), ['flash_success' => trans('alerts.backend.customers.created') . $pass_u . ' <a href="' . route('biller.customers.show', [$result->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customers.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customers.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a> ']);
     }
 
     /**
@@ -146,19 +126,14 @@ class CustomersController extends Controller
     public function update(EditCustomerRequest $request, Customer $customer)
     {
         $request->validate([
-            'name' => 'required',
-            'phone' => 'required',
-            'email' => 'required',
+            'company' => 'required',
         ]);
-        //Input received from the request
-        $data = $request->except(['_token', 'ins', 'balance', 'custom_field']);
-        $data2 = $request->only(['custom_field']);
-        //Update the model using repository update method
-        $result=$this->repository->update($customer, compact('data', 'data2'));
-        //return with successfull message
-       if($result) return new RedirectResponse(route('biller.customers.show', [$customer->id]), ['flash_success' => trans('alerts.backend.customers.updated') . ' <a href="' . route('biller.customers.show', [$customer->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.customers.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.customers.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
-        return new RedirectResponse(route('biller.customers.show', [$customer->id]),'');
+        // extract input fields
+        $input = $request->except(['_token', 'ins', 'balance']);
+        
+        $this->repository->update($customer, $input);
 
+        return new RedirectResponse(route('biller.customers.show', $customer), ['flash_success' => trans('alerts.backend.customers.updated')]);
     }
 
     /**
@@ -168,13 +143,11 @@ class CustomersController extends Controller
      * @param App\Models\customer\Customer $customer
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Customer $customer, DeleteCustomerRequest $request)
+    public function destroy(Customer $customer)
     {
-        //Calling the delete method on repository
         $this->repository->delete($customer);
-        //returning with successfull message
-        //return new RedirectResponse(route('biller.customers.index'), ['flash_success' => trans('alerts.backend.customers.deleted')]);
-        return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.customers.deleted')));
+
+        return new RedirectResponse(route('biller.customers.index'), ['flash_success' => trans('alerts.backend.customers.deleted')]);
     }
 
     /**
@@ -186,100 +159,100 @@ class CustomersController extends Controller
      */
     public function show(Customer $customer, ManageCustomerRequest $request)
     {
-        $accounts = Account::all();
-        return new ViewResponse('focus.customers.view', compact('customer', 'accounts'));
+        // extract invoice from customer statement
+        $invoices = $this->statement_invoices($customer);
+
+        // aging balance from extracted invoices
+        $aging_cluster = $this->aging_cluster($customer, $invoices);
+
+        // customer debt balance
+        $account_balance = collect($aging_cluster)->sum() - $customer->on_account;
+
+        return new ViewResponse('focus.customers.view', compact('customer', 'aging_cluster', 'account_balance'));
     }
 
-    public function send_bill(CommunicationRequest $request)
+    /**
+     * Customer Statement Invoices
+     */
+    public function statement_invoices($customer)
     {
-
-        $input = $request->only('text', 'subject', 'mail_to');
-        $mailer = new RosemailerRepository;
-        return $mailer->send($input['text'], $input);
-
-    }
-
-    public function selected_action(ManageCustomerRequest $request)
-    {
-
-        if (isset($request->cust)) {
-
-
-            switch ($request->r_type) {
-                case 'mail':
-                    if (access()->allow('communication')) {
-                        $customers_mails = Customer::whereIn('id', $request->cust)->get('email');
-                        $input = array();
-                        foreach ($customers_mails as $customer_mail) {
-                            $input['email'][] = $customer_mail->email;
-                        }
-                        $input['subject'] = $request->subject;
-                        $mailer = new RosemailerRepository;
-                        return $mailer->send_group($request->text, $input);
-                    }
-                    break;
-                case 'sms':
-                    if (access()->allow('communication')) {
-                        $customers_mails = Customer::whereIn('id', $request->cust)->get('phone');
-                        foreach ($customers_mails as $customer_mail) {
-                            $mailer = new RosesmsRepository;
-                            $mailer->send_sms($customer_mail->phone, $request->text, false);
-                        }
-                        return array('status' => 'Success', 'message' => '');
-                    }
-                    break;
-                case 'delete':
-                    if (access()->allow('delete-customer')) {
-                        $customers_mails = Customer::whereIn('id', $request->cust)->delete();
-                        return array('status' => 'Success', 'message' => trans('alerts.backend.customers.deleted'));
-                    }
-                    break;
+        $invoices = collect();
+        $statement = $this->repository->getStatementForDataTable($customer->id);
+        foreach ($statement as $row) {
+            if ($row->type == 'invoice') $invoices->add($row);
+            else {
+                $last_invoice = $invoices->last();
+                if ($last_invoice->invoice_id == $row->invoice_id) {
+                    $last_invoice->credit += $row->credit;
+                }
             }
-
         }
 
-
+        return $invoices;
     }
 
-    public function wallet(ManageCustomerRequest $request)
+
+    /**
+     * Aging report from customer statement invoices
+     */
+    public function aging_cluster($customer, $invoices)
     {
-
-
-        if ($request->post('amount') and $request->post('wid')) {
-            $amount = numberClean($request->post('amount'));
-            if ($amount > 0) {
-                $customer = Customer::find($request->wid);
-                $customer->balance = $customer->balance + $amount;
-                $customer->save();
-                $note = trans('transactions.wallet_recharge') . ' ' . amountFormat($amount);
-                TransactionHistory::create(array('party_id' => $request->wid, 'user_id' => auth()->user()->id, 'note' => $note, 'relation_id' => 11, 'ins' => auth()->user()->ins));
-                return new RedirectResponse(route('biller.customers.wallet') . '?rel_id=' . $request->wid, ['flash_success' => trans('transactions.wallet_updated')]);
+        // 5 date intervals of between 0 - 120+ days prior 
+        $intervals = array();
+        for ($i = 0; $i < 5; $i++) {
+            $from = date('Y-m-d');
+            $to = date('Y-m-d', strtotime($from . ' - 30 days'));
+            if ($i > 0) {
+                $prev = $intervals[$i-1][1];
+                $from = date('Y-m-d', strtotime($prev . ' - 1 day'));
+                $to = date('Y-m-d', strtotime($from . ' - 28 days'));
             }
-            return new RedirectResponse(route('biller.customers.wallet') . '?rel_id=' . $request->wid, ['flash_error' => trans('transactions.zero_amount')]);
-
+            $intervals[] = [$from, $to];
         }
 
-        if ($request->rel_id) {
-            $customer = Customer::find($request->rel_id);
-            $accounts = Account::all();
-
-            return new ViewResponse('focus.customers.wallet', compact('customer', 'accounts'));
+        // aging balance from extracted invoices
+        $aging_cluster = array_fill(0, 5, 0);
+        foreach ($invoices as $invoice) {
+            $due_date = new DateTime($invoice->date);
+            $debt_amount = $invoice->debit - $invoice->credit;
+            // over payment
+            if ($debt_amount < 0) {
+                $customer->on_account += $debt_amount * -1;
+                $debt_amount = 0;
+            }
+            // due_date between 0 - 120 days
+            foreach ($intervals as $i => $dates) {
+                $start  = new DateTime($dates[0]);
+                $end = new DateTime($dates[1]);
+                if ($start >= $due_date && $end <= $due_date) {
+                    $aging_cluster[$i] += $debt_amount;
+                    break;
+                }
+            }
+            // due_date in 120+ days
+            if ($due_date < new DateTime($intervals[4][1])) {
+                $aging_cluster[4] += $debt_amount;
+            }
         }
 
+        return $aging_cluster;
     }
 
-    public function wallet_transactions(ManageCustomerRequest $request)
-    {
-        $wallet_transactions = TransactionHistory::where(['relation_id' => 11, 'party_id' => $request->rel_id])->get();
-        return new ViewResponse('focus.customers.wallet_history', compact('wallet_transactions'));
-    }
-
+    /**
+     * Customer search options
+     */
     public function search(Request $request)
     {
         if (!access()->allow('crm')) return false;
-        $q = $request->post('keyword');
-        $user = \App\Models\customer\Customer::with('primary_group')->where('name', 'LIKE', '%' . $q . '%')->where('active', '=', 1)->orWhere('email', 'LIKE', '%' . $q . '')->orWhere('company', 'LIKE', '%' . $q . '')->limit(6)->get(array('id', 'name', 'phone', 'address', 'city', 'email','company'));
-        if (count($user) > 0) return view('focus.customers.partials.search')->with(compact('user'));
+        
+        $k = $request->post('keyword');
+        $user = Customer::with('primary_group')->where('active', 1)->where(function ($q) use($k) {
+            $q->where('name', 'LIKE', '%' . $k . '%')
+            ->orWhere('email', 'LIKE', '%' . $k . '')
+            ->orWhere('company', 'LIKE', '%' . $k . '');
+        })->limit(6)->get(['id', 'name', 'phone', 'address', 'city', 'email','company']);
+            
+        return view('focus.customers.partials.search')->with(compact('user'));
     }
 
     /**
@@ -290,21 +263,60 @@ class CustomersController extends Controller
         if (!access()->allow('crm')) 
             return response()->json(['message' => 'Insufficient privileges'], 403);
 
-        $val = $request->post('person');
-        $customers = Customer::with('primary_group')
-            ->where('active', 1)
-            ->get(['id', 'name', 'phone', 'address', 'city', 'email','company']);
+        $q = $request->search;
+        $customers = Customer::where('name', 'LIKE', '%'.$q.'%')
+            ->orWhere('company', 'LIKE', '%'.$q.'%')
+            ->limit(6)->get();
 
         return response()->json($customers);
     }
 
-    public function active(ManageCustomerRequest $request)
-    {
+    /**
+     * Print customer statements
+     */
+    public function print_statement(Request $request, $customer_id)
+    {   
+        // dd($customer_id);
+        $page = '';
+        $params = [];
+        if ($request->type == 1) {
+            // statement on account
+            $page = 'focus.customers.statements.print_statement_on_account';
 
-        $cid = $request->post('cid');
-        $active = $request->post('active');
-        $active = !(bool)$active;
-        Customer::where('id', '=', $cid)->update(array('active' => $active));
+            $transactions = $this->repository->getTransactionsForDataTable($customer_id)->sortBy('tr_date');
+            $start_date = request('start_date', date('Y-m-d'));
+            $company = Company::find(auth()->user()->ins);
+            $customer = Customer::find($customer_id);
+
+            $statement_invoices = $this->statement_invoices($customer);
+            $aging_cluster = $this->aging_cluster($customer, $statement_invoices);
+            
+            $params = compact('transactions', 'start_date', 'company', 'customer', 'aging_cluster');
+        } elseif ($request->type == 2) {
+            // statement on invoice
+            $page = 'focus.customers.statements.print_statement_on_invoice';
+
+            $inv_statements = $this->repository->getStatementForDataTable($customer_id);
+            $start_date = request('start_date', date('Y-m-d'));
+            $company = Company::find(auth()->user()->ins);
+            $customer = Customer::find($customer_id);
+
+            $statement_invoices = $this->statement_invoices($customer);
+            $aging_cluster = $this->aging_cluster($customer, $statement_invoices);
+
+            $params = compact('inv_statements', 'start_date', 'company', 'customer', 'aging_cluster');
+        }
+        
+        $html = view($page, $params)->render();
+        $pdf = new \Mpdf\Mpdf(config('pdf'));
+        $pdf->WriteHTML($html);
+        $headers = array(
+            "Content-type" => "application/pdf",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+        return Response::stream($pdf->Output('statement_on_account' . '.pdf', 'I'), 200, $headers);
     }
 
 }

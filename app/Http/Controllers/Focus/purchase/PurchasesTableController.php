@@ -15,12 +15,14 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\purchase;
 
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\purchase\PurchaseRepository;
 use App\Http\Requests\Focus\purchase\ManagePurchaseRequest;
+
 /**
  * Class PurchaseordersTableController.
  */
@@ -28,13 +30,13 @@ class PurchasesTableController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var PurchaseorderRepository
+     * @var PurchaseRepository
      */
     protected $purchase;
 
     /**
      * contructor to initialize repository object
-     * @param PurchaseorderRepository $purchaseorder ;
+     * @param PurchaseRepository $purchaseorder ;
      */
     public function __construct(PurchaseRepository $purchase)
     {
@@ -49,78 +51,58 @@ class PurchasesTableController extends Controller
      */
     public function __invoke(ManagePurchaseRequest $request)
     {
+        $query = $this->purchase->getForDataTable();
+        $ins = auth()->user()->ins;
+        $prefixes = prefixesArray(['direct_purchase'], $ins);
 
-
- 
-        $core = $this->purchase->getForDataTable();
-
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->addIndexColumn()
-            ->addColumn('tid', function ($purchase) {
-                return '<a class="font-weight-bold" href="' . route('biller.purchaseorders.show', [$purchase->id]) . '">' . $purchase->tid . '</a>';
+            ->escapeColumns(['id'])
+            ->editColumn('tid', function ($purchase) use($prefixes) {
+                return '<a class="font-weight-bold" href="' . route('biller.purchases.show', $purchase->id) . '">' . gen4tid("{$prefixes[0]}-", $purchase->tid) . '</a>';
             })
-            ->addColumn('trans_date', function ($purchase) {
-                return dateFormat($purchase->transaction_date);
-            })
-
-            ->addColumn('supplier_id', function ($purchase) {
-
-                if ($purchase->payer_id) {
-                    switch ($purchase->payer_type) {
-                        case 'supplier':
-                            return $purchase->supplier->name . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$purchase->supplier->id]) . '"><i class="ft-eye"></i></a>';
-                            break;
-                        case 'customer':
-                          return $purchase->customer->company . ' <a class="font-weight-bold" href="' . route('biller.suppliers.show', [$purchase->customer->id]) . '"><i class="ft-eye"></i></a>';
-                            break;
-                             case 'walkin':
-                            return $purchase->payer;
-                            break;
-                    }
+            ->filterColumn('tid', function($query, $tid) use($prefixes) {
+                $arr = explode('-', $tid);
+                if (strtolower($arr[0]) == strtolower($prefixes[0]) && isset($arr[1])) {
+                    $query->where('tid', floatval($arr[1]));
+                } elseif (floatval($tid)) {
+                    $query->where('tid', floatval($tid));
                 }
-                if ($purchase->payer) return $purchase->payer;
-
-
             })
-
-            ->addColumn('debit', function ($purchase) {
-                return amountFormat($purchase->debit);
+            ->editColumn('date', function ($purchase) {
+                return dateFormat($purchase->date);
             })
+            ->addColumn('supplier', function ($purchase) {
+                $name = $purchase->suppliername;
+                if ($purchase->supplier) {
+                    $supplier = $purchase->supplier;
+                    $name = $name ?: $supplier->name;
+                    if ($supplier->taxid) $name .= " - {$supplier->taxid}";
+                }
 
-             ->addColumn('credit', function ($purchase) {
-                return amountFormat($purchase->credit);
+                return ' <a class="font-weight-bold" href="'. route('biller.suppliers.show', $purchase->supplier_id) .'">'. $name .'</a>';
             })
-             ->addColumn('balance', function ($purchase) {
-                return amountFormat($purchase->credit-$purchase->total_paid_amount);
+             ->filterColumn('supplier', function($query, $supplier) {
+                $query->whereHas('supplier', fn($q) => $q->where('name', 'LIKE', "%{$supplier}%"));
             })
-            ->addColumn('created_at', function ($purchaseorder) {
-                return dateFormat($purchaseorder->invoicedate);
-            })
-            
-           
-            ->addColumn('actions', function ($purchase) {
-
-                 
-                    switch ($purchase->payer_type) {
-                        case 'supplier':
-                             return '<a class="btn btn-purple round" href="' . route('biller.makepayment.single_payment', [$purchase->id]) . '" title="List"><i class="fa fa-cc-visa"></i></a>' . $purchase->action_buttons;
-                            break;
-                        case 'customer':
-                        if($purchase->debit>0){
-                               return '<a class="btn btn-purple round" href="' . route('biller.makepayment.receive_single_payment', [$purchase->id]) . '" title="List"><i class="fa fa-cc-visa"></i></a>' ;
-
-                        }
-                       
-                          //.$purchase->action_buttons;
-                            break;
-                             case 'walkin':
-                             return '<a class="btn btn-purple round" href="' . route('biller.makepayment.single_payment', [$purchase->id]) . '" title="List"><i class="fa fa-cc-visa"></i></a>' . $purchase->action_buttons;
-                            break;
-                    }
+            ->addColumn('reference', function ($purchase) {
+                $reference = $purchase->doc_ref_type;
+                if ($purchase->doc_ref) $reference .= " - {$purchase->doc_ref}";
                 
-
-                //return $purchase->action_buttons;
-            })->rawColumns(['tid', 'supplier_id','actions'])
+                return $reference;
+            })
+             ->filterColumn('reference', function($query, $reference) {
+                $query->where('doc_ref_type', 'LIKE', "%{$reference}%")->orwhere('doc_ref', 'LIKE', "%{$reference}%");
+            })
+            ->addColumn('amount', function ($purchase) {
+                return numberFormat($purchase->grandttl);
+            })
+            ->addColumn('balance', function ($purchase) {
+                return numberFormat($purchase->grandttl - $purchase->amountpaid);
+            })
+            ->addColumn('actions', function ($purchase) {
+                return $purchase->action_buttons;
+            })
             ->make(true);
     }
 }

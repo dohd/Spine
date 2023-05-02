@@ -112,11 +112,17 @@ class BranchesController extends Controller
     }
 
     /**
-     *  Load customer branches     *  
+     *  Load customer branches for select options *  
      */
-    public function branch_load(Request $request)
+    public function select(Request $request)
     {
-        $branches = Customer::find(request('id'))->branches;
+        $q = $request->search;
+        $customer_id = $request->customer_id;
+
+        $branches = Branch::where('customer_id', $customer_id)
+            ->where('name', 'LIKE', '%'.$q.'%')
+            ->limit(6)->get();
+            
         return response()->json($branches);
     }
 
@@ -127,7 +133,7 @@ class BranchesController extends Controller
             'location' => 'required'
         ]);
         //Input received from the request
-        $input = $request->only(['name', 'rel_id', 'location', 'contact_name', 'contact_phone']);
+        $input = $request->only(['name', 'rel_id', 'location', 'contact_name', 'contact_phone', 'branch_code']);
         //Update the model using repository update method
         $this->repository->update($branch, $input);
         //return with successfull message
@@ -141,14 +147,14 @@ class BranchesController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Branch $branch, StoreBranchRequest $request)
+    public function destroy(Branch $branch)
     {
+        $res = $this->repository->delete($branch);
 
-        //dd($branch);
-        //Calling the delete method on repository
-        $this->repository->delete($branch);
-        //returning with successfull message
-        return new RedirectResponse(route('biller.branches.index'), ['flash_success' => 'Branch Successfully Deleted']);
+        $params = ['flash_success' => 'Branch successfully deleted'];
+        if (!$res) $params = ['flash_error' => 'Branch attached to Ticket'];
+
+        return new RedirectResponse(route('biller.branches.index'), $params);
     }
 
     /**

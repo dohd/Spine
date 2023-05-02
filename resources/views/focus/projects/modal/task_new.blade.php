@@ -19,12 +19,9 @@
                         <div class="row">
                             <fieldset class="form-group col-md-4">
                                 <select class="custom-select" id="todo-select" name="status">
-
                                     @foreach($mics->where('section','=',2) as $row)
                                         <option value="{{$row['id']}}">{{$row['name']}}</option>
                                     @endforeach
-
-
                                 </select>
                             </fieldset>
 
@@ -90,9 +87,9 @@
                             </div>
                             <div class="col-md-4 col-xs-12 mt-1">
                                 <div class="row">
-                                    <label class="col-sm-4 col-xs-6 control-label"
-                                           for="sdate">{{trans('tasks.link_to_calender')}}</label>
-
+                                    <label class="col-sm-4 col-xs-6 control-label" for="sdate">
+                                        {{trans('tasks.link_to_calender')}}
+                                    </label>
                                     <div class="col-sm-6 col-xs-6">
                                         <input type="checkbox" class="form-control"
                                                name="link_to_calender">
@@ -100,35 +97,45 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
 
+                        <div class="row">
+                            <div class="col-6">
+                                <fieldset class="form-group position-relative has-icon-left">
+                                    <select class="form-control  select-box" name="employees[]" id="employee" data-placeholder="{{trans('tasks.assign')}}" multiple>
+                                        @foreach($employees as $employee)
+                                            <option value="{{$employee['id']}}">{{$employee['first_name']}} {{$employee['last_name']}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-6">
+                                <select class="custom-select" name="milestone_id" id="milestone" data-placeholder="{{trans('tasks.assign')}}" required>
+                                    <option value="">-- Choose Milestone --</option>
+                                    @if(isset($project)) 
+                                        @foreach($project->milestones as $milestone)
+                                            <option value="{{ $milestone->id }}">{{ $milestone->name }}</option>
+                                        @endforeach 
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+                        
 
-                        <fieldset class="form-group position-relative has-icon-left">
-
-                            <select class="form-control  select-box" name="employees[]" id="employee"
-                                    data-placeholder="{{trans('tasks.assign')}}" multiple>
-
-                                @foreach($employees as $employee)
-                                    <option value="{{$employee['id']}}">{{$employee['first_name']}} {{$employee['last_name']}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                        @if(isset($project->id))  <input name="projects[]" type="hidden"
-                                                         value="{{$project->id}}"> @elseif(isset($project_select[0]))
+                        @if(isset($project))  
+                            <input name="projects[]" type="hidden"  value="{{$project->id}}"> 
+                        @elseif(isset($project_select[0]))
                             <fieldset class="form-group position-relative has-icon-left">
-
                                 <select class="form-control  select-box" name="projects[]" id="projects"
                                         data-placeholder="{{trans('projects.projects')}}" multiple>
-
                                     @foreach($project_select as $p_row)
                                         <option value="{{$p_row['id']}}">{{$p_row['name']}}</option>
                                     @endforeach
                                 </select>
                             </fieldset>
-
                         @endif
                     </div>
+
                     <div class="modal-footer">
                         <fieldset class="form-group position-relative has-icon-left mb-0">
                             <button type="button" id="submit-data_tasks" class="btn btn-info add-todo-item"

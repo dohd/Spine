@@ -79,7 +79,7 @@ class ProjectstocktransfersTableController extends Controller
                 return amountFormat($projectstocktransfer->credit);
             })
              ->addColumn('project_id', function ($projectstocktransfer) {
-               return $projectstocktransfer->project->project_number;
+               return $projectstocktransfer->project->tid;
             })
             ->addColumn('created_at', function ($projectstocktransfer) {
                 return dateFormat($projectstocktransfer->created_at);

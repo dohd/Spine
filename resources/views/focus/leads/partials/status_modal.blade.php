@@ -1,4 +1,4 @@
-<div class="modal fade" id="status-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="statusModal" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content w-75">
             <div class="modal-header">
@@ -7,21 +7,26 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            {{ Form::model($lead, ['route' => ['biller.leads.update_status', $lead->id] ]) }}
+            {{ Form::model($lead, ['route' => ['biller.leads.update_status', $lead], 'method' => 'PATCH' ]) }}
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="status">Status</label>
                         <select class="form-control" name="status" id="status">
-                            <option value="0">Open</option>
-                            <option value="1">Closed</option>
+                            @foreach (['Open', 'Closed'] as $i => $val)
+                                <option value="{{ $i }}" {{ $i == $lead->status? 'selected' : '' }}>
+                                    {{ $val }}
+                                </option>
+                            @endforeach                            
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="reason">Reason</label>
                         <select class="form-control" name="reason" id="reason">
-                            <option value="new">New</option>
-                            <option value="won">Won</option>
-                            <option value="lost">Lost</option>
+                            @foreach (['new', 'won'] as $val)
+                                <option value="{{ $val }}" {{ $val == $lead->reason? 'selected' : '' }}>
+                                    {{ ucfirst($val) }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
                 </div>

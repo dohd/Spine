@@ -47,56 +47,57 @@ class QuoteVerifyTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->quote->getForVerifyDataTable();
+        $query = $this->quote->getForVerifyDataTable();
+        $prefixes = prefixesArray(['quote', 'proforma_invoice', 'project'], auth()->user()->ins);
 
-        return Datatables::of($core)
+        return Datatables::of($query)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('notes', function($quote) {
-                return $quote->notes;
-            })
-            ->addColumn('tid', function ($quote) {
-                $tid = sprintf('%04d', $quote->tid);
-                if ($quote->bank_id) $tid = 'PI-'.$tid;
-                else $tid = 'QT-'.$tid;
-
-                return '<a class="font-weight-bold" href="' . route('biller.quotes.show', [$quote->id]) . '">' . $tid . '</a>';
-            })
-            ->addColumn('lead_tid', function($quote) {
-                return 'Tkt-' . sprintf('%04d', $quote->lead->reference);
+            ->addColumn('tid', function ($quote) use($prefixes) {
+                $tid = gen4tid($quote->bank_id? "{$prefixes[1]}-" : "{$prefixes[0]}-", $quote->tid);
+                return '<a class="font-weight-bold" href="'. route('biller.quotes.show',$quote) .'">'. $tid . $quote->revision .'</a>';
             })
             ->addColumn('customer', function ($quote) {
-                $client_name = $quote->customer ? $quote->customer->name : '';
-                $branch_name = $quote->branch ? $quote->branch->name : '';
-                if ($client_name && $branch_name) 
-                    return $client_name . ' - ' . $branch_name . ' <a class="font-weight-bold" href="'.route('biller.customers.show', [$quote->customer->id]).'"><i class="ft-eye"></i></a>';
-
-                return $quote->lead->client_name;
-            })
-            ->addColumn('created_at', function ($quote) {
-                return dateFormat($quote->invoicedate);
+                $customer = $quote->lead? $quote->lead->client_name : '';
+                if ($quote->customer) {
+                    $customer = "{$quote->customer->company}";
+                    if ($quote->branch) $customer .= " - {$quote->branch->name}";
+                }
+                
+                return $customer;
             })
             ->addColumn('total', function ($quote) {
-                return number_format($quote->total, 2);
+                if ($quote->currency) return amountFormat($quote->total, $quote->currency->id);
+                return numberFormat($quote->total);
             })
-            ->addColumn('verified', function ($quote) {
-                return $quote->verified;
+            ->addColumn('verified_total', function ($quote) {
+                if ($quote->currency) return amountFormat($quote->verified_total, $quote->currency->id);
+                return numberFormat($quote->verified_total);
             })
             ->addColumn('lpo_number', function($quote) {
-                return $quote->lpo ? $quote->lpo->lpo_no : '';
+                if ($quote->lpo) return 'lpo - ' . $quote->lpo->lpo_no;
             })
-            ->addColumn('project_number', function($quote) {
-                $tid = '';
-                if (isset($quote->project_quote->project)) {
-                    $tid = 'Prj-'.sprintf('%04d', $quote->project_quote->project->project_number);
-                }
-                return $tid;
+            ->addColumn('approved_date', function($quote) {
+                return $quote->approved_date? dateFormat($quote->approved_date) : '';
+            })
+            ->addColumn('project_tid', function($quote) use($prefixes) {
+                if ($quote->project) 
+                return gen4tid("{$prefixes[2]}-", $quote->project->tid);
+            })
+            ->addColumn('project_closure_date', function($quote) {
+                return $quote->project_closure_date? dateFormat($quote->project_closure_date) : '';
             })
             ->addColumn('actions', function ($quote) {
                 $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
-
-                return '<a href="'.route('biller.print_verified_quote', [$quote->id, 4, $valid_token, 1, 'verified=Yes']).'" class="btn btn-purple round" target="_blank" data-toggle="tooltip" data-placement="top" title="Print"><i class="fa fa-print"></i></a> '
-                    .'<a href="'. route('biller.quotes.verify', $quote) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="Verify"><i class="fa fa-check"></i></a>';
+                if ($quote->verified == 'No') {
+                    return '<a href="'. route('biller.quotes.verify', $quote) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="Verify">
+                        <i class="fa fa-check"></i></a>';
+                }
+                    
+                return '<a href="'.route('biller.print_verified_quote', [$quote->id, 4, $valid_token, 1, 'verified=Yes']).'" class="btn btn-purple round" target="_blank" data-toggle="tooltip" data-placement="top" title="Print">
+                    <i class="fa fa-print"></i></a> '
+                    .'<a href="'. route('biller.quotes.verify', $quote) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="Verify">
+                    <i class="fa fa-check"></i></a>';
             })
             ->make(true);
     }

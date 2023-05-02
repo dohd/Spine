@@ -2,8 +2,9 @@
 
 namespace App\Http\Responses\Focus\banktransfer;
 
+use App\Models\account\Account;
+use App\Models\banktransfer\Banktransfer;
 use Illuminate\Contracts\Support\Responsable;
-use App\Models\customer\Customer;
 
 class EditResponse implements Responsable
 {
@@ -29,9 +30,11 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
-         $customers=Customer::all();
-        return view('focus.banktransfers.edit')->with([
-            'banktransfer' => $this->banktransfer,'customers'=>$customers
-        ]);
+        $accounts = Account::whereHas('accountType', fn($q) => $q->where('system', 'bank'))->get(['id', 'holder']);
+        $banktransfer_rel = Banktransfer::where('tid', $this->banktransfer->tid)->where('credit', '>', 0)->first();
+        $pmt_mode = current(explode(' - ', $this->banktransfer->note));
+        
+        return view('focus.banktransfers.edit', compact('banktransfer_rel', 'accounts', 'pmt_mode'))
+            ->with([ 'banktransfer' => $this->banktransfer]);
     }
 }

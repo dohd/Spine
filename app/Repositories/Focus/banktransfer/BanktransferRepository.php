@@ -2,15 +2,13 @@
 
 namespace App\Repositories\Focus\banktransfer;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\banktransfer\Banktransfer;
 use App\Exceptions\GeneralException;
+use App\Models\bank\Bank;
+use App\Models\transaction\Transaction;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\items\PurchaseItem;
 use App\Models\transactioncategory\Transactioncategory;
-
+use DB;
 
 /**
  * Class BankRepository.
@@ -30,9 +28,7 @@ class BanktransferRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-
-        return $this->query()->where('transaction_type','transfers')
-        ->get();
+        return $this->query()->where('tr_type', 'xfer')->get();
     }
 
     /**
@@ -44,47 +40,19 @@ class BanktransferRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        //credit entry
-       $credit_trans_category_id = Transactioncategory::where('code', 'bc_transactions')->first();
-       $credit_trans_category_id=$credit_trans_category_id->id;
-
-        $input['credit']['tid'] = $input['credit']['tid'];
-        $input['credit']['account_id'] = $input['credit']['account_id'];
-        $input['credit']['method'] = $input['credit']['method'];
-        $input['credit']['refer_no'] = $input['credit']['refer_no'];
-        $input['credit']['note'] = strip_tags(@$input['credit']['note']);
-        $input['credit']['trans_category_id'] = $credit_trans_category_id;
-        $input['credit']['transaction_type'] ='transfers';
-       
-
+        // dd($input);
         DB::beginTransaction();
-        $input['credit'] = array_map( 'strip_tags', $input['credit']);
-        $result = Banktransfer::create($input['credit']);
 
+        $input['transaction_date'] = date_for_database($input['transaction_date']);
+        $input['amount'] = numberClean($input['amount']);
+        $input['note'] = "{$input['method']} - {$input['refer_no']} {$input['note']}";
 
+        $result = $this->post_transaction((object) $input);
         if ($result) {
-
-         //begin debit entry for bank charges
-       $debit_trans_category_id = Transactioncategory::where('code', 'bc_transactions')->first();
-       $debit_trans_category_id=$debit_trans_category_id->id;
-        //$invoice_d = Purchase::where('id',$input['debit']['id'])->first();
-        $input['debit']['tid'] = $input['debit']['tid'];
-        $input['debit']['bill_id'] = $result->id;
-        $input['debit']['trans_category_id'] = $debit_trans_category_id;
-        $input['debit']['method'] = $input['method']['id'];
-        $input['debit']['refer_no'] = $input['debit']['refer_no'];
-        $input['debit']['note'] = strip_tags(@$input['debit']['note']);
-        $input['debit']['second_trans'] = 1;
-        $input['debit']['transaction_type'] ='transfers';
-        $input['debit'] = array_map( 'strip_tags', $input['debit']);
-         Banktransfer::create($input['debit']);
-
-
-
-
             DB::commit();
-            return $result;
+            return true;
         }
+
         throw new GeneralException(trans('exceptions.backend.charges.create_error'));
     }
 
@@ -96,11 +64,21 @@ class BanktransferRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Charge $charge, array $input)
+    public function update(Banktransfer $banktransfer, array $input)
     {
-        $input = array_map( 'strip_tags', $input);
-    	if ($charge->update($input))
+        // dd($input);
+        DB::beginTransaction();
+
+        $input['transaction_date'] = date_for_database($input['transaction_date']);
+        $input['amount'] = numberClean($input['amount']);
+        $input['note'] = "{$input['method']} - {$input['refer_no']} {$input['note']}";
+
+        $input['id'] = $banktransfer->id;
+        $result = $this->post_transaction((object) $input);
+        if ($result) {
+            DB::commit();
             return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.charges.update_error'));
     }
@@ -112,12 +90,68 @@ class BanktransferRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function delete(Charge $charge)
+    public function delete($banktransfer)
     {
-        if ($bank->delete()) {
-            return true;
-        }
+        $result = Banktransfer::where('tid', $banktransfer->tid)->delete();
+        aggregate_account_transactions();
+        if ($result) return true;
 
         throw new GeneralException(trans('exceptions.backend.charges.delete_error'));
+    }
+
+    /**
+     * Money Transfer Transactons
+     * 
+     */
+    public function post_transaction($data)
+    {
+        // credit Transfer Account (Bank)
+        $tr_category = Transactioncategory::where('code', 'xfer')->first(['id', 'code']);
+
+        $tr_data = [];
+        $tr_data[] = [
+            'tid' => $data->tid,
+            'account_id' => $data->account_id,
+            'trans_category_id' => $tr_category->id,
+            'tr_date' => $data->transaction_date,
+            'due_date' => $data->transaction_date,
+            'user_id' => auth()->user()->id,
+            'note' => $data->note,
+            'ins' => auth()->user()->ins,
+            'tr_type' => $tr_category->code,
+            'user_type' => 'employee',
+            'credit' => $data->amount,
+            'debit' => 0,
+            'is_primary' => 1,
+        ];
+
+        // debit Recepient Account (Bank)
+        $tr_data[] = array_replace(current($tr_data), [
+            'account_id' => $data->debit_account_id,
+            'debit' => $data->amount,
+            'credit' => 0,
+            'is_primary' => 0
+        ]);
+
+        if (isset($data->id)) {
+            // update
+            $banktransfers = Banktransfer::where(['tid' => $data->tid, 'tr_type' => 'xfer'])->get();
+            foreach ($banktransfers as $item) {
+                $item_rel = $item;
+                $new_data = [];
+                if ($item->debit > 0) {
+                    $new_data = array_replace($item_rel->toArray(), end($tr_data));
+                } elseif ($item->credit > 0) {
+                    $new_data = array_replace($item_rel->toArray(), current($tr_data));
+                }
+                $item->update($new_data);
+            }
+        } else {
+            // create
+            Banktransfer::insert($tr_data);
+        }
+        
+        aggregate_account_transactions();
+        return true;
     }
 }

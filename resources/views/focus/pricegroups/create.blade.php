@@ -2,60 +2,39 @@
 
 @section ('title',  'Price Group Management | Create Price group')
 
-@section('page-header')
-    <h1>
-       Price Group Management
-        <small>Create Price Group</small>
-    </h1>
-@endsection
-
 @section('content')
-    <div class="">
-        <div class="content-wrapper">
-            <div class="content-header row">
-                <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title mb-0">Create Price Group</h4>
-
-                </div>
-                <div class="content-header-right col-md-6 col-12">
-                    <div class="media width-250 float-right">
-
-                        <div class="media-body media-right text-right">
-                            @include('focus.pricegroups.partials.pricegroups-header-buttons')
-                        </div>
-                    </div>
+<div class="content-wrapper">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title mb-0">Create Price Group</h4>
+        </div>
+        <div class="content-header-right col-6">
+            <div class="media width-250 float-right">
+                <div class="media-body media-right text-right">
+                    @include('focus.pricegroups.partials.pricegroups-header-buttons')
                 </div>
             </div>
-            <div class="content-body">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
+        </div>
+    </div>
 
-                            <div class="card-content">
-
-                                <div class="card-body">
-                                    {{ Form::open(['route' => 'biller.pricegroups.store', 'class' => 'form-horizontal required', 'role' => 'form', 'method' => 'post', 'id' => 'create-pricegroup']) }}
-
-
-                                    <div class="form-group">
-                                        {{-- Including Form blade file --}}
-                                        @include("focus.pricegroups.form")
-                                        <div class="edit-form-btn">
-                                            {{ link_to_route('biller.pricegroups.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
-                                            {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md']) }}
-                                            <div class="clearfix"></div>
-                                        </div><!--edit-form-btn-->
-                                    </div><!-- form-group -->
-
-                                    {{ Form::close() }}
+    <div class="content-body">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            {{ Form::open(['route' => 'biller.pricegroups.store', 'method' => 'post', 'id' => 'create-pricegroup']) }}
+                                @include("focus.pricegroups.form")
+                                <div class="edit-form-btn">
+                                    {{ link_to_route('biller.pricegroups.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                                    {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md']) }}
                                 </div>
-
-
-                            </div>
+                            {{ Form::close() }}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 @endsection

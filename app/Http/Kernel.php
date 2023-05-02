@@ -50,7 +50,11 @@ class Kernel extends HttpKernel
             'throttle:60,1',
             'bindings',
         ],
-        'biller'=>['auth','focus'],
+        
+        'biller' => [
+            'auth',
+            'focus'
+        ],
     ];
 
     /**
@@ -68,11 +72,11 @@ class Kernel extends HttpKernel
         'guest'      => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle'   => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'timeout'    => \App\Http\Middleware\SessionTimeout::class,
-         'focus' => \App\Http\Middleware\FocusMiddleware::class,
-         'crm' => \App\Http\Middleware\CustomerMiddleware::class,
+        'focus'      => \App\Http\Middleware\FocusMiddleware::class,
+        'crm'        => \App\Http\Middleware\CustomerMiddleware::class,
         'public_bill'=> \App\Http\Middleware\PublicBillMiddleware::class,
         'valid_token'=> \App\Http\Middleware\ValidTokenMiddleware::class,
-        'project'=> \App\Http\Middleware\ProjectMiddleware::class,
+        'project'    => \App\Http\Middleware\ProjectMiddleware::class,
 
         /*
          * Access Middleware

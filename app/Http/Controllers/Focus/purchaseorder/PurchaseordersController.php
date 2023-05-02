@@ -15,31 +15,20 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\purchaseorder;
 
 use App\Models\purchaseorder\Purchaseorder;
-use App\Models\supplier\Supplier;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
-use App\Http\Responses\Focus\purchaseorder\CreateResponse;
 use App\Http\Responses\Focus\purchaseorder\EditResponse;
 use App\Repositories\Focus\purchaseorder\PurchaseorderRepository;
-use App\Http\Requests\Focus\purchaseorder\ManagePurchaseorderRequest;
 
-//Ported
-use App\Models\account\Account;
-use App\Models\Company\ConfigMeta;
-use App\Models\customer\Customer;
-use App\Models\hrm\Hrm;
-use mPDF;
-
-use App\Http\Requests\Focus\purchaseorder\CreatePurchaseorderRequest;
 use App\Http\Requests\Focus\purchaseorder\StorePurchaseorderRequest;
-use App\Http\Requests\Focus\purchaseorder\EditPurchaseorderRequest;
-use App\Http\Requests\Focus\purchaseorder\UpdatePurchaseorderRequest;
-use App\Http\Requests\Focus\purchaseorder\DeletePurchaseorderRequest;
+use App\Http\Responses\Focus\purchaseorder\CreateResponse;
+use App\Http\Responses\RedirectResponse;
+use App\Models\supplier\Supplier;
+use Request;
 
 /**
  * PurchaseordersController
@@ -67,29 +56,11 @@ class PurchaseordersController extends Controller
      * @param App\Http\Requests\Focus\purchaseorder\ManagePurchaseorderRequest $request
      * @return \App\Http\Responses\ViewResponse
      */
-    public function index(ManagePurchaseorderRequest $request)
+    public function index()
     {
-        $input = $request->only('rel_type', 'rel_id');
-        $segment = false;
-        $words = array();
-        if (isset($input['rel_id']) and isset($input['rel_type'])) {
-            switch ($input['rel_type']) {
-                case 1 :
-                    $segment = Supplier::find($input['rel_id']);
-                    $words['name'] = trans('customers.title');
-                    $words['name_data'] = $segment->name;
-                    break;
-                case 2 :
-                    $segment = Hrm::find($input['rel_id']);
-                    $words['name'] = trans('hrms.employee');
-                    $words['name_data'] = $segment->first_name . ' ' . $segment->last_name;
-                    break;
+        $suppliers = Supplier::whereHas('purchase_orders')->get(['id', 'name']);
 
-            }
-        }
-
-
-        return new ViewResponse('focus.purchaseorders.index', compact('input', 'segment', 'words'));
+        return new ViewResponse('focus.purchaseorders.index', compact('suppliers'));
     }
 
     /**
@@ -111,21 +82,26 @@ class PurchaseordersController extends Controller
      */
     public function store(StorePurchaseorderRequest $request)
     {
-        //Input received from the request
-        $invoice = $request->only(['supplier_id', 'tid', 'refer', 'invoicedate', 'invoiceduedate', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'ship_tax', 'term_id', 'tax_id']);
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit']);
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
-        //dd($invoice_items);
-        $invoice['ins'] = auth()->user()->ins;
-        $invoice['user_id'] = auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $result = $this->repository->create(compact('invoice', 'invoice_items', 'data2'));
-        //return with successfull message
+       // dd($request->all());
+        // extract input fields
+        $order = $request->only([
+            'supplier_id', 'tid', 'date', 'due_date', 'term_id', 'project_id', 'note', 'tax',
+            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
+        ]);
+        $order_items = $request->only([
+            'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type','product_code','warehouse_id'
+        ]);
 
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.created') . ' <a href="' . route('biller.purchaseorders.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
+        $order['ins'] = auth()->user()->ins;
+        $order['user_id'] = auth()->user()->id;
+        // modify and filter items without item_id
+        $order_items = modify_array($order_items);
+        $order_items = array_filter($order_items, function ($v) { return $v['item_id']; });
 
+        $result = $this->repository->create(compact('order', 'order_items'));
+
+        return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order created successfully']);
     }
 
     /**
@@ -135,7 +111,7 @@ class PurchaseordersController extends Controller
      * @param EditPurchaseorderRequestNamespace $request
      * @return \App\Http\Responses\Focus\purchaseorder\EditResponse
      */
-    public function edit(Purchaseorder $purchaseorder, StorePurchaseorderRequest $request)
+    public function edit(Purchaseorder $purchaseorder)
     {
         return new EditResponse($purchaseorder);
     }
@@ -149,24 +125,25 @@ class PurchaseordersController extends Controller
      */
     public function update(StorePurchaseorderRequest $request, Purchaseorder $purchaseorder)
     {
+        // extract input fields
+        $order = $request->only([
+            'supplier_id', 'tid', 'date', 'due_date', 'term_id', 'project_id', 'note', 'tax',
+            'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
+            'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
+        ]);
+        $order_items = $request->only([
+            'id', 'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type','product_code','warehouse_id'
+        ]);
 
-        //Input received from the request
-        $invoice = $request->only(['supplier_id', 'id', 'refer', 'invoicedate', 'invoiceduedate', 'notes', 'subtotal', 'shipping', 'tax', 'discount', 'discount_rate', 'after_disc', 'currency', 'total', 'tax_format', 'discount_format', 'ship_tax', 'ship_tax_type', 'ship_rate', 'ship_tax', 'term_id', 'tax_id', 'restock']);
-        $invoice_items = $request->only(['product_id', 'product_name', 'code', 'product_qty', 'product_price', 'product_tax', 'product_discount', 'product_subtotal', 'product_subtotal', 'total_tax', 'total_discount', 'product_description', 'unit', 'old_product_qty']);
-        //dd($request->id);
-        $invoice['ins'] = auth()->user()->ins;
-        //$invoice['user_id']=auth()->user()->id;
-        $invoice_items['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $data2 = $request->only(['custom_field']);
-        $data2['ins'] = auth()->user()->ins;
+        $order['ins'] = auth()->user()->ins;
+        $order['user_id'] = auth()->user()->id;
+        // modify and filter items without item_id
+        $order_items = modify_array($order_items);
+        $order_items = array_filter($order_items, function ($val) { return $val['item_id']; });
 
+        $result = $this->repository->update($purchaseorder, compact('order', 'order_items'));
 
-        $result = $this->repository->update($purchaseorder, compact('invoice', 'invoice_items', 'data2'));
-
-        //return with successfull message
-
-        echo json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.updated') . ' <a href="' . route('biller.purchaseorders.show', [$result->id]) . '" class="btn btn-primary btn-md"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;'));
+        return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order updated successfully']);
     }
 
     /**
@@ -176,15 +153,12 @@ class PurchaseordersController extends Controller
      * @param App\Models\purchaseorder\Purchaseorder $purchaseorder
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Purchaseorder $purchaseorder, StorePurchaseorderRequest $request)
+    public function destroy(Purchaseorder $purchaseorder)
     {
-        //Calling the delete method on repository
         $this->repository->delete($purchaseorder);
-        //returning with successfull message
-        return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.purchaseorders.deleted')));
 
+        return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order deleted successfully']);        
     }
-
 
     /**
      * Remove the specified resource from storage.
@@ -193,19 +167,24 @@ class PurchaseordersController extends Controller
      * @param App\Models\purchaseorder\Purchaseorder $purchaseorder
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(Purchaseorder $purchaseorder, ManagePurchaseorderRequest $request)
-    {
-
-        $accounts = Account::all();
-        $features = ConfigMeta::where('feature_id', 9)->first();
-        //returning with successfull message
-        $purchaseorder['bill_type'] = 1;
-        $words['prefix'] = prefix(9);
-        $words['pay_note'] = trans('purchaseorders.payment_for_order') . ' ' . $words['prefix'] . '#' . $purchaseorder->tid;
-
-        return new ViewResponse('focus.purchaseorders.view', compact('purchaseorder', 'accounts', 'features', 'words'));
+    public function show(Purchaseorder $purchaseorder)
+    {   
+        return new ViewResponse('focus.purchaseorders.view', compact('purchaseorder'));
     }
 
+    /**
+     * Purchase Order Goods
+     */
+    public function goods(Request $request)
+    {
+        $purchaseorder = Purchaseorder::find(request('purchaseorder_id'));
+        $stock_goods = $purchaseorder? $purchaseorder->goods()->where('type', 'Stock')->get() : collect();
+        $stock_goods = $stock_goods->map(function($v) {
+            if ($v->productvariation) $v->description .= " - {$v->productvariation->code}";
+            $v->project_tid = gen4tid("PRJ-", $v->project->tid);
+            return $v;
+        });
 
-
+        return response()->json($stock_goods);
+    }
 }

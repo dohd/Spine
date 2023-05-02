@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses\Focus\banktransfer;
 
+use App\Models\account\Account;
 use App\Models\transaction\Transaction;
 use Illuminate\Contracts\Support\Responsable;
 
@@ -16,8 +17,9 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-         // $customers=Customer::all();
-           $last_id=Transaction::orderBy('id', 'desc')->first();
-        return view('focus.banktransfers.create')->with(array('last_id'=>$last_id))->with(bill_helper(3,9));;
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid');
+        $accounts = Account::whereHas('accountType', fn($q) =>  $q->where('system', 'bank'))->get();
+        
+        return view('focus.banktransfers.create', compact('tid', 'accounts'));;
     }
 }

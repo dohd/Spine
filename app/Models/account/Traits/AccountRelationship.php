@@ -2,6 +2,7 @@
 
 namespace App\Models\account\Traits;
 
+use App\Models\account\AccountType;
 use App\Models\transaction\Transaction;
 
 /**
@@ -9,14 +10,13 @@ use App\Models\transaction\Transaction;
  */
 trait AccountRelationship
 {
-     public function transactions()
+    public function accountType()
     {
-        return $this->hasMany('App\Models\transaction\Transaction','account_id')->withoutGlobalScopes();
+        return $this->belongsTo(AccountType::class);
     }
 
-          public function amount()
-          {
-              return $this->hasMany(Transaction::class, 'account_id');
-          }
-
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

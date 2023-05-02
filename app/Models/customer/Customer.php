@@ -11,9 +11,7 @@ class Customer extends Model
 {
     use ModelTrait,
         CustomerAttribute,
-    	CustomerRelationship {
-            // CustomerAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+        CustomerRelationship;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -30,17 +28,13 @@ class Customer extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -67,34 +61,40 @@ class Customer extends Model
     {
         parent::__construct($attributes);
     }
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+
+        static::creating(function ($instance) {
+            // $instance->user_id = auth()->user()->id;
+            // $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
 
-       /**
+    /**
      * Set password attribute.
      *
      * @param [string] $password
      */
     public function setPasswordAttribute($password)
     {
-        if (!empty($password)) {
-            $this->attributes['password'] = bcrypt($password);
-        }
+        if (isset($password)) $this->attributes['password'] = bcrypt($password);
     }
 
-         public function getPictureAttribute()
+    public function getPictureAttribute()
     {
-        if (!$this->attributes['picture']) {
-            return 'example.png';
-        }
-
+        if (!$this->attributes['picture']) return 'example.png';
+            
         return $this->attributes['picture'];
     }
-
-
 }

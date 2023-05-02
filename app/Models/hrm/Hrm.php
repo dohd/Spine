@@ -11,9 +11,9 @@ class Hrm extends Model
 {
     use ModelTrait,
         HrmAttribute,
-    	HrmRelationship {
-            // HrmAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+        HrmRelationship {
+        // HrmAttribute::getEditButtonAttribute insteadof ModelTrait;
+    }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -30,17 +30,13 @@ class Hrm extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -69,12 +65,12 @@ class Hrm extends Model
     }
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
-        /**
+    /**
      * Set password attribute.
      *
      * @param [string] $password

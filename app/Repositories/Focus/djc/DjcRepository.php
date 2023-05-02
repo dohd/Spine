@@ -6,8 +6,11 @@ use DB;
 use App\Models\items\DjcItem;
 use App\Models\djc\Djc;
 use App\Exceptions\GeneralException;
+use App\Models\lead\Lead;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Storage;
+
+use function Composer\Autoload\includeFile;
 
 /**
  * Class ProductcategoryRepository.
@@ -49,6 +52,7 @@ class DjcRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+                
         return $q->get();
     }
 
@@ -61,39 +65,42 @@ class DjcRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
-        $data['report_date'] = date_for_database($data['report_date']);
-        $data['jobcard_date'] = date_for_database($data['jobcard_date']);
-        // increament tid
-        $ref =  Djc::orderBy('tid', 'desc')->first('tid');
-        if (isset($ref) && $data['tid'] <= $ref->tid) {
-            $data['tid'] = $ref->tid + 1;
-        }        
-        // upload files
-        foreach($data as $key => $value) {
-            if ($key == 'image_one' || $key == 'image_two' || $key == 'image_three' || $key == 'image_four') {
-                if ($value) $data[$key] = $this->uploadFile($value);
+        foreach($data as $key => $val) {
+            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'])) {
+                if ($val) $data[$key] = $this->uploadFile($val);
             }
+            if (in_array($key, ['report_date', 'jobcard_date']))
+                $data[$key] = date_for_database($val);
         }
+
+        // close lead
+        Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
+        // increament tid
+        $last_tid =  Djc::where('ins', auth()->user()->ins)->max('tid');
+        if ($data['tid'] <= $last_tid) $data['tid'] = $last_tid + 1;
+
         $result = Djc::create($data);
 
-        // djc items
-        $item_count = count($input['data_item']['tag_number']);
-        $data_items = $this->items_array(
-            $item_count, 
-            $input['data_item'],
-            ['djc_id' => $result['id'], 'ins' => $result['ins']]
-        );
+        $data_items = $input['data_items'];
+        $data_items = array_map(function ($v) use($result) {
+            return array_replace($v, [
+                'djc_id' => $result->id, 
+                'ins' => $result->ins,
+                'last_service_date' => date_for_database($v['last_service_date']),
+                'next_service_date' => date_for_database($v['next_service_date'])
+            ]);
+        }, $data_items);
         DjcItem::insert($data_items);
 
-        // bulk insert djc items
         if ($result) {
             DB::commit();
             return $result;
         }
-
+           
         throw new GeneralException('Error Creating Djc');
     }
 
@@ -105,44 +112,49 @@ class DjcRepository extends BaseRepository
      * @throws GeneralException
      * @return object
      */
-    public function update(array $input)
+    public function update($djc, array $input)
     {
+        // dd($input);
         DB::beginTransaction();
 
-        // djc input data
         $data = $input['data'];
-        $data['report_date'] = date_for_database($data['report_date']);
-        $data['jobcard_date'] = date_for_database($data['jobcard_date']);
-        
-        $result = Djc::where('id', $data['id'])->update($data);
+        foreach($data as $key => $val) {
+            if (in_array($key, ['image_one', 'image_two', 'image_three', 'image_four'])) {
+                if ($val) $data[$key] = $this->uploadFile($val);
+            }
+            if (in_array($key, ['report_date', 'jobcard_date']))
+                $data[$key] = date_for_database($val);
+        }
+    
+        // if different lead, open previous lead otherwise close lead
+        if ($djc->lead && $djc->lead->status == 1 && $djc->lead_id != $data['lead_id']) 
+            $djc->lead->update(['status' => 0]);
+        else Lead::find($data['lead_id'])->update(['status' => 1, 'reason' => 'won']);
+                
+        $result = $djc->update($data);
 
-        // djc items
-        $item_count = count($input['data_item']['tag_number']);
-        $data_items = $this->items_array(
-            $item_count, 
-            $input['data_item'],
-            ['djc_id' => $data['id'], 'ins' => $data['ins']]
-        );
-
+        $data_items = $input['data_items'];
+        // remove omitted djc items
+        $item_ids = array_map(fn($v) => $v['item_id'], $data_items);
+        $djc->items()->whereNotIn('id', $item_ids)->delete();
         // update or create new djc_item
         foreach($data_items as $item) {
-            $djc_item = DjcItem::firstOrNew([
-                'id' => $item['item_id'],
-                'djc_id' => $item['djc_id'],
+            $item = array_replace($item, [
+                'djc_id' => $djc->id,
+                'ins' => $djc->ins,
+                'last_service_date' => date_for_database($item['last_service_date']),
+                'next_service_date' => date_for_database($item['next_service_date'])
             ]);
-            // assign properties to the item
-            foreach($item as $key => $value) {
-                $djc_item[$key] = $value;
-            }
-            // remove stale attributes and save
-            if ($djc_item['id'] == 0) unset($djc_item['id']);
-            unset($djc_item['item_id']);
+            $djc_item = DjcItem::firstOrNew(['id' => $item['item_id']]);
+            $djc_item->fill($item);
+            if (!$djc_item->id) unset($djc_item->id);
+            unset($djc_item->item_id);
             $djc_item->save();
         }
 
         if ($result) {
             DB::commit();
-            return $result;
+            return $djc;
         }
 
         throw new GeneralException('Error Updating Djc');
@@ -157,46 +169,18 @@ class DjcRepository extends BaseRepository
      */
     public function delete(Djc $djc)
     {
-        // delete djc_items items then delete djc
-        if ($djc->items()->delete() && $djc->delete()) return true;
+        if ($djc->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
-    }
-
-    // Delete djc item from storage
-    public function delete_item($id)
-    {
-        if (DjcItem::destroy($id)) return true;        
-
-        throw new GeneralException('Error deleting Djc Item');
     }
 
     // Upload file to storage
     public function uploadFile($file)
     {
-        $path = $this->file_path;
         $file_name = time() . $file->getClientOriginalName();
 
-        $this->storage->put($path . $file_name, file_get_contents($file->getRealPath()));
-
+        $this->storage->put($this->file_path . $file_name, file_get_contents($file->getRealPath()));
+        
         return $file_name;
-    }
-
-    // Convert array to database collection format
-    protected function items_array($count=0, $item=[], $extra=[])
-    {
-        $data_items = array();
-        for ($i = 0; $i < $count; $i++) {
-            $row = $extra;
-            foreach (array_keys($item) as $key) {
-                $value = $item[$key][$i];
-                if ($key == 'last_service_date' || $key == 'next_service_date') {
-                    $value = date_for_database($value);
-                }
-                $row[$key] = $value;
-            }
-            $data_items[] = $row;
-        }
-        return $data_items;
     }
 }

@@ -2,50 +2,23 @@
 
 namespace App\Repositories\Focus\loan;
 
-use App\Models\customergroup\CustomerGroupEntry;
-use App\Models\items\CustomEntry;
 use DB;
-use Carbon\Carbon;
-use App\Models\loan\Loan;
 use App\Exceptions\GeneralException;
+use App\Models\account\Account;
+use App\Models\loan\Loan;
+use App\Models\transaction\Transaction;
+use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Storage;
-use App\Http\Responses\RedirectResponse;
+use Illuminate\Validation\ValidationException;
 /**
  * Class CustomerRepository.
  */
 class LoanRepository extends BaseRepository
 {
-
-    /**
-     *customer_picture_path .
-     *
-     * @var string
-     */
-    protected $customer_picture_path;
-
-
-    /**
-     * Storage Class Object.
-     *
-     * @var \Illuminate\Support\Facades\Storage
-     */
-    protected $storage;
     /**
      * Associated Repository Model.
      */
-    const MODEL = Deptor::class;
-
-
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        $this->customer_picture_path = 'img' . DIRECTORY_SEPARATOR . 'customer' . DIRECTORY_SEPARATOR;
-        $this->storage = Storage::disk('public');
-    }
+    const MODEL = Loan::class;
 
     /**
      * This method is used by Table Controller
@@ -57,19 +30,8 @@ class LoanRepository extends BaseRepository
     {
         $q = $this->query();
        
-        $q->when(request('g_rel_type'), function ($q) {
-
-            return $q->where('rel_id', '=',request('g_rel_id',-1));
-        });
-        if (!request('g_rel_type') AND request('g_rel_id')) {
-            $q->whereHas('group', function ($s) {
-                return $s->where('customer_group_id', '=', request('g_rel_id', 0));
-            });
-        }
-        return $q->get(['id','taxid', 'name','company','email','address','picture','active','created_at']);
+        return $q->get();
     }
-
-
 
     /**
      * For Creating the respective model in storage
@@ -80,164 +42,115 @@ class LoanRepository extends BaseRepository
      */
     public function create(array $input)
     {
-
-        if (!empty($input['data']['picture'])) {
-            $input['data']['picture'] = $this->uploadPicture($input['data']['picture']);
-        }
-        $groups = @$input['data']['groups'];
-        unset($input['data']['groups']);
+        // dd($input);
         DB::beginTransaction();
-        $input['data'] = array_map( 'strip_tags', $input['data']);
-        try {
-            $result = Customer::create($input['data']);
-        } catch (QueryException $e){
-            $errorCode = $e->errorInfo[1];
-            if($errorCode == '1062'){
-                session()->flash('flash_error', 'Duplicate Email');
-            }
-            new RedirectResponse(route('biller.customers.create'), ['flash_success' =>trans('exceptions.backend.customers.create_error')]);
-           // throw new GeneralException(trans('exceptions.backend.customers.create_error'));
+
+        foreach ($input as $key => $val) {
+            if ($key == 'date') $input[$key] = date_for_database($val);
+            if (in_array($key, ['amount', 'fee', 'month_installment'])) 
+                $input[$key] = numberClean($val);
         }
 
+        $result = Loan::create($input);
 
-        if (@$result->id) {
-            $fields = array();
-            if (isset($groups)) {
-                $insert_groups = array();
-                foreach ($groups as $key => $value) {
-                    $insert_groups[] = array('customer_id' => $result->id, 'customer_group_id' => strip_tags($value));
-                }
-                CustomerGroupEntry::insert($insert_groups);
-            }
-
-            if (isset($input['data2']['custom_field'])) {
-                foreach ($input['data2']['custom_field'] as $key => $value) {
-                    $fields[] = array('custom_field_id' => $key, 'rid' => $result->id, 'module' => 1, 'data' => strip_tags($value), 'ins' => $input['data']['ins']);
-                }
-                CustomEntry::insert($fields);
-            }
+        if ($result) {
             DB::commit();
             return $result;
         }
+
         throw new GeneralException(trans('exceptions.backend.customers.create_error'));
     }
 
     /**
      * For updating the respective Model in storage
      *
-     * @param Customer $customer
+     * @param Productcategory $productcategory
      * @param  $input
      * @throws GeneralException
      * return bool
      */
-    public function update(Customer $customer, array $input)
+    public function update(Loan $loan, array $input)
     {
-
-        if (!empty($input['data']['picture'])) {
-            $this->removePicture($customer, 'picture');
-
-            $input['data']['picture'] = $this->uploadPicture($input['data']['picture']);
-        }
-        if (empty($input['data']['password'])) {
-
-
-          unset($input['data']['password']);
-        }
+        // dd($input);
         DB::beginTransaction();
-        $groups = @$input['data']['groups'];
 
-        unset($input['data']['groups']);
-          $input['data'] = array_map( 'strip_tags', $input['data']);
-
-        try {
-            $customer->update($input['data']);
-
-         } catch (QueryException $e) {
-            $errorCode = $e->errorInfo[1];
-            if ($errorCode == '1062') {
-                session()->flash('flash_error', 'Duplicate Email');
-            }
-               return false;
+        foreach ($input as $key => $val) {
+            if (in_array($key, ['date', 'approval_date'])) $input[$key] = date_for_database($val);
+            if (in_array($key, ['amount', 'fee', 'month_installment'])) 
+                $input[$key] = numberClean($val);
         }
 
+        $result = $loan->update($input);
+        if (!$loan->employee) throw ValidationException::withMessages(['server error! something went wrong']);
 
-            if (isset($groups)) {
+        if ($loan->approval_status == 'approved') {
+            $loan->amount += $loan->fee; 
 
-                $insert_groups = array();
-                foreach ($groups as $key => $value) {
-                    $insert_groups[] = array('customer_id' => $customer->id, 'customer_group_id' => $value);
-                }
-                CustomerGroupEntry::where('customer_id',  $customer->id)->delete();
-
-                CustomerGroupEntry::insert($insert_groups);
-
-            } else {
-                CustomerGroupEntry::where('customer_id',  $customer->id)->delete();
-            }
-
-
-            if (isset($input['data2']['custom_field'])) {
-                foreach ($input['data2']['custom_field'] as $key => $value) {
-                    $fields[] = array('custom_field_id' => $key, 'rid' => $customer->id, 'module' => 1, 'data' => strip_tags($value), 'ins' => $customer->ins);
-                    CustomEntry::where('custom_field_id', '=', $key)->where('rid', '=', $customer->id)->delete();
-                }
-                CustomEntry::insert($fields);
-            }
-            DB::commit();
-            return true;
-        
-
-
-        throw new GeneralException(trans('exceptions.backend.customers.update_error'));
-    }
-
-    /*
- * Upload logo image
- */
-    public function uploadPicture($logo)
-    {
-        $path = $this->customer_picture_path;
-
-        $image_name = time() . $logo->getClientOriginalName();
-
-        $this->storage->put($path . $image_name, file_get_contents($logo->getRealPath()));
-
-        return $image_name;
-    }
-
-    /*
-    * remove logo or favicon icon
-    */
-    public function removePicture(Customer $customer, $type)
-    {
-        $path = $this->customer_picture_path;
-
-        if ($customer->$type && $this->storage->exists($path . $customer->$type)) {
-            $this->storage->delete($path . $customer->$type);
+            $loan->transactions()->delete();
+            $this->post_transaction($loan);
         }
-
-        $result = $customer->update([$type => null]);
 
         if ($result) {
-            return true;
-        }
-
-        throw new GeneralException(trans('exceptions.backend.settings.update_error'));
+            DB::commit();
+            return $result;
+        }        
+            
+        throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
     /**
-     * For deleting the respective model from storage
-     *
-     * @param Customer $customer
-     * @return bool
-     * @throws GeneralException
+     *  Remove resource from storage
      */
-    public function delete(Customer $customer)
+    public function delete($loan)
     {
-        if ($customer->delete()) {
-            return true;
-        }
+        DB::beginTransaction();
 
-        throw new GeneralException(trans('exceptions.backend.customers.delete_error'));
+        $loan->transactions()->delete();
+        aggregate_account_transactions();
+        
+        if ($loan->delete()) {
+            DB::commit();
+            return true;
+        };
+    }
+
+    /**
+     * Approve loan transaction
+    */
+    public function post_transaction($loan)
+    {
+        // credit lender account (bank)
+        $tr_category = Transactioncategory::where('code', 'loan')->first(['id', 'code']);
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
+        $cr_data = [
+            'tid' => $tid,
+            'account_id' => $loan->lender_id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $loan->amount,
+            'tr_date' => $loan->approval_date,
+            'due_date' => $loan->approval_date,
+            'user_id' => $loan->user_id,
+            'ins' => $loan->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $loan->id,
+            'user_type' => 'employee',
+            'is_primary' => 1,
+            'note' => $loan->note,
+        ];
+        Transaction::create($cr_data);
+
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        if ($loan->employee) {
+            // debit Loan Receivable
+            $account = Account::where('system', 'loan_receivable')->first();
+            $dr_data = array_replace($cr_data, [
+                'account_id' =>  $account->id,
+                'debit' => $loan->amount,
+            ]);
+            Transaction::create($dr_data);
+        } else {
+            // business loan
+        }
+        aggregate_account_transactions();    
     }
 }

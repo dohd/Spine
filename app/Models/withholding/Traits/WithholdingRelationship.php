@@ -2,39 +2,31 @@
 
 namespace App\Models\withholding\Traits;
 
-//use App\Models\hrm\Hrm;
+use App\Models\items\WithholdingItem;
+use App\Models\transaction\Transaction;
 
 /**
- * Class TransactionRelationship
+ * Class WithholdingRelationship
  */
 trait WithholdingRelationship
 {
-     public function account()
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'tr_ref')->where('tr_type', 'withholding');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(WithholdingItem::class, 'withholding_id');
+    }
+
+    public function account()
     {
         return $this->belongsTo('App\Models\account\Account');
     }
 
-        public function customer()
+    public function customer()
     {
-        return $this->belongsTo('App\Models\customer\Customer','payer_id','id');
+        return $this->belongsTo('App\Models\customer\Customer');
     }
-/*
-            public function employee()
-    {
-        return $this->belongsTo(Hrm::class,'payer_id','id');
-    }
-
-         public function category()
-    {
-        return $this->belongsTo('App\Models\transactioncategory\Transactioncategory','trans_category_id','id');
-    }
-        public function invoice()
-    {
-        return $this->hasOne('App\Models\invoice\Invoice','id','bill_id');
-    }
-
-    public function user()
-    {
-        return $this->belongsTo('App\Models\Access\User\User')->withoutGlobalScopes();
-    }*/
 }

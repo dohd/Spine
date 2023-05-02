@@ -1,251 +1,241 @@
-@extends ('core.layouts.app',['page'=>'class="horizontal-layout horizontal-menu content-detached-left-sidebar app-contacts " data-open="click" data-menu="horizontal-menu" data-col="content-detached-left-sidebar"'])
+@extends('core.layouts.app', [
+    'page' => 'class = "horizontal-layout horizontal-menu content-detached-left-sidebar app-contacts" data-open = "click" data-menu = "horizontal-menu" data-col = "content-detached-left-sidebar"'
+])
 
-@section ('title', trans('labels.backend.suppliers.management') . ' | ' . trans('labels.backend.customers.create'))
+@section('title', trans('labels.backend.suppliers.management'))
 
-@section('page-header')
-    <h1>
-        {{ trans('labels.backend.customers.management') }}
-        <small>{{ trans('labels.backend.customers.create') }}</small>
-    </h1>
-@endsection
 @section('content')
-    <div class="">
-        <div class="content-wrapper">
-            <div class="content-header row">
-            </div>
-            <div class="content-detached content-right">
-                <div class="content-body">
-                    <div class="content-overlay"></div>
-
-
-                    <section class="row all-contacts">
-                        <div class="col-12">
-                            <div class="card">
-
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <!-- Task List table -->
-                                        <a href="{{route('biller.suppliers.edit',[$supplier->id])}}"
-                                           class="btn btn-blue btn-outline-accent-5 btn-sm float-right"><i
-                                                    class="fa fa-pencil"></i> {{trans('buttons.general.crud.edit')}}</a>
-                                        <div class="card-body">
-
-                                            <ul class="nav nav-tabs nav-top-border no-hover-bg "
-                                                role="tablist">
-                                                <li class="nav-item">
-                                                    <a class="nav-link active" id="active-tab1" data-toggle="tab"
-                                                       href="#active1" aria-controls="active1" role="tab"
-                                                       aria-selected="true">{{ trans('customers.billing_address') }}</a>
-                                                </li>
-
-                                                <li class="nav-item">
-                                                    <a class="nav-link " id="active-tab3" data-toggle="tab"
-                                                       href="#active3" aria-controls="active3"
-                                                       role="tab">{{ trans('customers.other_data') }}</a>
-                                                </li>
-
-
-                                            </ul>
-                                            <div class="tab-content px-1 pt-1">
-                                                <div class="tab-pane active in" id="active1"
-                                                     aria-labelledby="active-tab1" role="tabpanel">
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.name')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['name']}}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.phone')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['phone']}}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.email')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['email']}}</p>
-                                                        </div>
-                                                    </div>
-
-
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.address')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['address']}}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.city')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['city']}}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.region')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['region']}}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.country')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['country']}}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.postbox')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['postbox']}}</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.company')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['company']}}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.taxid')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['taxid']}}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="tab-pane" id="active3" aria-labelledby="link-tab3"
-                                                     role="tabpanel">
-
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.docid')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['docid']}}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                                            <p>{{trans('customers.custom1')}}</p>
-                                                        </div>
-                                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                                            <p>{{$supplier['custom1']}}</p>
-                                                        </div>
-                                                    </div>
-
-
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-            </div>
-            <div class="sidebar-detached sidebar-left">
-                <div class="sidebar">
-                    <div class="bug-list-sidebar-content">
-                        <!-- Predefined Views -->
-                        <div class="card">
-                            <div class="card-head">
-                                <div class="media-body media p-1">
-                                    <div class="media-middle pr-1"><span
-                                                class="avatar avatar-lg rounded-circle ml-2"><img
-                                                    src="{{Storage::disk('public')->url('app/public/img/supplier/' . $supplier->picture)}}"
-                                                    alt="avatar"><i></i></span></div>
-
-                                </div>
-                                <div class="media-body media-middle p-1">
-
-                                    <h5 class="media-heading">{{$supplier['name']}} </h5>
-                                    <h5 class="info"> {{trans('suppliers.supplier')}}</h5>
-                                </div>
-                            </div>
-
-                            <div class="card-body">
-                                <p class="lead"> {{trans('general.related')}}</p>
-                                <ul class="list-group">
-                                    <li class="list-group-item">
-                                        <span class="badge badge-primary badge-pill float-right">{{$supplier->invoices->count('id')}}</span>
-                                        <a href="{{route('biller.purchaseorders.index')}}?rel_type=1&rel_id={{$supplier->id}}">
-                                            {{trans('purchaseorders.purchaseorder')}}</a>
-                                    </li>
-                                    <li class="list-group-item">
-                                        <span class="badge bg-purple badge-pill float-right">{{$supplier->amount->count('id')}}</span>
-                                        <a href="{{route('biller.transactions.index')}}?rel_type=4&rel_id={{$supplier->id}}">
-                                            {{trans('transactions.transactions')}}</a>
-                                    </li>
-
-                                </ul>
-                            </div>
-                            <!--/ Groups-->
-
-
-                        </div>
-                        <!--/ Predefined Views -->
-
-                    </div>
+<div class="content-wrapper">
+    <div class="content-header row mb-1">
+        <div class="content-header-left col-6">
+            <h4 class="content-header-title">Supplier Management</h4>
+        </div>
+        <div class="content-header-right col-6">
+            <div class="media width-250 float-right">
+                <div class="media-body media-right text-right">
+                    @include('focus.suppliers.partials.suppliers-header-buttons')
                 </div>
             </div>
         </div>
     </div>
+    
+    <div class="content-detached content-right">
+        <div class="content-body">
+            <section class="row all-contacts">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="btn-group float-right">
+                                    <a href="{{ route('biller.suppliers.edit', $supplier) }}" class="btn btn-blue btn-outline-accent-5 btn-sm">
+                                        <i class="fa fa-pencil"></i> {{trans('buttons.general.crud.edit')}}
+                                    </a>&nbsp;
+                                    <button type="button" class="btn btn-danger btn-outline-accent-5 btn-sm" id="delSupplier">
+                                        {{Form::open(['route' => ['biller.suppliers.destroy', $supplier], 'method' => 'DELETE'])}}{{Form::close()}}
+                                        <i class="fa fa-trash"></i> {{trans('buttons.general.crud.delete')}}
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    @include('focus.suppliers.partials.tabs')
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    @include('focus.suppliers.partials.sidebar')
+</div>
 @endsection
 
 @section('after-scripts')
-    {{-- For DataTables --}}
-    {{ Html::script(mix('js/dataTable.js')) }}
+{{ Html::script(mix('js/dataTable.js')) }}
+<script>
+    config = {
+        ajax: {
+            headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}
+        },
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true},
+        dataTable: {
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            stateSave: true,
+            language: {@lang('datatable.strings')},
+        }
+    };
 
-    <script>
-        //Below written line is short form of writing $(document).ready(function() { })
-        $(function () {
-            $(document).on('click', ".customer_active", function (e) {
-                var cid = $(this).attr('data-cid');
-                var active = $(this).attr('data-active');
-                if (active == 1) {
-                    $(this).removeClass('checked');
-                    $(this).attr('data-active', 0);
-                } else {
-                    $(this).addClass('checked');
-                    $(this).attr('data-active', 1);
-                }
+    const View = {
+        startDate: '',
 
-                $.ajax({
-                    url: '{{ route("biller.customers.active") }}',
+        init() {
+            $.ajaxSetup(config.ajax);
+            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+            
+            this.drawSupplierDataTable();
+            this.drawBillDataTable();
+            this.drawAccountStatementDataTable();
+            this.drawBillStatementDataTable();
+            this.cloneAgingReport();
+
+            $('.start_date').change(this.changeStartDate);
+            $('.search').click(this.searchClick);
+            $('.refresh').click(this.refreshClick);
+            $('#delSupplier').click(this.deleteSupplier);
+        },
+
+        deleteSupplier() {
+            const form = $(this).children('form');
+            swal({
+                title: 'Are You  Sure?',
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+                showCancelButton: true,
+            }, () => form.submit());
+        },
+
+        changeStartDate() {
+            const date = $(this).val();
+            // statement on account
+            if ($(this).parents('#active2').length) {
+                let link = $('.print-on-account').attr('href');
+                if (link.includes('start_date')) {
+                    link = link.split('?')[0];
+                    link += `?is_transaction=1&start_date=${date}`;
+                } else link += `?is_transaction=1&start_date=${date}`;
+                $('.print-on-account').attr('href', link);
+            } else if ($(this).parents('#active4').length) {
+                // statement on invoice
+                let link = $('.print-on-invoice').attr('href');
+                if (link.includes('start_date')) {
+                    link = link.split('?')[0];
+                    link += `?is_statement=1&start_date=${date}`;
+                } else link += `?is_statement&start_date=${date}`;
+                $('.print-on-invoice').attr('href', link);
+            }
+        },
+
+        searchClick() {
+            const startInpt = $(this).parents('.row').find('.start_date');
+            const id = $(this).attr('id');
+            if (id == 'search2') {
+                View.startDate = startInpt.eq(0).val();
+                $('#transTbl').DataTable().destroy();
+                View.drawAccountStatementDataTable();
+            } else if (id == 'search4') {
+                View.startDate = startInpt.eq(1).val();
+                $('#stmentTbl').DataTable().destroy();
+                View.drawBillStatementDataTable();
+            }
+        },
+
+        refreshClick() {
+            View.startDate = '';
+            View.endDate = '';
+            const id = $(this).attr('id');
+            if (id == 'refresh2') {
+                $('#transTbl').DataTable().destroy();
+                View.drawAccountStatementDataTable();
+            } else if (id == 'refresh4') {
+                $('#stmentTbl').DataTable().destroy();
+                View.drawBillStatementDataTable();
+            }
+        },
+
+        cloneAgingReport() {
+            const aging = $('.aging').clone();
+            $('#stmentTbl').after(aging);
+            $('#active5').append(aging.clone());
+        },
+
+        drawSupplierDataTable() {
+            $('#supplierTbl').DataTable({
+                ...config.dataTable,
+                ajax: {
+                    url: '{{ route("biller.suppliers.get") }}',
                     type: 'post',
-                    data: {'cid': cid, 'active': active}
-                });
+                    data: {supplier_id: "{{ $supplier->id }}" },
+                },
+                columns: [{ data: 'name', name: 'name'}],
+                order: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'frt',
             });
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
+        },
+
+        drawBillDataTable() {
+            $('#billTbl').DataTable({
+                ...config.dataTable,
+                ajax: {
+                    url: '{{ route("biller.suppliers.get") }}',
+                    type: 'post',
+                    data: {supplier_id: "{{ $supplier->id }}", start_date:this.startDate, is_bill: 1 },
+                },
+                columns: [
+                    {name: 'id', data: 'DT_Row_Index'},
+                    ...['date', 'status', 'note', 'amount', 'paid'].map(v => ({data: v, name: v})),
+                ],
+                order: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['excel', 'csv', 'pdf'],
+                lengthMenu: [
+                    [25, 50, 100, 200, -1],
+                    [25, 50, 100, 200, "All"]
+                ],
             });
+        },
 
+        drawAccountStatementDataTable() {
+            $('#transTbl').DataTable({
+                ...config.dataTable,
+                ajax: {
+                    url: '{{ route("biller.suppliers.get") }}',
+                    type: 'post',
+                    data: {supplier_id: "{{ $supplier->id }}", start_date:this.startDate, is_transaction: 1 },
+                },
+                columns: [
+                    {name: 'id', data: 'DT_Row_Index'},
+                    ...['date', 'type', 'note', 'bill_amount', 'amount_paid', 'account_balance'].map(v => ({data: v, name: v})),
+                ],
+                order: [[1, "asc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['excel', 'csv', 'pdf'],
+                lengthMenu: [
+                    [25, 50, 100, 200, -1],
+                    [25, 50, 100, 200, "All"]
+                ],
+            });
+        },
 
-        });
-    </script>
+        drawBillStatementDataTable() {
+            $('#stmentTbl').DataTable({
+                ...config.dataTable,
+                bSort: false,
+                ajax: {
+                    url: '{{ route("biller.suppliers.get") }}',
+                    type: 'post',
+                    data: {supplier_id: "{{ $supplier->id }}", start_date:this.startDate, is_statement: 1 },
+                },
+                columns: [
+                    {name: 'id', data: 'DT_Row_Index'},
+                    ...['date', 'type', 'note', 'bill_amount', 'amount_paid', 'bill_balance'].map(v => ({data: v, name: v})),
+                ],
+                order: [[0, "asc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['excel', 'csv', 'pdf'],
+                lengthMenu: [
+                    [25, 50, 100, 200, -1],
+                    [25, 50, 100, 200, "All"]
+                ],
+            });
+        },
+    };
+
+    $(() => View.init());
+</script>
 @endsection

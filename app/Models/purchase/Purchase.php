@@ -12,8 +12,7 @@ class Purchase extends Model
     use ModelTrait,
         PurchaseAttribute,
         PurchaseRelationship {
-
-        }
+    }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -24,23 +23,19 @@ class Purchase extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'transactions';
+    protected $table = 'bills';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -67,11 +62,23 @@ class Purchase extends Model
     {
         parent::__construct($attributes);
     }
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
-            $builder->where('ins', '=', auth()->user()->ins);
-    });
+        parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->user_id = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
+            $builder->where('ins', auth()->user()->ins);
+        });
     }
 }

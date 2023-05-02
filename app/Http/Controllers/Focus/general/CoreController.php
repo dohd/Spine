@@ -15,9 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\general;
 
-use App\Events\Frontend\Auth\UserLoggedOut;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\Auth\Auth;
@@ -27,19 +27,15 @@ class CoreController extends Controller
 {
     use AuthenticatesUsers;
 
+    protected $redirectTo;
+
     public function redirectPath()
     {
-        return route('biller.dashboard');
+        return session()->get('url_intended') ?? route('biller.dashboard');
     }
 
     public function showLoginForm()
     {
-        if (!file_exists(storage_path('installed'))) 
-            return redirect()->to('install');
-
-        if (auth()->user()) 
-            return redirect()->route('biller.dashboard');
-        
         return view('core.index');
     }
 
@@ -50,15 +46,11 @@ class CoreController extends Controller
     {
         if (!$user->isConfirmed()) {
             access()->logout();
-            throw new GeneralException(
-                trans('exceptions.frontend.auth.confirmation.resend', 
-                ['user_id' => $user->id]), 
-                true
-            );
-        } 
+            trigger_error(trans('exceptions.frontend.auth.confirmation.resend', ['user_id' => $user->id]));
+        }
         if (!$user->isActive()) {
             access()->logout();
-            throw new GeneralException(trans('exceptions.frontend.auth.deactivated'));
+            trigger_error(trans('exceptions.frontend.auth.deactivated'));
         }
     }
 
@@ -73,18 +65,19 @@ class CoreController extends Controller
 
     public function logout(Request $request)
     {
+        if (!$request->auth) $this->redirectTo = session()->get('url_intended');
+
+        // clear session
         if (app('session')->has(config('access.socialite_session_name'))) {
             app('session')->forget(config('access.socialite_session_name'));
         }
         app()->make(Auth::class)->flushTempSession();
-        /*
-         * Fire event, Log out user, Redirect
-         */
-        event(new UserLoggedOut($this->guard()->user()));
         $this->guard()->logout();
         $request->session()->flush();
         $request->session()->regenerate();
 
-        return redirect(route('biller.index'));
+        session()->put('url_intended', $this->redirectTo);
+
+        return redirect()->route('biller.index');
     }
 }

@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\report;
 
 use App\Http\Responses\RedirectResponse;
@@ -23,7 +24,6 @@ use App\Models\Company\ConfigMeta;
 use App\Models\customer\Customer;
 use App\Models\invoice\Invoice;
 use App\Models\items\InvoiceItem;
-use App\Models\items\OrderItem;
 use App\Models\items\PurchaseItem;
 use App\Models\items\Register;
 use App\Models\product\ProductMeta;
@@ -34,22 +34,18 @@ use App\Models\supplier\Supplier;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Models\warehouse\Warehouse;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Focus\report\ManageReports;
 use Illuminate\Support\Facades\Response;
-use mPDF;
 
 class StatementController extends Controller
 {
     public function index(ManageReports $reports)
     {
-
     }
 
     public function account(ManageReports $reports)
     {
-
     }
 
     public function statement(ManageReports $reports)
@@ -133,7 +129,6 @@ class StatementController extends Controller
                 $lang['module'] = 'pos_statement';
                 return view('focus.report.general_statement', compact('lang'));
                 break;
-
         }
     }
 
@@ -194,7 +189,6 @@ class StatementController extends Controller
                 $lang['party'] = $account_details->name . '<br>' . $account_details->email . '<br>' . $account_details->phone;
                 $file_name = preg_replace('/[^A-Za-z0-9]+/', '-', $lang['title'] . '_' . $account_details->name);
                 break;
-
         }
 
         switch ($reports->trans_type) {
@@ -215,10 +209,10 @@ class StatementController extends Controller
             case 'pdf_print':
                 $html = view('focus.report.pdf.account', compact('account_details', 'transactions', 'lang'))->render();
                 $headers = array(
-                        "Content-type" => "application/pdf",
-                        "Pragma" => "no-cache",
-                        "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                        "Expires" => "0"
+                    "Content-type" => "application/pdf",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
                 );
                 $pdf = new \Mpdf\Mpdf(config('pdf'));
                 $pdf->WriteHTML($html);
@@ -257,20 +251,36 @@ class StatementController extends Controller
 
     public function generate_tax_statement(ManageReports $reports)
     {
-        if (!$reports->from_date) return new RedirectResponse(route('biller.reports.statements', [$reports->section]), ['flash_error' => trans('meta.invalid_entry')]);
+        if (!$reports->from_date)
+            return new RedirectResponse(route('biller.reports.statements', [$reports->section]), ['flash_error' => trans('meta.invalid_entry')]);
+
         switch ($reports->tax_type) {
             case 'tax_sales':
-                $account_details = Transaction::where('tax_type','sales_purchases')->where('credit', '>', 0)->whereBetween('transaction_date', [date_for_database($reports->from_date), date_for_database($reports->to_date)])->get();
+                $account_details = Transaction::whereHas('account', function ($q) {
+                    $q->where('system', 'tax');
+                })
+                    ->where('tr_type', 'inv')
+                    ->where('credit', '>', 0)
+                    ->whereBetween('tr_date', [date_for_database($reports->from_date), date_for_database($reports->to_date)])
+                    ->get();
+
                 $lang['title'] = trans('meta.tax_statement');
                 $lang['title2'] = trans('meta.tax_statement');
                 $lang['module'] = 'tax_statement';
                 $lang['party'] = config('core.cname');
                 $lang['party_2'] = trans('customers.customer');
-                 $lang['type'] = 1;
+                $lang['type'] = 1;
                 $file_name = preg_replace('/[^A-Za-z0-9]+/', '-', $lang['title'] . '_' . $reports->from_date);
                 break;
             case 'tax_purchase':
-                $account_details = Transaction::where('tax_type','sales_purchases')->where('debit', '>', 0)->whereBetween('transaction_date', [date_for_database($reports->from_date), date_for_database($reports->to_date)])->get();
+                $account_details = Transaction::whereHas('account', function ($q) {
+                    $q->where('system', 'tax');
+                })
+                    ->where('tr_type', 'bill')
+                    ->where('debit', '>', 0)
+                    ->whereBetween('tr_date', [date_for_database($reports->from_date), date_for_database($reports->to_date)])
+                    ->get();
+
                 $lang['title'] = trans('meta.tax_statement_purchase');
                 $lang['title2'] = trans('meta.tax_statement_purchase');
                 $lang['module'] = 'tax_statement';
@@ -283,15 +293,14 @@ class StatementController extends Controller
 
 
         switch ($reports->output_format) {
-
             case 'pdf_print':
                 $html = view('focus.report.pdf.tax', compact('account_details', 'lang'))->render();
-                 $headers = array(
-                        "Content-type" => "application/pdf",
-                        "Pragma" => "no-cache",
-                        "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                        "Expires" => "0"
-                    );
+                $headers = array(
+                    "Content-type" => "application/pdf",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
+                );
                 $pdf = new \Mpdf\Mpdf(config('pdf'));
                 $pdf->WriteHTML($html);
                 return Response::stream($pdf->Output($file_name . '.pdf', 'I'), 200, $headers);
@@ -347,10 +356,10 @@ class StatementController extends Controller
                 $transfer = 1;
                 $file_name = preg_replace('/[^A-Za-z0-9]+/', '-', $lang['title'] . '_' . $reports->from_date);
                 break;
-            //product stock transfer
+                //product stock transfer
             case 'product':
                 if (!$reports->product_name) return new RedirectResponse(route('biller.reports.statements', [$reports->section]), ['flash_error' => trans('meta.invalid_entry')]);
-                $account_details = ProductMeta:: where('rel_id', '=', $reports->product_name)->where('rel_type', '=', 1)->when($reports->to_warehouse != 'all', function ($q) use ($reports) {
+                $account_details = ProductMeta::where('rel_id', '=', $reports->product_name)->where('rel_type', '=', 1)->when($reports->to_warehouse != 'all', function ($q) use ($reports) {
                     return $q->where('value2', '=', $reports->to_warehouse);
                 })->whereBetween('created_at', [datetime_for_database($reports->from_date), datetime_for_database($reports->to_date)])->get();
                 $lang['title'] = trans('meta.stock_transfer_statement');
@@ -368,7 +377,6 @@ class StatementController extends Controller
                     $lang['title2'] = trans('meta.product_statement_sales');
 
                     $account_details = InvoiceItem::where('product_id', '=', $reports->product_name)->whereBetween('created_at', [datetime_for_database($reports->from_date), datetime_for_database($reports->to_date)])->get();
-
                 } elseif ($reports->type_p == 'purchase') {
                     $lang['title2'] = trans('meta.product_statement_purchase');
                     $account_details = PurchaseItem::where('product_id', '=', $reports->product_name)->whereBetween('created_at', [datetime_for_database($reports->from_date), datetime_for_database($reports->to_date)])->get();
@@ -393,8 +401,6 @@ class StatementController extends Controller
                             return $q->where('productcategory_id', '=', $cat_id);
                         });
                     })->get();
-
-
                 } elseif ($reports->type_p == 'purchase') {
                     $lang['title2'] = trans('meta.product_statement_purchase');
                     $account_details = PurchaseItem::whereBetween('created_at', [datetime_for_database($reports->from_date), datetime_for_database($reports->to_date)])->whereHas('variation', function ($q) use ($cat_id) {
@@ -420,7 +426,6 @@ class StatementController extends Controller
                         return $q->where('warehouse_id', '=', $cat_id);
                     })->get();
                     $lang['title2'] = trans('meta.product_statement_sales');
-
                 } elseif ($reports->type_p == 'purchase') {
                     $account_details = PurchaseItem::whereBetween('created_at', [datetime_for_database($reports->from_date), datetime_for_database($reports->to_date)])->whereHas('variation', function ($q) use ($cat_id) {
                         return $q->where('warehouse_id', '=', $cat_id);
@@ -444,7 +449,6 @@ class StatementController extends Controller
                     $lang['title'] = trans('meta.product_customer_statement');
                     $customer = Customer::find($reports->person)->first();
                     $lang['party'] = $customer->name;
-
                 }
 
                 $lang['module'] = 'product_statement';
@@ -476,15 +480,15 @@ class StatementController extends Controller
                 case 'pdf_print':
 
                     $html = view('focus.report.pdf.stock_transfer', compact('account_details', 'lang'))->render();
-                      $headers = array(
+                    $headers = array(
                         "Content-type" => "application/pdf",
                         "Pragma" => "no-cache",
                         "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
                         "Expires" => "0"
                     );
-                $pdf = new \Mpdf\Mpdf(config('pdf'));
-                $pdf->WriteHTML($html);
-                return Response::stream($pdf->Output($file_name . '.pdf', 'I'), 200, $headers);
+                    $pdf = new \Mpdf\Mpdf(config('pdf'));
+                    $pdf->WriteHTML($html);
+                    return Response::stream($pdf->Output($file_name . '.pdf', 'I'), 200, $headers);
 
                     break;
                 case 'pdf':
@@ -523,15 +527,15 @@ class StatementController extends Controller
 
                 case 'pdf_print':
                     $html = view('focus.report.pdf.product', compact('account_details', 'lang'))->render();
-                      $headers = array(
+                    $headers = array(
                         "Content-type" => "application/pdf",
                         "Pragma" => "no-cache",
                         "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
                         "Expires" => "0"
                     );
-                $pdf = new \Mpdf\Mpdf(config('pdf'));
-                $pdf->WriteHTML($html);
-                return Response::stream($pdf->Output($file_name . '.pdf', 'I'), 200, $headers);
+                    $pdf = new \Mpdf\Mpdf(config('pdf'));
+                    $pdf->WriteHTML($html);
+                    return Response::stream($pdf->Output($file_name . '.pdf', 'I'), 200, $headers);
                     break;
                 case 'pdf':
                     $html = view('focus.report.pdf.product', compact('account_details', 'lang'))->render();
@@ -569,15 +573,15 @@ class StatementController extends Controller
 
                 case 'pdf_print':
                     $html = view('focus.report.pdf.product_person', compact('account_details', 'lang'))->render();
-                      $headers = array(
+                    $headers = array(
                         "Content-type" => "application/pdf",
                         "Pragma" => "no-cache",
                         "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
                         "Expires" => "0"
                     );
-                $pdf = new \Mpdf\Mpdf(config('pdf'));
-                $pdf->WriteHTML($html);
-                return Response::stream($pdf->Output($file_name . '.pdf', 'I'), 200, $headers);
+                    $pdf = new \Mpdf\Mpdf(config('pdf'));
+                    $pdf->WriteHTML($html);
+                    return Response::stream($pdf->Output($file_name . '.pdf', 'I'), 200, $headers);
                     break;
                 case 'pdf':
                     $html = view('focus.report.pdf.product_person', compact('account_details', 'lang'))->render();
@@ -606,7 +610,6 @@ class StatementController extends Controller
                             }
                         }
                         fclose($file);
-
                     };
                     return Response::stream($callback, 200, $headers);
                     break;
@@ -633,12 +636,12 @@ class StatementController extends Controller
             case 'pdf_print':
 
                 $html = view('focus.report.pdf.pos_register', compact('register_entries', 'lang'))->render();
-                  $headers = array(
-                        "Content-type" => "application/pdf",
-                        "Pragma" => "no-cache",
-                        "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                        "Expires" => "0"
-                    );
+                $headers = array(
+                    "Content-type" => "application/pdf",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
+                );
                 $pdf = new \Mpdf\Mpdf(config('pdf'));
                 $pdf->WriteHTML($html);
                 return Response::stream($pdf->Output($file_name . '.pdf', 'I'), 200, $headers);
@@ -676,5 +679,4 @@ class StatementController extends Controller
                 break;
         }
     }
-
 }

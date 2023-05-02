@@ -13,7 +13,7 @@ class StoreSectionRequest extends FormRequest
      */
     public function authorize()
     {
-        return access()->allow('store-misc');
+        return access()->allow('create-misc');
     }
 
     /**
