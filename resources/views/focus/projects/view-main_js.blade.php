@@ -125,33 +125,67 @@
         $(document).on('click', ".file-del", function (e) {
             e.preventDefault();
             const obj = $(this);
-            $.ajax({
-                url: $(this).attr('href'),
-                type: 'POST',
-                success: (data)  => obj.parents('tr').remove(),
+            $.post($(this).attr('href'), data => {
+                obj.parents('tr').remove()
             });
         });   
     });
 
     // milestone show modal
+    let milestoneState;
+    const addMilestoneForm = $('#data_form_mile_stone')[0].outerHTML;
     $('#AddMileStoneModal').on('shown.bs.modal', function() {
+        if (milestoneState == 'create') {
+            $(this).find('.modal-content').html(addMilestoneForm);
+            $('[data-toggle="datepicker"]').datepicker(config.date);
+            $('.from_date').datepicker(config.date).datepicker('setDate', '{{dateFormat(date('Y-m-d', strtotime('-30 days', strtotime(date('Y-m-d')))))}}');
+            $('.to_date').datepicker(config.date).datepicker('setDate', 'today');
+            $('#color').colorpicker();        
+        }   
+
         // fetch project budget amount
         $.get("{{ route('biller.projects.budget_limit', $project) }}", ({data}) => {
             const milestoneBudget = accounting.formatNumber(data.milestone_budget);
             $('.milestone-limit').text(milestoneBudget);
+            if (milestoneState == 'edit') {
+                const amount = accounting.unformat($('#milestone-amount').val());
+                let limit = accounting.unformat($('.milestone-limit').text());
+                limit += amount;
+                $('.milestone-limit').text(accounting.formatNumber(limit));
+            }
         });
-
-        $('[data-toggle="datepicker"]').datepicker(config.date);
-        $('.from_date').datepicker(config.date).datepicker('setDate', '{{dateFormat(date('Y-m-d', strtotime('-30 days', strtotime(date('Y-m-d')))))}}');
-        $('.to_date').datepicker(config.date).datepicker('setDate', 'today');
-        $('#color').colorpicker();        
 
         $('#milestone-amount').change(function() {
             const milestoneBudget = accounting.unformat($('.milestone-limit').text());
             if (this.value > milestoneBudget) this.value = milestoneBudget;
             this.value = accounting.formatNumber(this.value);
-        });
+        });            
     });
+    $('#addMilestone').click(function() { milestoneState = 'create'; });
+    // on edit milestone
+    $(document).on('click', ".milestone-edit", function() {
+        const obj = $(this);
+        $.get($(this).attr('data-url'), 
+            {object_id: $(this).attr('data-id'), obj_type: 2}, 
+            data => {
+                milestoneState = 'edit';
+                const div = $(document.createElement('div'));
+                div.html(data);
+                let form = div.find('.modal-content').html();
+                $('#AddMileStoneModal').find('.modal-content').html(form);
+                $('#AddMileStoneModal').modal('toggle');
+            }
+        );
+    });     
+    // on delete milestone
+    $(document).on('click', ".milestone-del", function() {
+        const obj = $(this);
+        $.post($(this).attr('data-url'), 
+            {object_id: $(this).attr('data-id'), obj_type: 2}, 
+            data => obj.parents('tr').remove()
+        );
+    });    
+
 
     // quote show modal
     $('#AddQuoteModal').on('shown.bs.modal', function () {
@@ -183,29 +217,10 @@
         const form_data = {};
         form_data['form'] = $("#data_form_mile_stone").serialize();
         form_data['url'] = $('#action-url').val();
+        return console.log(form_data.form)
         addObject(form_data, true);
         $('#AddMileStoneModal').modal('toggle');
-
-    //     var num = $('#estimated-milestone').val();
-    //     if (num == '') {
-    //         swal({
-    //                 title: 'Enter Estimated Milestone Amount?',
-    //                 icon: "warning",
-    //                 buttons: true,
-    //                 dangerMode: true,
-    //                 showCancelButton: true,
-    //             }, () =>{ return;});
-            
-    //     }
-    //    else{
-    
-    //     const form_data = {};
-    //         form_data['form_name'] = 'data_form_quote';
-    //         form_data['form'] = $("#data_form_mile_stone").serialize();
-    //         form_data['url'] = $('#action-url').val();
-    //         $('#AddMileStoneModal').modal('toggle');
-    //         addObject(form_data, true);
-    //    }
+        $('#data_form_mile_stone')[0].reset();
     });
 
     // log submit
@@ -346,117 +361,7 @@
             buttons: ['csv', 'excel', 'print'],
         });
     }
-    // detach budget
-    $(document).on('click', ".budget_delete", function (e) {
-        var pro_id = e.target.getAttribute('data-pro');
-        var budget_id = e.target.getAttribute('data-id');
-        var url = "{{ route('biller.projects.detach_budget') }}";
-        $.ajax({
-            method: "POST",
-            url: url,
-            data: {
-                budget_id: budget_id,
-            },
-            
-            success: function (response) {
-                swal({
-                    title: response.status,
-                    icon: "success",
-                    buttons: true,
-                    dangerMode: true,
-                    showCancelButton: true,
-                }, () =>{ 
-                    window.location.reload();
-                });
-            }
-        });
-        // e.preventDefault();
-        // addObject({form: '', url: $(this).attr('href')}, true);
-        // $(this).closest('tr').remove();
-    });
-    // budget view
-    $('#budgetsTbl tbody').on('click', '.view',  function(e){
-        var id = e.target.getAttribute('data-id');
-
-        $.ajax({
-            method: "GET",
-            url: "{{ route('biller.projects.view_budget')}}",
-            data: {
-                id : id,
-            },
-            
-            success: function (response) {
-               if (response.id) {
-                swal({
-                    title: 'Quote is Not Budgeted?',
-                    icon: "warning",
-                    buttons: true,
-                    dangerMode: true,
-                    showCancelButton: true,
-                }, () =>{ return;}); 
-                //data-toggle="modal" data-target="#AddBudgetModal"
-                //
-                return;
-               }
-               $('#AddBudgetModal').modal('show');
-               $('#customer').val(response.customer);
-               $('#branch').val(response.branch);
-               if(response.quote.approval_note)
-                    $('#subject').val(response.quote.approval_note);
-               $('#date').val(response.quote.date);
-               $('#tid').val('QT-'+response.quote.tid);
-               $('#client_ref').val(response.quote.client_ref);
-               $('#quote_total').val(response.budget.quote_total)
-               $('#budget-total').val(response.budget.budget_total);
-               //Budget Items modal view
-               $.each(response.budget_items, function(key, value) {
-                var row = $('<tr>');
-                var numbering = $('<td>').text(value.numbering);
-                var product_name = $('<td>').text(value.product_name);
-                var approved_qty = $('<td>').text(value.product_qty);
-                var unit = $('<td>').text(value.unit);
-                var new_qty = $('<td>').text(value.new_qty);
-                var price = $('<td>').text(value.price);
-                var amount = $('<td>').text(value.price * value.new_qty);
-                
-                row.append(numbering);
-                row.append(product_name);
-                row.append(approved_qty);
-                row.append(unit);
-                row.append(new_qty);
-                row.append(price);
-                row.append(amount);
-                $('#AddBudgetModal').find('#budgetviewTbl tbody').append(row);
-                });
-                //Budget Skillset modal View
-                let i = 1;
-                $.each(response.skillset, function(key, value) {
-                var row = $('<tr>');
-                var numbering = $('<td>').text(i);
-                var skill = $('<td>').text(value.skill);
-                var charge = $('<td>').text(value.charge);
-                var hours = $('<td>').text(value.hours);
-                var no_technician = $('<td>').text(value.no_technician);
-                var amount = $('<td class="total">').text(value.charge * value.hours * value.no_technician);
-                
-                row.append(numbering);
-                row.append(skill);
-                row.append(charge);
-                row.append(hours);
-                row.append(no_technician);
-                row.append(amount);
-                i++
-                $('#AddBudgetModal').find('#budgetviewskillsetTbl tbody').append(row);
-                });
-                var total = 0;
-                $('#budgetviewskillsetTbl tbody tr .total').each(function(){
-                    total += parseFloat($(this).text());
-                })
-                $('#labour-total').val(total);
-            }
-        });
-    });       
-
+        
     /** Purchase Table Summary */
     function purchase() {
         if ($('#purchaseTbl tbody tr').length) return;        
@@ -644,7 +549,7 @@
         quoteIds = quoteIds.join(',');
         $('#invoices-table_p').dataTable({
             processing: true,
-            serverSide: true,
+            // serverSide: true,
             responsive: true,
             language: {
                 @lang('datatable.strings')

@@ -1,6 +1,6 @@
 <div class="tab-pane" id="tab_data2" aria-labelledby="tab2" role="tabpanel">
     {{-- @if(project_access($project->id)) --}}
-        <button type="button" class="btn btn-info" id="addt" data-toggle="modal" data-target="#AddMileStoneModal">
+        <button type="button" class="btn btn-info" id="addMilestone" data-toggle="modal" data-target="#AddMileStoneModal">
             <i class="fa fa-plus-circle"></i> Milestone
         </button>
     {{-- @endif --}}
@@ -26,7 +26,7 @@
                     {{-- @if (project_access($project->id)) --}}
                         <div class="timeline-body mb-1">
                             <p>{{$row['note']}}</p>
-                            <p>Estimated Milestone Amount: <b>{{ amountFormat($row['estimated_milestone_amount']) }}</b></p>
+                            <p>Milestone Amount: <b>{{ amountFormat($row['amount']) }}</b></p>
                         </div>
                     {{-- @endif --}}
                     <small class="text-muted"><i class="fa fa-user"></i>
@@ -35,13 +35,12 @@
                     </small>
                     <div>
                         <div class="btn-group">
-                            <a href="#" class="edit-object mr-1"  data-object-id="{{$row['id']}}">
-                                <i class="ft ft-edit" style="font-size: 1.5em"></i>
-                            </a>
-
-                            <a href="#" class="delete-object mr-1" data-object-type="2" data-object-id="{{$row['id']}}">
+                            <button class="btn btn-link milestone-edit" obj-type="2" data-id="{{$row['id']}}" data-url="{{ route('biller.projects.edit_meta') }}">
+                                <i class="ft ft-edit" style="font-size: 1.2em"></i>
+                            </button>
+                            <button class="btn btn-link milestone-del" obj-type="2" data-id="{{$row['id']}}" data-url="{{ route('biller.projects.delete_meta') }}">
                                 <i class="fa fa-trash fa-lg danger"></i>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>

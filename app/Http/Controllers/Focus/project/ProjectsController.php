@@ -368,87 +368,100 @@ class ProjectsController extends Controller
 
         DB::beginTransaction();
 
-        switch ($input['obj_type']) {
-            case 2: // milestone
-                $data = Arr::only($input, ['project_id','amount', 'name', 'description', 'color', 'duedate', 'time_to']);
-                $data['due_date'] = date_for_database("{$data['duedate']} {$data['time_to']}:00");
-                $data['note'] = $data['description'];
-                unset($data['duedate'], $data['time_to'], $data['description']);
-                $milestone = ProjectMileStone::create($data);
-
-                $result = '
-                    <li id="m_'. $milestone->id .'">
-                        <div class="timeline-badge" style="background-color:'. $milestone->color .';">*</div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h4 class="timeline-title">'. $milestone->name .'</h4>
-                                <p><small class="text-muted">['. trans('general.due_date') .' '. dateTimeFormat($milestone->due_date) .']</small></p>
+        try {
+            switch ($input['obj_type']) {
+                case 2: // milestone
+                    $data = Arr::only($input, ['project_id','amount', 'name', 'description', 'color', 'duedate', 'time_to']);
+                    $data = array_replace($data, [
+                        'due_date' => date_for_database("{$data['duedate']} {$data['time_to']}:00"),
+                        'note' => $data['description'],
+                        'amount' => numberClean($data['amount']),
+                    ]);
+                    unset($data['duedate'], $data['time_to'], $data['description']);
+                    $milestone = ProjectMileStone::create($data);
+    
+                    $result = '
+                        <li id="m_'. $milestone->id .'">
+                            <div class="timeline-badge" style="background-color:'. $milestone->color .';">*</div>
+                            <div class="timeline-panel">
+                                <div class="timeline-heading">
+                                    <h4 class="timeline-title">'. $milestone->name .'</h4>
+                                    <p><small class="text-muted">['. trans('general.due_date') .' '. dateTimeFormat($milestone->due_date) .']</small></p>
+                                </div>
+                                <div class="timeline-body mb-1">
+                                    <p> '. $milestone->note .'</p>
+                                    <p> Milestone Amount: '. numberFormat($milestone->amount) .'</p>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fa fa-user"></i><strong>'. @$milestone->creator->fullname . '</strong>
+                                    <i class="fa fa-clock-o"></i> '. trans('general.created') . '  ' . dateTimeFormat($milestone->created_at) . '
+                                </small>
+                                <div class="btn-group">
+                                    <button class="btn btn-link milestone-edit" obj-type="2" data-id="'. $milestone->id .'" data-url="'. route('biller.projects.edit_meta') .'">
+                                        <i class="ft ft-edit" style="font-size: 1.2em"></i>
+                                    </button>
+                                    <button class="btn btn-link milestone-del" obj-type="2" data-id="'. $milestone->id .'" data-url="'. route('biller.projects.delete_meta') .'">
+                                        <i class="fa fa-trash fa-lg danger"></i>
+                                    </button>
+                                </div>                             
                             </div>
-                            <div class="timeline-body mb-1">
-                                <p> '. $milestone->note .'</p>
-                                <p> '. $milestone->estimated_milestone_amount .'</p>
-                                <a href="#" class=" delete-object" data-object-type="2" data-object-id="'. $milestone->id .'">
-                                    <i class="danger fa fa-trash"></i>
-                                </a>
-                            </div>
-                            <small class="text-muted">
-                                <i class="fa fa-user"></i><strong>'. $milestone->creator->first_name .' '. $milestone->creator->last_name . '</strong>
-                                <i class="fa fa-clock-o"></i> '. trans('general.created') . '  ' . dateTimeFormat($milestone->created_at) . '
-                            </small>
-                        </div>
-                    </li>
-                ';
-
-                $data = [
-                    'project_id' => $milestone->project_id, 
-                    'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.new') . '] ' . $input['name'],
-                ];
-                ProjectLog::create($data);
-
-                $response = array_replace($response, ['status' => 'Success', 't_type' => 2, 'meta' => $result]);
-                break;
-            case 5: // project activity log 
-                $data = ['project_id' => $request->project_id, 'value' => $request->name];
-                $project_log = ProjectLog::create($data);
-
-                $log_text = '<tr><td>*</td><td>'. dateTimeFormat($project_log->created_at) .'</td><td>' 
-                    .auth()->user()->first_name .'</td><td>'. $project_log->value .'</td></tr>';
-
-                $response = array_replace($response, ['status' => 'Success', 't_type' => 5, 'meta' => $log_text]);
-                break;
-            case 6: // project note
-                $data = ['title' => $input['title'], 'content' => $input['content'], 'section' => 1];
-                $note = Note::create($data);
-
-                $data = ['project_id' => $request->project_id, 'related' => 6, 'rid' => $note->id];
-                ProjectRelations::create($data);
-
-                $data = ['project_id' => $request->project_id, 'value' => '[' . trans('projects.milestone') . '] ' . $request->title];
-                ProjectLog::create($data);
-
-                $log_text = '<tr><td>*</td><td>'. $note->title .'</td><td>'. dateTimeFormat($note->created_at) .'</td><td>' 
-                    . auth()->user()->first_name . '</td><td><a href="'. route('biller.notes.show', [$note->id]) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="View"><i class="fa fa-eye"></i></a>
-                        <a href="'. route('biller.notes.edit', [$note->id]) .'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Edit"><i class="fa fa-pencil "></i> </a> 
-                        <a class="btn btn-danger round" table-method="delete" data-trans-button-cancel="Cancel" data-trans-button-confirm="Delete" data-trans-title="Are you sure you want to do this?" data-toggle="tooltip" data-placement="top" title="Delete" style="cursor:pointer;" onclick="$(this).find(&quot;form&quot;).submit();">
-                        <i class="fa fa-trash"></i> <form action="' . route('biller.notes.show', [$note->id]) . '" method="POST" name="delete_table_item" style="display:none"></form></a></td></tr>';
+                        </li>
+                    ';
+    
+                    $data = [
+                        'project_id' => $milestone->project_id, 
+                        'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.new') . '] ' . $input['name'],
+                    ];
+                    ProjectLog::create($data);
+    
+                    $response = array_replace($response, ['status' => 'Success', 't_type' => 2, 'meta' => $result]);
+                    break;
+                case 5: // project activity log 
+                    $data = ['project_id' => $request->project_id, 'value' => $request->name];
+                    $project_log = ProjectLog::create($data);
+    
+                    $log_text = '<tr><td>*</td><td>'. dateTimeFormat($project_log->created_at) .'</td><td>' 
+                        .auth()->user()->first_name .'</td><td>'. $project_log->value .'</td></tr>';
+    
+                    $response = array_replace($response, ['status' => 'Success', 't_type' => 5, 'meta' => $log_text]);
+                    break;
+                case 6: // project note
+                    $data = ['title' => $input['title'], 'content' => $input['content'], 'section' => 1];
+                    $note = Note::create($data);
+    
+                    $data = ['project_id' => $request->project_id, 'related' => 6, 'rid' => $note->id];
+                    ProjectRelations::create($data);
+    
+                    $data = ['project_id' => $request->project_id, 'value' => '[' . trans('projects.milestone') . '] ' . $request->title];
+                    ProjectLog::create($data);
+    
+                    $log_text = '<tr><td>*</td><td>'. $note->title .'</td><td>'. dateTimeFormat($note->created_at) .'</td><td>' 
+                        . auth()->user()->first_name . '</td><td><a href="'. route('biller.notes.show', [$note->id]) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="View"><i class="fa fa-eye"></i></a>
+                            <a href="'. route('biller.notes.edit', [$note->id]) .'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Edit"><i class="fa fa-pencil "></i> </a> 
+                            <a class="btn btn-danger round" table-method="delete" data-trans-button-cancel="Cancel" data-trans-button-confirm="Delete" data-trans-title="Are you sure you want to do this?" data-toggle="tooltip" data-placement="top" title="Delete" style="cursor:pointer;" onclick="$(this).find(&quot;form&quot;).submit();">
+                            <i class="fa fa-trash"></i> <form action="' . route('biller.notes.show', [$note->id]) . '" method="POST" name="delete_table_item" style="display:none"></form></a></td></tr>';
+                    
+                    $response = array_replace($response, ['status' => 'Success', 't_type' => 6, 'meta' => $log_text]);
+                    break;
                 
-                $response = array_replace($response, ['status' => 'Success', 't_type' => 6, 'meta' => $log_text]);
-                break;
-            
-            case 7: // project quote
-                $project = Project::find($input['project_id']);
-                $milestones = $project->milestones()->first();
-                if($milestones) return response()->json($milestone_response);
-                if (!$project->main_quote_id) $project->update(['main_quote_id' => current($input['quote_ids'])]);
-
-                foreach($input['quote_ids'] as $val) {
-                    $item = ProjectQuote::firstOrCreate(['project_id' => $project->id, 'quote_id' => $val]);
-                    Quote::find($val)->update(['project_quote_id' => $item->id]); 
-                }
-
-                $response = array_replace($response, ['status' => 'Success', 't_type' => 7, 'meta' => '', 'refresh' => 1]);
-                break;
+                case 7: // project quote
+                    $project = Project::find($input['project_id']);
+                    $milestones = $project->milestones()->first();
+                    if($milestones) return response()->json($milestone_response);
+                    if (!$project->main_quote_id) $project->update(['main_quote_id' => current($input['quote_ids'])]);
+    
+                    foreach($input['quote_ids'] as $val) {
+                        $item = ProjectQuote::firstOrCreate(['project_id' => $project->id, 'quote_id' => $val]);
+                        Quote::find($val)->update(['project_quote_id' => $item->id]); 
+                    }
+    
+                    $response = array_replace($response, ['status' => 'Success', 't_type' => 7, 'meta' => '', 'refresh' => 1]);
+                    break;
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
         }
+
 
         if ($response['status'] == 'Success') {
             DB::commit();
@@ -458,6 +471,24 @@ class ProjectsController extends Controller
 
         return response()->json($response);
     }
+
+    /**
+     * Edit Meta Data
+     */
+    public function edit_meta(ManageProjectRequest $request)
+    {
+        $input = $request->except(['_token', 'ins']);
+
+        $data = '';
+        switch ($input['obj_type']) {
+            case 2 :
+                $milestone = ProjectMileStone::find($input['object_id']);
+                $project = $milestone->project;
+                return view('focus.projects.modal.milestone_new', compact('milestone', 'project'));
+        }
+        
+        return response()->json($data);
+    }    
 
     /**
      * Delete meta
@@ -489,6 +520,38 @@ class ProjectsController extends Controller
 
         return response()->json($data);
     }
+
+    /**
+     * Update Meta
+     */
+    public function update_meta(ManageProjectRequest $request)
+    {
+        $input = $request->except(['_token', 'ins']); dd($input);
+
+        DB::beginTransaction();
+
+        try {
+            switch ($input['object_type']) {
+                case 2 :
+                    $milestone = ProjectMileStone::find($input['object_id']);
+                    ProjectLog::create([
+                        'project_id' => $milestone->project_id, 
+                        'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.delete') . '] ' . $milestone->name, 
+                        'user_id' => auth()->user()->id
+                    ]);
+                    $milestone->delete();
+                    $data = ['status' => 'Success', 'message' => trans('general.delete'), 't_type' => 1, 'meta' => $input['object_id']];
+                    break;
+            }
+            DB::commit();
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            $data = ['status' => 'Error', 'message' => 'Internal server error!'];
+        }
+
+        return response()->json($data);
+    }
+
 
 
     /**

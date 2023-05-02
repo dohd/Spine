@@ -12,6 +12,8 @@ Route::group(['namespace' => 'projectstock'], function () {
 // 
 Route::group(['namespace' => 'project', 'middleware' => 'project'], function () {
   Route::post('projects/update_status', 'ProjectsController@update_status')->name('projects.update_status');
+  Route::get('projects/edit_meta', 'ProjectsController@edit_meta')->name('projects.edit_meta');
+  Route::post('projects/update_meta', 'ProjectsController@update_meta')->name('projects.update_meta');
   Route::post('projects/store_meta', 'ProjectsController@store_meta')->name('projects.store_meta');
   Route::post('projects/delete_meta', 'ProjectsController@delete_meta')->name('projects.delete_meta');
   Route::post('projects/log_history', 'ProjectsController@log_history')->name('projects.log_history');

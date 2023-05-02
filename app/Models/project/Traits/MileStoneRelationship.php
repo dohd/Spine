@@ -3,6 +3,7 @@
 namespace App\Models\project\Traits;
 
 use App\Models\hrm\Hrm;
+use App\Models\project\Project;
 use App\Models\project\Task;
 
 /**
@@ -10,6 +11,11 @@ use App\Models\project\Task;
  */
 trait MileStoneRelationship
 {
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
     public function tasks()
     {
         return $this->hasMany(Task::class, 'milestone_id');
@@ -17,6 +23,6 @@ trait MileStoneRelationship
 
     public function creator()
     {
-        return $this->belongsTo(Hrm::class, 'user_id', 'id')->withoutGlobalScopes();;
+        return $this->belongsTo(Hrm::class, 'user_id', 'id')->withoutGlobalScopes();
     }
 }
