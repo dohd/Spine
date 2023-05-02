@@ -50,66 +50,46 @@ class ProspectsTableController extends Controller
     public function __invoke()
     {
         $core = $this->prospect->getForDataTable();
-       
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('name', function ($prospect) {
-                return $prospect->name;
+
+                $name = $prospect->name == null ? '_____________' : $prospect->name;
+                return $name;
             })
             ->addColumn('email', function ($prospect) {
-                $client_email = $prospect->email;
+                $client_email = $prospect->email == null ? '_____________' : $prospect->email ;
 
                 return $client_email;
             })
             ->addColumn('industry', function ($prospect) {
-                $client_industry = $prospect->industry;
+                $client_industry = $prospect->industry == null ? '_____________' : $prospect->industry;
 
                 return $client_industry;
             })
             ->addColumn('region', function ($prospect) {
-                $client_region = $prospect->region;
+                $client_region = $prospect->region == null ? '_____________': $prospect->region;
 
                 return $client_region;
             })
             ->addColumn('company', function ($prospect) {
-                $client_company = $prospect->company;
+                $client_company = $prospect->company == null ? '_____________' : $prospect->company;
 
                 return $client_company;
             })
             ->addColumn('phone', function ($prospect) {
-                $phone = $prospect->phone;
+                $phone = $prospect->phone == null ? '_____________' : $prospect->phone ;
 
                 return $phone;
             })
-            ->addColumn('previous_date', function ($prospect) {
-                $date =$prospect->remarks()->get()->count() > 1 ?  $prospect->remarks()->skip(1)
-                ->take(1)
-                ->first()->reminder_date : $prospect->remarks()->first()->reminder_date ;
-                //$date =$prospect->remarks()->first()->reminder_date;
-               
-                return $date;
-            })
-            ->addColumn('reminder_date', function ($prospect) {
-                $date =$prospect->remarks()->first()->reminder_date;
-               
-                return $date;
-            })
-            ->addColumn('remarks', function ($prospect) {
-                $remark =$prospect->remarks()->first()->remarks;
+            // ->addColumn('category', function ($prospect) {
+            //     $category = $prospect->category;
 
-                return $remark;
-            })
-            ->addColumn('prospect_status', function ($prospect) {
-                $state =$prospect->prospect_status;
-
-                return $state;
-            })
-            ->addColumn('follow_up', function ($prospect) {
-                return '<a id="follow" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospect->id . '" data-toggle="tooltip"  title="FollowUp" >
-                <i  class="fa fa-vcard"></i>
-                         </a>';
-            })
+            //     return $category;
+            // })
+            
             ->addColumn('status', function ($prospect) {
                 $status = $prospect->status;
                 if ($status == 0) {

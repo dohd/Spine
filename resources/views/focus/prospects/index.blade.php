@@ -50,11 +50,7 @@
                                             <th>Company</th>
                                             <th>Email</th>
                                             <th>Phone</th>
-                                            <th>Previous Date</th>
-                                            <th>Reminder Date</th>
-                                            <th>Remark</th>
-                                            <th>State</th>
-                                            <th>Follow up</th>
+                                            
                                             <th>Status</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -210,31 +206,15 @@
                             data: 'phone',
                             name: 'phone'
                         },
-                        {
-                            data: 'previous_date',
-                            name: 'previous_date'
-                        },
-                        {
-                            data: 'reminder_date',
-                            name: 'reminder_date'
-                        },
-                        {
-                            data: 'remarks',
-                            name: 'remarks'
-                        },
-                        {
-                            data: 'prospect_status',
-                            name: 'prospect_status'
-                        },
-                        {
-                            data: 'follow_up',
-                            name: 'follow_up'
-                        },
-
+                        // {
+                        //     data: 'category',
+                        //     name: 'category'
+                        // },
                         {
                             data: 'status',
                             name: 'status'
                         },
+                        
                         {
                             data: 'actions',
                             name: 'actions',

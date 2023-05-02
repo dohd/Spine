@@ -2,7 +2,7 @@
 
 namespace App\Imports;
 
-use App\Models\calllist\CallList;
+use App\Models\prospect\Prospect;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
@@ -30,24 +30,27 @@ class ProspectsImport implements ToCollection, WithBatchInserts, WithValidation,
         // dd($rows);
         $prospect_data = [];
         foreach ($rows as $key => $row) {
-            $row_num = $key+1;
-            if ($row_num == 1 && $row->count() < 9) {
+            $row_num = $key + 1;
+            if ($row_num == 1 && $row->count() < 6) {
                 trigger_error('Missing columns! Use latest CSV file template.');
             } elseif ($row_num > 1) {
-                if (empty($row[0])) trigger_error('Company is required on row no. $row_num', );
+                if (empty($row[0])) trigger_error('Name is required on row no. $row_num',);
                 $prospect_data[] = [
+                    'title' => $this->data['title'],
+                    'category' => "excel",
                     'name' => $row[0],
-                    'company' => empty($row[1])? $row[0] : $row[1],
+                    'company' => empty($row[1]) ? $row[0] : $row[1],
                     'industry' => $row[2],
                     'region' => $row[3],
                     'email' => $row[4],
                     'phone' => $row[5],
                     'ins' => $this->data['ins'],
+                    'user_id' => auth()->user()->id,
                 ];
                 ++$this->rows;
-            }            
+            }
         }
-        CallList::insert($prospect_data);
+        Prospect::insert($prospect_data);
     }
 
     public function rules(): array

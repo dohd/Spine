@@ -20,7 +20,7 @@ namespace App\Http\Controllers\Focus\calllist;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
+use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Http\Responses\Focus\calllist\CreateResponse;
 use App\Http\Responses\Focus\calllist\EditResponse;
@@ -30,9 +30,9 @@ use App\Models\branch\Branch;
 use App\Models\calllist\CallList;
 
 /**
- * ProductcategoriesController
+ * CallListController
  */
-class CallListsController extends Controller
+class CallListController extends Controller
 {
     /**
      * variable to store the repository object
@@ -58,18 +58,23 @@ class CallListsController extends Controller
     public function index()
     {
 
-       
+        $called = CallList::where('call_status', 1)->count();
+        $not_called = CallList::where('call_status', 0)->count() ;
+        $total_prospect = CallList::count() ;
+        
+        return new ViewResponse('focus.prospects.calllist.index', compact('called', 'not_called', 'total_prospect'));
+        //return new ViewResponse('focus.prospects.calllist.index');
     }
 
     /**
      * Show the form for creating a new resource.
      *
      * @param CreateProductcategoryRequestNamespace $request
-     * @return \App\Http\Responses\Focus\productcategory\CreateResponse
+     * @return \App\Http\Responses\Focus\calllist\CreateResponse
      */
     public function create()
     {
-        return new CreateResponse('focus.calllists.create');
+        return new CreateResponse('focus.prospects.calllist.create');
     }
 
     // /**
@@ -110,5 +115,12 @@ class CallListsController extends Controller
         
 
         return new EditResponse('focus.calllists.edit', compact('calllist'));
+    }
+    public function mytoday(){
+        $called = CallList::where('call_status', 1)->count();
+        $not_called = CallList::where('call_status', 0)->count();
+        $total_prospect = CallList::count();
+        
+        return new ViewResponse('focus.prospects.calllist.mycalls', compact('called', 'not_called', 'total_prospect'));
     }
 }

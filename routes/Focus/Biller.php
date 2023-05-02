@@ -23,8 +23,8 @@ Route::group(['namespace' => 'billpayment'], function () {
     Route::resource('billpayments', 'BillPaymentController');
     // data table
     Route::post('billpayments/get', 'BillPaymentTableController')->name('billpayments.get');
-  });
-  
+});
+
 
 //  Accounts
 Route::group(['namespace' => 'account'], function () {
@@ -191,29 +191,37 @@ Route::group(['namespace' => 'lead'], function () {
     //For Datatable
     Route::post('leads/get', 'LeadsTableController')->name('leads.get');
 });
+
+//Prospects
 Route::group(['namespace' => 'prospect'], function () {
     Route::patch('prospects/update_status/{prospect}', 'ProspectsController@update_status')->name('prospects.update_status');
     Route::resource('prospects', 'ProspectsController');
 
     //For Datatable
-     Route::post('prospects/get', 'ProspectsTableController')->name('prospects.get');
-     Route::post('prospects/followup', 'ProspectsController@followup')->name('prospects.followup');
+    Route::post('prospects/get', 'ProspectsTableController')->name('prospects.get');
+    Route::post('prospects/followup', 'ProspectsController@followup')->name('prospects.followup');
 });
+
+//CallList
 Route::group(['namespace' => 'calllist'], function () {
+    Route::get('calllists/mytoday', 'CallListController@mytoday')->name('calllists.mytoday');
     Route::patch('calllists/update_status/{calllist}', 'CallListController@update_status')->name('calllists.update_status');
     Route::resource('calllists', 'CallListController');
 
     //For Datatable
-    // Route::get('calllists/get', 'CallListTableController')->name('calllists.get');
-     Route::post('calllists/followup', 'CallListController@followup')->name('calllists.followup');
+    Route::post('calllists/get', 'CallListTableController')->name('calllists.get');
+    Route::post('calllists/mytoday', 'MyTodayCallListTableController')->name('calllists.mytoday');
+    Route::post('calllists/followup', 'CallListController@followup')->name('calllists.followup');
 });
+
+//Remarks
 Route::group(['namespace' => 'remark'], function () {
     Route::patch('remarks/update_status/{remark}', 'ProspectsController@update_status')->name('remarks.update_status');
     Route::resource('remarks', 'RemarksController');
 
     //For Datatable
     // Route::post('remarks/get', 'RemarksTableController')->name('remarks.get');
-     
+
 });
 Route::group(['namespace' => 'lender'], function () {
     Route::resource('lenders', 'LendersController');
@@ -443,4 +451,3 @@ Route::group(['namespace' => 'creditnote'], function () {
     // for DataTable
     Route::post('creditnotes/get', 'CreditNotesTableController')->name('creditnotes.get');
 });
-

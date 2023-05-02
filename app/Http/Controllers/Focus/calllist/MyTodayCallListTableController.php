@@ -25,7 +25,7 @@ use App\Repositories\Focus\calllist\CallListRepository;
 /**
  * Class BranchTableController.
  */
-class CallListTableController extends Controller
+class MyTodayCallListTableController extends Controller
 {
     /**
      * variable to store the repository object
@@ -50,7 +50,7 @@ class CallListTableController extends Controller
     public function __invoke()
     {
         $core = $this->calllist->getForDataTable();
-       
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -83,9 +83,19 @@ class CallListTableController extends Controller
                 return $region;
             })
             ->addColumn('call_status', function ($calllist) {
-                $call_status =$calllist->call_status;
+                $call_status = $calllist->call_status;
+                if ($call_status == 0) {
+                    $call_status = "Not Called";
+                } else {
+                    $call_status = "Called";
+                }
 
                 return $call_status;
+            })
+            ->addColumn('call_prospect', function ($calllist) {
+                return '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $calllist->id . '" data-toggle="tooltip"  title="Call" >
+                <i  class="fa fa-vcard"></i>
+                         </a>';
             })
             
             ->addColumn('actions', function ($calllist) {

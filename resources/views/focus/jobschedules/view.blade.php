@@ -190,7 +190,7 @@
                     &nbsp;
                      {{ Form::open(['route' => 'biller.projectequipments.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'mass_deactivate_form']) }}
                        
-                     {!! Form::hidden('selected_rows', null, ['id' => 'selected_rows']); !!}
+                     {!! Form::hidden('selected_rows', null, ['id' => 'selected_rows']) !!}
                         {!! Form::submit('Deactivate Selected', array('class' => 'btn btn-xs btn-danger', 'id' => 'delete-selected')) !!}
 
                   {{ Form::close() }}

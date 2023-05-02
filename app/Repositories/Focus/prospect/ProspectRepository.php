@@ -48,18 +48,11 @@ class ProspectRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function create(array $data, array $remark)
+    public function create(array $data)
     {
         
-       
         $result = Prospect::create($data);
         
-        $remark['reminder_date'] = date_for_database($remark['reminder_date']);
-        $remark['recepient'] =$result->name ;
-        $remark['prospect_id'] = $result->id;
-        unset($remark['name']);
-       
-        $this->remark->create($remark);
         return $result;
 
         throw new GeneralException('Error Creating Prospect');
@@ -79,16 +72,6 @@ class ProspectRepository extends BaseRepository
         DB::beginTransaction();
         $result = $prospect->update($input['data']);
         
-       
-        
-        $remark = $input['remark'];
-        $remark_item = Remark::where('prospect_id',$remark['id'])->orderBy('created_at','DESC')->first();
-        $remark['reminder_date'] = date_for_database($remark['reminder_date']);
-        unset($remark['name']);
-        //dd($remark_item);
-        $remark_item->update($remark);
-        
-
         if ($result) {
             DB::commit();
             return true;

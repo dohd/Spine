@@ -141,10 +141,10 @@
                 <div style="display: flex; width: 100%;">
                  
                       {{ Form::open(['route' => 'biller.projectequipments.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'mass_add_form']) }}
-                     {!! Form::hidden('selected_products', null, ['id' => 'selected_products']); !!}
-                     {!! Form::hidden('shedule_id', $jobschedule->id, ['id' => 'shedule_id']); !!}
-                     {!! Form::hidden('project_id', $jobschedule->project_id, ['id' => 'project_id']); !!}
-                     {!! Form::hidden('client_id', $jobschedule->client_id, ['id' => 'client_id']); !!}
+                     {!! Form::hidden('selected_products', null, ['id' => 'selected_products']) !!}
+                     {!! Form::hidden('shedule_id', $jobschedule->id, ['id' => 'shedule_id']) !!}
+                     {!! Form::hidden('project_id', $jobschedule->project_id, ['id' => 'project_id']) !!}
+                     {!! Form::hidden('client_id', $jobschedule->client_id, ['id' => 'client_id']) !!}
                     {!! Form::submit('Add Selected', array('class' => 'btn btn-xs btn-primary', 'id' => 'add-selected')) !!}    
                        {{ Form::close() }}
                 
@@ -152,7 +152,7 @@
                     &nbsp;
                      {{ Form::open(['route' => 'biller.projectequipments.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'mass_deactivate_form']) }}
                        
-                     {!! Form::hidden('selected_rows', null, ['id' => 'selected_rows']); !!}
+                     {!! Form::hidden('selected_rows', null, ['id' => 'selected_rows']) !!}
                         {!! Form::submit('Remove Selected', array('class' => 'btn btn-xs btn-danger', 'id' => 'delete-selected')) !!}
 
                   {{ Form::close() }}

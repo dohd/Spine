@@ -24,38 +24,40 @@
                         <div class="card-body">
                             <div class="row no-gutters">
                                 <div class="col-sm-3 col-md-2 h4">Called</div>
-                                <div class="col-sm-2 col-md-1 h4 text-primary font-weight-bold">{{ $open_prospect }}</div>
+                                <div class="col-sm-2 col-md-1 h4 text-primary font-weight-bold">{{ $called }}</div>
                                 <div class="col-sm-12 col-md-1 h4 text-primary font-weight-bold">
-                                    {{ numberFormat(div_num($open_prospect, $total_prospect) * 100) }}%</div>
+                                    {{ numberFormat(div_num($called, $total_prospect) * 100) }}%</div>
                             </div>
                             <div class="row no-gutters">
                                 <div class="col-sm-3 col-md-2 h4">Not Called</div>
-                                <div class="col-sm-2 col-md-1 h4 text-success font-weight-bold">{{ $closed_prospect }}</div>
+                                <div class="col-sm-2 col-md-1 h4 text-success font-weight-bold">{{ $not_called }}</div>
                                 <div class="col-sm-12 col-md-1 h4 text-success font-weight-bold">
-                                    {{ numberFormat(div_num($closed_prospect, $total_prospect) * 100) }}%</div>
+                                    {{ numberFormat(div_num($not_called, $total_prospect) * 100) }}%</div>
                             </div>
                         </div>
                     </div>
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
-                                <table id="prospects-table" class="table table-striped table-bordered zero-configuration"
+                                <table id="calllist-table" class="table table-striped table-bordered zero-configuration"
                                     cellspacing="0" width="100%">
                                     <thead>
                                         <tr>
                                             <th>#</th>
                                             <th>Names</th>
-                                            <th>Industry</th>
-                                            <th>Region</th>
-                                            <th>Company</th>
                                             <th>Email</th>
                                             <th>Phone</th>
-                                            <th>Previous Date</th>
-                                            <th>Reminder Date</th>
-                                            <th>Remark</th>
-                                            <th>State</th>
-                                            <th>Follow up</th>
-                                            <th>Status</th>
+                                            <th>Company</th>
+                                            <th>Industry</th>
+                                            <th>Region</th>
+                                            
+                                            
+                                            {{-- <th>Previous Date</th>
+                                            <th>Reminder Date</th> --}}
+                                            
+                                            <th>Call Status</th>
+                                            {{-- <th>Follow up</th> --}}
+                                            
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                     </thead>
@@ -104,7 +106,7 @@
             },
 
             showModal(){
-                $('#prospects-table tbody').on('click','#follow', function(e) {
+                $('#calllist-table tbody').on('click','#follow', function(e) {
                  var id = $(this).attr('data-id');
                 
                 //show modal
@@ -169,7 +171,7 @@
           
 
             draw_data() {
-                $('#prospects-table').dataTable({
+                $('#calllist-table').dataTable({
                     stateSave: true,
                     processing: true,
                     responsive: true,
@@ -177,7 +179,7 @@
                         @lang('datatable.strings')
                     },
                     ajax: {
-                        url: '{{ route('biller.prospects.get') }}',
+                        url: '{{ route('biller.calllists.get') }}',
                         type: 'post',
                     },
                     columns: [{
@@ -189,20 +191,6 @@
                             name: 'name'
                         },
                         {
-                            data: 'industry',
-                            name: 'industry'
-                        },
-                        {
-                            data: 'region',
-                            name: 'region'
-                        },
-                        {
-                            data: 'company',
-                            name: 'company'
-                        },
-
-
-                        {
                             data: 'email',
                             name: 'email'
                         },
@@ -211,30 +199,30 @@
                             name: 'phone'
                         },
                         {
-                            data: 'previous_date',
-                            name: 'previous_date'
+                            data: 'company',
+                            name: 'company'
                         },
                         {
-                            data: 'reminder_date',
-                            name: 'reminder_date'
+                            data: 'industry',
+                            name: 'industry'
                         },
                         {
-                            data: 'remarks',
-                            name: 'remarks'
+                            data: 'region',
+                            name: 'region'
                         },
                         {
-                            data: 'prospect_status',
-                            name: 'prospect_status'
+                            data: 'call_status',
+                            name: 'call_status'
                         },
-                        {
-                            data: 'follow_up',
-                            name: 'follow_up'
-                        },
-
-                        {
-                            data: 'status',
-                            name: 'status'
-                        },
+                        // {
+                        //     data: 'start_date',
+                        //     name: 'start_date'
+                        // },
+                        // {
+                        //     data: 'end_date',
+                        //     name: 'end_date'
+                        // },
+                       
                         {
                             data: 'actions',
                             name: 'actions',
@@ -243,8 +231,8 @@
                         }
                     ],
                     columnDefs: [{
-                        type: "custom-date-sort",
-                        targets: [5]
+                        // type: "custom-date-sort",
+                        // targets: [5]
                     }],
                     order: [
                         [0, "desc"]

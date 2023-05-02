@@ -50,35 +50,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="form-group row">
-            <div class="col-sm-6"><label for="prospect_status" class="caption">Prospect Status</label>
-                <div class="input-group">
-                    <select class="form-control" name="prospect_status" id="prospect_status">
-                        @foreach (['hot','warm','cold'] as $val)
-                            <option value="{{ $val }}">
-                                {{ ucfirst( $val) }}
-                            </option>
-                        @endforeach                            
-                    </select>
-                </div>
-            </div>
-            <div class="col-sm-6"><label for="reminder_date" class="caption">Reminder Date</label>
-                <div class="input-group">
-                    <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                    {{ Form::text('reminder_date', null, ['class' => 'form-control round datepicker', 'placeholder' => 'Date', 'id' => 'reminder_date']) }}
-                </div>
-            </div>
-            
-        </div>
-        <div class="form-group row">
-            <div class="col-sm-12"><label for="remarks" class="caption">Remark</label>
-                <div class="input-group">
-                    <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                    {{ Form::textarea('remarks',null, ['class' => 'form-control','rows' => 3, 'placeholder' => 'Remark','id'=>'remarks','required']) }}
-                </div>
-            </div>
-        </div>
         {{ Form::hidden('id',null, ['class' => 'form-control','id'=>'id','required']) }}
     </div>
 </div>

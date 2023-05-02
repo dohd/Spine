@@ -49,30 +49,30 @@
                         @endif
                     </tr> 
                     <tr>
-                        <th>Prospect Name</th>
+                        <th>Name</th>
                         <td>{{  $prospect->name }}</td>
                     </tr>
                     <tr>
-                        <th>Prospect Company</th>
+                        <th>Region</th>
+                        <td>{{ $prospect->region }}</td>
+                    </tr>
+                    <tr>
+                        <th>Industry</th>
+                        <td>{{ $prospect->industry }}</td>
+                    </tr>
+                    <tr>
+                        <th>Company</th>
                         <td>{{ $prospect->company }}</td>
                     </tr>
                     
                     <tr>
-                        <th>Prospect Contact</th>
+                        <th>Contact</th>
                         <td>{{  $prospect->phone }}</td>
                     </tr>
                     <tr>
-                        <th>Prospect Email</th>
+                        <th>Email</th>
                         <td>{{ $prospect->email }}</td>
-                    </tr>                 
-                    <tr>
-                        <th>Reminder Date</th>
-                        <td>{{ dateFormat($prospect->remarks->first()->reminder_date) }}</td>
-                    </tr>                    
-                    <tr>
-                        <th>Remarks</th>
-                        <td>{{ $prospect->remarks->first()->remarks }}</td>
-                    </tr>                    
+                    </tr>                                 
                 </tbody>
             </table>
         </div>

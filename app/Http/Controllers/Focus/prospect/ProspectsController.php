@@ -86,12 +86,11 @@ class ProspectsController extends Controller
     {
 
         // filter request input fields
-        $data = $request->except(['_token', 'ins', 'files', 'reminder_date', 'remarks']);
+        $data = $request->except(['_token', 'ins', 'files']);
 
-        $remark = $request->only('reminder_date', 'remarks', 'name');
 
         //Create the model using repository create method
-        $this->repository->create($data, $remark);
+        $this->repository->create($data);
 
         return new RedirectResponse(route('biller.prospects.index'), ['flash_success' => 'Prospect Successfully Created']);
     }
@@ -105,10 +104,7 @@ class ProspectsController extends Controller
     //  */
     public function edit(Prospect $prospect)
     {
-
-        $getremarks = $prospect->remarks()->get();
-        $remarks =$getremarks->first();
-        return new EditResponse('focus.prospects.edit', compact('prospect', 'remarks'));
+        return new EditResponse('focus.prospects.edit', compact('prospect'));
     }
 
 
@@ -133,10 +129,10 @@ class ProspectsController extends Controller
 
         //dd($request);
         // update input fields from request
-        $data = $request->only(['company','name','email','phone','region','industry','prospect_status']);
-        $remark = $request->only('reminder_date', 'remarks', 'name','id');
+        $data = $request->only(['company','name','email','phone','region','industry']);
+        
         //Update the model using repository update method
-        $this->repository->update($prospect, compact('data','remark'));
+        $this->repository->update($prospect, compact('data'));
 
         return new RedirectResponse(route('biller.prospects.index'), ['flash_success' => 'Prospect Successfully Updated']);
     }

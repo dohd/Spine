@@ -91,7 +91,7 @@
                 ajax: {
                     url: '{{ route("biller.miscs.get") }}',
                     type: 'post',
-                    data: {{!! $input['json'] !!}},
+                    data: {{!! $input['json'] }},
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},

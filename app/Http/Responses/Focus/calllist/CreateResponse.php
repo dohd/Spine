@@ -3,8 +3,8 @@
 namespace App\Http\Responses\Focus\calllist;
 
 use App\Models\branch\Branch;
-use App\Models\customer\Customer;
-use App\Models\calllist\Prospect;
+
+use App\Models\calllist\CallList;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable

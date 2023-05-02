@@ -90,7 +90,7 @@
                 ajax: {
                     url: '{{ route("biller.sections.get") }}',
                     type: 'post',
-                    data: {{!! $input['json'] !!}},
+                    data: {{!! $input['json'] }},
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
