@@ -54,42 +54,36 @@ class ProspectsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('name', function ($prospect) {
+            ->addColumn('title', function ($prospect) {
 
-                $name = $prospect->name == null ? '_____________' : $prospect->name;
+                $name = $prospect->title == null ? '-----' : $prospect->title;
+                return $name;
+            })
+            ->addColumn('company', function ($prospect) {
+
+                $name = $prospect->company == null ? '-----' : $prospect->company;
                 return $name;
             })
             ->addColumn('email', function ($prospect) {
-                $client_email = $prospect->email == null ? '_____________' : $prospect->email ;
+                $client_email = $prospect->email == null ? '-----' : $prospect->email ;
 
                 return $client_email;
             })
+            ->addColumn('phone', function ($prospect) {
+                $phone = $prospect->phone == null ? '-----' : $prospect->phone ;
+
+                return $phone;
+            })
             ->addColumn('industry', function ($prospect) {
-                $client_industry = $prospect->industry == null ? '_____________' : $prospect->industry;
+                $client_industry = $prospect->industry == null ? '-----' : $prospect->industry;
 
                 return $client_industry;
             })
             ->addColumn('region', function ($prospect) {
-                $client_region = $prospect->region == null ? '_____________': $prospect->region;
+                $client_region = $prospect->region == null ? '-----': $prospect->region;
 
                 return $client_region;
             })
-            ->addColumn('company', function ($prospect) {
-                $client_company = $prospect->company == null ? '_____________' : $prospect->company;
-
-                return $client_company;
-            })
-            ->addColumn('phone', function ($prospect) {
-                $phone = $prospect->phone == null ? '_____________' : $prospect->phone ;
-
-                return $phone;
-            })
-            // ->addColumn('category', function ($prospect) {
-            //     $category = $prospect->category;
-
-            //     return $category;
-            // })
-            
             ->addColumn('status', function ($prospect) {
                 $status = $prospect->status;
                 if ($status == 0) {

@@ -52,50 +52,37 @@ class CallListTableController extends Controller
         $core = $this->calllist->getForDataTable();
        
         return Datatables::of($core)
-            ->escapeColumns(['id'])
-            ->addIndexColumn()
-            ->addColumn('name', function ($calllist) {
-                return $calllist->name;
-            })
-            ->addColumn('email', function ($calllist) {
-                $email = $calllist->email;
+        ->escapeColumns(['id'])
+        ->addIndexColumn()
+        ->addColumn('title', function ($calllist) {
 
-                return $email;
-            })
-            ->addColumn('phone', function ($calllist) {
-                $phone = $calllist->phone;
+            $title = $calllist->title == null ? '_____________' : $calllist->title;
+            return $title;
+        })
+        ->addColumn('category', function ($calllist) {
+            $category = $calllist->category == null ? '_____________' : $calllist->category ;
 
-                return $phone;
-            })
-            ->addColumn('company', function ($calllist) {
-                $company = $calllist->company;
+            return $category;
+        })
+        ->addColumn('prospects_number', function ($calllist) {
+            $prospects_number = $calllist->prospects_number == null ? '_____________' : $calllist->prospects_number;
 
-                return $company;
-            })
-            ->addColumn('industry', function ($calllist) {
-                $industry = $calllist->industry;
+            return $prospects_number;
+        })
+        ->addColumn('start_date', function ($calllist) {
+            $start_date = $calllist->start_date == null ? '_____________': $calllist->start_date;
 
-                return $industry;
-            })
-            ->addColumn('region', function ($calllist) {
-                $region = $calllist->region;
+            return $start_date;
+        })
+        ->addColumn('end_date', function ($calllist) {
+            $end_date = $calllist->end_date == null ? '_____________' : $calllist->end_date;
 
-                return $region;
-            })
-            ->addColumn('call_status', function ($calllist) {
-                $call_status =$calllist->call_status;
-                if ($call_status == 0) {
-                    $call_status = "Not Called";
-                } else {
-                    $call_status = "Called";
-                }
-                return $call_status;
-            })
-            
-            ->addColumn('actions', function ($calllist) {
-                return $calllist->action_buttons;
-            })
-            ->make(true);
+            return $end_date;
+        })
+        ->addColumn('actions', function ($calllist) {
+            return $calllist->action_buttons;
+        })
+        ->make(true);
     }
 
 }

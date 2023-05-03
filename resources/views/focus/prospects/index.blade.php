@@ -44,13 +44,12 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Names</th>
+                                            <th>Title</th>
+                                            <th>Company/Name</th>
                                             <th>Industry</th>
-                                            <th>Region</th>
-                                            <th>Company</th>
                                             <th>Email</th>
                                             <th>Phone</th>
-                                            
+                                            <th>Region</th>
                                             <th>Status</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -181,23 +180,17 @@
                             name: 'id'
                         },
                         {
-                            data: 'name',
-                            name: 'name'
-                        },
-                        {
-                            data: 'industry',
-                            name: 'industry'
-                        },
-                        {
-                            data: 'region',
-                            name: 'region'
+                            data: 'title',
+                            name: 'title'
                         },
                         {
                             data: 'company',
                             name: 'company'
                         },
-
-
+                        {
+                            data: 'industry',
+                            name: 'industry'
+                        },
                         {
                             data: 'email',
                             name: 'email'
@@ -206,10 +199,12 @@
                             data: 'phone',
                             name: 'phone'
                         },
-                        // {
-                        //     data: 'category',
-                        //     name: 'category'
-                        // },
+                       
+                        {
+                            data: 'region',
+                            name: 'region'
+                        },
+                       
                         {
                             data: 'status',
                             name: 'status'

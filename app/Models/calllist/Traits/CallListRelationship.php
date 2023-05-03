@@ -2,15 +2,16 @@
 
 namespace App\Models\calllist\Traits;
 
-use App\Models\remark\Remark;
+use App\Models\prospect\Prospect;
+use App\Models\prospect_calllist\ProspectCallList;
 
 /**
  * Class ProspectRelationsip* 
  **/
 trait CallListRelationship
 {
-    public function remarks()
+    public function prospects()
     {
-        return $this->hasMany(Remark::class)->orderBy('updated_at', 'DESC');
+        return $this->hasManyThrough(Prospect::class, ProspectCallList::class, 'call_id', 'prospect_id', 'id', 'id')->withoutGlobalScopes();
     }
 }

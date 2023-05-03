@@ -31,19 +31,18 @@ class ProspectsImport implements ToCollection, WithBatchInserts, WithValidation,
         $prospect_data = [];
         foreach ($rows as $key => $row) {
             $row_num = $key + 1;
-            if ($row_num == 1 && $row->count() < 6) {
+            if ($row_num == 1 && $row->count() < 5) {
                 trigger_error('Missing columns! Use latest CSV file template.');
             } elseif ($row_num > 1) {
                 if (empty($row[0])) trigger_error('Name is required on row no. $row_num',);
                 $prospect_data[] = [
                     'title' => $this->data['title'],
                     'category' => "excel",
-                    'name' => $row[0],
-                    'company' => empty($row[1]) ? $row[0] : $row[1],
-                    'industry' => $row[2],
-                    'region' => $row[3],
-                    'email' => $row[4],
-                    'phone' => $row[5],
+                    'company' => $row[0],
+                    'email' => $row[1],
+                    'phone' => $row[2],
+                    'industry' => $row[3],
+                    'region' => $row[4],
                     'ins' => $this->data['ins'],
                     'user_id' => auth()->user()->id,
                 ];

@@ -10,32 +10,41 @@
                 
                     <div><label for="prospect-type">Select Prospect Type</label></div>                        
                     <div class="d-inline-block custom-control custom-checkbox mr-1">
-                        <input type="radio" class="custom-control-input bg-primary prospect-type" name="prospect_status" id="colorCheck1" value="direct" checked>
+                        <input type="radio" class="custom-control-input bg-primary prospect-type" name="category" id="colorCheck1" value="direct" checked>
                         <label class="custom-control-label" for="colorCheck1">Direct</label>
                     </div>
                     <div class="d-inline-block custom-control custom-checkbox mr-1">
-                        <input type="radio" class="custom-control-input bg-purple prospect-type" name="prospect_status" value="excel" id="colorCheck3">
+                        <input type="radio" class="custom-control-input bg-purple prospect-type" name="category" value="excel" id="colorCheck3">
                         <label class="custom-control-label" for="colorCheck3">Excel Upload</label>
                     </div>
                 
             </div>
         </div>
         <div class="form-group row">
-            <div class="col-sm-4">
-                <p>Number of Prospects : <span id="count"></span></p>
+            <div class="col-sm-4 ">
+                <div class=" h6">Prospects Count</div>                            
+                <div class=" h6 prospect-count">0</div>
             </div>
-            
+            <div class="col-sm-4 row">
+                <label for="prospects_number" class="caption">Number of Prospects<span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                    {{ Form::text('prospects_number', null, ['class' => 'form-control', 'placeholder' => 'Prospects to be added in range', 'id' => 'prospects_number']) }}
+                </div>
+            </div>
             
         </div>
         <div class="form-group row">
             <div class="col-sm-4"><label for="group_title" class="caption">Group Title</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                    <select id="group_title" name="group_title" class="form-control" data-placeholder="Choose Title" disabled>
+                    <select id="title" name="title" class="form-control" data-placeholder="Choose Title" disabled>
                         @foreach ($excel as $row)
+                       
                         <option value="{{ $row->title}}">
-                            {{ $row->title }}
-                        </option>
+                            {{ $row->title }} - Total {{ $row->count }}
+                        </option> 
+                       
                         @endforeach
                         
                     </select>

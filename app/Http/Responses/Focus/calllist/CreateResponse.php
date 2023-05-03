@@ -19,9 +19,9 @@ class CreateResponse implements Responsable
     public function toResponse($request)
     {
         
-        $direct = Prospect::get(['id','title','company/name','category'])->where('category','direct');  
-        $excel = Prospect::get(['id','title','company/name','category'])->where('category','excel')->unique('title');  
+        $prospects = Prospect::get(['id','title','company','category']);  
+       
         
-        return view('focus.prospects.calllist.create', compact('direct','excel'));
+        return view('focus.prospects.calllist.create', compact('prospects'));
     }
 }

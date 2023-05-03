@@ -18,6 +18,7 @@
 
 namespace App\Http\Controllers\Focus\calllist;
 
+use App\Models\prospect\Prospect;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
@@ -28,6 +29,7 @@ use App\Repositories\Focus\calllist\CallListRepository;
 use App\Http\Requests\Focus\calllist\CallListRequest;
 use App\Models\branch\Branch;
 use App\Models\calllist\CallList;
+use DB;
 
 /**
  * CallListController
@@ -58,11 +60,9 @@ class CallListController extends Controller
     public function index()
     {
 
-        $called = CallList::where('call_status', 1)->count();
-        $not_called = CallList::where('call_status', 0)->count() ;
-        $total_prospect = CallList::count() ;
+       
         
-        return new ViewResponse('focus.prospects.calllist.index', compact('called', 'not_called', 'total_prospect'));
+        return new ViewResponse('focus.prospects.calllist.index');
         //return new ViewResponse('focus.prospects.calllist.index');
     }
 
@@ -74,7 +74,10 @@ class CallListController extends Controller
      */
     public function create()
     {
-        return new CreateResponse('focus.prospects.calllist.create');
+        $direct = Prospect::where('category','direct')->count();
+        $excel = Prospect::select(DB::raw('title,COUNT("*") AS count '))->groupBy('title')->where('category','excel')->get();
+        
+        return view('focus.prospects.calllist.create', compact('direct','excel'));
     }
 
     // /**
@@ -89,10 +92,12 @@ class CallListController extends Controller
         // filter request input fields
         $data = $request->except(['_token', 'ins', 'files']);
 
-        //Create the model using repository create method
-        $this->repository->create($data);
-        $calllists = CallList::where('prospect_id', $request->prospect_id)->orderBy('created_at', 'DESC')->limit(10)->get();
-        return view('focus.prospects.partials.calllists_table', compact('calllists'));
+       
+         $this->repository->create($data);
+        
+
+        // $calllists = CallList::where('prospect_id', $request->prospect_id)->orderBy('created_at', 'DESC')->limit(10)->get();
+        return view('focus.prospects.calllist.index');
     }
 
     // /**
@@ -116,6 +121,11 @@ class CallListController extends Controller
 
         return new EditResponse('focus.calllists.edit', compact('calllist'));
     }
+    public function show(CallList $calllist)
+    {
+        return new ViewResponse('focus.prospects.calllist.view', compact('calllist'));
+    }
+
     public function mytoday(){
         $called = CallList::where('call_status', 1)->count();
         $not_called = CallList::where('call_status', 0)->count();

@@ -20,22 +20,7 @@
         <div class="content-body">
             <div class="row">
                 <div class="col-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row no-gutters">
-                                <div class="col-sm-3 col-md-2 h4">Called</div>
-                                <div class="col-sm-2 col-md-1 h4 text-primary font-weight-bold">{{ $called }}</div>
-                                <div class="col-sm-12 col-md-1 h4 text-primary font-weight-bold">
-                                    {{ numberFormat(div_num($called, $total_prospect) * 100) }}%</div>
-                            </div>
-                            <div class="row no-gutters">
-                                <div class="col-sm-3 col-md-2 h4">Not Called</div>
-                                <div class="col-sm-2 col-md-1 h4 text-success font-weight-bold">{{ $not_called }}</div>
-                                <div class="col-sm-12 col-md-1 h4 text-success font-weight-bold">
-                                    {{ numberFormat(div_num($not_called, $total_prospect) * 100) }}%</div>
-                            </div>
-                        </div>
-                    </div>
+                    
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
@@ -44,19 +29,11 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Names</th>
-                                            <th>Email</th>
-                                            <th>Phone</th>
-                                            <th>Company</th>
-                                            <th>Industry</th>
-                                            <th>Region</th>
-                                            
-                                            
-                                            {{-- <th>Previous Date</th>
-                                            <th>Reminder Date</th> --}}
-                                            
-                                            <th>Call Status</th>
-                                            {{-- <th>Follow up</th> --}}
+                                            <th>Title</th>
+                                            <th>Category</th>
+                                            <th>Prospects to Call</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
                                             
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -99,75 +76,10 @@
             init() {
                 $.ajaxSetup(config.ajax);
                 this.draw_data();
-                this.showModal();
-                //form remark
-                remark: @json(@$remark),
-                $('#reminder_date').datepicker(config.date).datepicker('setDate', new Date());
+                
             },
 
-            showModal(){
-                $('#calllist-table tbody').on('click','#follow', function(e) {
-                 var id = $(this).attr('data-id');
-                
-                //show modal
-                $('#remarksModal').modal('show');
-                
-
-                //varible to check if data is saved
-                let saved = false;
-                //set prospect id to form
-                $('#prospect_id').val(id);
-
-                $.ajax({
-                    url: "{{ route('biller.prospects.followup') }}",
-                    type: 'POST',
-                    data: {
-                        id: id
-                    },
-                    success: function(response) {
-
-                        $('#tableModal').append(response);
-                    }
-                });
-
-                $('#save_remark').on('click', function(e) {
-
-                    var recepient = $('#recepient').val();
-                    var reminder_date = $('#reminder_date').val();
-                    var remarks = $('#remarks').val();
-
-                    //disable button
-                    $("#save_remark").prop("disabled", true);
-                    let formData = $('#save_remark').parents('form').serializeArray();
-                    $.ajax({
-                        url: "remarks",
-                        type: 'POST',
-                        data: formData,
-                        success: function(response) {
-                            saved = true;
-                            $('#remarks_table').remove();
-                            $('#tableModal').append(response);
-                        },
-                        error: function(error) {
-                            console.log(error.responseText);
-
-                        }
-                    });
-
-                    $('#recepient').val('');
-                    $('#reminder_date').val('');
-                    $('#remarks').val('');
-                    $("#save_remark").prop("disabled", false);
-                });
-
-                $('#remarksModal').on('hidden.bs.modal', function(e) {
-                    $('#remarks_table').remove();
-                    $('#prospect_id').val();
-                    id= "";
-                    saved?window.location.reload():null;
-                });
-            });
-            },
+           
           
 
             draw_data() {
@@ -187,41 +99,25 @@
                             name: 'id'
                         },
                         {
-                            data: 'name',
-                            name: 'name'
+                            data: 'title',
+                            name: 'title'
                         },
                         {
-                            data: 'email',
-                            name: 'email'
+                            data: 'category',
+                            name: 'category'
                         },
                         {
-                            data: 'phone',
-                            name: 'phone'
+                            data: 'prospects_number',
+                            name: 'prospects_number'
                         },
                         {
-                            data: 'company',
-                            name: 'company'
+                            data: 'start_date',
+                            name: 'start_date'
                         },
                         {
-                            data: 'industry',
-                            name: 'industry'
+                            data: 'end_date',
+                            name: 'end_date'
                         },
-                        {
-                            data: 'region',
-                            name: 'region'
-                        },
-                        {
-                            data: 'call_status',
-                            name: 'call_status'
-                        },
-                        // {
-                        //     data: 'start_date',
-                        //     name: 'start_date'
-                        // },
-                        // {
-                        //     data: 'end_date',
-                        //     name: 'end_date'
-                        // },
                        
                         {
                             data: 'actions',
@@ -231,8 +127,8 @@
                         }
                     ],
                     columnDefs: [{
-                        // type: "custom-date-sort",
-                        // targets: [5]
+                        type: "custom-date-sort",
+                        targets: [4,5]
                     }],
                     order: [
                         [0, "desc"]

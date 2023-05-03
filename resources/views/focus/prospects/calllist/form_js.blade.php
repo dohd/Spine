@@ -14,33 +14,32 @@
         };
 
         const Form = {
+            
             direct: @json(@$direct),
             excel: @json(@$excel),
             init() {
                 $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
-                $('#group_title').select2({allowClear: true});
-                $('.prospect-type').change(this.prospectTypeChange);
-                let count = 0;
-                if(this.direct){
-                    console.log(this.direct);
-                }
+                $('#title').select2({
+                    allowClear: true
+                });
                
-                if(this.excel){
-                    console.log(this.excel);
-                }
+                $('.prospect-type').change(this.prospectTypeChange);
+                $('.prospect-count').text(this.direct);
+
             },
 
+           
             prospectTypeChange() {
-            if ($(this).val() == 'direct') {
-                
-                $('#group_title').attr('disabled', true).val('').change();
-               
-            } else {
-                
-                $('#group_title').attr('disabled', false).val('');
-              
-            }
-        },
+                if ($(this).val() == 'direct') {
+
+                    $('#title').attr('disabled', true).val('').change();
+                    
+                } else {
+                    $('#title').attr('disabled', false).val('');
+                   
+
+                }
+            },
 
         };
 

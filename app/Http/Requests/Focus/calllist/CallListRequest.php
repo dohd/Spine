@@ -24,13 +24,11 @@ class CallListRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
-            'email' => 'required',
-            'phone' => 'required',
-            'remarks' => 'required',
-            'reminder_date' => 'required',
-            'industry' => 'required',
-            'region' => 'required',
+            'category' => 'required',
+            'prospects_number' => 'required',
+            'start_date' => 'required',
+            'end_date' => 'required',
+           
         ];
     }
 

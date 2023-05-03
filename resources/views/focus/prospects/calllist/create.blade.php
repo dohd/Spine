@@ -22,7 +22,7 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            {{ Form::open(['route' => 'biller.prospects.store', 'method' => 'POST' ]) }}
+                            {{ Form::open(['route' => 'biller.calllists.store', 'method' => 'POST' ]) }}
                                 @include("focus.prospects.calllist.form")
                                 <div class="column">
                                     {{ link_to_route('biller.prospects.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md col-1 ml-auto mr-1']) }}

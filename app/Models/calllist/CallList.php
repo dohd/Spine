@@ -25,7 +25,7 @@ class CallList extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'prospects_call_list';
+    protected $table = 'call_list';
 
     /**
      * Mass Assignable fields of model

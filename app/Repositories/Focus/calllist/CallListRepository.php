@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Repositories\Focus\calllist;
-
+use App\Models\prospect\Prospect;
 use App\Models\calllist\CallList;
 use App\Exceptions\GeneralException;
 use App\Models\items\Prefix;
@@ -40,10 +40,17 @@ class CallListRepository extends BaseRepository
      */
     public function create(array $data)
     {
-        $data['reminder_date'] = date_for_database($data['reminder_date']);
-        
+        $data['start_date'] = date_for_database($data['start_date']);
+        $data['end_date'] = date_for_database($data['end_date']);
+
         $result = CallList::create($data);
-        $response = $result->fresh();
+        $response = $result->refresh();
+        $callid= $response->id;
+
+        $prospects = Prospect::where('industry',$data['title'])->limit($data['prospects_number'])->get()->toArray();
+
+        dd($prospects);
+
         return $response;
 
         throw new GeneralException('Error Creating CallList');
@@ -60,7 +67,7 @@ class CallListRepository extends BaseRepository
     // public function update(array $data)
     // {
     //     DB::beginTransaction();
-        
+
     //     $result = $calllist->update($data);
     //     if ($result) {
     //         DB::commit();
@@ -82,13 +89,13 @@ class CallListRepository extends BaseRepository
         $prefix = Prefix::where('note', 'calllist')->first();
         $tid = gen4tid("{$prefix}-", $calllist->reference);
 
-        if ($calllist->djcs->count()) 
+        if ($calllist->djcs->count())
             throw ValidationException::withMessages(["{$tid} is attached to DJC Report!"]);
-        if ($calllist->quotes->count()) 
+        if ($calllist->quotes->count())
             throw ValidationException::withMessages(["{$tid} is attached to Quote!"]);
-            
+
         if ($calllist->delete()) return true;
-        
+
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 }
