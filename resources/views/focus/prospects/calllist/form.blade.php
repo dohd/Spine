@@ -20,17 +20,23 @@
                 
             </div>
         </div>
-        
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <p>Number of Prospects : <span id="count"></span></p>
+            </div>
+            
+            
+        </div>
         <div class="form-group row">
             <div class="col-sm-4"><label for="group_title" class="caption">Group Title</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
                     <select id="group_title" name="group_title" class="form-control" data-placeholder="Choose Title" disabled>
-                        {{-- @foreach ($title as $row)
-                            <option value="{{ $row->id }}">
-                                {{ $row->title }}
-                            </option>
-                        @endforeach --}}
+                        @foreach ($excel as $row)
+                        <option value="{{ $row->title}}">
+                            {{ $row->title }}
+                        </option>
+                        @endforeach
                         
                     </select>
                 </div>

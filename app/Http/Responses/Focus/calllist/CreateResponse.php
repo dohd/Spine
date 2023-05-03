@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses\Focus\calllist;
 
-use App\Models\branch\Branch;
+use App\Models\prospect\Prospect;
 
 use App\Models\calllist\CallList;
 use Illuminate\Contracts\Support\Responsable;
@@ -18,11 +18,10 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        // $ins = auth()->user()->ins;
-       
-        // $prefixes = prefixesArray(['calllist'], $ins);
-        $branches = Branch::get();
-    
-        return view('focus.prospects.calllist.create', compact('branches'));
+        
+        $direct = Prospect::get(['id','title','company/name','category'])->where('category','direct');  
+        $excel = Prospect::get(['id','title','company/name','category'])->where('category','excel')->unique('title');  
+        
+        return view('focus.prospects.calllist.create', compact('direct','excel'));
     }
 }
