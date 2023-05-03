@@ -8,7 +8,6 @@ use App\Models\Access\User\User;
 use App\Models\event\Event;
 use App\Models\event\EventRelation;
 use App\Models\project\ProjectLog;
-use App\Models\project\ProjectRelations;
 use App\Notifications\Rose;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
@@ -71,24 +70,12 @@ class ProjectRepository extends BaseRepository
         if (@$input['tid'] <= $tid) $input['tid'] = $tid+1;
         $result = Project::create($input);
 
-        $tag_group = [];
-        if (is_array($tags)) {
-            foreach ($tags as $row) {
-                $tag_group[] = ['project_id' => $result->id, 'related' => 1, 'rid' => $row];
-            }
-        }
-
         $employee_group = [];
         if (is_array($employees)) {
             foreach ($employees as $row) {
-                $tag_group[] = ['project_id' => $result->id, 'related' => 2, 'rid' => $row];
                 $employee_group[] = $row;
             }
         }
-
-        if ($customer > 0) $tag_group[] = ['project_id' => $result->id, 'related' => 8, 'rid' => $customer];
-        $tag_group[] = ['project_id' => $result->id, 'related' => 3, 'rid' => $result->user_id];
-        ProjectRelations::insert($tag_group);
 
         $data = ['project_id' => $result->id, 'value' => '[' . trans('general.create') . '] ' . $result->name, 'user_id' => $result->user_id];
         ProjectLog::create($data);
@@ -150,29 +137,12 @@ class ProjectRepository extends BaseRepository
 
         $result = $project->update($input);
 
-        ProjectRelations::whereIn('related', range(1,3))->where('project_id', $project->id)->delete();
         $event_rel = EventRelation::where(['related' => 1, 'r_id' => $project->id])->first();
         if ($event_rel) {
             $event_rel->event->delete();
             $event_rel->delete();
         }
-
-        $tag_group = [];
-        if (is_array($tags)) {
-            foreach ($tags as $row) {
-                $tag_group[] = ['project_id' => $project->id, 'related' => 1, 'rid' => $row];
-            }
-        }
-        if (is_array($employees)) {
-            foreach ($employees as $row) {
-                $tag_group[] = ['project_id' => $project->id, 'related' => 2, 'rid' => $row];
-            }
-        }
-        if ($customer > 0) $tag_group[] = ['project_id' => $project->id, 'related' => 8, 'rid' => $customer];
             
-        $tag_group[] = ['project_id' => $project->id, 'related' => 3, 'rid' => $project->user_id];
-        ProjectRelations::insert($tag_group);
-
         $data = ['project_id' => $project->id, 'value' => '[' . trans('general.edit') . '] ' . $project->name, 'user_id' => $project->user_id];
         ProjectLog::create($data);
         if ($calender) {
@@ -201,7 +171,6 @@ class ProjectRepository extends BaseRepository
         $data = ['project_id' => $project->id, 'value' => '[' . trans('general.delete') . '] ' . $project->name, 'user_id' => $project->user_id];
         ProjectLog::create($data);
 
-        ProjectRelations::where('project_id', $project->id)->delete();
         $event_rel = EventRelation::where(['related' => 1, 'r_id' => $project->id])->first();
         if ($event_rel) {
             $event_rel->event->delete();

@@ -110,7 +110,26 @@ class TasksController extends Controller
 
         $task_back = task_status($result->status);
         $status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span>';
-        $row = '<tr><td><div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.tasks.show", [$result->id]) . '" >' . $result->name . '</a><div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $result->short_desc . '</span></div> </div></td><td>' . dateTimeFormat($result->start) . '</td><td>' . dateTimeFormat($result->duedate) . '</td><td>' . $status . '</td><td>' . $btn . '</td></tr>';
+        
+        // project task
+        if ($request->milestone) {
+            $row = '<tr>
+                <td></td>
+                <td>'. @$result->milestone->name. '</td>
+                <td><div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.tasks.show", [$result->id]) . '" >' . $result->name . '</a><div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $result->short_desc . '</span></div> </div></td>
+                <td>' . dateTimeFormat($result->start) . '</td>
+                <td>' . dateTimeFormat($result->duedate) . '</td>
+                <td>' . $status . '</td>
+                <td>' . $btn . '</td>
+            </tr>';            
+        } else {
+            $row = '<tr>
+                <td><div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.tasks.show", [$result->id]) . '" >' . $result->name . '</a><div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $result->short_desc . '</span></div> </div></td>
+                <td>' . dateTimeFormat($result->start) . '</td><td>' . dateTimeFormat($result->duedate) . '</td>
+                <td>' . $status . '</td>
+                <td>' . $btn . '</td>
+            </tr>';
+        }
 
         return response()->json(['status' => 'Success', 'message' => trans('alerts.backend.tasks.created'), 'title' => $result->name, 'short_desc' => $result->short_desc, 'row' => $row, 't_type' => 3]);
     }

@@ -53,13 +53,21 @@ class TasksTableController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $core = collect();
-        if (access()->allow('manage-task') || project_access(request('project_id')))
-            $core = $this->task->getForDataTable();
+        $core = $this->task->getForDataTable();
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('milestone', function ($task) {
+                return @$task->milestone->name;
+            })
+            ->addColumn('tags', function ($task) {
+                $tag = '';
+                foreach ($task->tags as $row) {
+                    $tag .= '<span class="badge" style="background-color:' . $row['color'] . '">' . $row['name'] . '</span> ';
+                }
+                return $task->name . '<div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $task->short_desc . '</span></div></div>';
+            })
             ->addColumn('start', function ($task) {
                 return '<span  class="font-size-small">'. dateTimeFormat($task->start) .'</span>';
             })
@@ -70,15 +78,7 @@ class TasksTableController extends Controller
                 $task_back = task_status($task->status);
                 return '<span class="badge" style="background-color:'. $task_back['color'] .'">'. $task_back['name'] . '</span> ';
             })
-            ->addColumn('tags', function ($task) {
-                $tag = '';
-                foreach ($task->tags as $row) {
-                    $tag .= '<span class="badge" style="background-color:' . $row['color'] . '">' . $row['name'] . '</span> ';
-                }
-
-                return '<div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="#" title="View" class="view_task success" data-toggle="modal" data-target="#ViewTaskModal" data-item="' . $task->id . '">'
-                    . $task->name . '</a><div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $task->short_desc . '</span></div> </div>';
-            })
+            
             ->addColumn('actions', function ($task) {
                 $btn = '<a href="#" title="View" class="view_task success" data-toggle="modal" data-target="#ViewTaskModal" data-id="'. $task->id .'">
                     <i  class="ft-eye"></i></a> ';

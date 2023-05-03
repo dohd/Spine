@@ -18,7 +18,6 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
   Route::post('projects/delete_meta', 'ProjectsController@delete_meta')->name('projects.delete_meta');
   Route::post('projects/log_history', 'ProjectsController@log_history')->name('projects.log_history');
   Route::post('projects/notes', 'ProjectsController@notes')->name('projects.notes');
-  Route::post('projects/invoices', 'ProjectsController@invoices')->name('projects.invoices');
   Route::post('projects/project_budget', 'ProjectsController@project_budget')->name('projects.project_budget');
   Route::post('projects/quotes_select', 'ProjectsController@quotes_select')->name('projects.quotes_select');
   Route::post('projects/detach_quote', 'ProjectsController@detach_quote')->name('projects.detach_quote');

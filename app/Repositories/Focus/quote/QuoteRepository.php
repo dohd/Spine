@@ -103,10 +103,9 @@ class QuoteRepository extends BaseRepository
         }
         $q->when($status, fn($q) => $q->where('status', '!=', 'cancelled'));
 
-        // project quote filter
+        // project filter
         $q->when(request('project_id'), function($q) {
-            if (request('quote_ids')) $q->whereIn('id', explode(',', request('quote_ids')));
-            else $q->whereIn('id', [0]);
+            $q->whereHas('project', fn($q) => $q->where('projects.id', request('project_id')));
         });
         
         return $q;

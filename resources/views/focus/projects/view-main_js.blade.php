@@ -223,17 +223,43 @@
         });
     });
     
-    // log submit
-    $("#submit-data_log").on("click", function (e) {
-        e.preventDefault();
-        var form_data = {};
-        form_data['form_name'] = 'data_form_log';
-        form_data['form'] = $("#data_form_log").serialize();
-        form_data['url'] = $('#action-url_5').val();
-        addObject(form_data, true);
-        $('#AddLogModal').modal('toggle');
+    // task show modal
+    $('#AddTaskModal').on('shown.bs.modal', function () {
+        $('[data-toggle="datepicker"]').datepicker(config.date);
+        $('.from_date').datepicker(config.date).datepicker('setDate', 'today');
+        $('.to_date').datepicker(config.date).datepicker('setDate', '{{ dateFormat(date('Y-m-d', strtotime('+30 days', strtotime(date('Y-m-d'))))) }}');
+        ['tags', 'employee', 'projects'].forEach(v => $('#'+v).select2());
+        $('#color_t').colorpicker();
     });
 
+    // on submit task
+    $("#submit-data_tasks").on("click", function() {
+        event.preventDefault();
+        var form_data = {};
+        form_data['form'] = $("#data_form_task").serialize();
+        form_data['url'] = $('#action-url_task').val();
+        addObject(form_data, true);
+        $('#AddTaskModal').modal('toggle');
+    });
+
+    // on view task
+    $(document).on('click', '.view_task', function() {
+        const url = "{{ route('biller.tasks.load') }}";
+        const task_id = $(this).attr('data-id');
+        $.post(url, {task_id}, data => {
+            $('#t_name').html(data.name);
+            $('#t_start').html(data.start)
+            $('#t_end').html(data.duedate);
+            $('#t_status').html(data.status);
+            $('#t_status_list').html(data.status_list);
+            $('#t_status_list').html(data.status_list);
+            $('#t_creator').html(data.creator);
+            $('#t_assigned').html(data.assigned);
+            $('#ts_description').html(data.short_desc);
+            $('#t_description').html(data.description);
+        });
+    });
+    
     // quote submit
     $("#submit-data_quote").on("click", function (e) {
         e.preventDefault();
@@ -254,7 +280,7 @@
         addObject(form_data, true);
         $('#AddNoteModal').modal('toggle');
     });
-
+    // projects notes textarea ext
     $('.summernote').summernote({
         height: 300,
         toolbar: [
@@ -268,14 +294,12 @@
             ['fullscreen', ['fullscreen']],
             ['codeview', ['codeview']]
         ],
-        popover: {}
+        popover: {},
     });
     
     // Fetch quotes
     function quotes() {
         if ($('#quotesTbl tbody tr').length) return;        
-        let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
-        
         $('#quotesTbl').dataTable({
             processing: true,
             responsive: true,
@@ -284,7 +308,7 @@
             ajax: {
                 url: "{{ route('biller.quotes.get') }}",
                 type: 'POST',
-                data: {project_id: @json(@$project->id), quote_ids: quoteIds.join(',')},
+                data: {project_id: "{{ $project->id }}"},
                 dataSrc: ({data}) => {
                     data = data.map(v => {
                         if (v.budget_status.includes('budgeted')) {
@@ -365,7 +389,6 @@
     /** Purchase Table Summary */
     function purchase() {
         if ($('#purchaseTbl tbody tr').length) return;        
-
         $('#purchaseTbl').dataTable({
             processing: true,
             responsive: true,
@@ -534,7 +557,6 @@
                 ].map(v => ({data: v, name: v})),
                 {data: 'amount', name: 'amount', searchable: false, sortable: false}
             ],
-            
             order:[[0, 'desc']],
             searchDelay: 500,
             dom: 'Blfrtip',
@@ -545,30 +567,21 @@
     /**Fetch Invoices */
     function invoices() {
         if ($('#invoices-table_p tbody tr').length) return;
-        let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
-        quoteIds = quoteIds.join(',');
         $('#invoices-table_p').dataTable({
             processing: true,
-            // serverSide: true,
+            serverSide: true,
             responsive: true,
-            language: {
-                @lang('datatable.strings')
-            },
+            language: {@lang('datatable.strings')},
             ajax: {
-                url: "{{ route('biller.projects.invoices') }}",
+                url: "{{ route('biller.invoices.get') }}",
                 type: 'POST',
-                data: {project_id: @json(@$project->id), quote_ids: quoteIds}
+                data: {project_id: "{{ $project->id }}"}
             },
             columns: [
                 {data: 'DT_Row_Index', name: 'id'},
-                {data: 'tid', name: 'tid'},
-                {data: 'customer', name: 'customer'},
-                {data: 'invoicedate', name: 'invoicedate'},
-                {data: 'total', name: 'total'},
-                {data: 'status', name: 'status'},
-                {data: 'invoiceduedate', name: 'invoiceduedate'}
+                ...['tid', 'customer', 'invoicedate', 'total', 'status', 'invoiceduedate'].map(v => ({data:v, name:v})),
             ],
-            order: [[0, "asc"]],
+            order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
             buttons: ['csv', 'excel', 'print'],
@@ -603,27 +616,21 @@
     }
     
     /**Fetch Tasks */
-    @include('focus.projects.adt.new_task_js');
     function tasks() {
         if ($('#tasks-table tbody tr').length) return;
         $('#tasks-table').dataTable({
             processing: true,
             serverSide: true,
             responsive: true,
-            language: {
-                @lang('datatable.strings')
-            },
+            language: {@lang('datatable.strings')},
             ajax: {
                 url: '{{ route("biller.tasks.get") }}',
                 type: 'POST',
-                data: {project_id: @json(@$project_id)}
+                data: {project_id: "{{ $project->id }}"},
             },
             columns: [
                 {data: 'DT_Row_Index', name: 'id'},
-                {data: 'tags', name: 'tags'},
-                {data: 'start', name: 'start'},
-                {data: 'duedate', name: 'duedate'},
-                {data: 'status', name: 'status'},
+                ...['milestone', 'tags','start', 'duedate', 'status'].map(v => ({data:v, name:v})),
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ],
             order: [[0, "desc"]],

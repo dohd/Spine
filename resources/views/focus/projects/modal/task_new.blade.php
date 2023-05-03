@@ -121,9 +121,8 @@
                             </div>
                         </div>
                         
-
                         @if(isset($project))  
-                            <input name="projects[]" type="hidden"  value="{{$project->id}}"> 
+                            <input name="projects[]" type="hidden"  value="{{ $project->id }}"> 
                         @elseif(isset($project_select[0]))
                             <fieldset class="form-group position-relative has-icon-left">
                                 <select class="form-control  select-box" name="projects[]" id="projects"
@@ -138,12 +137,13 @@
 
                     <div class="modal-footer">
                         <fieldset class="form-group position-relative has-icon-left mb-0">
-                            <button type="button" id="submit-data_tasks" class="btn btn-info add-todo-item"
-                                    data-dismiss="modal"><i class="fa fa-paper-plane-o d-block d-lg-none"></i>
-                                <span class="d-none d-lg-block">{{trans('tasks.new_task')}}</span></button>
+                            <button type="button" id="submit-data_tasks" class="btn btn-info add-todo-item" data-dismiss="modal">
+                                <i class="fa fa-paper-plane-o d-block d-lg-none"></i>
+                                <span class="d-none d-lg-block">{{trans('tasks.new_task')}}</span>
+                            </button>
                         </fieldset>
                     </div>
-                    <input type="hidden" value="{{route('biller.tasks.store')}}" id="action-url_task">
+                    <input type="hidden" value="{{ route('biller.tasks.store') }}" id="action-url_task">
                 </form>
             </section>
         </div>
