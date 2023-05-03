@@ -20,7 +20,7 @@ trait NoteAttribute
         return '
          '.$this->getViewButtonAttribute("manage-note", "biller.notes.show").'
                 '.$this->getEditButtonAttribute("edit-note", "biller.notes.edit").'
-                '.$this->getDeleteButtonAttribute("delete-note", "biller.notes.destroy",'table').'
+                '.$this->getDeleteButtonAttribute("delete-note", "biller.notes.destroy").'
                 ';
     }
 }

@@ -233,9 +233,10 @@
     });
 
     // on submit task
-    $("#submit-data_tasks").on("click", function() {
-        event.preventDefault();
-        var form_data = {};
+    $("#submit-data_tasks").on("click", function(e) {
+        e.preventDefault();
+        const form_data = {};
+        form_data['form_name'] = 'data_form_task';
         form_data['form'] = $("#data_form_task").serialize();
         form_data['url'] = $('#action-url_task').val();
         addObject(form_data, true);
@@ -260,20 +261,21 @@
         });
     });
     
-    // quote submit
+    // on quote submit
     $("#submit-data_quote").on("click", function (e) {
         e.preventDefault();
         var form_data = {};
+        form_data['form_name'] = 'data_form_quote';
         form_data['form'] = $("#data_form_quote").serialize();
         form_data['url'] = $('#action-url_7').val();
         addObject(form_data, true);
         $('#AddQuoteModal').modal('toggle');
     });
 
-    // note submit
-    $("#submit-data_note").on("click", function() {
-        event.preventDefault();
-        var form_data = {};
+    // on submit note
+    $("#submit-data_note").on("click", function(e) {
+        e.preventDefault();
+        const form_data = {};
         form_data['form_name'] = 'data_form_note';
         form_data['form'] = $("#data_form_note").serialize();
         form_data['url'] = $('#action-url_6').val();
@@ -588,7 +590,7 @@
         });
     }    
 
-    /**Fetch Notes */
+    //Fetch Notes
     function notes() {
         if ($('#notes-table tbody tr').length) return;
         $('#notes-table').dataTable({
@@ -599,13 +601,11 @@
             ajax: {
                 url: '{{ route("biller.notes.get") }}',
                 type: 'POST',
-                data: {project_id: @json(@$project->id)},
+                data: {project_id: "{{ $project->id }}"},
             },
             columns: [
                 {data: 'DT_Row_Index', name: 'id'},
-                {data: 'title', name: 'title'},
-                {data: 'created_at', name: 'created_at'},
-                {data: 'user', name: 'user'},
+                ...['title', 'created_at', 'user'].map(v => ({data:v, name:v})),
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ],
             order: [[0, "desc"]],

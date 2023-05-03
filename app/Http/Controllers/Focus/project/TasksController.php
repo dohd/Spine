@@ -114,7 +114,7 @@ class TasksController extends Controller
         // project task
         if ($request->milestone) {
             $row = '<tr>
-                <td></td>
+                <td>*</td>
                 <td>'. @$result->milestone->name. '</td>
                 <td><div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.tasks.show", [$result->id]) . '" >' . $result->name . '</a><div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $result->short_desc . '</span></div> </div></td>
                 <td>' . dateTimeFormat($result->start) . '</td>

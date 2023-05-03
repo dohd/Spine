@@ -15,6 +15,7 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\note;
 
 use App\Models\note\Note;
@@ -27,7 +28,7 @@ use App\Repositories\Focus\note\NoteRepository;
 use App\Http\Requests\Focus\note\ManageNoteRequest;
 use App\Http\Requests\Focus\note\CreateNoteRequest;
 use App\Http\Requests\Focus\note\EditNoteRequest;
-
+use Illuminate\Http\Request;
 
 /**
  * NotesController
@@ -134,17 +135,18 @@ class NotesController extends Controller
      * @param App\Models\note\Note $note
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Note $note, EditNoteRequest $request)
+    public function destroy(Note $note, Request $request)
     {
-        
         try {
-            //Calling the delete method on repository
+            $project = $note->project;
+
             $this->repository->delete($note);
+
+            if ($project) return new RedirectResponse(route('biller.projects.show', $project), ['flash_success' => trans('alerts.backend.notes.deleted')]);
+            return new RedirectResponse(route('biller.notes.index'), ['flash_success' => trans('alerts.backend.notes.deleted')]);
         } catch (\Throwable $th) {
             return errorHandler('Error Deleting Notes', $th);
         }
-        //returning with successfull message
-        return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.notes.deleted')));
     }
 
     /**
@@ -156,9 +158,6 @@ class NotesController extends Controller
      */
     public function show(Note $note, ManageNoteRequest $request)
     {
-
-        //returning with successfull message
         return new ViewResponse('focus.notes.view', compact('note'));
     }
-
 }

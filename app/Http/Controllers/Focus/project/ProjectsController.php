@@ -426,24 +426,25 @@ class ProjectsController extends Controller
                     $response = array_replace($response, ['status' => 'Success', 't_type' => 5, 'meta' => $log_text]);
                     break;
                 case 6: // project note
-                    $data = ['title' => $input['title'], 'content' => $input['content'], 'section' => 1];
+                    $data = Arr::only($input, ['title', 'content', 'project_id']);
+                    $data['section'] = 1;
+
                     $note = Note::create($data);
+                    ProjectLog::create(['project_id' => $note->project_id, 'value' => '[Project Note][New]' . $note->title]);
     
-                    $data = ['project_id' => $request->project_id, 'related' => 6, 'rid' => $note->id];
-                    ProjectRelations::create($data);
-    
-                    $data = ['project_id' => $request->project_id, 'value' => '[' . trans('projects.milestone') . '] ' . $request->title];
-                    ProjectLog::create($data);
-    
-                    $log_text = '<tr><td>*</td><td>'. $note->title .'</td><td>'. dateTimeFormat($note->created_at) .'</td><td>' 
-                        . auth()->user()->first_name . '</td><td><a href="'. route('biller.notes.show', [$note->id]) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="View"><i class="fa fa-eye"></i></a>
+                    $log_text = '<tr>
+                        <td>*</td>
+                        <td>'. $note->title .'</td><td>'. dateTimeFormat($note->created_at) .'</td>
+                        <td>'. auth()->user()->first_name . '</td>
+                        <td><a href="'. route('biller.notes.show', [$note->id]) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="View"><i class="fa fa-eye"></i></a>
                             <a href="'. route('biller.notes.edit', [$note->id]) .'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Edit"><i class="fa fa-pencil "></i> </a> 
                             <a class="btn btn-danger round" table-method="delete" data-trans-button-cancel="Cancel" data-trans-button-confirm="Delete" data-trans-title="Are you sure you want to do this?" data-toggle="tooltip" data-placement="top" title="Delete" style="cursor:pointer;" onclick="$(this).find(&quot;form&quot;).submit();">
-                            <i class="fa fa-trash"></i> <form action="' . route('biller.notes.show', [$note->id]) . '" method="POST" name="delete_table_item" style="display:none"></form></a></td></tr>';
+                            <i class="fa fa-trash"></i> <form action="' . route('biller.notes.show', [$note->id]) . '" method="POST" name="delete_table_item" style="display:none"></form></a>
+                        </td>
+                    </tr>';
                     
                     $response = array_replace($response, ['status' => 'Success', 't_type' => 6, 'meta' => $log_text]);
                     break;
-                
                 case 7: // project quote
                     $project = Project::find($input['project_id']);
                     $milestones = $project->milestones()->first();
