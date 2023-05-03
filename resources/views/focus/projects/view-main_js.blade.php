@@ -143,10 +143,10 @@
             $('#color').colorpicker();        
         }   
 
-        // fetch project budget amount
+        // fetch milestone budget limit
         $.get("{{ route('biller.projects.budget_limit', $project) }}", ({data}) => {
-            const milestoneBudget = accounting.formatNumber(data.milestone_budget);
-            $('.milestone-limit').text(milestoneBudget);
+            const budgetLimit = accounting.formatNumber(data.milestone_budget);
+            $('.milestone-limit').text(budgetLimit);
             if (milestoneState == 'edit') {
                 const amount = accounting.unformat($('#milestone-amount').val());
                 let limit = accounting.unformat($('.milestone-limit').text());
@@ -159,38 +159,50 @@
             const milestoneBudget = accounting.unformat($('.milestone-limit').text());
             if (this.value > milestoneBudget) this.value = milestoneBudget;
             this.value = accounting.formatNumber(this.value);
-        });            
+        });
+        const amount = accounting.unformat($('#milestone-amount').val()); 
+        if (!amount) $('#milestone-amount').attr('disabled', true);
+        
+        // milestone submit
+        $("#submit-data_mile_stone").on("click", function(e) {
+            e.preventDefault();
+            if (!amount) return swal('Milestone amount required!');
+
+            const form_data = {};
+            form_data['form'] = $("#data_form_mile_stone").serialize();
+            form_data['url'] = $('#action-url').val();
+            addObject(form_data, true);
+            $('#AddMileStoneModal').modal('toggle');
+            $('#data_form_mile_stone')[0].reset();
+        });        
     });
     $('#addMilestone').click(function() { milestoneState = 'create'; });
     // on edit milestone
     $(document).on('click', ".milestone-edit", function() {
         const obj = $(this);
-        $.get($(this).attr('data-url'), 
-            {object_id: $(this).attr('data-id'), obj_type: 2}, 
-            data => {
-                milestoneState = 'edit';
-                const div = $(document.createElement('div'));
-                div.html(data);
-                let form = div.find('.modal-content').html();
-                $('#AddMileStoneModal').find('.modal-content').html(form);
-                $('#AddMileStoneModal').modal('toggle');
-            }
-        );
+        const url = $(this).attr('data-url');
+        $.get(url, {object_id: $(this).attr('data-id'), obj_type: 2}, data => {
+            milestoneState = 'edit';
+            const div = $(document.createElement('div'));
+            div.html(data);
+            let form = div.find('.modal-content').html();
+            $('#AddMileStoneModal').find('.modal-content').html(form);
+            $('#AddMileStoneModal').modal('toggle');
+        });
     });     
     // on delete milestone
     $(document).on('click', ".milestone-del", function() {
         const obj = $(this);
-        $.post($(this).attr('data-url'), 
-            {object_id: $(this).attr('data-id'), obj_type: 2}, 
-            data => obj.parents('tr').remove()
-        );
-    });    
-
+        const url = $(this).attr('data-url');
+        $.post(url, {object_id: $(this).attr('data-id'), obj_type: 2}, data => obj.parents('tr').remove());
+    });  
 
     // quote show modal
     $('#AddQuoteModal').on('shown.bs.modal', function () {
-        $('.from_date').val(@json(dateFormat()));
-        $('.to_date').val(@json(dateFormat()));
+        const dt = "{{ dateFormat() }}";
+        $('.from_date').val(dt);
+        $('.to_date').val(dt);
+
         $("#quote").select2({
             allowClear: true,
             dropdownParent: $('#AddQuoteModal'),
@@ -211,18 +223,6 @@
         });
     });
     
-    // milestone submit
-    $("#submit-data_mile_stone").on("click", function (e) {
-        e.preventDefault();
-        const form_data = {};
-        form_data['form'] = $("#data_form_mile_stone").serialize();
-        form_data['url'] = $('#action-url').val();
-        return console.log(form_data.form)
-        addObject(form_data, true);
-        $('#AddMileStoneModal').modal('toggle');
-        $('#data_form_mile_stone')[0].reset();
-    });
-
     // log submit
     $("#submit-data_log").on("click", function (e) {
         e.preventDefault();

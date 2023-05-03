@@ -43,13 +43,14 @@
                         </div>
                         <input type="hidden" value="{{ route('biller.projects.update_meta') }}" id="action-url">
                         <input type="hidden" value="{{ $project->id }}" name="project_id">
+                        <input type="hidden" value="{{ $milestone->id }}" name="object_id">
                         <input type="hidden" value="2" name="obj_type">
                     </div>
                     <div class="modal-footer">
                         <fieldset class="form-group position-relative has-icon-left mb-0">
                             <button type="button" id="submit-data_mile_stone" class="btn btn-info add-todo-item" data-dismiss="modal">
                                 <i class="fa fa-paper-plane-o d-block d-lg-none"></i>
-                                <span class="d-none d-lg-block">{{trans('general.add')}}</span>
+                                <span class="d-none d-lg-block">Update</span>
                             </button>
                         </fieldset>
                     </div>

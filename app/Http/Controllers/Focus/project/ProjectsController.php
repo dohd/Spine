@@ -479,7 +479,6 @@ class ProjectsController extends Controller
     {
         $input = $request->except(['_token', 'ins']);
 
-        $data = '';
         switch ($input['obj_type']) {
             case 2 :
                 $milestone = ProjectMileStone::find($input['object_id']);
@@ -487,7 +486,7 @@ class ProjectsController extends Controller
                 return view('focus.projects.modal.milestone_new', compact('milestone', 'project'));
         }
         
-        return response()->json($data);
+        return response()->json();
     }    
 
     /**
@@ -526,21 +525,29 @@ class ProjectsController extends Controller
      */
     public function update_meta(ManageProjectRequest $request)
     {
-        $input = $request->except(['_token', 'ins']); dd($input);
+        $input = $request->except(['_token', 'ins']); 
 
         DB::beginTransaction();
 
         try {
-            switch ($input['object_type']) {
+            switch ($input['obj_type']) {
                 case 2 :
+                    $data = Arr::only($input, ['project_id','amount', 'name', 'description', 'color', 'duedate', 'time_to']);
+                    $data = array_replace($data, [
+                        'due_date' => date_for_database("{$data['duedate']} {$data['time_to']}:00"),
+                        'note' => $data['description'],
+                        'amount' => numberClean($data['amount']),
+                    ]);
+                    unset($data['duedate'], $data['time_to'], $data['description']);
+
                     $milestone = ProjectMileStone::find($input['object_id']);
+                    $milestone->update($data);
                     ProjectLog::create([
                         'project_id' => $milestone->project_id, 
-                        'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.delete') . '] ' . $milestone->name, 
+                        'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.update') . '] ' . $milestone->name, 
                         'user_id' => auth()->user()->id
                     ]);
-                    $milestone->delete();
-                    $data = ['status' => 'Success', 'message' => trans('general.delete'), 't_type' => 1, 'meta' => $input['object_id']];
+                    $data = ['status' => 'Success', 'message' => trans('general.update'), 't_type' => 1, 'meta' => $input['object_id'], 'refresh' => 1];
                     break;
             }
             DB::commit();
