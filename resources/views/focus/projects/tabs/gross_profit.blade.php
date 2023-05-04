@@ -33,6 +33,7 @@
                 </tbody>
             </table>
         </div>    
+
         {{-- budgeting --}}
         <h5>2. Budgeting</h5>
         <div class="table-responsive">
@@ -65,6 +66,7 @@
                 </tbody>
             </table>
         </div>   
+
         {{-- direct purchase expense --}}
         <h5>3. Job Expense</h5>
         <div class="table-responsive">
@@ -82,8 +84,7 @@
                     @foreach ($project->quotes as $quote)
                         @php
                             $actual_amount = $quote->subtotal;
-                            $expense_amount = $project->purchase_items->sum('amount');
-                            $expense_amount = 1 / $project->quotes->count() * $expense_amount;  
+                            $expense_amount = $project->purchase_items->sum('amount') / $project->quotes->count();
                             $balance = $actual_amount - $expense_amount;
                         @endphp
                         <tr>
@@ -97,6 +98,7 @@
                 </tbody>
             </table>
         </div>   
+        
         {{-- verification --}}
         <h5>4. Job Verification</h5>
         <div class="table-responsive">
@@ -114,8 +116,7 @@
                     @foreach ($project->quotes as $quote)
                         @php
                             $actual_amount = $quote->verified_amount;
-                            $expense_amount = $project->purchase_items->sum('amount');
-                            $expense_amount = 1 / $project->quotes->count() * $expense_amount;  
+                            $expense_amount = $project->purchase_items->sum('amount') / $project->quotes->count();
                             $balance = $actual_amount - $expense_amount;
                         @endphp
                         <tr>
