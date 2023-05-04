@@ -27,7 +27,7 @@ class NoteRepository extends BaseRepository
         $q = $this->query();
 
         if (request('project_id')) {
-            $q->where('project_id', request('project_id'));
+            $q->whereHas('project', fn($q) => $q->where('projects.id', request('project_id')));
         }
 
         return $q->get();

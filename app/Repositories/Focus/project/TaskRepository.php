@@ -34,7 +34,7 @@ class TaskRepository extends BaseRepository
         
         // filter project
         if (request('project_id')) {
-            $q->whereHas('milestone', fn($q) => $q->where('project_id', request('project_id')));
+            $q->whereHas('milestone', fn($q) => $q->where('project_milestones.project_id', request('project_id')));
         }
 
         return $q->get();
