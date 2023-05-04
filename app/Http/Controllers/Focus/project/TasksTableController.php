@@ -81,15 +81,14 @@ class TasksTableController extends Controller
             
             ->addColumn('actions', function ($task) {
                 $btn = '<a href="#" title="View" class="view_task success" data-toggle="modal" data-target="#ViewTaskModal" data-id="'. $task->id .'">
-                    <i  class="ft-eye"></i></a> ';
-
+                    <i class="ft-eye" style="font-size:1.5em;"></i></a> ';
                 if (access()->allow('edit-task')) 
-                    $btn .= '&nbsp;&nbsp;<a href="'. route("biller.tasks.edit", [$task->id]) . '" data-toggle="tooltip" data-placement="top" title="Edit"><i  class="ft-edit"></i></a>';
-                
+                    $btn .= '&nbsp;&nbsp;<a href="'. route("biller.tasks.edit", [$task->id]) . '" data-toggle="tooltip" data-placement="top" title="Edit">
+                        <i class="ft-edit" style="font-size:1.2em;"></i></a>';                
                 if (access()->allow('delete-task')) 
                     $btn .= '&nbsp;&nbsp;<a class="danger" href="' . route("biller.tasks.destroy", [$task->id]) . '" table-method="delete" data-trans-button-cancel="' 
                         .trans('buttons.general.cancel') . '" data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '" data-trans-title="'
-                        .trans('strings.backend.general.are_you_sure') .'"title="Delete"> <i  class="fa fa-trash"></i> </a>';
+                        .trans('strings.backend.general.are_you_sure') .'"title="Delete"> <i  class="fa fa-trash fa-lg"></i> </a>';
                         
                 return $btn;
             })

@@ -32,7 +32,7 @@
                                             @if (strpos(url()->previous(), 'projects') !== false)
                                                 <a href="{{ url()->previous() }}" class="btn btn-danger btn-md">{{ trans('buttons.general.cancel') }}</a>
                                             @else
-                                                {{ link_to_route('biller.tasks.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                                                {{ link_to_route('biller.projects.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
                                             @endif                                            
                                             {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
                                         </div><!--edit-form-btn-->
