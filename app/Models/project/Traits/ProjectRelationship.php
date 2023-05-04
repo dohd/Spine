@@ -86,6 +86,7 @@ trait ProjectRelationship
     {
         return $this->hasOneThrough(Hrm::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 3)->withoutGlobalScopes();
     }
+    
     public function branch()
     {
         return $this->belongsTo(Branch::class);
