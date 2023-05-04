@@ -9,18 +9,24 @@
         <div class="row">
             <fieldset class="form-group col-md-4">
                 <select class="custom-select" id="todo-select" name="status">
-                    <option value="{{$tasks->status}}" selected>--{{$tasks->task_status->name}}--</option>
-                    @foreach($mics->where('section','=',2) as $row)
+                    @if (isset($tasks))
+                        <option value="{{$tasks->status}}" selected>{{ $tasks->task_status->name }}</option>
+                    @else
+                        <option value="{{$tasks->priority}}" selected>-- Select Status --</option>
+                    @endif                    
+                    @foreach($mics->where('section', 2) as $row)
                         <option value="{{$row['id']}}">{{$row['name']}}</option>
                     @endforeach
-
-
                 </select>
             </fieldset>
-
             <fieldset class="form-group col-md-4">
+                {{ $tasks->priority . ' ' . $tasks->status }}
                 <select class="custom-select" id="todo-select" name="priority">
-                    <option value="{{$tasks->priority}}" selected>--{{trans('tasks.'.$tasks->priority)}}--</option>
+                    @if (@$tasks)
+                        <option value="{{$tasks->priority}}" selected>{{ trans('tasks.'.$tasks->priority) }}</option>
+                    @else
+                        <option value="{{$tasks->priority}}" selected>-- Select Priority --</option>
+                    @endif
                     <option value="Medium">{{trans('tasks.priority')}}</option>
                     <option value="Low">{{trans('tasks.Low')}}</option>
                     <option value="Medium">{{trans('tasks.Medium')}}</option>
@@ -29,15 +35,16 @@
                 </select>
             </fieldset>
             <fieldset class="form-group col-md-4">
-                <select class="form-control  select-box" name="tags[]" id="tags"
-                        data-placeholder="{{trans('tags.select')}}" multiple>
-                    @foreach($tasks->tags as $tag)
-                        <option value="{{$tag['id']}}" selected>{{$tag['name']}}</option>
-                    @endforeach
-                    {{--                     
-                    @foreach($mics->where('section','=',1) as $tag)
-                        <option value="{{$tag['id']}}">{{$tag['name']}}</option>
-                    @endforeach --}}
+                <select class="form-control  select-box" name="tags[]" id="tags" data-placeholder="{{trans('tags.select')}}" multiple>
+                    @if (@$tasks) 
+                        @foreach($tasks->tags as $tag)
+                            <option value="{{$tag['id']}}" selected>{{$tag['name']}}</option>
+                        @endforeach
+                    @else
+                        @foreach($mics->where('section','=',1) as $tag)
+                            <option value="{{$tag['id']}}">{{$tag['name']}}</option>
+                        @endforeach
+                    @endif
                 </select>
             </fieldset>
         </div>
@@ -45,57 +52,41 @@
             <div class="form-control-position">
                 <i class="icon-emoticon-smile"></i>
             </div>
-            <input type="text" id="new-todo-desc" class="new-todo-desc form-control"
-                   placeholder="{{trans('tasks.short_desc')}}" name="short_desc" value="{{$tasks->short_desc}}">
-
+            <input type="text" id="new-todo-desc" class="new-todo-desc form-control" placeholder="{{trans('tasks.short_desc')}}" name="short_desc" value="{{$tasks->short_desc}}">
         </fieldset>
         <fieldset class="form-group col-12">
-                            <textarea class="new-todo-item form-control" placeholder="{{trans('tasks.description')}}"
-                                      rows="6" name="description">{{$tasks->description}}</textarea>
+            <textarea class="new-todo-item form-control" placeholder="{{trans('tasks.description')}}" rows="6" name="description">{{ @$tasks->description }}</textarea>                                    
         </fieldset>
         <div class="form-group row">
             <div class="col-md-4 col-xs-12 mt-1">
                 <div class="row">
-                    <label class="col-sm-4 col-xs-6 control-label"
-                           for="sdate">{{trans('meta.from_date')}}</label>
-
+                    <label class="col-sm-4 col-xs-6 control-label" for="sdate">{{trans('meta.from_date')}}</label>
                     <div class="col-sm-4 col-xs-6">
-                        <input type="text" class="form-control from_date required"
-                               placeholder="Start Date" name="start"
-                               autocomplete="false" data-toggle="datepicker">
-
+                        <input type="text" class="form-control from_date required" placeholder="Start Date" name="start" autocomplete="false" data-toggle="datepicker">
                         <input type="time" name="time_from" class="form-control" value="{{timeFormat($tasks->start)}}">
                     </div>
                 </div>
             </div>
             <div class="col-md-4 col-xs-6 mt-1">
                 <div class="row">
-                    <label class="col-sm-4 col-xs-6  control-label"
-                           for="sdate">{{trans('meta.to_date')}}</label>
-
+                    <label class="col-sm-4 col-xs-6  control-label" for="sdate">{{trans('meta.to_date')}}</label>
                     <div class="col-sm-6 col-xs-6">
-                        <input type="text" class="form-control required to_date"
-                               placeholder="End Date" name="duedate"
-                               data-toggle="datepicker" autocomplete="false">
-
+                        <input type="text" class="form-control required to_date" placeholder="End Date" name="duedate" data-toggle="datepicker" autocomplete="false">
                         <input type="time" name="time_to" class="form-control" value="{{timeFormat($tasks->duedate)}}">
                     </div>
                 </div>
             </div>
             <div class="col-md-4 col-xs-12 mt-1">
                 <div class="row">
-                    <label class="col-sm-4 col-xs-6 control-label"
-                           for="sdate">{{trans('tasks.link_to_calender')}}</label>
+                    <label class="col-sm-4 col-xs-6 control-label" for="sdate">{{trans('tasks.link_to_calender')}}</label>
                     @if($tasks->events)
                         <div class="col-sm-6 col-xs-6">
-                            <input type="checkbox" class="form-control"
-                                   name="link_to_calender" checked>
+                            <input type="checkbox" class="form-control" name="link_to_calender" checked>
                             {{ Form::text('color', $tasks->events['color'],['class' => 'form-control round', 'id'=>'color_t','placeholder' => trans('miscs.color'),'autocomplete'=>'off','value'=>$tasks->events['color']]) }}
                         </div>
                     @else
                         <div class="col-sm-6 col-xs-6">
-                            <input type="checkbox" class="form-control"
-                                   name="link_to_calender">
+                            <input type="checkbox" class="form-control" name="link_to_calender">
                             {{ Form::text('color', '#0b97f4',['class' => 'form-control round', 'id'=>'color_t','placeholder' => trans('miscs.color'),'autocomplete'=>'off']) }}
                         </div>
                     @endif
@@ -106,47 +97,32 @@
         <div class="row fom-group">
             <div class="col-6">
                 <fieldset class="form-group position-relative has-icon-left">
-                    <select class="form-control select-box" name="employees[]" id="employee"
-                            data-placeholder="{{trans('tasks.assign')}}" multiple>
-                        {{-- @foreach($tasks->users as $employee)
-                            <option value="{{$employee['id']}}"
-                                    selected>{{$employee['first_name']}} {{$employee['last_name']}}</option>
-                        @endforeach --}}
-                        @foreach($employees as $employee)
-                            <option value="{{$employee['id']}}">{{$employee['first_name']}} {{$employee['last_name']}}</option>
-                        @endforeach
+                    <select class="form-control select-box" name="employees[]" id="employee" data-placeholder="{{trans('tasks.assign')}}" multiple>
+                        @if (@$tasks)
+                            @foreach($tasks->users as $employee)
+                                <option value="{{$employee['id']}}" selected>{{$employee['first_name']}} {{$employee['last_name']}}</option>
+                            @endforeach
+                        @else
+                            @foreach($employees as $employee)
+                                <option value="{{$employee['id']}}">{{$employee['first_name']}} {{$employee['last_name']}}</option>
+                            @endforeach
+                        @endif
                     </select>
                 </fieldset>
             </div>
             <div class="col-6">
                 <select class="form-control select-box" name="milestone_id" id="milestone" data-placeholder="{{trans('tasks.assign')}}">
                     <option value="">-- Choose Milestone --</option>
-                    @foreach($tasks->milestone()->get() as $milestone)
-                        <option value="{{ $milestone->id }}" {{ $milestone->id == $tasks->milestone_id? 'selected' : '' }}>
-                            {{ $milestone->name }} 
-                        </option>
-                    @endforeach
+                    @if (@$tasks)
+                        @foreach($tasks->milestone()->get() as $milestone)
+                            <option value="{{ $milestone->id }}" selected>
+                                {{ $milestone->name }} 
+                            </option>
+                        @endforeach
+                    @endif
                 </select>
             </div>
         </div>
-
-        @if(isset($project->id))  <input name="projects[]" type="hidden"
-                                         value="{{$project->id}}"> @elseif(isset($project_select[0]))
-            <fieldset class="form-group position-relative has-icon-left">
-
-                <select class="form-control  select-box" name="projects[]" id="projects"
-                        data-placeholder="{{trans('projects.projects')}}" multiple>
-                    @foreach($tasks->projects as $p_row)
-                        <option value="{{$p_row['id']}}" selected>{{$p_row['name']}}</option>
-                    @endforeach
-                    @foreach($project_select as $p_row)
-                        <option value="{{$p_row['id']}}">{{$p_row['name']}}</option>
-                    @endforeach
-                </select>
-            </fieldset>
-
-        @endif
     </div>
-
-    <input type="hidden" value="{{route('biller.tasks.store')}}" id="action-url_task">
+    <input type="hidden" value="{{ route('biller.tasks.store') }}" id="action-url_task">
 </form>

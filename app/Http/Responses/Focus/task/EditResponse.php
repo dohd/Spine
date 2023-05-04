@@ -36,9 +36,7 @@ class EditResponse implements Responsable
         $mics = Misc::all();
         $employees = Hrm::all();
         $user = auth()->user()->id;
-        $project_select = Project::whereHas('users', function ($q) use ($user) {
-            return $q->where('rid', '=', $user);
-        })->get();
+        $project_select = Project::whereHas('users')->get();
         return view('focus.projects.tasks.edit',compact('tasks','mics', 'employees', 'project_select'));
 
     }

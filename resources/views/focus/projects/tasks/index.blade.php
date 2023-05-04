@@ -152,7 +152,7 @@
                 buttons: ['csv', 'excel', 'print'],
             });
             $('#tasks-table_wrapper').removeClass('form-inline');
-            @include('focus.projects.adt.new_task_js')
+            {{--  @include('focus.projects.adt.new_task_js') --}}
         }
         // call back
         function trigger(data) {
