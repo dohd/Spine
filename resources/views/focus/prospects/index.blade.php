@@ -45,8 +45,9 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Title</th>
-                                            <th>Company/Name</th>
+                                            <th>Company Name</th>
                                             <th>Industry</th>
+                                            <th>Contact Name</th>
                                             <th>Email</th>
                                             <th>Phone</th>
                                             <th>Region</th>
@@ -187,9 +188,14 @@
                             data: 'company',
                             name: 'company'
                         },
+                        
                         {
                             data: 'industry',
                             name: 'industry'
+                        },
+                        {
+                            data: 'name',
+                            name: 'name'
                         },
                         {
                             data: 'email',

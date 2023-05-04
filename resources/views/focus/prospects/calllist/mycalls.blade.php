@@ -45,11 +45,15 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Names</th>
-                                            
+                                            <th>Title</th>
+                                            <th>Company/Name</th>
+                                            <th>Industry</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Region</th>
+                                            <th>Call Status</th>
                                             <th>Call Date</th>
                                             <th>Call</th>
-
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                     </thead>
@@ -90,7 +94,7 @@
 
             init() {
                 $.ajaxSetup(config.ajax);
-                this.draw_data();
+               this.draw_data();
                 this.showModal();
                 this.dismissModal();
                 $('#callModal').find('.call-status').change(this.callTypeChange);
@@ -141,7 +145,7 @@
                         @lang('datatable.strings')
                     },
                     ajax: {
-                        url: '{{ route('biller.calllists.mytodaycalls') }}',
+                        url: '{{ route('biller.calllists.fetchtodaycalls') }}',
                         type: 'post',
                     },
                     columns: [{
@@ -149,10 +153,36 @@
                             name: 'id'
                         },
                         {
-                            data: 'prospect_id',
-                            name: 'prospect_id'
+                            data: 'title',
+                            name: 'title'
                         },
                        
+                        {
+                            data: 'company',
+                            name: 'company'
+                        },
+                        {
+                            data: 'industry',
+                            name: 'industry'
+                        },
+                       
+                        {
+                            data: 'email',
+                            name: 'email'
+                        },
+                        {
+                            data: 'phone',
+                            name: 'phone'
+                        },
+                       
+                        {
+                            data: 'region',
+                            name: 'region'
+                        },
+                        {
+                            data: 'call_status',
+                            name: 'call_status'
+                        },
                         {
                             data: 'call_date',
                             name: 'call_date'
@@ -170,7 +200,7 @@
                     ],
                     columnDefs: [{
                         type: "custom-date-sort",
-                        targets: [2]
+                        targets: [8]
                     }],
                     order: [
                         [0, "desc"]
@@ -180,73 +210,7 @@
                     buttons: ['csv', 'excel', 'print'],
                 });
             },
-            // draw_data() {
-            //     $('#mytodaycalllist-table').dataTable({
-            //         stateSave: true,
-            //         processing: true,
-            //         responsive: true,
-            //         language: {
-            //             @lang('datatable.strings')
-            //         },
-            //         ajax: {
-            //             url: '{{ route('biller.calllists.mytoday') }}',
-            //             type: 'post',
-            //         },
-            //         columns: [{
-            //                 data: 'DT_Row_Index',
-            //                 name: 'id'
-            //             },
-            //             {
-            //                 data: 'name',
-            //                 name: 'name'
-            //             },
-            //             {
-            //                 data: 'email',
-            //                 name: 'email'
-            //             },
-            //             {
-            //                 data: 'phone',
-            //                 name: 'phone'
-            //             },
-            //             {
-            //                 data: 'company',
-            //                 name: 'company'
-            //             },
-            //             {
-            //                 data: 'industry',
-            //                 name: 'industry'
-            //             },
-            //             {
-            //                 data: 'region',
-            //                 name: 'region'
-            //             },
-            //             {
-            //                 data: 'call_status',
-            //                 name: 'call_status'
-            //             },
-            //             {
-            //                 data: 'call_prospect',
-            //                 name: 'call_prospect'
-            //             },
-            //             {
-            //                 data: 'actions',
-            //                 name: 'actions',
-            //                 searchable: false,
-            //                 sortable: false
-            //             }
-            //         ],
-            //         columnDefs: [{
-            //             // type: "custom-date-sort",
-            //             // targets: [5]
-            //         }],
-            //         order: [
-            //             [0, "desc"]
-            //         ],
-            //         searchDelay: 500,
-            //         dom: 'Blfrtip',
-            //         buttons: ['csv', 'excel', 'print'],
-            //     });
-            // }
+           
 
         };
         $(() => Index.init());

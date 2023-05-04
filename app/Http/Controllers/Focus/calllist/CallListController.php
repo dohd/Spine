@@ -63,9 +63,6 @@ class CallListController extends Controller
      */
     public function index()
     {
-
-
-
         return new ViewResponse('focus.prospects.calllist.index');
         //return new ViewResponse('focus.prospects.calllist.index');
     }
@@ -181,10 +178,27 @@ class CallListController extends Controller
 
     public function mytoday()
     {
-        // $called = ProspectCallList::where('call_status', 1)->count();
-        // $not_called = CallList::where('call_status', 0)->count();
-        // $total_prospect = CallList::count();
-
-        return new ViewResponse('focus.prospects.calllist.mycalls');
+        
+        return view('focus.prospects.calllist.mycalls');
     }
+    public function allocationdays($id)
+    {
+       $calllist = ProspectCallList::where('call_id',$id)->get();
+      
+        return view('focus.prospects.calllist.allocationdays',compact('calllist'));
+    }
+    public function prospectviacalllist(Request $request)
+    {
+      
+        $prospects = ProspectCallList::whereMonth('call_date', $request->month)
+        ->whereDay('call_date', $request->day)
+        ->with(['prospect' => function ($q) {
+            $q->select('id', 'title', 'company','industry','contact_person','email','phone','region','call_status');
+        }])
+        ->get();
+      
+    return response()->json($prospects);
+    }
+
+
 }

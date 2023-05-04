@@ -64,6 +64,11 @@ class ProspectsTableController extends Controller
                 $name = $prospect->company == null ? '-----' : $prospect->company;
                 return $name;
             })
+            ->addColumn('name', function ($prospect) {
+
+                $name = $prospect->contact_person == null ? '-----' : $prospect->contact_person;
+                return $name;
+            })
             ->addColumn('email', function ($prospect) {
                 $client_email = $prospect->email == null ? '-----' : $prospect->email ;
 

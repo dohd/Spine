@@ -204,13 +204,18 @@ Route::group(['namespace' => 'prospect'], function () {
 
 //CallList
 Route::group(['namespace' => 'calllist'], function () {
+   
     Route::get('calllists/mytoday', 'CallListController@mytoday')->name('calllists.mytoday');
+    Route::get('calllists/allocationdays/{id}', 'CallListController@allocationdays')->name('calllists.allocationdays');
     Route::patch('calllists/update_status/{calllist}', 'CallListController@update_status')->name('calllists.update_status');
     Route::resource('calllists', 'CallListController');
 
     //For Datatable
+    
     Route::post('calllists/get', 'CallListTableController')->name('calllists.get');
-    Route::post('calllists/mytoday', 'MyTodayCallListTableController')->name('calllists.mytodaycalls');
+    Route::post('calllists/mytoday', 'MyTodayCallListTableController')->name('calllists.fetchtodaycalls');
+    Route::post('calllists/prospectscalllist', 'MyTodayCallListTableController')->name('calllists.prospectcalllist');
+    Route::post('calllists/prospectviacalllist', 'CallListController@prospectviacalllist')->name('calllists.prospectviacalllist');
     Route::post('calllists/followup', 'CallListController@followup')->name('calllists.followup');
 });
 

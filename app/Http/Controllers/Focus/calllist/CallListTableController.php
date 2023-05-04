@@ -56,26 +56,32 @@ class CallListTableController extends Controller
         ->addIndexColumn()
         ->addColumn('title', function ($calllist) {
 
-            $title = $calllist->title == null ? '_____________' : $calllist->title;
+            $title = $calllist->title == null ? '----' : $calllist->title;
             return $title;
         })
         ->addColumn('category', function ($calllist) {
-            $category = $calllist->category == null ? '_____________' : $calllist->category ;
+            $category = $calllist->category == null ? '----' : $calllist->category ;
 
             return $category;
         })
         ->addColumn('prospects_number', function ($calllist) {
-            $prospects_number = $calllist->prospects_number == null ? '_____________' : $calllist->prospects_number;
+            $prospects_number = $calllist->prospects_number == null ? '----' : $calllist->prospects_number;
 
             return $prospects_number;
         })
+        ->addColumn('explore', function ($calllist) {
+            $link = route('biller.calllists.allocationdays', [$calllist]);
+            return '<a id="explore" href="' . $link . '" class="btn btn-primary" data-toggle="tooltip"  title="Call" >
+            <i  class="fa fa-vcard"></i>
+                     </a>';
+        })
         ->addColumn('start_date', function ($calllist) {
-            $start_date = $calllist->start_date == null ? '_____________': $calllist->start_date;
+            $start_date = $calllist->start_date == null ? '----': $calllist->start_date;
 
             return $start_date;
         })
         ->addColumn('end_date', function ($calllist) {
-            $end_date = $calllist->end_date == null ? '_____________' : $calllist->end_date;
+            $end_date = $calllist->end_date == null ? '----' : $calllist->end_date;
 
             return $end_date;
         })

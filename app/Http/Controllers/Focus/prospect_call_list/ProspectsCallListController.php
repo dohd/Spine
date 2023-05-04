@@ -171,4 +171,5 @@ class ProspectCallListController extends Controller
 
         return redirect()->back();
     }
+
 }

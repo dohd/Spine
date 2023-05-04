@@ -50,28 +50,28 @@
                     </tr> 
                     <tr>
                         <th>Name</th>
-                        <td>{{  $prospect->name }}</td>
+                        <td>{{  $prospect->name ==null ? '---':$prospect->name }}</td>
                     </tr>
                     <tr>
                         <th>Region</th>
-                        <td>{{ $prospect->region }}</td>
+                        <td>{{ $prospect->region  ==null ? '---':$prospect->region }}</td>
                     </tr>
                     <tr>
                         <th>Industry</th>
-                        <td>{{ $prospect->industry }}</td>
+                        <td>{{ $prospect->industry  ==null ? '---':$prospect->industry }}</td>
                     </tr>
                     <tr>
                         <th>Company</th>
-                        <td>{{ $prospect->company }}</td>
+                        <td>{{ $prospect->company  ==null ? '---':$prospect->company }}</td>
                     </tr>
                     
                     <tr>
                         <th>Contact</th>
-                        <td>{{  $prospect->phone }}</td>
+                        <td>{{  $prospect->phone  ==null ? '---':$prospect->phone }}</td>
                     </tr>
                     <tr>
                         <th>Email</th>
-                        <td>{{ $prospect->email }}</td>
+                        <td>{{ $prospect->email  ==null ? '---':$prospect->email }}</td>
                     </tr>                                 
                 </tbody>
             </table>

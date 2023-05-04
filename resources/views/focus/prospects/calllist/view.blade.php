@@ -54,38 +54,7 @@
         </div>
     </div>
 
-    <table class="table table-xs table-bordered">
-        <thead>
-            <tr class="item_header bg-gradient-directional-blue white">
-                <th>Id</th>
-                <th>Title</th>
-                <th>Company/Name</th>
-                <th>Industry</th>
-                <th>Phone</th>
-                <th>Call Status</th>
-            </tr>
-         
-          
-        </thead>
-        <tbody>
-             @isset ($calllist->prospects)
-                @php ($i = 0)
-                @foreach ($calllist->prospects as $prospect)
-                    @if ($prospect)
-                    <tr>
-                        <td>{{$prospect->id}}</td>
-                        <td>{{$prospect->title}}</td>
-                        <td>{{$prospect->company}}</td>
-                        <td>{{$prospect->industry}}</td>
-                        <td>{{$prospect->phone}}</td>
-                        <td>{{$prospect->call_status==0?'Not called':'Called'}}</td>
-                    </tr>
-                        @php ($i++)
-                    @endif
-                @endforeach
-            @endisset
-        </tbody>
-    </table>
+    
 
     
 </div>

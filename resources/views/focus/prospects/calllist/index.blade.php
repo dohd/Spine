@@ -32,6 +32,7 @@
                                             <th>Title</th>
                                             <th>Category</th>
                                             <th>Prospects to Call</th>
+                                            <th>Explore Prospects</th>
                                             <th>Start Date</th>
                                             <th>End Date</th>
                                             
@@ -76,10 +77,10 @@
             init() {
                 $.ajaxSetup(config.ajax);
                 this.draw_data();
-                
+               
             },
 
-           
+          
           
 
             draw_data() {
@@ -109,6 +110,10 @@
                         {
                             data: 'prospects_number',
                             name: 'prospects_number'
+                        },
+                        {
+                            data: 'explore',
+                            name: 'explore'
                         },
                         {
                             data: 'start_date',

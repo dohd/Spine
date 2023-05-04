@@ -13,12 +13,13 @@
                     {{ Form::text('company', null, ['class' => 'form-control round', 'placeholder' => 'Company', 'id' => 'prospect_company']) }}
                 </div>
             </div>
-            <div class="col-sm-6"><label for="industry" class="caption">Industry</label>
+            <div class="col-sm-6"><label for="prospect_name" class="caption">Prospect Name</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                    {{ Form::text('industry', null, ['class' => 'form-control round', 'placeholder' => 'Industry', 'id' => 'industry']) }}
+                    {{ Form::text('name', null, ['class' => 'form-control round', 'placeholder' => 'Name', 'id' => 'prospect_name']) }}
                 </div>
             </div>
+            
         </div>
         <div class="form-group row">
 
@@ -43,7 +44,12 @@
                     {{ Form::text('region', null, ['class' => 'form-control round', 'placeholder' => 'Region', 'id' => 'region']) }}
                 </div>
             </div>
-           
+            <div class="col-sm-6"><label for="industry" class="caption">Industry</label>
+                <div class="input-group">
+                    <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                    {{ Form::text('industry', null, ['class' => 'form-control round', 'placeholder' => 'Industry', 'id' => 'industry']) }}
+                </div>
+            </div>
         </div>
         {{ Form::hidden('id',null, ['class' => 'form-control','id'=>'id','required']) }}
     </div>
