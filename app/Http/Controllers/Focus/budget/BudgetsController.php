@@ -73,12 +73,11 @@ class BudgetsController extends Controller
         try {
             $budget = $this->repository->create($request->except('_token', 'files'));
             $project = @$budget->quote->project;
-            if ($project) return redirect()->route('biller.projects.show', $project);
-        } catch (\Throwable $th) { dd($th);
+            if ($project) return new RedirectResponse(route('biller.projects.show', $project), ['flash_success' => 'Budget Created Successfully']);
+            return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Created Successfully']);
+        } catch (\Throwable $th) {
             return errorHandler('Error Creating Budget!', $th);
         }
-
-        return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Created Successfully']);
     }
 
     /**
@@ -106,13 +105,11 @@ class BudgetsController extends Controller
         try {
             $this->repository->update($budget, $request->except('_token', 'files'));
             $project = @$budget->quote->project;
-            if ($project) return redirect()->route('biller.projects.show', $project);
-            
-        } catch (\Throwable $th) {
+            if ($project) return new RedirectResponse(route('biller.projects.show', $project), ['flash_success' => 'Budget Updated Successfully']);
+            return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Updated Successfully']);
+        } catch (\Throwable $th) { dd($th);
             return errorHandler('Error Updating Budget!', $th);
         }
-
-        return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Updated Successfully']);
     }
 
     /**

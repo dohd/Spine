@@ -52,7 +52,7 @@
             <tr class="item_header bg-gradient-directional-blue white">
                 <th width="6%" class="text-center">#</th>
                 <th width="38%" class="text-center">Product</th>
-                <th width="8%" class="text-center">Approved Qty</th>                                
+                <th width="8%" class="text-center">Quoted Qty</th>                                
                 <th width="15%" class="text-center">UoM</th>
                 <th width="8%" class="text-center">Qty</th>     
                 <th width="12%" class="text-center">Buy Price</th>
@@ -124,7 +124,13 @@
                 </span>
             </div>
             <input type="text" value="0" class="form-control" id="budget-total" name="budget_total" readonly>
-        </div>                            
+        </div>          
+        
+        @if (strpos(url()->previous(), 'projects') !== false)
+            <a href="{{ url()->previous() }}" class="btn btn-danger btn-lg">{{ trans('buttons.general.cancel') }}</a>
+        @else
+            {{ link_to_route('biller.projects.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-lg']) }}
+        @endif  
         {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
     </div>                              
 </div>
