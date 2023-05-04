@@ -32,6 +32,7 @@
 
             <div id="div_picked" class="mx-2">
                 <h3>Follow up questions</h3>
+                {{{ Form::open() }}}
                 <div class="form-group">
                     <p>Do you have an ERP</p>
                     <div class="d-inline-block">
@@ -112,6 +113,7 @@
                     </div>
                 </div>
                 {{ Form::button('Save Call Chat', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_remark']) }}
+                {!! Form::close() !!}
             </div>
 
 

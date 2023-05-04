@@ -16,11 +16,11 @@
  * ***********************************************************************
  */
 
-namespace App\Http\Controllers\Focus\calllist;
+namespace App\Http\Controllers\Focus\prospectcalllist;
 
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
-use App\Repositories\Focus\calllist\CallListRepository;
+use App\Repositories\Focus\prospect_call_list\ProspectCallListRepository;
 
 /**
  * Class BranchTableController.
@@ -31,16 +31,16 @@ class MyTodayCallListTableController extends Controller
      * variable to store the repository object
      * @var ProductcategoryRepository
      */
-    protected $calllist;
+    protected $prospectcalllist;
 
     /**
      * contructor to initialize repository object
      * @param ProductcategoryRepository $productcategory ;
      */
-    public function __construct(CallListRepository $calllist)
+    public function __construct(ProspectCallListRepository $prospectcalllist)
     {
 
-        $this->calllist = $calllist;
+        $this->prospectcalllist = $prospectcalllist;
     }
 
     /**
@@ -49,59 +49,81 @@ class MyTodayCallListTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->calllist->getForDataTable();
+        $core = $this->prospectcalllist->getForDataTable();
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('name', function ($calllist) {
-                return $calllist->name;
+            ->addColumn('prospect_id', function ($prospectcalllist) {
+                return $prospectcalllist->prospect_id;
             })
-            ->addColumn('email', function ($calllist) {
-                $email = $calllist->email;
+            ->addColumn('call_date', function ($prospectcalllist) {
+                $call_date = $prospectcalllist->call_date;
+               
 
-                return $email;
+                return $call_date;
             })
-            ->addColumn('phone', function ($calllist) {
-                $phone = $calllist->phone;
-
-                return $phone;
-            })
-            ->addColumn('company', function ($calllist) {
-                $company = $calllist->company;
-
-                return $company;
-            })
-            ->addColumn('industry', function ($calllist) {
-                $industry = $calllist->industry;
-
-                return $industry;
-            })
-            ->addColumn('region', function ($calllist) {
-                $region = $calllist->region;
-
-                return $region;
-            })
-            ->addColumn('call_status', function ($calllist) {
-                $call_status = $calllist->call_status;
-                if ($call_status == 0) {
-                    $call_status = "Not Called";
-                } else {
-                    $call_status = "Called";
-                }
-
-                return $call_status;
-            })
-            ->addColumn('call_prospect', function ($calllist) {
-                return '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $calllist->id . '" data-toggle="tooltip"  title="Call" >
+            ->addColumn('call_prospect', function ($prospectcalllist) {
+                return '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcalllist->prospect_id . '" data-toggle="tooltip"  title="Call" >
                 <i  class="fa fa-vcard"></i>
                          </a>';
             })
             
-            ->addColumn('actions', function ($calllist) {
-                return $calllist->action_buttons;
+            ->addColumn('actions', function ($prospectcalllist) {
+                return $prospectcalllist->action_buttons;
             })
             ->make(true);
+        // return Datatables::of($core)
+        //     ->escapeColumns(['id'])
+        //     ->addIndexColumn()
+        //     ->addColumn('name', function ($prospectcalllist) {
+        //         return $prospectcalllist->name;
+        //     })
+        //     ->addColumn('email', function ($prospectcalllist) {
+        //         $email = $prospectcalllist->email;
+
+        //         return $email;
+        //     })
+        //     ->addColumn('phone', function ($prospectcalllist) {
+        //         $phone = $prospectcalllist->phone;
+
+        //         return $phone;
+        //     })
+        //     ->addColumn('company', function ($prospectcalllist) {
+        //         $company = $prospectcalllist->company;
+
+        //         return $company;
+        //     })
+        //     ->addColumn('industry', function ($prospectcalllist) {
+        //         $industry = $prospectcalllist->industry;
+
+        //         return $industry;
+        //     })
+        //     ->addColumn('region', function ($prospectcalllist) {
+        //         $region = $prospectcalllist->region;
+
+        //         return $region;
+        //     })
+        //     ->addColumn('call_status', function ($prospectcalllist) {
+        //         $call_status = $prospectcalllist->call_status;
+        //         if ($call_status == 0) {
+        //             $call_status = "Not Called";
+        //         } else {
+        //             $call_status = "Called";
+        //         }
+
+        //         return $call_status;
+        //     })
+        //     ->addColumn('call_prospect', function ($prospectcalllist) {
+        //         return '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcalllist->id . '" data-toggle="tooltip"  title="Call" >
+        //         <i  class="fa fa-vcard"></i>
+        //                  </a>';
+        //     })
+            
+        //     ->addColumn('actions', function ($prospectcalllist) {
+        //         return $prospectcalllist->action_buttons;
+        //     })
+        //     ->make(true);
     }
 
 }

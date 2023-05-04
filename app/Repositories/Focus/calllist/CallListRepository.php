@@ -1,11 +1,15 @@
 <?php
 
 namespace App\Repositories\Focus\calllist;
+
+use App\Http\Controllers\Focus\prospect_call_list\ProspectCallListController;
 use App\Models\prospect\Prospect;
 use App\Models\calllist\CallList;
 use App\Exceptions\GeneralException;
 use App\Models\items\Prefix;
+
 use App\Repositories\BaseRepository;
+use App\Repositories\Focus\prospect_call_list\ProspectCallListRepository;
 use DB;
 use Illuminate\Validation\ValidationException;
 
@@ -18,6 +22,18 @@ class CallListRepository extends BaseRepository
      * Associated Repository Model.
      */
     const MODEL = CallList::class;
+
+
+    private $prospectcalllist;
+
+  
+
+    
+    public function __construct()
+    {
+        
+    
+    }
 
     /**
      * This method is used by Table Controller
@@ -45,12 +61,7 @@ class CallListRepository extends BaseRepository
 
         $result = CallList::create($data);
         $response = $result->refresh();
-        $callid= $response->id;
-
-        $prospects = Prospect::where('industry',$data['title'])->limit($data['prospects_number'])->get()->toArray();
-
-        dd($prospects);
-
+        
         return $response;
 
         throw new GeneralException('Error Creating CallList');

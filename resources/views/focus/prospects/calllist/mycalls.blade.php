@@ -20,7 +20,7 @@
         <div class="content-body">
             <div class="row">
                 <div class="col-12">
-                    <div class="card">
+                    {{-- <div class="card">
                         <div class="card-body">
                             <div class="row no-gutters">
                                 <div class="col-sm-3 col-md-2 h4">Called</div>
@@ -35,7 +35,7 @@
                                     {{ numberFormat(div_num($not_called, $total_prospect) * 100) }}%</div>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
@@ -46,12 +46,8 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Names</th>
-                                            <th>Email</th>
-                                            <th>Phone</th>
-                                            <th>Company</th>
-                                            <th>Industry</th>
-                                            <th>Region</th>
-                                            <th>Call Status</th>
+                                            
+                                            <th>Call Date</th>
                                             <th>Call</th>
 
                                             <th>{{ trans('labels.general.actions') }}</th>
@@ -145,7 +141,7 @@
                         @lang('datatable.strings')
                     },
                     ajax: {
-                        url: '{{ route('biller.calllists.mytoday') }}',
+                        url: '{{ route('biller.calllists.mytodaycalls') }}',
                         type: 'post',
                     },
                     columns: [{
@@ -153,32 +149,13 @@
                             name: 'id'
                         },
                         {
-                            data: 'name',
-                            name: 'name'
+                            data: 'prospect_id',
+                            name: 'prospect_id'
                         },
+                       
                         {
-                            data: 'email',
-                            name: 'email'
-                        },
-                        {
-                            data: 'phone',
-                            name: 'phone'
-                        },
-                        {
-                            data: 'company',
-                            name: 'company'
-                        },
-                        {
-                            data: 'industry',
-                            name: 'industry'
-                        },
-                        {
-                            data: 'region',
-                            name: 'region'
-                        },
-                        {
-                            data: 'call_status',
-                            name: 'call_status'
+                            data: 'call_date',
+                            name: 'call_date'
                         },
                         {
                             data: 'call_prospect',
@@ -192,8 +169,8 @@
                         }
                     ],
                     columnDefs: [{
-                        // type: "custom-date-sort",
-                        // targets: [5]
+                        type: "custom-date-sort",
+                        targets: [2]
                     }],
                     order: [
                         [0, "desc"]
@@ -202,7 +179,74 @@
                     dom: 'Blfrtip',
                     buttons: ['csv', 'excel', 'print'],
                 });
-            }
+            },
+            // draw_data() {
+            //     $('#mytodaycalllist-table').dataTable({
+            //         stateSave: true,
+            //         processing: true,
+            //         responsive: true,
+            //         language: {
+            //             @lang('datatable.strings')
+            //         },
+            //         ajax: {
+            //             url: '{{ route('biller.calllists.mytoday') }}',
+            //             type: 'post',
+            //         },
+            //         columns: [{
+            //                 data: 'DT_Row_Index',
+            //                 name: 'id'
+            //             },
+            //             {
+            //                 data: 'name',
+            //                 name: 'name'
+            //             },
+            //             {
+            //                 data: 'email',
+            //                 name: 'email'
+            //             },
+            //             {
+            //                 data: 'phone',
+            //                 name: 'phone'
+            //             },
+            //             {
+            //                 data: 'company',
+            //                 name: 'company'
+            //             },
+            //             {
+            //                 data: 'industry',
+            //                 name: 'industry'
+            //             },
+            //             {
+            //                 data: 'region',
+            //                 name: 'region'
+            //             },
+            //             {
+            //                 data: 'call_status',
+            //                 name: 'call_status'
+            //             },
+            //             {
+            //                 data: 'call_prospect',
+            //                 name: 'call_prospect'
+            //             },
+            //             {
+            //                 data: 'actions',
+            //                 name: 'actions',
+            //                 searchable: false,
+            //                 sortable: false
+            //             }
+            //         ],
+            //         columnDefs: [{
+            //             // type: "custom-date-sort",
+            //             // targets: [5]
+            //         }],
+            //         order: [
+            //             [0, "desc"]
+            //         ],
+            //         searchDelay: 500,
+            //         dom: 'Blfrtip',
+            //         buttons: ['csv', 'excel', 'print'],
+            //     });
+            // }
 
         };
         $(() => Index.init());

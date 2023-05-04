@@ -25,7 +25,7 @@
                
                 $('.prospect-type').change(this.prospectTypeChange);
                 $('.prospect-count').text(this.direct);
-
+                $('.direct-prospects').attr('hidden',false);
             },
 
            
@@ -33,11 +33,10 @@
                 if ($(this).val() == 'direct') {
 
                     $('#title').attr('disabled', true).val('').change();
-                    
+                    $('.direct-prospects').attr('hidden',false).change();
                 } else {
                     $('#title').attr('disabled', false).val('');
-                   
-
+                    $('.direct-prospects').attr('hidden',true);
                 }
             },
 

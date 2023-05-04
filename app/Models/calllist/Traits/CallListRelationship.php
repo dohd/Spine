@@ -12,6 +12,6 @@ trait CallListRelationship
 {
     public function prospects()
     {
-        return $this->hasManyThrough(Prospect::class, ProspectCallList::class, 'call_id', 'prospect_id', 'id', 'id')->withoutGlobalScopes();
+        return $this->hasManyThrough(Prospect::class, ProspectCallList::class, 'call_id',  'id', 'id','prospect_id')->withoutGlobalScopes();
     }
 }

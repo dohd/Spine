@@ -19,8 +19,10 @@
 namespace App\Http\Controllers\Focus\calllist;
 
 use App\Models\prospect\Prospect;
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Focus\prospect_call_list\ProspectCallListController;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Http\Responses\Focus\calllist\CreateResponse;
@@ -29,7 +31,9 @@ use App\Repositories\Focus\calllist\CallListRepository;
 use App\Http\Requests\Focus\calllist\CallListRequest;
 use App\Models\branch\Branch;
 use App\Models\calllist\CallList;
+use App\Models\prospect_calllist\ProspectCallList;
 use DB;
+use Illuminate\Support\Carbon;
 
 /**
  * CallListController
@@ -60,8 +64,8 @@ class CallListController extends Controller
     public function index()
     {
 
-       
-        
+
+
         return new ViewResponse('focus.prospects.calllist.index');
         //return new ViewResponse('focus.prospects.calllist.index');
     }
@@ -74,10 +78,10 @@ class CallListController extends Controller
      */
     public function create()
     {
-        $direct = Prospect::where('category','direct')->count();
-        $excel = Prospect::select(DB::raw('title,COUNT("*") AS count '))->groupBy('title')->where('category','excel')->get();
-        
-        return view('focus.prospects.calllist.create', compact('direct','excel'));
+        $direct = Prospect::where('category', 'direct')->count();
+        $excel = Prospect::select(DB::raw('title,COUNT("*") AS count '))->groupBy('title')->where('category', 'excel')->get();
+
+        return view('focus.prospects.calllist.create', compact('direct', 'excel'));
     }
 
     // /**
@@ -92,11 +96,59 @@ class CallListController extends Controller
         // filter request input fields
         $data = $request->except(['_token', 'ins', 'files']);
 
-       
-         $this->repository->create($data);
-        
 
-        // $calllists = CallList::where('prospect_id', $request->prospect_id)->orderBy('created_at', 'DESC')->limit(10)->get();
+        $res = $this->repository->create($data);
+
+        //get call id
+        $callid = $res['id'];
+        //get prospects based on title
+        $prospects = Prospect::where('call_status',0)->where('title',$res['title'])->limit($res['prospects_number'])->get([
+            "id"
+        ])->toArray();
+
+
+        //start and end date  
+        $start = $res['start_date'];
+        $end = $res['end_date'];
+        // Create an empty array to store the valid dates
+        $validDates = [];
+        $carbonstart = Carbon::parse($start);
+        $carbonend = Carbon::parse($end);
+        
+        // Loop through each date in the range
+        for ($date = $carbonstart; $date <= $carbonend; $date->addDay()) {
+            // Check if the current date is not a Sunday
+            if ($date->dayOfWeek != Carbon::SUNDAY) {
+                // Add the date to the array of valid dates
+                $validDates[] = $date->toDateString();
+            }
+        }
+        $prospectcount = count($prospects);
+        $dateCount = count($validDates);
+        $prospectIndex = 0;
+        $dateIndex = 0;
+
+        $prospectcalllist = [];
+
+
+        // Allocate the prospects to the valid dates
+
+        while ($prospectIndex < $prospectcount && $dateIndex < $dateCount) {
+            $prospect = $prospects[$prospectIndex]['id'];
+            $date = $validDates[$dateIndex];
+            $prospectcalllist[] = [
+                "prospect_id" => $prospect,
+                "call_id" => $callid,
+                "call_date"=>$date
+            ];
+            $prospectIndex++;
+            $dateIndex = ($dateIndex + 1) % $dateCount;
+        }
+    
+        //dd($prospectcalllist);
+        //send data to prospectcalllisttable
+        ProspectCallList::insert($prospectcalllist);
+        
         return view('focus.prospects.calllist.index');
     }
 
@@ -114,23 +166,25 @@ class CallListController extends Controller
 
         return new EditResponse('focus.calllists.edit', compact('calllist', 'branches'));
     }
-    public function update(CallListRequest $request,CallList $calllist)
+    public function update(CallListRequest $request, CallList $calllist)
     {
-      
-        
+
+
 
         return new EditResponse('focus.calllists.edit', compact('calllist'));
     }
     public function show(CallList $calllist)
     {
+     
         return new ViewResponse('focus.prospects.calllist.view', compact('calllist'));
     }
 
-    public function mytoday(){
-        $called = CallList::where('call_status', 1)->count();
-        $not_called = CallList::where('call_status', 0)->count();
-        $total_prospect = CallList::count();
-        
-        return new ViewResponse('focus.prospects.calllist.mycalls', compact('called', 'not_called', 'total_prospect'));
+    public function mytoday()
+    {
+        // $called = ProspectCallList::where('call_status', 1)->count();
+        // $not_called = CallList::where('call_status', 0)->count();
+        // $total_prospect = CallList::count();
+
+        return new ViewResponse('focus.prospects.calllist.mycalls');
     }
 }

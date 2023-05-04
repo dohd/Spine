@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">CallList Management</h4>
+            <h4 class="content-header-title">Individual CallList</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right mr-3">
@@ -53,6 +53,41 @@
             </table>
         </div>
     </div>
+
+    <table class="table table-xs table-bordered">
+        <thead>
+            <tr class="item_header bg-gradient-directional-blue white">
+                <th>Id</th>
+                <th>Title</th>
+                <th>Company/Name</th>
+                <th>Industry</th>
+                <th>Phone</th>
+                <th>Call Status</th>
+            </tr>
+         
+          
+        </thead>
+        <tbody>
+             @isset ($calllist->prospects)
+                @php ($i = 0)
+                @foreach ($calllist->prospects as $prospect)
+                    @if ($prospect)
+                    <tr>
+                        <td>{{$prospect->id}}</td>
+                        <td>{{$prospect->title}}</td>
+                        <td>{{$prospect->company}}</td>
+                        <td>{{$prospect->industry}}</td>
+                        <td>{{$prospect->phone}}</td>
+                        <td>{{$prospect->call_status==0?'Not called':'Called'}}</td>
+                    </tr>
+                        @php ($i++)
+                    @endif
+                @endforeach
+            @endisset
+        </tbody>
+    </table>
+
+    
 </div>
 
 @endsection

@@ -210,7 +210,7 @@ Route::group(['namespace' => 'calllist'], function () {
 
     //For Datatable
     Route::post('calllists/get', 'CallListTableController')->name('calllists.get');
-    Route::post('calllists/mytoday', 'MyTodayCallListTableController')->name('calllists.mytoday');
+    Route::post('calllists/mytoday', 'MyTodayCallListTableController')->name('calllists.mytodaycalls');
     Route::post('calllists/followup', 'CallListController@followup')->name('calllists.followup');
 });
 
