@@ -99,6 +99,12 @@
                                 aria-controls="tab_data8" role="tab" aria-selected="true"><i
                                         class="ft-users"></i> {{trans('projects.users')}}</a>
                         </li>
+                        {{-- project percentage profit --}}
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab12" data-toggle="tab" href="#tab_data12" aria-controls="tab_data12" role="tab" aria-selected="true">
+                                <i class="font-weight-bold">%</i>Percentage Profit
+                            </a>                           
+                        </li>
                     </ul>
 
                     {{-- tab content --}}
@@ -589,6 +595,9 @@
                                 </div>
                             </div>
 
+                        </div>
+                        <div class="tab-pane" id="tab_data12" aria-labelledby="tab12" role="tabpanel">
+                            @include('focus.projects.tabs.percentage_profit')
                         </div>
                     </div>
                 </div>
