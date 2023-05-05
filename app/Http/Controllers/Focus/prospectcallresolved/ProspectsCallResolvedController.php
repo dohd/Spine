@@ -18,22 +18,22 @@
 
 namespace App\Http\Controllers\Focus\prospectcallresolved;
 
-use App\Models\remark\Remark;
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Http\Responses\Focus\prospect\CreateResponse;
 use App\Http\Responses\Focus\prospect\EditResponse;
-use App\Repositories\Focus\prospect\ProspectRepository;
-use App\Http\Requests\Focus\prospect\ProspectRequest;
+use App\Repositories\Focus\prospectcallresolved\ProspectCallResolvedRepository;
+use App\Http\Requests\Focus\prospectcallresolved\ProspectCallResolvedRequest;
 use App\Models\prospectcallresolved\ProspectCallResolved;
 
 
 /**
  * ProductcategoriesController
  */
-class ProspectsController extends Controller
+class ProspectsCallResolvedController extends Controller
 {
     /**
      * variable to store the repository object
@@ -45,7 +45,7 @@ class ProspectsController extends Controller
      * contructor to initialize repository object
      * @param ProspectRepository $repository ;
      */
-    public function __construct(ProspectRepository $repository)
+    public function __construct(ProspectCallResolvedRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -83,12 +83,12 @@ class ProspectsController extends Controller
     //  * @param StoreProductcategoryRequestNamespace $request
     //  * @return \App\Http\Responses\RedirectResponse
     //  */
-    public function store(ProspectRequest $request)
+    public function store(ProspectCallResolvedRequest $request)
     {
 
         // filter request input fields
         $data = $request->except(['_token', 'ins', 'files']);
-
+        //dd($data);
 
         //Create the model using repository create method
         $this->repository->create($data);
@@ -110,11 +110,11 @@ class ProspectsController extends Controller
 
 
     // follow up
-    public function followup(Request $request)
-    {
-        $remarks = Remark::where('prospect_id', $request->id)->orderBy('updated_at', 'DESC')->limit(10)->get();
-        return view('focus.prospects.partials.remarks_table', compact('remarks'));
-    }
+    // public function followup(Request $request)
+    // {
+    //     $remarks = Remark::where('prospect_id', $request->id)->orderBy('updated_at', 'DESC')->limit(10)->get();
+    //     return view('focus.prospects.partials.remarks_table', compact('remarks'));
+    // }
 
 
 
@@ -125,7 +125,7 @@ class ProspectsController extends Controller
     //  * @param EditProductcategoryRequestNamespace $request
     //  * @return \App\Http\Responses\Focus\productcategory\EditResponse
     //  */
-    public function update(ProspectRequest $request, ProspectCallResolved $prospect)
+    public function update(ProspectCallResolvedRequest $request, ProspectCallResolved $prospect)
     {
 
         //dd($request);

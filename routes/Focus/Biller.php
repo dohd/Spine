@@ -201,6 +201,15 @@ Route::group(['namespace' => 'prospect'], function () {
     Route::post('prospects/get', 'ProspectsTableController')->name('prospects.get');
     Route::post('prospects/followup', 'ProspectsController@followup')->name('prospects.followup');
 });
+//ProspectsCallResolved
+Route::group(['namespace' => 'prospectcallresolved'], function () {
+    Route::patch('prospectcallresolves/update_status/{prospect}', 'ProspectsCallResolvedController@update_status')->name('prospectcallresolves.update_status');
+    Route::resource('prospectcallresolves', 'ProspectsCallResolvedController');
+
+    //For Datatable
+   // Route::post('prospectcallresolves/get', 'ProspectsTableController')->name('prospectcallresolves.get');
+    Route::post('prospectcallresolves/followup', 'ProspectsCallResolvedController@followup')->name('prospectcallresolves.followup');
+});
 
 //CallList
 Route::group(['namespace' => 'calllist'], function () {

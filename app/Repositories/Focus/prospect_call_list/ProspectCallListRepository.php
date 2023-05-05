@@ -27,7 +27,9 @@ class ProspectCallListRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query()->where('call_date',date('Y-m-d'));
+       
+        $q = $this->query()->whereDay('call_date',date('m'));
+        
         return $q->get();
     }
 

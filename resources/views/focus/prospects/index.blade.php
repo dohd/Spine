@@ -48,9 +48,10 @@
                                             <th>Company Name</th>
                                             <th>Industry</th>
                                             <th>Contact Name</th>
-                                            <th>Email</th>
+                                            {{-- <th>Email</th> --}}
                                             <th>Phone</th>
                                             <th>Region</th>
+                                            <th>Type</th>
                                             <th>Status</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -197,10 +198,10 @@
                             data: 'name',
                             name: 'name'
                         },
-                        {
-                            data: 'email',
-                            name: 'email'
-                        },
+                        // {
+                        //     data: 'email',
+                        //     name: 'email'
+                        // },
                         {
                             data: 'phone',
                             name: 'phone'
@@ -211,6 +212,10 @@
                             name: 'region'
                         },
                        
+                        {
+                            data: 'temperate',
+                            name: 'temperate'
+                        },
                         {
                             data: 'status',
                             name: 'status'

@@ -69,11 +69,11 @@ class ProspectsTableController extends Controller
                 $name = $prospect->contact_person == null ? '-----' : $prospect->contact_person;
                 return $name;
             })
-            ->addColumn('email', function ($prospect) {
-                $client_email = $prospect->email == null ? '-----' : $prospect->email ;
+            // ->addColumn('email', function ($prospect) {
+            //     $client_email = $prospect->email == null ? '-----' : $prospect->email ;
 
-                return $client_email;
-            })
+            //     return $client_email;
+            // })
             ->addColumn('phone', function ($prospect) {
                 $phone = $prospect->phone == null ? '-----' : $prospect->phone ;
 
@@ -89,6 +89,12 @@ class ProspectsTableController extends Controller
 
                 return $client_region;
             })
+            ->addColumn('temparate', function ($prospect) {
+                $status = $prospect->temperate;
+               
+
+                return $status;
+            })
             ->addColumn('status', function ($prospect) {
                 $status = $prospect->status;
                 if ($status == 0) {
@@ -99,9 +105,7 @@ class ProspectsTableController extends Controller
 
                 return $status;
             })
-            ->addColumn('created_at', function ($prospect) {
-                return dateFormat($prospect->created_at);
-            })
+           
             ->addColumn('actions', function ($prospect) {
                 return $prospect->action_buttons;
             })

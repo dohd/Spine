@@ -48,13 +48,14 @@
                                             <th>Title</th>
                                             <th>Company/Name</th>
                                             <th>Industry</th>
-                                            <th>Email</th>
+                                            <th>Call</th>
+                                            {{-- <th>Email</th> --}}
                                             <th>Phone</th>
                                             <th>Region</th>
                                             <th>Call Status</th>
                                             <th>Call Date</th>
-                                            <th>Call</th>
-                                            <th>{{ trans('labels.general.actions') }}</th>
+
+                                            {{-- <th>{{ trans('labels.general.actions') }}</th> --}}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -94,10 +95,15 @@
 
             init() {
                 $.ajaxSetup(config.ajax);
-               this.draw_data();
+                this.draw_data();
                 this.showModal();
                 this.dismissModal();
+                
+                $('#callModal').find('.erp-status').change(this.erpChange);
+                $('#callModal').find('.challenges-status').change(this.challengesChange);
+                $('#callModal').find('.demo-status').change(this.demoChange);
                 $('#callModal').find('.call-status').change(this.callTypeChange);
+                $('#demo_date').datepicker(config.date).datepicker('setDate', new Date());
                 $('#reminder_date').datepicker(config.date).datepicker('setDate', new Date());
             },
 
@@ -115,14 +121,34 @@
                 });
             },
 
-
+            erpChange(){
+                if ($(this).val() == 0) {
+                    $("#erp_div").css("display", "none");
+                } else {
+                    $("#erp_div").css("display", "block");
+                }
+            },
+            challengesChange(){
+                if ($(this).val() == "0") {
+                    $("#erpchallenges").css("display", "none");
+                } else {
+                    $("#erpchallenges").css("display", "block");
+                }
+            },
+            demoChange(){
+                if ($(this).val() == "0") {
+                    $("#demo").css("display", "none");
+                } else {
+                    $("#demo").css("display", "");
+                }
+            },
             callTypeChange() {
                 if ($(this).val() == 'picked') {
                     $("#div_picked").css("display", "block");
                     $("#div_notpicked").css("display", "none");
                 } else {
                     $("#div_picked").css("display", "none");
-                    $("#div_notpicked").css("display", "block");
+                    $("#div_notpicked").css("display", "flex");
                 }
 
 
@@ -156,7 +182,7 @@
                             data: 'title',
                             name: 'title'
                         },
-                       
+
                         {
                             data: 'company',
                             name: 'company'
@@ -165,16 +191,19 @@
                             data: 'industry',
                             name: 'industry'
                         },
-                       
                         {
-                            data: 'email',
-                            name: 'email'
+                            data: 'call_prospect',
+                            name: 'call_prospect'
                         },
+                        // {
+                        //     data: 'email',
+                        //     name: 'email'
+                        // },
                         {
                             data: 'phone',
                             name: 'phone'
                         },
-                       
+
                         {
                             data: 'region',
                             name: 'region'
@@ -187,16 +216,13 @@
                             data: 'call_date',
                             name: 'call_date'
                         },
-                        {
-                            data: 'call_prospect',
-                            name: 'call_prospect'
-                        },
-                        {
-                            data: 'actions',
-                            name: 'actions',
-                            searchable: false,
-                            sortable: false
-                        }
+
+                        // {
+                        //     data: 'actions',
+                        //     name: 'actions',
+                        //     searchable: false,
+                        //     sortable: false
+                        // }
                     ],
                     columnDefs: [{
                         type: "custom-date-sort",
@@ -210,7 +236,7 @@
                     buttons: ['csv', 'excel', 'print'],
                 });
             },
-           
+
 
         };
         $(() => Index.init());

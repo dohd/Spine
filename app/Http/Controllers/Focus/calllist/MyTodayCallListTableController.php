@@ -55,17 +55,28 @@ class MyTodayCallListTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('title', function ($prospectcalllist) {
-               
-                return $prospectcalllist->prospect->title == null ? '-----':$prospectcalllist->prospect->title;
+
+                return $prospectcalllist->prospect->title == null ? '-----' : $prospectcalllist->prospect->title;
             })
             ->addColumn('company', function ($prospectcalllist) {
-                return $prospectcalllist->prospect->company == null ? '-----':$prospectcalllist->prospect->company;
+                return $prospectcalllist->prospect->company == null ? '-----' : $prospectcalllist->prospect->company;
             })
             ->addColumn('industry', function ($prospectcalllist) {
-                return $prospectcalllist->prospect->industry == null ? '-----':$prospectcalllist->prospect->industry;
+                return $prospectcalllist->prospect->industry == null ? '-----' : $prospectcalllist->prospect->industry;
             })
-            ->addColumn('email', function ($prospectcalllist) {
-                return $prospectcalllist->prospect->email == null ? '-----':$prospectcalllist->prospect->email;
+            // ->addColumn('email', function ($prospectcalllist) {
+            //     return $prospectcalllist->prospect->email == null ? '-----':$prospectcalllist->prospect->email;
+            // })
+            ->addColumn('call_prospect', function ($prospectcalllist) {
+                $hide = true;
+                if($prospectcalllist->prospect->call_status){
+                    $hide = false;
+                }else{
+                    $hide = true;
+                }
+                return $hide? '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcalllist->prospect_id . '" data-toggle="tooltip"  title="Call" >
+                <i  class="fa fa-vcard"></i>
+                         </a>':'---';
             })
             ->addColumn('phone', function ($prospectcalllist) {
                 return $prospectcalllist->prospect->phone == null ? '-----':$prospectcalllist->prospect->phone;
@@ -86,15 +97,11 @@ class MyTodayCallListTableController extends Controller
 
                 return dateFormat( $call_date);
             })
-            ->addColumn('call_prospect', function ($prospectcalllist) {
-                return '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcalllist->prospect_id . '" data-toggle="tooltip"  title="Call" >
-                <i  class="fa fa-vcard"></i>
-                         </a>';
-            })
             
-            ->addColumn('actions', function ($prospectcalllist) {
-                return $prospectcalllist->action_buttons;
-            })
+            
+            // ->addColumn('actions', function ($prospectcalllist) {
+            //     return $prospectcalllist->action_buttons;
+            // })
             ->make(true);
         
     }
