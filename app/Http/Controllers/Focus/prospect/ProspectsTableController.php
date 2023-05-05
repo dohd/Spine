@@ -95,6 +95,20 @@ class ProspectsTableController extends Controller
 
                 return $status;
             })
+            ->addColumn('call_status', function ($prospect) {
+                $status = $prospect->call_status;
+                if ($status == 'notcalled') {
+                    $status = "Not called";
+                } 
+                else if ($status == 'callednotpicked'){
+                    $status = "Called Not Picked";
+                }
+                else  {
+                    $status = "Called";
+                }
+
+                return $status;
+            })
             ->addColumn('status', function ($prospect) {
                 $status = $prospect->status;
                 if ($status == 0) {

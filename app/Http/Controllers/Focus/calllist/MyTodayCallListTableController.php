@@ -78,7 +78,7 @@ class MyTodayCallListTableController extends Controller
                 }
                 return $hide? '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcalllist->prospect_id . '" data-toggle="tooltip"  title="Call" >
                 <i  class="fa fa-vcard"></i>
-                         </a>':'---';
+                         </a>':'<a"><i  class="fa fa-check-circle  fa-2x text-primary"></i></a>';
             })
             ->addColumn('phone', function ($prospectcalllist) {
                 return $prospectcalllist->prospect->phone == null ? '-----':$prospectcalllist->prospect->phone;
@@ -88,9 +88,17 @@ class MyTodayCallListTableController extends Controller
                 return $prospectcalllist->prospect->region == null ? '-----':$prospectcalllist->prospect->region;
             })
             ->addColumn('call_status', function ($prospectcalllist) {
-                
-             
-                return $prospectcalllist->prospect->call_status == 0 ? 'Not Called':'Called';
+                $status =$prospectcalllist->prospect->call_status;
+                if ($status == 'notcalled') {
+                    $status = "Not called";
+                } 
+                else if ($status == 'callednotpicked'){
+                    $status = "Called Not Picked";
+                }
+                else  {
+                    $status = "Called";
+                }
+                return  $status;
             })
             ->addColumn('call_date', function ($prospectcalllist) {
                 

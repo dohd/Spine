@@ -16,12 +16,12 @@
                         <div><label for="prospect-type">Select Call Status</label></div>
                         <div class="d-inline-block custom-control custom-checkbox mr-1">
                             <input type="radio" class="custom-control-input bg-primary call-status" name="call_status"
-                                id="colorCheck1" value="picked" checked>
+                                id="colorCheck1" value="picked" checked required>
                             <label class="custom-control-label" for="colorCheck1">Picked</label>
                         </div>
                         <div class="d-inline-block custom-control custom-checkbox mr-1">
                             <input type="radio" class="custom-control-input bg-purple call-status" name="call_status"
-                                value="notpicked" id="colorCheck3">
+                                value="notpicked" id="colorCheck3" required>
                             <label class="custom-control-label" for="colorCheck3">Not Picked</label>
                         </div>
 
@@ -42,9 +42,9 @@
 
             <div id="div_notpicked" style="display:none" class="mx-2">
                 <h3>Busy Not Picking</h3>
-                {{ Form::open(['route' => 'biller.prospectcallresolves.store', 'method' => 'POST' ]) }}
+                {{ Form::open(['route' => 'biller.prospectcallresolves.notpicked', 'method' => 'POST' ]) }}
                 @include("focus.prospects.calllist.notpicked_form")
-                {{ Form::button('Save Reminder', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_reminder']) }}
+                {{ Form::submit('Record As Not Picked', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_reminder']) }}
                 {{ Form::close() }}
             
             

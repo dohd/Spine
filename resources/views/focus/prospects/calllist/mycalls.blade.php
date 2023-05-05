@@ -9,7 +9,7 @@
                 <h4 class="content-header-title">My Today Calls</h4>
             </div>
             <div class="content-header-right col-6">
-                <div class="media width-250 float-right mr-3">
+                <div class="media width-auto float-right mr-3">
                     <div class="media-body media-right text-right">
                         @include('focus.prospects.partials.prospects-header-buttons')
                     </div>
@@ -131,6 +131,7 @@
 
 
                     $('#prospect_id').val(id);
+                    $('#hidden_prospect').val(id);
 
                 });
             },
@@ -156,6 +157,8 @@
             demoChange(){
                 if ($(this).val() == "0") {
                     $("#demo").css("display", "none");
+                    $("#notes").val('');
+                    $("#demo_date").val('');
                 } else {
                     $("#demo").css("display", "");
                 }
@@ -166,7 +169,7 @@
                     $("#div_notpicked").css("display", "none");
                 } else {
                     $("#div_picked").css("display", "none");
-                    $("#div_notpicked").css("display", "flex");
+                    $("#div_notpicked").css("display", "block");
                 }
 
 
@@ -174,7 +177,16 @@
 
             dismissModal() {
                 $('#callModal').on('hidden.bs.modal', function() {
-
+                    $("#notes").val('');
+                    $("#demo_date").val('');
+                    $(".call-status").val('');
+                    $(".erp-status").val('');
+                    $(".challenges-status").val('');
+                    $(".demo-status").val('');
+                    $("#current_erp").val('');
+                    $("#current_erp_usage").val('');
+                    $("#current_erp_challenges").val('');
+                    $('#hidden_prospect').val('');
                 });
             },
 

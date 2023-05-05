@@ -15,7 +15,7 @@
             <h4 class="content-header-title">Prospects Management</h4>
         </div>
         <div class="content-header-right col-6">
-            <div class="media width-250 float-right mr-3">
+            <div class="media width-auto float-right mr-3">
                 <div class="media-body media-right text-right">
                     @include('focus.prospects.partials.prospects-header-buttons')
                 </div>

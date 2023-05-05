@@ -2,9 +2,7 @@
     <div class="col-2">
         <label for="month">Monthly Calendar Days</label>
 
-        {{-- @php
-          dd()  
-        @endphp --}}
+       
         <input type="hidden" id="callId" name="callId" value={{ $id }}>
         <select name="month" id="month" class="custom-select">
             <option value="">Choose Month</option>
@@ -17,7 +15,10 @@
         </select>
         {{ Form::text('day', null, ['class' => 'form-control mt-1', 'placeholder' => 'call day', 'id' => 'day', 'required']) }}
     </div>
-    <div class="col-10">
+    <div class="col-3">
+        <h5>{{ $daterange }}</h5>
+    </div>
+    <div class="col-7">
         <h3 class="calendar-title text-center font-weight-bold"></h3>
     </div>
 </div>
@@ -123,7 +124,7 @@
                 $('#day').val(day);
                 $('input:submit').removeClass('hidden');
                 Index.loadCallListProspects();
-                Index.callCount();
+                //Index.callCount();
             },
 
             monthChange() {
@@ -152,32 +153,32 @@
                 
             },
 
-            callCount() {
-                const day = $('#day').val();
-                const month = $('#month').val();
-                const id = $('#callId').val();
-                const url = "{{ route('biller.calllists.prospectviacalllist') }}";
-                $.post(url, {
-                    day,
-                    month,
-                    id
-                }, data => {
-                    console.log(data.length);
+            // callCount() {
+            //     const day = $('#day').val();
+            //     const month = $('#month').val();
+            //     const id = $('#callId').val();
+            //     const url = "{{ route('biller.calllists.prospectviacalllist') }}";
+            //     $.post(url, {
+            //         day,
+            //         month,
+            //         id
+            //     }, data => {
+            //         console.log(data.length);
                    
 
-                    $('#weeksTbl').find('td').each(function() {
-                        const td = $(this);
-                        let count = 0;
-                        const monthDay = td.find('.day-btn').text();
-                        data.forEach((v,i) => {
+            //         $('#weeksTbl').find('td').each(function() {
+            //             const td = $(this);
+            //             let count = 0;
+            //             const monthDay = td.find('.day-btn').text();
+            //             data.forEach((v,i) => {
                            
-                            if (v.prospect.call_status == 0) count++;
-                        });
-                        if (count) td.find('.call-ratio').text(`${count}/${data.length}`);
+            //                 if (v.prospect.call_status == 0) count++;
+            //             });
+            //             if (count) td.find('.call-ratio').text(`${count}/${data.length}`);
 
-                    });
-                });
-            },
+            //         });
+            //     });
+            // },
 
             loadWeekRow(weeks = []) {
                 const trList = [];
@@ -215,7 +216,14 @@
 
                         $('#prospectTbl tbody').append(Index.rowTemplate);
                         row = $('#prospectTbl tbody tr:last');
-                        status = v.prospect.call_status == 0 ? 'Not Called' : 'Called';
+                        status = '';
+                        if(v.prospect.call_status == 'notcalled'){
+                            status = 'Not Called';
+                        }else if (v.prospect.call_status == 'callednotpicked'){
+                            status = 'Called Not Picked';
+                        }else{
+                            status = 'Called';
+                        }
                         row.find('.index').text(i + 1);
                         row.find('.title').text(v.prospect.title);
                         row.find('.company').text(v.prospect.company);

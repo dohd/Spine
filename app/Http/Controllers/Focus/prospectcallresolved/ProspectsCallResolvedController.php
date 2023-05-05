@@ -61,7 +61,7 @@ class ProspectsCallResolvedController extends Controller
         $open_prospect = ProspectCallResolved::where('status', 0)->count();
         $closed_prospect = ProspectCallResolved::where('status', 1)->count();
         $total_prospect = ProspectCallResolved::count();
-        
+
         return new ViewResponse('focus.prospects.index', compact('open_prospect', 'closed_prospect', 'total_prospect'));
     }
 
@@ -71,11 +71,11 @@ class ProspectsCallResolvedController extends Controller
      * @param CreateProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\CreateResponse
      */
-    public function create()
-    {
-        return new CreateResponse('focus.prospects.create');
-        //return view('focus.prospects.create', ['branches' => collect()]);
-    }
+    // public function create()
+    // {
+    //     return new CreateResponse('focus.prospects.create');
+    //     //return view('focus.prospects.create', ['branches' => collect()]);
+    // }
 
     // /**
     //  * Store a newly created resource in storage.
@@ -88,12 +88,12 @@ class ProspectsCallResolvedController extends Controller
 
         // filter request input fields
         $data = $request->except(['_token', 'ins', 'files']);
-        //dd($data);
+       
 
         //Create the model using repository create method
         $this->repository->create($data);
 
-        return new RedirectResponse(route('biller.prospects.index'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
+        return new RedirectResponse(route('biller.calllists.mytoday'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
     }
 
     // /**
@@ -130,8 +130,8 @@ class ProspectsCallResolvedController extends Controller
 
         //dd($request);
         // update input fields from request
-        $data = $request->only(['company','name','email','phone','region','industry']);
-        
+        $data = $request->only(['company', 'name', 'email', 'phone', 'region', 'industry']);
+
         //Update the model using repository update method
         $this->repository->update($prospect, compact('data'));
 
@@ -174,5 +174,18 @@ class ProspectsCallResolvedController extends Controller
         $prospect->update(compact('status', 'reason'));
 
         return redirect()->back();
+    }
+
+    public function notpicked(Request $request)
+    {
+
+        // filter request input fields
+        $data = $request->except(['_token', 'ins', 'files']);
+       
+        
+        //Create the model using repository create method
+        $this->repository->notpickedcreate($data);
+
+        return new RedirectResponse(route('biller.calllists.mytoday'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
     }
 }

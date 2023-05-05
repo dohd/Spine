@@ -184,11 +184,11 @@ class CallListController extends Controller
     public function allocationdays($id)
     {
        $calllist = CallList::find($id);
-       
+       $daterange ="Days With Prospects ".Carbon::parse($calllist->start_date)->format('d')." - ".Carbon::parse($calllist->end_date)->format('d');
        $start = Carbon::parse($calllist->start_date)->format('n');
        $end =Carbon::parse($calllist->end_date)->format('n');
         $id = $calllist->id;
-        return view('focus.prospects.calllist.allocationdays',compact('id','start','end'));
+        return view('focus.prospects.calllist.allocationdays',compact('id','start','end','daterange'));
     }
     public function prospectviacalllist(Request $request)
     {

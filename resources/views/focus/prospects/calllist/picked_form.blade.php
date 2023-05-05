@@ -7,11 +7,11 @@
 <div class="form-group">
     <p>Do you have an ERP</p>
     <div class="d-inline-block">
-        <input class="erp-status" type="radio" id="yes" name="erp" value="1" checked>
+        <input class="erp-status" type="radio" id="yes" name="erp" value="1"  required>
         <label for="yes">Yes</label><br>
     </div>
     <div class="d-inline-block">
-        <input class="erp-status" type="radio" id="no" name="erp" value="0">
+        <input class="erp-status" type="radio" id="no" name="erp" value="0" required>
         <label for="no">No</label><br>
     </div>
 </div>
@@ -25,6 +25,7 @@
                 'class' => 'form-control ',
                 'placeholder' => 'Current ERP',
                 'id' => 'current_erp',
+                
             ]) !!}
         </div>
         <div class="col-md-6">
@@ -33,6 +34,7 @@
                 'class' => 'form-control ',
                 'placeholder' => 'Weeks/Months/Years',
                 'id' => 'current_erp_usage',
+                
             ]) !!}
         </div>
     
@@ -40,11 +42,11 @@
     <div class="form-group">
         <p>Do you have any challenges in your existing ERP</p>
         <div class="d-inline-block">
-            <input class="challenges-status" type="radio" id="yes" name="erp_challenges" value="1" checked>
+            <input class="challenges-status" type="radio" id="yes" name="erp_challenges" value="1"  required>
             <label for="yes">Yes</label><br>
         </div>
         <div class="d-inline-block">
-            <input class="challenges-status" type="radio" id="no" name="erp_challenges" value="0">
+            <input class="challenges-status" type="radio" id="no" name="erp_challenges" value="0" required>
             <label for="no">No</label><br>
         </div>
     </div>
@@ -57,6 +59,7 @@
                 'placeholder' => 'Challenges',
                 
                 'id' => 'current_erp_challenges',
+                
             ]) !!}
         </div>
     </div>
@@ -65,11 +68,11 @@
 <div  class="form-group">
     <p>Are you interested in us showing you a demo</p>
     <div class="d-inline-block">
-        <input class="demo-status" type="radio" id="yes" name="erp_demo" value="1" checked>
+        <input class="demo-status" type="radio" id="yes" name="erp_demo" value="1" required>
         <label for="yes">Yes</label><br>
     </div>
     <div class="d-inline-block">
-        <input class="demo-status" type="radio" id="no" name="erp_demo" value="0">
+        <input class="demo-status" type="radio" id="no" name="erp_demo" value="0" required>
         <label for="no">No</label><br>
     </div>
 </div>
@@ -81,11 +84,12 @@
             'class' => 'form-control ',
             'placeholder' => 'Demo date',
             'id' => 'demo_date',
+            
         ]) !!}
     </div>
 
     <div class="col-md-6">
-        <p>Any Notes?</p>
+        <p>Any Remarks?</p>
         {!! Form::text('notes', null, ['class' => 'form-control ', 'placeholder' => 'Notes/Remarks', 'id' => 'notes']) !!}
     </div>
 </div>

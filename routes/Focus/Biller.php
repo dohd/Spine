@@ -205,7 +205,7 @@ Route::group(['namespace' => 'prospect'], function () {
 Route::group(['namespace' => 'prospectcallresolved'], function () {
     Route::patch('prospectcallresolves/update_status/{prospect}', 'ProspectsCallResolvedController@update_status')->name('prospectcallresolves.update_status');
     Route::resource('prospectcallresolves', 'ProspectsCallResolvedController');
-
+    Route::post('prospectcallresolves/notpicked','ProspectsCallResolvedController@notpicked')->name('prospectcallresolves.notpicked');
     //For Datatable
    // Route::post('prospectcallresolves/get', 'ProspectsTableController')->name('prospectcallresolves.get');
     Route::post('prospectcallresolves/followup', 'ProspectsCallResolvedController@followup')->name('prospectcallresolves.followup');
