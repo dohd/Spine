@@ -20,9 +20,22 @@
         <div class="content-body">
             <div class="row">
                 <div class="col-12">
-                    {{-- <div class="card">
+
+                   
+                    <div class="card">
                         <div class="card-body">
-                            <div class="row no-gutters">
+                            <input type="hidden" name="list_id" id="list_id" value="">
+                            <div class="col-4">
+                                <label for="client">All CallLists</label>                             
+                                <select name="calllist_id" class="custom-select" id="calllist_id" data-placeholder="Choose CallList">
+                                    <option value="0">Choose Call List</option>
+                                    @foreach ($calllists as $calllist)
+                                        
+                                        <option value="{{ $calllist->id }}">{{ $calllist->title }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            {{-- <div class="row no-gutters">
                                 <div class="col-sm-3 col-md-2 h4">Called</div>
                                 <div class="col-sm-2 col-md-1 h4 text-primary font-weight-bold">{{ $called }}</div>
                                 <div class="col-sm-12 col-md-1 h4 text-primary font-weight-bold">
@@ -33,9 +46,9 @@
                                 <div class="col-sm-2 col-md-1 h4 text-success font-weight-bold">{{ $not_called }}</div>
                                 <div class="col-sm-12 col-md-1 h4 text-success font-weight-bold">
                                     {{ numberFormat(div_num($not_called, $total_prospect) * 100) }}%</div>
-                            </div>
+                            </div> --}}
                         </div>
-                    </div> --}}
+                    </div>
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
@@ -92,7 +105,7 @@
         };
 
         const Index = {
-
+            callListId: @json(request('id')),
             init() {
                 $.ajaxSetup(config.ajax);
                 this.draw_data();
@@ -105,7 +118,8 @@
                 $('#callModal').find('.call-status').change(this.callTypeChange);
                 $('#demo_date').datepicker(config.date).datepicker('setDate', new Date());
                 $('#reminder_date').datepicker(config.date).datepicker('setDate', new Date());
-            },
+                $('#calllist_id').change(this.callListChange);
+            },  
 
             showModal() {
                 $('#mytodaycalllist-table tbody').on('click', '#call', function(e) {
@@ -120,7 +134,11 @@
 
                 });
             },
-
+            callListChange(){
+            Index.callListId = $(this).val();
+            $('#mytodaycalllist-table').DataTable().destroy();
+            return Index.draw_data();
+            },
             erpChange(){
                 if ($(this).val() == 0) {
                     $("#erp_div").css("display", "none");
@@ -163,6 +181,7 @@
 
 
             draw_data() {
+                
                 $('#mytodaycalllist-table').dataTable({
                     stateSave: true,
                     processing: true,
@@ -173,6 +192,10 @@
                     ajax: {
                         url: '{{ route('biller.calllists.fetchtodaycalls') }}',
                         type: 'post',
+                        data: {
+                            id: this.callListId
+                        }
+                       
                     },
                     columns: [{
                             data: 'DT_Row_Index',

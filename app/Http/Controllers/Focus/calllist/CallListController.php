@@ -92,9 +92,8 @@ class CallListController extends Controller
 
         // filter request input fields
         $data = $request->except(['_token', 'ins', 'files']);
-
-
-        $res = $this->repository->create($data);
+       
+       $res = $this->repository->create($data);
 
         //get call id
         $callid = $res['id'];
@@ -178,19 +177,24 @@ class CallListController extends Controller
 
     public function mytoday()
     {
-        
-        return view('focus.prospects.calllist.mycalls');
+        $calllists = CallList::all();
+       
+        return view('focus.prospects.calllist.mycalls',compact('calllists'));
     }
     public function allocationdays($id)
     {
-       $calllist = ProspectCallList::where('call_id',$id)->get();
-      
-        return view('focus.prospects.calllist.allocationdays',compact('calllist'));
+       $calllist = CallList::find($id);
+       
+       $start = Carbon::parse($calllist->start_date)->format('n');
+       $end =Carbon::parse($calllist->end_date)->format('n');
+        $id = $calllist->id;
+        return view('focus.prospects.calllist.allocationdays',compact('id','start','end'));
     }
     public function prospectviacalllist(Request $request)
     {
       
-        $prospects = ProspectCallList::whereMonth('call_date', $request->month)
+       
+        $prospects = ProspectCallList::where('call_id',$request->id)->whereMonth('call_date', $request->month)
         ->whereDay('call_date', $request->day)
         ->with(['prospect' => function ($q) {
             $q->select('id', 'title', 'company','industry','contact_person','email','phone','region','call_status');

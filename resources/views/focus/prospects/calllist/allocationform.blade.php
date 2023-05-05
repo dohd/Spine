@@ -5,17 +5,17 @@
         {{-- @php
           dd()  
         @endphp --}}
-
+        <input type="hidden" id="callId" name="callId" value={{ $id }}>
         <select name="month" id="month" class="custom-select">
-            <option value=""></option>
+            <option value="">Choose Month</option>
             @foreach (range(1, 12) as $v)
-                @php $dsp = in_array($v, [5]) ?: 'd-none' @endphp
+                @php $dsp = in_array($v, [$start,$end]) ?: 'd-none' @endphp
                 <option value="{{ $v }}" class="{{ $dsp }}">
                     {{ DateTime::createFromFormat('!m', $v)->format('F') }}
                 </option>
             @endforeach
         </select>
-        {{ Form::text('day', null, ['class' => 'form-control mt-1', 'placeholder' => 'attendance day', 'id' => 'day', 'required']) }}
+        {{ Form::text('day', null, ['class' => 'form-control mt-1', 'placeholder' => 'call day', 'id' => 'day', 'required']) }}
     </div>
     <div class="col-10">
         <h3 class="calendar-title text-center font-weight-bold"></h3>
@@ -48,7 +48,7 @@
                         <th>Phone</th>
                         <th>Region</th>
                         <th>Call Status</th>
-                        {{-- <th>Call Date</th> --}}
+
 
                     </tr>
                 </thead>
@@ -71,6 +71,7 @@
         </div>
     </div>
 </div>
+
 
 <div class="form-group row no-gutters">
     <div class="col-1 ml-auto">
@@ -122,6 +123,7 @@
                 $('#day').val(day);
                 $('input:submit').removeClass('hidden');
                 Index.loadCallListProspects();
+                Index.callCount();
             },
 
             monthChange() {
@@ -147,39 +149,32 @@
 
                 const rows = Index.loadWeekRow(weeks);
                 $('#weeksTbl tbody').html('').append(rows);
-                Index.attendanceCount();
+                
             },
 
-            attendanceCount() {
+            callCount() {
+                const day = $('#day').val();
                 const month = $('#month').val();
-                const url = "{{ route('biller.attendances.day_attendance') }}";
+                const id = $('#callId').val();
+                const url = "{{ route('biller.calllists.prospectviacalllist') }}";
                 $.post(url, {
-                    month
+                    day,
+                    month,
+                    id
                 }, data => {
-                    const dayCallList = data.day_attendance;
-                    const employeeCount = data.employee_count;
+                    console.log(data.length);
+                   
 
                     $('#weeksTbl').find('td').each(function() {
                         const td = $(this);
                         let count = 0;
                         const monthDay = td.find('.day-btn').text();
-                        dayCallList.forEach(v => {
-                            if (v.day == monthDay) count = v.count;
+                        data.forEach((v,i) => {
+                           
+                            if (v.prospect.call_status == 0) count++;
                         });
-                        if (count) td.find('.attendance-ratio').text(`${count}/${employeeCount}`);
-                        // // disable future dates
-                        // const today = new Date().getDate()
-                        // const thisMonth = new Date().getMonth() + 1;
-                        // if (month > thisMonth) {
-                        //     td.find('.day-btn').prop('disabled', true);
-                        //     td.addClass('bg-light')
-                        // } else if (month == thisMonth && monthDay > today) {
-                        //     td.find('.day-btn').prop('disabled', true);
-                        //     td.addClass('bg-light')
-                        // } else {
-                        //     td.find('.day-btn').prop('disabled', false);
-                        //     td.removeClass('bg-light')
-                        // }
+                        if (count) td.find('.call-ratio').text(`${count}/${data.length}`);
+
                     });
                 });
             },
@@ -192,7 +187,7 @@
                         const td = `
                         <td>
                             <span class="day-btn btn btn-primary round">${day}</span>
-                            <sub class="attendance-ratio text-success pl-1"></sub>
+                            <sub class="call-ratio text-success pl-1"></sub>
                         </td>
                     `;
                         tdList.push(td);
@@ -205,12 +200,14 @@
             loadCallListProspects() {
                 const day = $('#day').val();
                 const month = $('#month').val();
+                const id = $('#callId').val();
                 $('#prospectTbl tbody').html('').append(Index.defaultProspectRows);
 
                 const url = "{{ route('biller.calllists.prospectviacalllist') }}";
                 $.post(url, {
                     day,
                     month,
+                    id
                 }, data => {
 
                     $('#prospectTbl tbody').html('');
@@ -218,7 +215,8 @@
 
                         $('#prospectTbl tbody').append(Index.rowTemplate);
                         row = $('#prospectTbl tbody tr:last');
-                        console.log(row.html())
+                        status = v.prospect.call_status == 0 ? 'Not Called' : 'Called';
+                        row.find('.index').text(i + 1);
                         row.find('.title').text(v.prospect.title);
                         row.find('.company').text(v.prospect.company);
                         row.find('.industry').text(v.prospect.industry);
@@ -226,7 +224,7 @@
                         row.find('.email').text(v.prospect.email);
                         row.find('.phone').text(v.prospect.phone);
                         row.find('.region').text(v.prospect.region);
-                        row.find('.status').text(v.prospect.call_status);
+                        row.find('.status').text(status);
                     });
                 })
             },

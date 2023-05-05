@@ -21,6 +21,7 @@ namespace App\Http\Controllers\Focus\calllist;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\prospect_call_list\ProspectCallListRepository;
+use Request;
 
 /**
  * Class BranchTableController.
@@ -49,6 +50,7 @@ class MyTodayCallListTableController extends Controller
      */
     public function __invoke()
     {
+       
         $core = $this->prospectcalllist->getForDataTable();
 
         return Datatables::of($core)

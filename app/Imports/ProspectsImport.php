@@ -27,16 +27,19 @@ class ProspectsImport implements ToCollection, WithBatchInserts, WithValidation,
 
     public function collection(Collection $rows)
     {
-        // dd($rows);
+       
         $prospect_data = [];
         foreach ($rows as $key => $row) {
             $row_num = $key + 1;
             if ($row_num == 1 && $row->count() < 6) {
                 trigger_error('Missing columns! Use latest CSV file template.');
             } elseif ($row_num > 1) {
-                if (empty($row[0])) trigger_error('Name is required on row no. $row_num',);
+                if (empty($row[0])) trigger_error('Company is required on row no. $row_num',);
                 $prospect_data[] = [
                     'title' => $this->data['title'],
+                    'status'=>0,
+                    'call_status'=>0,
+                    'temperate'=>'warm',
                     'category' => "excel",
                     'company' => $row[0],
                     'contact_person' => $row[1],
@@ -45,12 +48,15 @@ class ProspectsImport implements ToCollection, WithBatchInserts, WithValidation,
                     'industry' => $row[4],
                     'region' => $row[5],
                     'ins' => $this->data['ins'],
+                    'reason' => 'new',
                     'user_id' => auth()->user()->id,
                 ];
                 ++$this->rows;
             }
         }
-        Prospect::insert($prospect_data);
+        // dd($prospect_data);
+       
+       Prospect::insert($prospect_data);
     }
 
     public function rules(): array

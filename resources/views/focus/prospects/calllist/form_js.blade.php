@@ -26,6 +26,7 @@
                 $('.prospect-type').change(this.prospectTypeChange);
                 $('.prospect-count').text(this.direct);
                 $('.direct-prospects').attr('hidden',false);
+                $('#title').change(this.callListChange);
             },
 
            
@@ -39,6 +40,12 @@
                     $('.direct-prospects').attr('hidden',true);
                 }
             },
+
+            callListChange(){
+                let count = $('#title option:selected').attr('count');
+                console.log(count);
+                $('#prospects_number').val(count);
+            }
 
         };
 
