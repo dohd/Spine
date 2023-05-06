@@ -52,7 +52,7 @@ class MyTodayCallListTableController extends Controller
     {
        
         $core = $this->prospectcalllist->getForDataTable();
-
+        
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -70,13 +70,14 @@ class MyTodayCallListTableController extends Controller
             //     return $prospectcalllist->prospect->email == null ? '-----':$prospectcalllist->prospect->email;
             // })
             ->addColumn('call_prospect', function ($prospectcalllist) {
-                $hide = true;
-                if($prospectcalllist->prospect->call_status){
-                    $hide = false;
+                $show = true;
+                $status =$prospectcalllist->prospect->call_status;
+                if($status=='notcalled'){
+                    $show = true;
                 }else{
-                    $hide = true;
+                    $show = false;
                 }
-                return $hide? '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcalllist->prospect_id . '" data-toggle="tooltip"  title="Call" >
+                return $show? '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcalllist->prospect_id . '" data-toggle="tooltip"  title="Call" >
                 <i  class="fa fa-vcard"></i>
                          </a>':'<a"><i  class="fa fa-check-circle  fa-2x text-primary"></i></a>';
             })
@@ -102,7 +103,7 @@ class MyTodayCallListTableController extends Controller
             })
             ->addColumn('call_date', function ($prospectcalllist) {
                 
-                $call_date = $prospectcalllist->prospect->call_date == null ? '-----':$prospectcalllist->prospect->call_date;
+                $call_date = $prospectcalllist->call_date == null ? '-----':$prospectcalllist->call_date;
                
 
                 return dateFormat( $call_date);

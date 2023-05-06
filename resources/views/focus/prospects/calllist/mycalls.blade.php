@@ -193,7 +193,7 @@
 
 
             draw_data() {
-                
+                console.log(this.callListId);
                 $('#mytodaycalllist-table').dataTable({
                     stateSave: true,
                     processing: true,
@@ -230,10 +230,6 @@
                             data: 'call_prospect',
                             name: 'call_prospect'
                         },
-                        // {
-                        //     data: 'email',
-                        //     name: 'email'
-                        // },
                         {
                             data: 'phone',
                             name: 'phone'
@@ -252,12 +248,6 @@
                             name: 'call_date'
                         },
 
-                        // {
-                        //     data: 'actions',
-                        //     name: 'actions',
-                        //     searchable: false,
-                        //     sortable: false
-                        // }
                     ],
                     columnDefs: [{
                         type: "custom-date-sort",

@@ -30,7 +30,7 @@ class ProspectCallListRepository extends BaseRepository
        
         $q = $this->query()->when(request('id'), function ($q) {
             $q->where('call_id', request('id'));
-        })->whereDay('call_date',date('m'));
+        })->whereDay('call_date', date('d'));
         
         return $q->get();
     }

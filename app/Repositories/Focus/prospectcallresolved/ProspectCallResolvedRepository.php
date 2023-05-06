@@ -80,7 +80,7 @@ class ProspectCallResolvedRepository extends BaseRepository
             $prospect = Prospect::find($id);
             if($prospect){
                 $prospect->update([
-                    'call_status' => 1,
+                    'call_status' => 'called',
                     'temperate' => $temperate,
                 ]);
             }

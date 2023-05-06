@@ -38,7 +38,7 @@ class ProspectsImport implements ToCollection, WithBatchInserts, WithValidation,
                 $prospect_data[] = [
                     'title' => $this->data['title'],
                     'status'=>0,
-                    'call_status'=>0,
+                    'call_status'=>'notcalled',
                     'temperate'=>'warm',
                     'category' => "excel",
                     'company' => $row[0],

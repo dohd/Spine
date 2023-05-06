@@ -98,11 +98,11 @@ class CallListController extends Controller
         //get call id
         $callid = $res['id'];
         //get prospects based on title
-        $prospects = Prospect::where('call_status',0)->where('title',$res['title'])->limit($res['prospects_number'])->get([
+        $prospects = Prospect::where('call_status','notcalled')->where('title',$res['title'])->get([
             "id"
         ])->toArray();
 
-
+       // dd($prospects);
         //start and end date  
         $start = $res['start_date'];
         $end = $res['end_date'];
@@ -141,9 +141,9 @@ class CallListController extends Controller
             $dateIndex = ($dateIndex + 1) % $dateCount;
         }
     
-        //dd($prospectcalllist);
-        //send data to prospectcalllisttable
-        ProspectCallList::insert($prospectcalllist);
+       // dd($prospectcalllist);
+        // //send data to prospectcalllisttable
+         ProspectCallList::insert($prospectcalllist);
         
         return view('focus.prospects.calllist.index');
     }
