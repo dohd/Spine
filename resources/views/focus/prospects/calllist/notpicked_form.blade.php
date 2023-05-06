@@ -17,7 +17,7 @@
 </div>
 
 
-<div id="erp_div" >
+<div id="hiddenerp_div" >
     <div hidden class="form-group row">
         <div class="col-md-6">
             <p >Which One</p>
@@ -77,7 +77,7 @@
     </div>
 </div>
 
-<div hidden id="demo" class="form-group row">
+<div hidden id="hiddendemo" class="form-group row">
     <div class="col-md-6">
         <p >When do you think is the appropriate date</p>
         {!! Form::hidden('demo_date', null, [

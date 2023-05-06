@@ -7,7 +7,7 @@
 <div class="form-group">
     <p>Do you have an ERP</p>
     <div class="d-inline-block">
-        <input class="erp-status" type="radio" id="yes" name="erp" value="1"  required>
+        <input class="erp-status" type="radio" id="yes" name="erp" value="1" checked  required>
         <label for="yes">Yes</label><br>
     </div>
     <div class="d-inline-block">
@@ -42,7 +42,7 @@
     <div class="form-group">
         <p>Do you have any challenges in your existing ERP</p>
         <div class="d-inline-block">
-            <input class="challenges-status" type="radio" id="yes" name="erp_challenges" value="1"  required>
+            <input class="challenges-status" type="radio" id="yes" name="erp_challenges" value="1" checked  required>
             <label for="yes">Yes</label><br>
         </div>
         <div class="d-inline-block">
@@ -68,7 +68,7 @@
 <div  class="form-group">
     <p>Are you interested in us showing you a demo</p>
     <div class="d-inline-block">
-        <input class="demo-status" type="radio" id="yes" name="erp_demo" value="1" required>
+        <input class="demo-status" type="radio" id="yes" name="erp_demo" value="1" checked required>
         <label for="yes">Yes</label><br>
     </div>
     <div class="d-inline-block">

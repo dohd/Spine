@@ -178,7 +178,7 @@
             dismissModal() {
                 $('#callModal').on('hidden.bs.modal', function() {
                     $("#notes").val('');
-                    $("#demo_date").val('');
+                    $("#demo_date").datepicker(config.date).datepicker('setDate', new Date());
                     $(".call-status").val('');
                     $(".erp-status").val('');
                     $(".challenges-status").val('');
