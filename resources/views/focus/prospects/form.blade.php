@@ -16,7 +16,7 @@
             <div class="col-sm-6"><label for="prospect_name" class="caption">Prospect Name</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                    {{ Form::text('name', null, ['class' => 'form-control round', 'placeholder' => 'Name', 'id' => 'prospect_name']) }}
+                    {{ Form::text('contact_person', null, ['class' => 'form-control round', 'placeholder' => 'Name', 'id' => 'prospect_name']) }}
                 </div>
             </div>
             

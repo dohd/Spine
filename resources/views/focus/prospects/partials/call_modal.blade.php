@@ -17,12 +17,17 @@
                         <div class="d-inline-block custom-control custom-checkbox mr-1">
                             <input type="radio" class="custom-control-input bg-primary call-status" name="call_status"
                                 id="colorCheck1" value="picked" checked required>
-                            <label class="custom-control-label" for="colorCheck1">Picked</label>
+                            <label class="custom-control-label" for="colorCheck1">Answered</label>
+                        </div>
+                        <div class="d-inline-block custom-control custom-checkbox mr-1">
+                            <input type="radio" class="custom-control-input bg-danger call-status" name="call_status"
+                                id="colorCheck2" value="pickedbusy" required>
+                            <label class="custom-control-label" for="colorCheck2">Answered But Busy</label>
                         </div>
                         <div class="d-inline-block custom-control custom-checkbox mr-1">
                             <input type="radio" class="custom-control-input bg-purple call-status" name="call_status"
                                 value="notpicked" id="colorCheck3" required>
-                            <label class="custom-control-label" for="colorCheck3">Not Picked</label>
+                            <label class="custom-control-label" for="colorCheck3">Not Answered</label>
                         </div>
 
                     </div>
@@ -36,6 +41,13 @@
                 {{ Form::open(['route' => 'biller.prospectcallresolves.store', 'method' => 'POST' ]) }}
                 @include("focus.prospects.calllist.picked_form")
                 {{ Form::submit('Save Call Chat', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_call_chat']) }}
+                {!! Form::close() !!}
+            </div>
+            <div id="div_picked_busy"  style="display:none" class="mx-2">
+                <h3>Picked But Busy</h3>
+                {{-- {{ Form::open(['route' => 'biller.prospectcallresolves.pickedbusy', 'method' => 'POST' ]) }} --}}
+                @include("focus.prospects.calllist.picked_busy_form")
+                {{ Form::submit('Save Reschedule', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_reshedule']) }}
                 {!! Form::close() !!}
             </div>
 

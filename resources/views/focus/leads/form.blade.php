@@ -85,7 +85,7 @@
                 <div class="col-6"><label for="reminder_date" class="caption">Reminder Start Date</label>
                     <div class="input-group">
                         <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
-                        <input type="datetime-local" name="reminder_date" id="reminder_date" class="form-control" disabled/>
+                        <input type="datetime-local" name="reminder_date" id="reminder_date" class="form-control" />
                     </div>
                 </div>
                 <div class="col-6"><label for="client_ref" class="caption">Event Date</label>

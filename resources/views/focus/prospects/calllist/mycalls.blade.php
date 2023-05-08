@@ -116,9 +116,10 @@
                 $('#callModal').find('.challenges-status').change(this.challengesChange);
                 $('#callModal').find('.demo-status').change(this.demoChange);
                 $('#callModal').find('.call-status').change(this.callTypeChange);
-                $('#demo_date').datepicker(config.date).datepicker('setDate', new Date());
-                $('#reminder_date').datepicker(config.date).datepicker('setDate', new Date());
+                // $('#demo_date').datepicker(config.date).datepicker('setDate', new Date());
+               
                 $('#calllist_id').change(this.callListChange);
+                
             },  
 
             showModal() {
@@ -132,9 +133,11 @@
 
                     $('#prospect_id').val(id);
                     $('#hidden_prospect').val(id);
+                    $('#busyprospect_id').val(id);
 
                 });
             },
+          
             callListChange(){
             Index.callListId = $(this).val();
             $('#mytodaycalllist-table').DataTable().destroy();
@@ -164,29 +167,37 @@
                 }
             },
             callTypeChange() {
+               
                 if ($(this).val() == 'picked') {
                     $("#div_picked").css("display", "block");
                     $("#div_notpicked").css("display", "none");
-                } else {
+                    $("#div_picked_busy").css("display", "none");
+                }
+                else if($(this).val() == 'pickedbusy'){
+                    $("#div_picked_busy").css("display", "block");
                     $("#div_picked").css("display", "none");
+                    $("#div_notpicked").css("display", "none");
+                }
+                 else if($(this).val() == 'notpicked') {
                     $("#div_notpicked").css("display", "block");
+                    $("#div_picked").css("display", "none");
+                    $("#div_picked_busy").css("display", "none");
                 }
 
 
             },
 
             dismissModal() {
+
                 $('#callModal').on('hidden.bs.modal', function() {
                     $("#notes").val('');
                     $("#demo_date").datepicker(config.date).datepicker('setDate', new Date());
-                    $(".call-status").val('');
-                    $(".erp-status").val('');
-                    $(".challenges-status").val('');
-                    $(".demo-status").val('');
-                    $("#current_erp").val('');
-                    $("#current_erp_usage").val('');
+             
                     $("#current_erp_challenges").val('');
+                    $('#prospect_id').val('');
                     $('#hidden_prospect').val('');
+                    $('#busyprospect_id').val('');
+                    
                 });
             },
 

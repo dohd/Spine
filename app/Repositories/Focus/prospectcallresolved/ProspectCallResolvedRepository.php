@@ -107,6 +107,24 @@ class ProspectCallResolvedRepository extends BaseRepository
 
         throw new GeneralException('Error Creating Prospect');
     }
+    public function pickedbusycreate(array $data)
+    {
+        
+        $result = ProspectCallResolved::create($data);
+        if($result){
+            $id = $data['prospect_id'];
+            $prospect = Prospect::find($id);
+            if($prospect){
+                $prospect->update([
+                    'call_status' => 'calledrescheduled',
+                    'temperate' => 'warm',
+                ]);
+            }
+        }
+        return $result;
+
+        throw new GeneralException('Error Creating Prospect');
+    }
 
     /**
      * For updating the respective Model in storage

@@ -80,12 +80,16 @@
 <div id="demo" class="form-group row">
     <div class="col-md-6">
         <p>When do you think is the appropriate date</p>
-        {!! Form::text('demo_date', null, [
+        <div class="input-group">
+            <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
+            <input type="datetime-local" name="demo_date" id="demo_date" class="form-control"/>
+        </div>
+        {{-- {!! Form::text('demo_date', null, [
             'class' => 'form-control ',
             'placeholder' => 'Demo date',
             'id' => 'demo_date',
             
-        ]) !!}
+        ]) !!} --}}
     </div>
 
     <div class="col-md-6">

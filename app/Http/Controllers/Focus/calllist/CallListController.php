@@ -113,8 +113,8 @@ class CallListController extends Controller
         
         // Loop through each date in the range
         for ($date = $carbonstart; $date <= $carbonend; $date->addDay()) {
-            // Check if the current date is not a Sunday
-            if ($date->dayOfWeek != Carbon::SUNDAY) {
+            // Check if the current date is not a Sunday or Saturday
+            if ($date->isWeekday()) {
                 // Add the date to the array of valid dates
                 $validDates[] = $date->toDateString();
             }
@@ -184,7 +184,7 @@ class CallListController extends Controller
     public function allocationdays($id)
     {
        $calllist = CallList::find($id);
-       $daterange ="Days With Prospects ".Carbon::parse($calllist->start_date)->format('d')." - ".Carbon::parse($calllist->end_date)->format('d');
+       $daterange ="Days With Prospects ".Carbon::parse($calllist->start_date)->format('Y-m-d')." To ".Carbon::parse($calllist->end_date)->format('Y-m-d');
        $start = Carbon::parse($calllist->start_date)->format('n');
        $end =Carbon::parse($calllist->end_date)->format('n');
         $id = $calllist->id;
