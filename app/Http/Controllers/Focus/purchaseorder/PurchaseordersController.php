@@ -28,6 +28,7 @@ use App\Http\Requests\Focus\purchaseorder\StorePurchaseorderRequest;
 use App\Http\Responses\Focus\purchaseorder\CreateResponse;
 use App\Http\Responses\RedirectResponse;
 use App\Models\supplier\Supplier;
+use Illuminate\Validation\ValidationException;
 use Request;
 
 /**
@@ -101,6 +102,7 @@ class PurchaseordersController extends Controller
         try {
             $result = $this->repository->create(compact('order', 'order_items'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error creating Purchase Order', $th);
         }
 
@@ -147,6 +149,7 @@ class PurchaseordersController extends Controller
         try {
             $result = $this->repository->update($purchaseorder, compact('order', 'order_items'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Purchase Order', $th);
         }
 

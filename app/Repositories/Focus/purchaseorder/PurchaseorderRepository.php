@@ -72,6 +72,10 @@ class PurchaseorderRepository extends BaseRepository
         $result = Purchaseorder::create($order);
 
         $order_items = $input['order_items'];
+        foreach ($order_items as $item) {
+            if (@$item['type'] == 'Stock' && !$item['uom'])
+            throw ValidationException::withMessages(['Unit of Measure (uom) required for Inventory Items']);
+        }
         $order_items = array_map(function ($v) use($result) {
             return array_replace($v, [
                 'ins' => $result->ins,
@@ -120,8 +124,12 @@ class PurchaseorderRepository extends BaseRepository
         $purchaseorder->update($order);
 
         $order_items = $input['order_items'];
+        foreach ($order_items as $item) {
+            if (@$item['type'] == 'Stock' && !$item['uom'])
+            throw ValidationException::withMessages(['Unit of Measure (uom) required for Inventory Items']);
+        }
         // delete omitted items
-        $item_ids = array_map(function ($v) { return $v['id']; }, $order_items);
+        $item_ids = array_map(fn($v) => $v['id'], $order_items);
         $purchaseorder->products()->whereNotIn('id', $item_ids)->delete();
         // update or create new items
         foreach ($order_items as $item) {
