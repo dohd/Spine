@@ -72,8 +72,6 @@ class TaxPrnsController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate(['return_month' => 'required']);
-
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) { dd($th);
@@ -104,8 +102,6 @@ class TaxPrnsController extends Controller
      */
     public function update(Request $request, TaxPrn $tax_prn)
     {
-        $request->validate(['return_month' => 'required']);
-
         try {
             $this->repository->update($tax_prn, $request->except('_token'));
         } catch (\Throwable $th) {

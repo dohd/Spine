@@ -5,7 +5,6 @@ namespace App\Repositories\Focus\tax_prn;
 use App\Exceptions\GeneralException;
 use App\Models\tax_prn\TaxPrn;
 use App\Repositories\BaseRepository;
-use DateTime;
 use Illuminate\Validation\ValidationException;
 
 class TaxPrnRepository extends BaseRepository
@@ -40,13 +39,11 @@ class TaxPrnRepository extends BaseRepository
         // dd($input);
         foreach ($input as $key => $val) {
             if ($key == 'amount') $input[$key] = numberClean($val);
-            if ($key == 'date') $input[$key] = date_for_database($val);
-            if ($key == 'return_month') {
-                $date = DateTime::createFromFormat('m-Y', $input[$key]);
-                if ($date) $input[$key] = $date->format('m-Y');
-                else throw ValidationException::withMessages(['Valid date format required mm-YYYY']);
-            }
+            if (in_array($key, ['date', 'period_from', 'period_to'])) 
+                $input[$key] = date_for_database($val);
         }
+        if (substr($input['period_from'], 0, 6) != substr($input['period_to'], 0, 6))
+            throw ValidationException::withMessages(['Return period must be of the same month']);
 
         $result = TaxPrn::create($input);
         if ($result) return $result;
@@ -67,13 +64,11 @@ class TaxPrnRepository extends BaseRepository
         // dd($input);
         foreach ($input as $key => $val) {
             if ($key == 'amount') $input[$key] = numberClean($val);
-            if ($key == 'date') $input[$key] = date_for_database($val);
-            if ($key == 'return_month') {
-                $date = DateTime::createFromFormat('m-Y', $input[$key]);
-                if ($date) $input[$key] = $date->format('m-Y');
-                else throw ValidationException::withMessages(['Valid date format required mm-YYYY']);
-            }
+            if (in_array($key, ['date', 'period_from', 'period_to'])) 
+                $input[$key] = date_for_database($val);
         }
+        if (substr($input['period_from'], 0, 6) != substr($input['period_to'], 0, 6))
+            throw ValidationException::withMessages(['Return period must be of the same month']);
 
         if ($tax_prn->update($input)) return $tax_prn;
 

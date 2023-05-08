@@ -22,21 +22,22 @@
                     <table class="table table-bordered table-sm">
                         @php
                             $details = [
-                                'Return Month' => $tax_prn->return_month,
-                                'PRN Code' => $tax_prn->code,
+                                'Return Number' => $tax_prn->code,
+                                'Period From' => dateFormat($tax_prn->period_from),
+                                'Period To' => dateFormat($tax_prn->period_to),
                                 'Payment Mode' => ucfirst($tax_prn->payment_mode),
                                 'Amount' => numberFormat($tax_prn->amount),
-                                'Date' => dateFormat($tax_prn->date),
-                                'Note' => $tax_prn->note,
+                                'Acknowledgement Date' => dateFormat($tax_prn->date),
+                                'Remark' => $tax_prn->note,
                             ];
                         @endphp
                         @foreach ($details as $key => $val)
                             <tr>
                                 <th width="30%">{{ $key }}</th>
                                 <td>
-                                    @if ($key == 'Return Month')
+                                    @if ($key == 'Return Number')
                                         <span class="mr-1">{{ $val }}</span>
-                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', ['return_month' => $tax_prn->return_month]) }}" title="Tax Returns">
+                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', ['return_month' => substr(dateFormat($tax_prn->period_from), 3)]) }}" title="Tax Returns">
                                             <i class="fa fa-list"></i> List
                                         </a>  
                                     @else

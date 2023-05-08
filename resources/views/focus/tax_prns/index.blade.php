@@ -25,11 +25,12 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Return Month</th>
-                                        <th>PRN Code</th>
+                                        <th>Period From</th>
+                                        <th>Period To</th>
+                                        <th>Return Number</th>
                                         <th>Payment Mode</th>
                                         <th>Amount</th>
-                                        <th>Date</th>
+                                        <th>Acknowledgement Date</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -76,7 +77,7 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['return_month', 'code', 'payment_mode', 'amount', 'date'].map(v => ({data: v, name: v})),
+                    ...['period_from', 'period_to', 'code', 'payment_mode', 'amount', 'date'].map(v => ({data: v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
