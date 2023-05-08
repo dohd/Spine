@@ -37,7 +37,7 @@
                                 <td>
                                     @if ($key == 'Return Number')
                                         <span class="mr-1">{{ $val }}</span>
-                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', ['return_month' => substr(dateFormat($tax_prn->period_from), 3)]) }}" title="Tax Returns">
+                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', ['record_month' => substr(dateFormat($tax_prn->period_from), 3)]) }}" title="Tax Returns">
                                             <i class="fa fa-list"></i> List
                                         </a>  
                                     @else

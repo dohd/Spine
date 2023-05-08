@@ -56,10 +56,10 @@ class TaxPrnsTableController extends Controller
                 return numberFormat($tax_prn->amount);
             })
             ->addColumn('period_from', function ($tax_prn) {
-                return dateFormat($tax_prn->date);
+                return dateFormat($tax_prn->period_from);
             })
             ->addColumn('period_to', function ($tax_prn) {
-                return dateFormat($tax_prn->date);
+                return dateFormat($tax_prn->period_to);
             })
             ->addColumn('actions', function ($tax_prn) {
                 return $tax_prn->action_buttons;

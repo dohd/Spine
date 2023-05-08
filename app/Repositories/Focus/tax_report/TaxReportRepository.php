@@ -172,9 +172,12 @@ class TaxReportRepository extends BaseRepository
     public function update(TaxReport $tax_report, array $input)
     {
         // dd($input);
-        $is_exists = TaxPrn::where('return_month', 'LIKE', $tax_report->return_month)->exists();
-        if ($is_exists) throw ValidationException::withMessages(['Tax Returns locked using PRN Code']);
-
+        if ($tax_report->record_month) {
+            $dt = explode('-', $tax_report->record_month);
+            $is_exists = TaxPrn::whereMonth('period_from', $dt[0])->whereYear('period_from', $dt[1])->exists();
+            if ($is_exists) throw ValidationException::withMessages(['Not allowed. Filed Tax Returns have been acknowledged']);
+        }
+    
         DB::beginTransaction();
 
         $data_keys = [
@@ -236,8 +239,11 @@ class TaxReportRepository extends BaseRepository
      */
     public function delete(TaxReport $tax_report)
     {
-        $is_exists = TaxPrn::where('return_month', 'LIKE', $tax_report->return_month)->exists();
-        if ($is_exists) throw ValidationException::withMessages(['Tax Returns locked using PRN Code']);
+        if ($tax_report->record_month) {
+            $dt = explode('-', $tax_report->record_month);
+            $is_exists = TaxPrn::whereMonth('period_from', $dt[0])->whereYear('period_from', $dt[1])->exists();
+            if ($is_exists) throw ValidationException::withMessages(['Not allowed. Filed Tax Returns have been acknowledged']);
+        }
         
         if ($tax_report->delete()) return true;
             
