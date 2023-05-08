@@ -23,7 +23,6 @@ use App\Models\note\Note;
 use App\Models\account\Account;
 use App\Models\project\ProjectLog;
 use App\Models\project\ProjectMileStone;
-use App\Models\project\ProjectRelations;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
@@ -37,12 +36,10 @@ use App\Models\Access\User\User;
 use App\Models\hrm\Hrm;
 use App\Models\misc\Misc;
 use App\Models\project\Budget;
-use App\Models\project\BudgetSkillset;
 use App\Models\project\Project;
-use App\Models\projectstock\Projectstock;
 use App\Models\project\ProjectQuote;
 use App\Models\quote\Quote;
-use App\Models\items\QuoteItem;
+use App\Models\supplier\Supplier;
 use DB;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -171,6 +168,8 @@ class ProjectsController extends Controller
     public function show(Project $project, ManageProjectRequest $request)
     {
         $accounts = Account::where('account_type', 'Income')->get(['id', 'holder', 'number']);
+        $exp_accounts = Account::where('account_type', 'Expense')->get(['id', 'holder', 'number']);
+        $suppliers = Supplier::get(['id', 'name']);
         $last_tid = Project::where('ins', auth()->user()->ins)->max('tid');
 
         // temp properties
@@ -180,7 +179,7 @@ class ProjectsController extends Controller
         $mics = Misc::all();
         $employees = User::all();
 
-        return new ViewResponse('focus.projects.view-main', compact('project', 'accounts', 'last_tid', 'mics', 'employees'));
+        return new ViewResponse('focus.projects.view-main', compact('project', 'accounts', 'exp_accounts', 'suppliers', 'last_tid', 'mics', 'employees'));
     }
 
     /**
@@ -196,43 +195,6 @@ class ProjectsController extends Controller
 
         return redirect()->back();
     }
-
-    /**
-     * Invoices Datatable
-     */
-    public function invoices(Request $request)
-    {
-        $quote_ids = explode(',', $request->quote_ids);
-        $invoices = Invoice::whereHas('quotes', fn($q) => $q->whereIn('quotes.id', $quote_ids));
-
-        return Datatables::of($invoices)
-            ->addIndexColumn()
-            ->addColumn('tid', function ($invoice) {
-                $tid = gen4tid('INV-', $invoice->tid);
-                return '<a class="font-weight-bold" href="' . route('biller.invoices.show', [$invoice->id]) . '">' . $tid . '</a>';
-            })
-            ->addColumn('customer', function ($invoice) {
-                if($invoice->customer)
-                    return $invoice->customer->name . ' <a class="font-weight-bold" href="' . route('biller.customers.show', [$invoice->customer->id]) . '"><i class="ft-eye"></i></a>';
-            })
-            ->addColumn('invoicedate', function ($invoice) {
-                return dateFormat($invoice->invoicedate);
-            })
-            ->addColumn('total', function ($invoice) {
-                return amountFormat($invoice->total);
-            })
-            ->addColumn('status', function ($invoice) {
-                return '<span class="st-' . $invoice->status . '">' . trans('payments.' . $invoice->status) . '</span>';
-            })
-            ->addColumn('invoiceduedate', function ($invoice) {
-                return dateFormat($invoice->invoiceduedate);
-            })
-            ->addColumn('actions', function ($invoice) {
-                return $invoice->action_buttons;
-            })->rawColumns(['tid', 'customer', 'actions', 'status', 'total'])
-            ->make(true);
-    }
-
 
     /**
      * Project autocomplete search
@@ -560,8 +522,6 @@ class ProjectsController extends Controller
         return response()->json($data);
     }
 
-
-
     /**
      * Remove Project Quote
      */
@@ -610,27 +570,6 @@ class ProjectsController extends Controller
     }
 
     /**
-     * Remove Project Budget
-     */
-    public function detach_budget(Request $request)
-    {
-        $input = $request->except('_token');
-
-        DB::beginTransaction();
-        
-        $budget = Budget::find($request->budget_id);
-        if($budget){
-            $budget->items()->delete();
-            $budget->skillsets()->delete();
-            $budget->delete();
-            DB::commit();
-            return response()->json(['status'=> 'Detached Successfully!!']);
-        
-        }
-    }
-
-
-    /**
      * DataTable Project Activity Log
      */
     public function log_history(ManageProjectRequest $request)
@@ -654,29 +593,6 @@ class ProjectsController extends Controller
             ->make(true);
     }
 
-    public function view_budget(Request $request)
-    {
-        $budget = Budget::where('quote_id', $request->id)->first();
-        if($budget){
-            $quote = Quote::find($request->id);
-            
-            $customer = $quote->customer ? $quote->customer->company : '';
-            $branch = $quote->branch? $quote->branch->name : '';
-           // $budget = Budget::find($budget_id);
-            $budget_items = $budget->items()->orderBy('row_index')->get();
-            $skillset = $budget->skillsets()->get();
-            return response()->json([
-                'quote'=>$quote,
-                 'budget'=>$budget,
-                 'budget_items'=> $budget_items,
-                 'skillset'=> $skillset,
-                 'customer' => $customer,
-                 'branch'=> $branch
-                ]);
-        }
-        return response()->json($request);
-    }
-
     /**
      * Milestone budget limit
      */
@@ -686,11 +602,9 @@ class ProjectsController extends Controller
         foreach ($project->quotes as $quote) {
             if ($quote->budget) $project_budget += $quote->budget->budget_total;
         }
-        if ($project_budget == 0 && $project->quotes->count()) {
+        if ($project_budget == 0 && $project->quotes->count()) 
             $project_budget = $project->quotes->sum('total');
-        } elseif ($project_budget == 0) {
-            $project_budget = $project->worth;
-        }
+        elseif ($project_budget == 0) $project_budget = $project->worth;
 
         $milestone_budget = $project_budget;
         foreach ($project->milestones as $milestone) {
@@ -698,247 +612,5 @@ class ProjectsController extends Controller
         }
 
         return response()->json(['status' => 'Success', 'data' => compact('project_budget', 'milestone_budget')]);
-    }
-
-
-
-    public function project_budget(Request $request){
-        //$core = $budget->getForDataTable();
-        $pro = $request->project_id;
-        $project = Project::find($request->project_id);
-        $quotes = $project->quotes()->get();
-        $budgets = [];
-        foreach($quotes as $quote){
-            $budgets = $quote->budgets()->get();
-        }
-        return Datatables::of($budgets)
-            ->addIndexColumn()
-            ->addColumn('tid', function ($budget) {
-                return $budget->quote ? 'QT-'.$budget->quote->tid : '';
-            })
-            ->addColumn('customer', function ($budget) {
-                return $budget->quote->customer ? $budget->quote->customer->name : '';
-            })
-            ->addColumn('quote_total', function ($budget) {
-                return amountFormat($budget->quote_total);
-            })
-            ->addColumn('budget_total', function ($budget) {
-                return amountFormat($budget->budget_total);
-            })
-            ->addColumn('actions', function ($budget) use ($pro) {
-                 $editUrl = "{{ route('biller.projects.create_project_budget', $budget->quote_id)}}";
-                return '
-                <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Action
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item edit" href="' . route('biller.projects.create_project_budget', [$budget->quote_id]) . '">Edit</a>
-                        <a class="dropdown-item view" data-id="'.$budget->quote_id.'"  href="javascript:void(0);">View</a>
-                        <a class="dropdown-item text-danger budget_delete" data-id="'.$budget->id.'" data-pro="'.$pro.'" href="#">Remove</a>
-                    </div>
-                </div> ';
-        
-            })->rawColumns(['tid', 'customer', 'actions', 'quote_total', 'budget_total'])
-            ->make(true);
-
-    }
-
-    public function bill_stock_items(Request $request)
-    {
-        $project = Project::find($request->project_id);
-        $bill_items = $project->purchase_items()->where('type', 'Stock')->get();
-
-        return Datatables::of($bill_items)
-            ->addIndexColumn()
-            ->addColumn('bill_id', function ($bill_item) {
-                return $bill_item->bill_id;
-            })
-            ->addColumn('type', function ($bill_item) {
-                return $bill_item->type;
-            })
-            ->addColumn('description', function ($bill_item) {
-                return $bill_item->description;
-            })
-            ->addColumn('uom', function ($bill_item) {
-                return $bill_item->uom;
-            })
-            ->addColumn('qty', function ($bill_item) {
-                return numberFormat($bill_item->qty);
-            })
-            ->addColumn('amount', function ($bill_item) {
-                return amountFormat($bill_item->amount);
-        
-            })->rawColumns(['bill_id', 'type', 'description','uom', 'qty','amount'])
-            ->make(true);
-    }
-
-    public function project_expense(Request $request)
-    {
-        $project = Project::find($request->project_id);
-        $expenses = $project->purchase_items()->where('type', 'Expense')->get();
-
-        return Datatables::of($expenses)
-            ->addIndexColumn()
-            ->addColumn('bill_id', function ($expense) {
-                return $expense->bill_id;
-            })
-            ->addColumn('type', function ($expense) {
-                return $expense->type;
-            })
-            ->addColumn('description', function ($expense) {
-                return $expense->description;
-            })
-            ->addColumn('uom', function ($expense) {
-                return $expense->uom;
-            })
-            ->addColumn('qty', function ($expense) {
-                return numberFormat($expense->qty);
-            })
-            ->addColumn('amount', function ($expense) {
-                return amountFormat($expense->amount);
-        
-            })->rawColumns(['bill_id', 'type', 'description','uom', 'qty','amount'])
-            ->make(true);
-    }
-    public function issued_items(Request $request)
-    {
-        $quote_ids = explode(',', $request->quote_ids);
-        $project_stocks = [];
-        foreach ($quote_ids as $quote) {
-            $project_stocks = Projectstock::where('quote_id', $quote)->get();
-        }
-        $project_stocks_items = [];
-        if($project_stocks){
-           $pro = [];
-            foreach($project_stocks as $project_stock){
-                $project_stocks_items = $project_stock->items()->get();
-                $pro = $project_stock;
-            }
-        }
-        
-
-        return Datatables::of($project_stocks_items)
-            ->addIndexColumn()
-            ->addColumn('tid', function ($project_stock_item) use ($pro) {
-                if($pro)return $pro->quote ? 'QT-'.$pro->quote->tid : '';
-                return '';
-            })
-            ->addColumn('uom', function ($project_stock_item)  {
-                return $project_stock_item->unit ? $project_stock_item->unit : '';
-            })
-            ->addColumn('description', function ($project_stock_item) {
-                return $project_stock_item->productvariation ? $project_stock_item->productvariation->name : '';
-            })
-            ->addColumn('qty', function ($project_stock_item) {
-                return $project_stock_item->qty ? numberFormat($project_stock_item->qty) : '';
-            })
-            ->addColumn('warehouse', function ($project_stock_item) {
-                return $project_stock_item->warehouse ? $project_stock_item->warehouse->title : '';
-            })
-            ->addColumn('amount', function ($project_stock_item) {
-                return $project_stock_item->productvariation ? amountFormat($project_stock_item->productvariation->price) : '';
-        
-            })->rawColumns(['tid', 'description','uom', 'qty','warehouse','amount'])
-            ->make(true);
-    }
-    public function labour_skillsets(Request $request)
-    {
-        $quote_ids = explode(',', $request->quote_ids);
-        $budget_skillsets = [];
-        foreach ($quote_ids as $quote) {
-            $budget_skillsets = BudgetSkillset::where('quote_id', $quote)->get();
-        }
-       
-        
-
-        return Datatables::of($budget_skillsets)
-            ->addIndexColumn()
-            ->addColumn('skill', function ($budget_skillset) {
-                return $budget_skillset->skill;
-            })
-            ->addColumn('charge', function ($budget_skillset)  {
-                return $budget_skillset->charge;
-            })
-            ->addColumn('hours', function ($budget_skillset) {
-                return $budget_skillset->hours;
-            })
-            ->addColumn('no_technician', function ($budget_skillset) {
-                return $budget_skillset->no_technician;
-            })
-            ->addColumn('tid', function ($budget_skillset) {
-                $tid = Quote::find($budget_skillset->quote_id);
-                return '<b>'.'QT-'.$tid->tid.'</b>';
-            })
-            ->addColumn('amount', function ($budget_skillset) {
-                $total = $budget_skillset->charge * $budget_skillset->hours * $budget_skillset->no_technician;
-                return amountFormat($total);
-            })->rawColumns(['tid', 'skill','charge', 'hours','no_technician','amount'])
-            ->make(true);
-    }
-
-    //Quote service items
-    public function quotes_service_items(Request $request)
-    {
-        $quote_ids = explode(',', $request->quote_ids);
-        $quote_item = [];
-        $quote_items = QuoteItem::whereIn('quote_id', $quote_ids)->get();
-        foreach ($quote_items as $quote) {
-            $quote_item = $quote;
-        }
-        $variations = [];
-        foreach($quote_items as $qq){
-            $variations = $qq->variation()->get();
-        }
-        //dd($variations);
-       //$variations = $quote_items->product()->first();
-       
-       $items = [];
-       foreach ($variations as $variation) {
-            $items = $variation->quote_service_items()->first();
-       }
-       if($items){
-        return Datatables::of($variations)
-            ->addIndexColumn()
-            ->addColumn('tid', function ($variation) use ($quote_item){
-                return '<b>'.'QT-'.$quote_item->quote->tid.'</b>';
-            })
-            ->addColumn('description', function ($variation)  {
-                return $variation->name;
-            })
-            ->addColumn('uom', function ($variation) use ($quote_item) {
-                return $quote_item->unit;
-            })
-            ->addColumn('qty', function ($variation) use ($quote_item) {
-                return $quote_item->product_qty;
-            })
-            ->addColumn('amount', function ($variation) use ($quote_item) {
-                $total = $quote_item->product_price;
-                return amountFormat($total);
-            })->rawColumns(['tid', 'description','uom','qty','amount'])
-            ->make(true);
-       }
-       else{
-        return Datatables::of($variations)
-            ->addIndexColumn()
-            ->addColumn('tid', function ($variation) use ($quote_item){
-                return '';
-            })
-            ->addColumn('description', function ($variation)  {
-                return '';
-            })
-            ->addColumn('uom', function ($variation) use ($quote_item) {
-                return '';
-            })
-            ->addColumn('qty', function ($variation) use ($quote_item) {
-                return '';
-            })
-            ->addColumn('amount', function ($variation) use ($quote_item) {
-                $total = $quote_item->product_price;
-                return '';
-            })->rawColumns(['tid', 'description','uom','qty','amount'])
-            ->make(true);
-       }
-        
     }
 }

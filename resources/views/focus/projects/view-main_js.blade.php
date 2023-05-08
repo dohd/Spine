@@ -46,7 +46,7 @@
 
     // on document load
     $(() => {
-        // on show tab
+        // on show tab load datatables
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             localStorage.setItem('project_tab', $(e.target).attr('href'));
             switch ($(e.target).attr('href')) {
@@ -56,12 +56,7 @@
                 case '#tab_data10': invoices(); break;
                 case '#tab_data7': quotes(); break;
                 case '#tab_data8': budgets(); break;
-                case '#tab_data9': 
-                    skillset();
-                    service();
-                    stocks();
-                    expense();
-                    purchase(); break;    
+                case '#tab_data9': expenses(); break;
             }
         });
         const projectTab = localStorage.project_tab;
@@ -388,176 +383,24 @@
         });
     }
         
-    /** Purchase Table Summary */
-    function purchase() {
-        if ($('#purchaseTbl tbody tr').length) return;        
-        $('#purchaseTbl').dataTable({
+    // fetch expenses
+    function expenses() {
+        // if ($('#expItems tbody tr').length) return;        
+
+        $('#expItems').dataTable({
             processing: true,
             responsive: true,
             stateSave: true,
             language: {@lang('datatable.strings')},
             ajax: {
-                url: "{{ route('biller.projects.bill_stock_items') }}",
+                url: "{{ route('biller.projects.get_expense') }}",
                 type: 'POST',
-                data: {project_id: @json(@$project->id)},
+                data: {project_id: "{{ $project->id }}"},
             },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
-                },
-                ...[
-                    'bill_id', 'type', 'description', 'uom','qty'
-                ].map(v => ({data: v, name: v})),
-                {data: 'amount', name: 'amount', searchable: false, sortable: false}
-            ],
-            order:[[0, 'desc']],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: ['csv', 'excel', 'print'],
-        });
-    }
-
-    /** Expense Table Summary */
-    function expense() {
-        if ($('#expenseTbl tbody tr').length) return;        
-
-        $('#expenseTbl').dataTable({
-            processing: true,
-            responsive: true,
-            stateSave: true,
-            language: {@lang('datatable.strings')},
-            ajax: {
-                url: "{{ route('biller.projects.project_expense') }}",
-                type: 'POST',
-                data: {project_id: @json(@$project->id)},
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
-                },
-                ...[
-                    'bill_id', 'type', 'description', 'uom','qty'
-                ].map(v => ({data: v, name: v})),
-                {data: 'amount', name: 'amount', searchable: false, sortable: false}
-            ],
-            order:[[0, 'desc']],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: ['csv', 'excel', 'print'],
-        });
-    }
-
-    /**Issued Stock to Project */
-    function stocks() {
-        if ($('#stockTbl tbody tr').length) return;        
-        let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
-        quoteIds = quoteIds.join(',');
-
-        $('#stockTbl').dataTable({
-            processing: true,
-            responsive: true,
-            stateSave: true,
-            language: {@lang('datatable.strings')},
-            ajax: {
-                url: "{{ route('biller.projects.issued_items') }}",
-                type: 'POST',
-                data: {project_id: @json(@$project->id), quote_ids: quoteIds},
-                dataSrc: ({data}) => {
-                    data = data.map(v => {
-                       
-                        return v;
-                    });
-                    return data;
-                }
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
-                },
-                ...[
-                    'tid', 'description','uom','qty','warehouse'
-                ].map(v => ({data: v, name: v})),
-                {data: 'amount', name: 'amount', searchable: false, sortable: false}
-            ],
-            
-            order:[[0, 'desc']],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: ['csv', 'excel', 'print'],
-        });
-    }
-
-    /** Service Items */
-    function service() {
-        if ($('#serviceTbl tbody tr').length) return;        
-        let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
-        quoteIds = quoteIds.join(',');
-
-        $('#serviceTbl').dataTable({
-            processing: true,
-            responsive: true,
-            stateSave: true,
-            language: {@lang('datatable.strings')},
-            ajax: {
-                url: "{{ route('biller.projects.quotes_service_items') }}",
-                type: 'POST',
-                data: {project_id: @json(@$project->id), quote_ids: quoteIds},
-                dataSrc: ({data}) => {
-                    data = data.map(v => {
-                       
-                        return v;
-                    });
-                    return data;
-                }
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
-                },
-                ...[
-                    'tid', 'description','uom','qty'
-                ].map(v => ({data: v, name: v})),
-                {data: 'amount', name: 'amount', searchable: false, sortable: false}
-            ],
-            
-            order:[[0, 'desc']],
-            searchDelay: 500,
-            dom: 'Blfrtip',
-            buttons: ['csv', 'excel', 'print'],
-        });
-    }
-
-    /**SkillSet Labour */
-    function skillset() {
-        if ($('#labourTbl tbody tr').length) return;        
-        let quoteIds = @json(@$project->quotes->pluck('id')->toArray());
-        quoteIds = quoteIds.join(',');
-
-        $('#labourTbl').dataTable({
-            processing: true,
-            responsive: true,
-            stateSave: true,
-            language: {@lang('datatable.strings')},
-            ajax: {
-                url: "{{ route('biller.projects.labour_skillsets') }}",
-                type: 'POST',
-                data: {project_id: @json(@$project->id), quote_ids: quoteIds},
-                dataSrc: ({data}) => {
-                    data = data.map(v => {
-                       
-                        return v;
-                    });
-                    return data;
-                }
-            },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
-                },
-                ...[
-                    'tid', 'skill','charge', 'hours','no_technician'
-                ].map(v => ({data: v, name: v})),
-                {data: 'amount', name: 'amount', searchable: false, sortable: false}
+            columns: [
+                {data: 'DT_Row_Index', name: 'id'},
+                ...['exp_category', 'supplier', 'product_name', 'uom', 'qty', 'rate', 'amount']
+                .map(v => ({data: v, name: v})),
             ],
             order:[[0, 'desc']],
             searchDelay: 500,

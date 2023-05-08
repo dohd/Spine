@@ -31,12 +31,9 @@ Route::group(['namespace' => 'project', 'middleware' => 'project'], function () 
   Route::post('projects/budget_store', 'ProjectsController@store_project_budget')->name('projects.store_project_budget');
   Route::post('projects/budget_update/{budget}', 'ProjectsController@update_project_budget')->name('projects.update_project_budget');
   Route::post('projects/budget_tool_update/{budget}', 'ProjectsController@update_budget_tool')->name('projects.update_budget_tool');
-  //Project Expenses
-  Route::post('projects/bill_stock_items', 'ProjectsController@bill_stock_items')->name('projects.bill_stock_items');
-  Route::post('projects/project_expense', 'ProjectsController@project_expense')->name('projects.project_expense');
-  Route::post('projects/issued_items', 'ProjectsController@issued_items')->name('projects.issued_items');
-  Route::post('projects/labour_skillsets', 'ProjectsController@labour_skillsets')->name('projects.labour_skillsets');
-  Route::post('projects/quotes_service_items', 'ProjectsController@quotes_service_items')->name('projects.quotes_service_items');
+
+  // expenses
+  Route::post('projects/expenses', 'ExpensesTableController')->name('projects.get_expense');
 });
 
 // project budget
