@@ -40,13 +40,17 @@
                     </tr>
                     <tr>
                         <th>Status</th>
-                        @if ($prospect->status)
+                        @if ($prospect->status =='won' || 'lost')
                             <td class='text-success'>Closed
-                                <span style='color:black'> || {{ $prospect->reason }}</span> 
+                                <span style='color:black'> || {{ $prospect->status }}</span> 
                             </td>   
                         @else
                             <td class='font-weight-bold'>Open</td>
                         @endif
+                    </tr> 
+                    <tr>
+                        <th>Reason For Closure</th>
+                        <td>{{  $prospect->reason ==null ? '---':$prospect->reason }}</td>
                     </tr> 
                     <tr>
                         <th>Name</th>

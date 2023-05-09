@@ -37,7 +37,16 @@ class ProspectRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query();
+        $q = $this->query()->when(request('bytitle'), function ($q) {
+            $q->where('title', request('bytitle'));
+        })->when(request('bytemperate'), function ($q) {
+            $q->where('temperate', request('bytemperate'));
+        })->when(request('bycallstatus'), function ($q) {
+            $q->where('call_status', request('bycallstatus'));
+        })->when(request('bystatus'), function ($q) {
+            $q->where('status', request('bystatus'));
+        });
+        
         return $q->get();
     }
 

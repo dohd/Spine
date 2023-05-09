@@ -188,6 +188,18 @@ class ProspectsCallResolvedController extends Controller
 
         return new RedirectResponse(route('biller.calllists.mytoday'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
     }
+    public function notavailable(Request $request)
+    {
+
+        // filter request input fields
+        $data = $request->except(['_token', 'ins', 'files','call_id']);
+        
+        
+        //Create the model using repository create method
+        $this->repository->notavailablecreate($data);
+
+        return new RedirectResponse(route('biller.calllists.mytoday'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
+    }
     public function pickedbusy(Request $request)
     {
 

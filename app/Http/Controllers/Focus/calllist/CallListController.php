@@ -75,8 +75,8 @@ class CallListController extends Controller
      */
     public function create()
     {
-        $direct = Prospect::where('category', 'direct')->count();
-        $excel = Prospect::select(DB::raw('title,COUNT("*") AS count '))->groupBy('title')->where('category', 'excel')->get();
+        $direct = Prospect::where('call_status','notcalled')->where('category', 'direct')->count();
+        $excel = Prospect::select(DB::raw('title,COUNT("*") AS count '))->groupBy('title')->where('call_status','notcalled')->where('category', 'excel')->get();
 
         return view('focus.prospects.calllist.create', compact('direct', 'excel'));
     }

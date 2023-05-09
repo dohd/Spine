@@ -37,7 +37,7 @@ class ProspectsImport implements ToCollection, WithBatchInserts, WithValidation,
                 if (empty($row[0])) trigger_error('Company is required on row no. $row_num',);
                 $prospect_data[] = [
                     'title' => $this->data['title'],
-                    'status'=>0,
+                    'status'=>'open',
                     'call_status'=>'notcalled',
                     'temperate'=>'warm',
                     'category' => "excel",

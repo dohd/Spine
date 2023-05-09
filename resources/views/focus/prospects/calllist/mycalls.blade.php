@@ -133,6 +133,7 @@
 
                     $('#prospect_id').val(id);
                     $('#hidden_prospect').val(id);
+                    $('#notavailable_prospect').val(id);
                     $('#busyprospect_id').val(id);
                     $('#call_id').val(call_id);
                     $('#busycall_id').val(call_id);
@@ -174,16 +175,26 @@
                     $("#div_picked").css("display", "block");
                     $("#div_notpicked").css("display", "none");
                     $("#div_picked_busy").css("display", "none");
+                    $("#div_notpicked_available").css("display", "none");
                 }
                 else if($(this).val() == 'pickedbusy'){
                     $("#div_picked_busy").css("display", "block");
                     $("#div_picked").css("display", "none");
                     $("#div_notpicked").css("display", "none");
+                    $("#div_notpicked_available").css("display", "none");
                 }
                  else if($(this).val() == 'notpicked') {
                     $("#div_notpicked").css("display", "block");
                     $("#div_picked").css("display", "none");
                     $("#div_picked_busy").css("display", "none");
+                    $("#div_notpicked_available").css("display", "none");
+                }
+                 else if($(this).val() == 'notavailable') {
+                    $("#div_notpicked_available").css("display", "block");
+                    $("#div_notpicked").css("display", "none");
+                    $("#div_picked").css("display", "none");
+                    $("#div_picked_busy").css("display", "none");
+                    
                 }
 
 
@@ -199,6 +210,7 @@
                     $('#prospect_id').val('');
                     $('#hidden_prospect').val('');
                     $('#busyprospect_id').val('');
+                    $('#notavailable_prospect').val('');
                     $('#busycall_id').val('');
                     $('#call_id').val('');
                    
@@ -209,7 +221,7 @@
 
 
             draw_data() {
-                console.log(this.callListId);
+                
                 $('#mytodaycalllist-table').dataTable({
                     stateSave: true,
                     processing: true,

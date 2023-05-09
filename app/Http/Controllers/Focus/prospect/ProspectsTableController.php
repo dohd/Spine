@@ -106,6 +106,9 @@ class ProspectsTableController extends Controller
                 else if($status == 'calledrescheduled') {
                     $status = "Call Rescheduled";
                 }
+                else if($status == 'callednotavailable') {
+                    $status = "Called Not Available";
+                }
                 else  {
                     $status = "Called";
                 }
@@ -114,10 +117,12 @@ class ProspectsTableController extends Controller
             })
             ->addColumn('status', function ($prospect) {
                 $status = $prospect->status;
-                if ($status == 0) {
+                if ($status == 'open') {
                     $status = "Open";
-                } else {
-                    $status = "Closed";
+                } else if ($status == 'won') {
+                    $status = "Closed - Won";
+                }else{
+                    $status = "Closed - Lost";
                 }
 
                 return $status;

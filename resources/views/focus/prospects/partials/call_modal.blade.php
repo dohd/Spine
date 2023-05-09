@@ -11,7 +11,7 @@
 
             <div class="mx-2 mt-3">
                 <div class="form-group row">
-                    <div class='col-sm-6 mb-2'>
+                    <div class=' mb-2'>
 
                         <div><label for="prospect-type">Select Call Status</label></div>
                         <div class="d-inline-block custom-control custom-checkbox mr-1">
@@ -20,7 +20,7 @@
                             <label class="custom-control-label" for="colorCheck1">Answered</label>
                         </div>
                         <div class="d-inline-block custom-control custom-checkbox mr-1">
-                            <input type="radio" class="custom-control-input bg-danger call-status" name="call_status"
+                            <input type="radio" class="custom-control-input bg-blue call-status" name="call_status"
                                 id="colorCheck2" value="pickedbusy" required>
                             <label class="custom-control-label" for="colorCheck2">Answered But Busy</label>
                         </div>
@@ -28,6 +28,11 @@
                             <input type="radio" class="custom-control-input bg-purple call-status" name="call_status"
                                 value="notpicked" id="colorCheck3" required>
                             <label class="custom-control-label" for="colorCheck3">Not Answered</label>
+                        </div>
+                        <div class="d-inline-block custom-control custom-checkbox mr-1">
+                            <input type="radio" class="custom-control-input bg-danger call-status" name="call_status"
+                                value="notavailable" id="colorCheck4" required>
+                            <label class="custom-control-label" for="colorCheck4">Not Available</label>
                         </div>
 
                     </div>
@@ -61,50 +66,16 @@
             
             
             </div>
-
-
-
-
-
-
-            {{-- <div class="mx-3">
-               
-                    <h5 class="my-2">New Remark</h5>
-                    {{ Form::open(['id'=>'remarkform']) }}
-                    <div class="form-group column">
-                        {{ Form::hidden('prospect_id',null,['class'=>'form-control','id'=>'prospect_id']) }}
-                        <div class="row">
-                           
-                            <div class="col-sm-9"><label for="recepient" class="caption">Recepient Name</label>
-                                <div class="input-group">
-                                    <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                    {{ Form::text('recepient', null, ['class' => 'form-control ', 'placeholder' => 'Name', 'id'=>'recepient' ,'required']) }}
-                                </div>
-                            </div>
-                            <div class="col-sm-3"><label for="reminder_date" class="caption">Next Reminder Date</label>
-                                <div class="input-group">
-                                    <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                    {{ Form::text('reminder_date', null, ['class' => 'form-control datepicker', 'placeholder' => 'Date', 'id' => 'reminder_date' ,'required']) }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-12"><label for="remarks" class="caption">Remarks</label>
-                                <div class="input-group">
-                                    <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                    {{ Form::textarea('remarks', null, ['class' => 'form-control','rows' => 3, 'placeholder' => 'Remark','id'=>'remarks','required']) }}
-                                </div>
-                            </div>
-                        </div>
-                      
-                        
-                            {{ Form::button("Save Remark",['class'=>' my-2 btn btn-md btn-primary','id'=>'save_remark']) }}
-                        {{ Form::close() }}   
-                    </div>
-        
-                         
+            <div id="div_notpicked_available" style="display:none" class="mx-2">
+                <h3>Not Available</h3>
+                {{ Form::open(['route' => 'biller.prospectcallresolves.notavailable', 'method' => 'POST' ]) }}
+                @include("focus.prospects.calllist.picked_notavailable_form")
+                {{ Form::submit('Record As Not Available', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_remark']) }}
+                {{ Form::close() }}
             
-            </div> --}}
+            
+            </div>
+
 
         </div>
     </div>

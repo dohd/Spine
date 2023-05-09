@@ -27,12 +27,15 @@
                 $('.prospect-count').text(this.direct);
                 $('.direct-prospects').attr('hidden',false);
                 $('#title').change(this.callListChange);
+                let count = $('#directprospectcount').text();
+                $('#prospects_number').val(count);
             },
 
            
             prospectTypeChange() {
                 if ($(this).val() == 'direct') {
-
+                    let count = $('#directprospectcount').text();
+                    $('#prospects_number').val(count);
                     $('#title').attr('disabled', true).val('').change();
                     $('.direct-prospects').attr('hidden',false).change();
                 } else {
@@ -43,7 +46,7 @@
 
             callListChange(){
                 let count = $('#title option:selected').attr('count');
-                console.log(count);
+                
                 $('#prospects_number').val(count);
             }
 

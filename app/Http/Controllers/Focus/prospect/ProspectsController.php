@@ -29,6 +29,7 @@ use App\Repositories\Focus\prospect\ProspectRepository;
 use App\Http\Requests\Focus\prospect\ProspectRequest;
 use App\Models\prospect\Prospect;
 use App\Models\remark\Remark;
+use App\Models\calllist\CallList;
 
 /**
  * ProductcategoriesController
@@ -58,11 +59,16 @@ class ProspectsController extends Controller
      */
     public function index()
     {
-        $open_prospect = Prospect::where('status', 0)->count();
-        $closed_prospect = Prospect::where('status', 1)->count();
+        $open_prospect = Prospect::where('status', 'open')->count();
+        $closed_prospect = Prospect::where('status', 'won')->orWhere('status', 'lost')->count();
         $total_prospect = Prospect::count();
-        
-        return new ViewResponse('focus.prospects.index', compact('open_prospect', 'closed_prospect', 'total_prospect'));
+        $prospects= Prospect::all();
+        $titles = $prospects->where('title')->unique('title');
+        $callstatuses = $prospects->where('call_status')->unique();
+        $statuses = $prospects->where('status')->unique();
+        $temperates = $prospects->where('temperate')->unique();
+       
+        return new ViewResponse('focus.prospects.index', compact('open_prospect', 'closed_prospect', 'total_prospect','titles','callstatuses','statuses','temperates'));
     }
 
     /**
@@ -130,7 +136,7 @@ class ProspectsController extends Controller
 
         //dd($request);
         // update input fields from request
-        $data = $request->only(['company','name','email','phone','region','industry']);
+        $data = $request->only(['company','contact_person','email','phone','region','industry']);
         
         //Update the model using repository update method
         $this->repository->update($prospect, compact('data'));

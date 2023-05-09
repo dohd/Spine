@@ -12,22 +12,17 @@
                     <div class="form-group">
                         <label for="status">Status</label>
                         <select class="form-control" name="status" id="status">
-                            @foreach (['Open', 'Closed'] as $i => $val)
-                                <option value="{{ $i }}" {{ $i == $prospect->status? 'selected' : '' }}>
-                                    {{ $val }}
+                            @foreach (['open','lost','won'] as $i => $val)
+                                <option value="{{ $val }}">
+                                    {{ ucfirst($val) }}
                                 </option>
                             @endforeach                            
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="reason">Reason</label>
-                        <select class="form-control" name="reason" id="reason">
-                            @foreach (['new', 'won'] as $val)
-                                <option value="{{ $val }}" {{ $val == $prospect->reason? 'selected' : '' }}>
-                                    {{ ucfirst($val) }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <input type="text" name="reason" id="reason" class="form-control" placeholder="Reason for Closure"  required>
+                        
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -102,7 +102,7 @@ class ProspectCallResolvedRepository extends BaseRepository
                     'call_status' => 'callednotpicked',
                     'temperate' => 'cold',
                 ]);
-                $calldate = date_for_database($calllist['reminder_date']);
+                $calldate =$calllist['reminder_date'];
                 $rescheduledata = [
                     "call_id"=>$calllist['call_id'],
                     "prospect_id"=>$calllist['prospect_id'],
@@ -110,6 +110,27 @@ class ProspectCallResolvedRepository extends BaseRepository
                 ];
               
                 ProspectCallList::create($rescheduledata);
+            }
+        }
+        return $result;
+
+        throw new GeneralException('Error Creating Prospect');
+    }
+    public function notavailablecreate(array $data)
+    {
+        
+        $result = ProspectCallResolved::create($data);
+        if($result){
+            $id = $data['prospect_id'];
+            $prospect = Prospect::find($id);
+            if($prospect){
+                $prospect->update([
+                    'call_status' => 'callednotavailable',
+                    'temperate' => 'cold',
+                    'status'=>'lost',
+                    'reason'=>$data['unavailable_remarks']
+                ]);
+                
             }
         }
         return $result;
@@ -128,7 +149,7 @@ class ProspectCallResolvedRepository extends BaseRepository
                     'call_status' => 'calledrescheduled',
                     'temperate' => 'warm',
                 ]);
-                $calldate = date_for_database($calllist['reminder_date']);
+                $calldate = $calllist['reminder_date'];
                 $rescheduledata = [
                     "call_id"=>$calllist['call_id'],
                     "prospect_id"=>$calllist['prospect_id'],

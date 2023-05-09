@@ -26,7 +26,7 @@
         <div class="form-group row">
             <div class="col-sm-4 direct-prospects" hidden>
                 <div class=" h6">Direct Prospects Count</div>
-                <div class=" h6 prospect-count">0</div>
+                <div id="directprospectcount" class=" h6 prospect-count">0</div>
             </div>
         </div>
        

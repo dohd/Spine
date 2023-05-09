@@ -72,21 +72,29 @@ class MyTodayCallListTableController extends Controller
             // })
             ->addColumn('call_prospect', function ($prospectcalllist) {
 
-               
-                
                 $show = true;
                 $status =$prospectcalllist->prospect->call_status;
                 if($status=='called'){
                     $show = false;
                 }
-                
-                else{
-                    $calldate = $prospectcalllist->call_date;
-                    if($calldate == Carbon::today()->toDateString()){
-                        $show = true;
-                    }else{
-                        $show = false;
-                    }
+                else if($status=='notcalled'){
+                    $show = true;
+                }
+                else if($status=='callednotavailable'){
+                    $show = false;
+                }
+                else {
+                    $call_date = $prospectcalllist->call_date;
+
+                    $now = Carbon::now();
+
+                   $checkdate= $now->gt($call_date);
+                   if(!$checkdate){
+                    $show = true;
+                   }else{
+                    $show = false;
+                   }
+                   
                 }
                 return $show? '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcalllist->prospect_id . '" call-id="'.$prospectcalllist->call_id.'" data-toggle="tooltip"  title="Call" >
                 <i  class="fa fa-vcard"></i>
@@ -109,7 +117,11 @@ class MyTodayCallListTableController extends Controller
                 }
                 else if($status == 'calledrescheduled') {
                     $status = "Call Rescheduled";
-                }else{
+                }
+                else if($status == 'callednotavailable') {
+                    $status = "Called Not Available";
+                }
+                else{
                     $status = "Called";
                 }
                 return  $status;
@@ -119,7 +131,7 @@ class MyTodayCallListTableController extends Controller
                 $call_date = $prospectcalllist->call_date == null ? '-----':$prospectcalllist->call_date;
                
 
-                return dateFormat( $call_date);
+                return $call_date;
             })
             
             
