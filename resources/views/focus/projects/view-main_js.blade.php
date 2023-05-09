@@ -382,11 +382,15 @@
             buttons: ['csv', 'excel', 'print'],
         });
     }
-        
+    
+    ['accountLedger', 'supplier'].forEach(v => $('#'+v).select2({allowClear: true}));
+    ['expCategory', 'accountLedger', 'supplier'].forEach(v => $('#'+v).change(() =>  expenses(render=true)));
     // fetch expenses
-    function expenses() {
-        // if ($('#expItems tbody tr').length) return;        
-
+    function expenses(render=false) {
+        if (!render) {
+            if ($('#expItems tbody tr').length) return;   
+        } else $('#expItems').DataTable().destroy();
+            
         $('#expItems').dataTable({
             processing: true,
             responsive: true,
@@ -395,7 +399,28 @@
             ajax: {
                 url: "{{ route('biller.projects.get_expense') }}",
                 type: 'POST',
-                data: {project_id: "{{ $project->id }}"},
+                data: {
+                    project_id: "{{ $project->id }}",
+                    exp_category: $('#expCategory').val(),
+                    ledger_id: $('#accountLedger').val(),
+                    supplier_id: $('#supplier').val(),
+                },
+                dataSrc: ({data}) => {
+                    if (data.length) {
+                        const groupTotals = data[0]['group_totals'];
+                        $('#expTotals tbody td').each(function(i) {
+                            let row = $(this);
+                            switch (i) {
+                                case 0: row.text(accounting.formatNumber(groupTotals['inventory_stock'])); break;
+                                case 1: row.text(accounting.formatNumber(groupTotals['labour_service'])); break;
+                                case 2: row.text(accounting.formatNumber(groupTotals['dir_purchase_stock'])); break;
+                                case 3: row.text(accounting.formatNumber(groupTotals['dir_purchase_service'])); break;
+                                case 4: row.text(accounting.formatNumber(groupTotals['grand_total'])); break;
+                            }
+                        });
+                    } 
+                    return data;
+                },
             },
             columns: [
                 {data: 'DT_Row_Index', name: 'id'},

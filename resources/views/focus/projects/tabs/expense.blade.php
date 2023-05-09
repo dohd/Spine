@@ -3,11 +3,18 @@
         <div class="row mb-1">
             <div class="col-2">
                 <label for="category">Expense Category</label>                             
-                @php($categories=['Inventory Stock', 'Direct Purchase Stock', 'Direct Purchase Service', 'Purchase Order Stock'])
+                @php
+                    $categories=[
+                        'labour_service' => 'Labour Service', 
+                        'inventory_stock' => 'Inventory Stock', 
+                        'dir_purchase_stock' => 'Direct Purchase Stock', 
+                        'dir_purchase_service' => 'Direct Purchase Service',
+                    ];
+                @endphp
                 <select class="custom-select" id="expCategory">
                     <option value="">-- Select Expense --</option>
-                    @foreach ($categories as $value)
-                        <option value="{{ $value }}">{{ $value }}</option>
+                    @foreach ($categories as $key => $value)
+                        <option value="{{ $key }}">{{ $value }}</option>
                     @endforeach
                 </select>
             </div>
@@ -40,16 +47,18 @@
                     <th>Labour Service</th>
                     <th>Direct Purchase Stock</th>
                     <th>Direct Purchase Service</th>
-                    <th>Purchase Order Stock</th>
+                    {{-- <th>Purchase Order Stock</th> --}}
+                    <th>Expense Grand Total</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>1000</td>
-                    <td>1000</td>
-                    <td>1000</td>
-                    <td>1000</td>
-                    <td>1000</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    {{-- <td></td> --}}
+                    <td class="font-weight-bold"></td>
                 </tr>
             </tbody>
         </table>
@@ -68,17 +77,12 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Inventory Stock</td>
-                    <td>Front-freeze</td>
-                    <td>Product 1</td>
-                    <td>LOT</td>
-                    <td>1</td>
-                    <td>1,000</td>
-                    <td>1,000</td>
-                </tr>
-            </tbody>
+                {{-- <tr>
+                    <td colspan="100%" class="text-center text-success font-large-1">
+                        <i class="fa fa-spinner spinner"></i>
+                    </td>
+                </tr> --}}
+            </tbody>            
         </table>
     </div>
 </div>

@@ -44,7 +44,7 @@
             @foreach ($budget_items as $i => $item)
                 <tr>
                     <td>{{ $i+1 }}</td>
-                    <td>{{ $item->product_name }} {{ @$item->product? ' - ' . $item->product->code : ''}}</td>
+                    <td>{{ $item->product_name }} {{ $item->product? ' - {$item->product->code}' : ''}}</td>
                     <td>
                         <select name="unit[]" id="unit" class="custom-select unit">
                             <option value="{{ $item->unit }}">{{ $item->unit }}</option>
@@ -76,7 +76,7 @@
                         </select>
                     </td>
                     <td><input type="text" name="qty[]" id="qty" class="form-control qty"></td>
-                    <input type="hidden" name="budget_item_id[]" value="{{ $item->id }}">
+                    <input type="hidden" name="budget_item_id[]" value="{{ $item->id }}" class="bgt_item_id">
                     <input type="hidden" name="product_id[]" value="{{ $product_id }}">
                     <input type="hidden" name="qty_limit[]" value="{{ +$qty_limit }}" class="qty-limit">
                     <input type="hidden" name="stock_qty[]" value="{{ +$stock_qty }}" class="qty-stock">
@@ -109,10 +109,26 @@
     };
 
     const Form = {
+        issuedStock: @json(@$projectstock),
+        issuedStockItems: @json(@$projectstock->items),
+
         init() {
             $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
             $('#productsTbl').ready(this.tableReady);
             $('#productsTbl').on('keyup change', '.qty', this.tableEventChange);
+
+            if (this.issuedStock) {
+                const issuedStockItems = this.issuedStockItems;
+                const budgetItemIds = issuedStockItems.map(v => v.budget_item_id);
+                $('#productsTbl tbody tr').each(function() {
+                    const el = $(this);
+                    let budgetItemId = el.find('.bgt_item_id').val()*1;
+                    if (budgetItemIds.includes(id)) {
+                        
+                    } 
+                    else el.remove();
+                });
+            }
         },
 
         tableReady() {

@@ -19,7 +19,9 @@
 namespace App\Http\Controllers\Focus\project;
 
 use App\Http\Controllers\Controller;
+use App\Models\items\ProjectstockItem;
 use App\Models\items\PurchaseItem;
+use App\Models\project\BudgetSkillset;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\project\ProjectRepository;
 
@@ -49,29 +51,11 @@ class ExpensesTableController extends Controller
      */
     public function __invoke()
     {
-        // ['id', 'exp_category', 'supplier', 'product_name', 'uom', 'qty', 'rate', 'amount']
-        $indx = 0;
-        $dir_purchase_items = PurchaseItem::whereHas('project', fn($q) => $q->where('projects.id', request('project_id')))
-            ->with('purchase', 'account')
-            ->latest()->get();
-        $dir_purchases = collect();
-        foreach ($dir_purchase_items as $item) {
-            $indx++;
-            $data = (object) [
-                'id' => $indx,
-                'exp_category' => $item->type == 'Stock'? 'dir_purchase_stock' : ($item->type == 'Expense'? 'dir_purchase_service' : ''),
-                'exp_account' => @$item->account->holder,
-                'supplier' => @$item->purchase->suppliername ? $item->purchase->suppliername : ($item->purchase->supplier? $item->purchase->supplier->name : ''),
-                'product_name' => $item->description,
-                'uom' => $item->uom,
-                'qty' => $item->qty,
-                'rate' => $item->qty > 0? ($item->amount/$item->qty) : $item->amount,
-                'amount' => $item->amount,
-            ];
-            $dir_purchases->add($data);
-        }
-        
-        return Datatables::of($dir_purchases)
+        $core = $this->get_expenses();
+        $core = $this->request_filter($core);
+        $group_totals = $this->group_totals($core);
+
+        return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->editColumn('exp_category', function ($item) {
@@ -80,13 +64,144 @@ class ExpensesTableController extends Controller
                     case 'dir_purchase_stock': $exp_category = 'Direct Purchase Stock'; break;
                     case 'dir_purchase_service': $exp_category = 'Direct Purchase Service'; break;
                     case 'purchase_order_stock': $exp_category = 'Purchase Order Stock'; break;
-                    case 'inventory_stock': $exp_category = 'Purchase Order Stock'; break;
+                    case 'inventory_stock': $exp_category = 'Inventory Stock'; break;
                     case 'labour_service': $exp_category = 'Labour Service'; break;
                 }
-
-                if ($item->exp_account) return "{$exp_category}<br>(Account: {$item->exp_account})";
+                if ($item->ledger_account) 
+                    return "{$exp_category}<br>(Account: {$item->ledger_account})";
                 return $exp_category;
             })
+            ->addColumn('group_totals', function() use($group_totals) {
+                return $group_totals;
+            })
             ->make(true);
+    }
+
+    /**
+     * Apply Expense Filter
+     */
+    public function request_filter($expenses)
+    {
+        $params = request()->only(['exp_category', 'ledger_id', 'supplier_id']);
+        $params = array_filter($params);
+        if (!$params) return $expenses;
+
+        return $expenses->filter(function($item) use($params) {
+            $eval = 0;
+            foreach ($params as $key => $value) {
+                if ($item->$key == $value) $eval += 1; 
+            }
+            return count($params) == $eval;
+        });
+    }
+
+    /**
+     * Expense Group Totals
+     */
+    public function group_totals($expenses=[])
+    {
+        $group_totals = [];
+        foreach ($expenses as $expense) {
+            if (@$group_totals[$expense->exp_category]) 
+                $group_totals[$expense->exp_category] += $expense->amount*1;
+            else $group_totals[$expense->exp_category] = $expense->amount*1;
+        }
+        $group_totals['grand_total'] = collect(array_values($group_totals))->sum();
+
+        return $group_totals;
+    }
+
+    /**
+     * Collect Related Project Expenses
+     */
+    public function get_expenses()
+    {
+        $indx = 0;
+        $expenses = collect();
+        // direct purchase
+        $dir_purchase_items = PurchaseItem::whereHas('project', fn($q) => $q->where('projects.id', request('project_id')))
+            ->with('purchase', 'account')
+            ->latest()->get();
+        foreach ($dir_purchase_items as $item) {
+            $indx++;
+            $data = (object) [
+                'id' => $indx,
+                'exp_category' => $item->type == 'Stock'? 'dir_purchase_stock' : ($item->type == 'Expense'? 'dir_purchase_service' : ''),
+                'ledger_id' => @$item->account->id,
+                'ledger_account' => @$item->account->holder,
+                'supplier_id' => @$item->purchase->supplier->id,
+                'supplier' => @$item->purchase->suppliername ? $item->purchase->suppliername : ($item->purchase->supplier? $item->purchase->supplier->name : ''),
+                'product_name' => $item->description,
+                'uom' => $item->uom,
+                'qty' => $item->qty,
+                'rate' => $item->qty > 0? ($item->amount/$item->qty) : $item->amount,
+                'amount' => $item->amount,
+            ];
+            $expenses->add($data);
+        }
+
+        // inventory stock (issued)
+        $issued_items = ProjectstockItem::whereHas('project_stock', function ($q) {
+            $q->whereHas('quote', function ($q) {
+                $q->whereHas('project', fn($q) => $q->where('projects.id', request('project_id')));
+            });
+        })
+        ->latest()->get();
+        foreach ($issued_items as $item) {
+            $indx++;
+            $product_variation = @$item->product_variation;
+            $data = (object) [
+                'id' => $indx,
+                'exp_category' => 'inventory_stock',
+                'ledger_id' => '',
+                'ledger_account' => '',
+                'supplier_id' => '',
+                'supplier' => '',
+                'product_name' => @$product_variation->name,
+                'uom' => $item->unit,
+                'qty' => $item->qty,
+                'rate' => @$product_variation? $product_variation->purchase_price : 0,
+                'amount' => @$product_variation? $product_variation->purchase_price * $item->qty : 0,
+            ];
+            $expenses->add($data);
+        }
+
+        // labour service items
+        $budget_skillsets = BudgetSkillset::whereHas('budget', function ($q) {
+            $q->whereHas('quote', function ($q) {
+                $q->whereHas('project', fn($q) => $q->where('projects.id', request('project_id')));
+            });
+        }) 
+        ->latest()->get();
+        foreach ($budget_skillsets as $item) {
+            $indx++;
+            switch ($item->skill) {
+                case 'contract': $item->skill = 'contractors'; break;
+                case 'attachee': $item->skill = 'attachees'; break;
+                case 'casual': $item->skill = 'casuals'; break;
+            }
+            $data = (object) [
+                'id' => $indx,
+                'exp_category' => 'labour_service',
+                'ledger_id' => '',
+                'ledger_account' => '',
+                'supplier_id' => '',
+                'supplier' => '',
+                'product_name' => "{$item->no_technician} {$item->skill}",
+                'uom' => 'Hrs',
+                'qty' => $item->hours,
+                'rate' => $item->no_technician * $item->charge,
+                'amount' => $item->hours * $item->no_technician * $item->charge,
+            ];
+            $expenses->add($data);
+        }
+
+
+        // purchase order
+        // $po_purchase_items = PurchaseorderItem::whereHas('project', fn($q) => $q->where('projects.id', request('project_id')))
+        //     ->latest()->get();
+        // $po_purchases = collect();
+
+        return $expenses;
     }
 }

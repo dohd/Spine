@@ -64,6 +64,11 @@ trait QuoteRelationship
         return $this->hasOne(Budget::class);
     }
 
+    public function budget_skillsets()
+    {
+        return $this->hasManyThrough(BudgetSkillset::class, Budget::class, 'quote_id', 'budget_id', 'id', 'id');
+    }
+
     public function budgets()
     {
         return $this->hasMany(Budget::class);

@@ -14,12 +14,7 @@ trait ProjectstockItemRelationship
         return $this->belongsTo(Projectstock::class, 'project_stock_id');
     }
 
-    public function productvariation()
-    {
-        return $this->belongsTo(ProductVariation::class, 'product_id');
-    }
-
-    public function product()
+    public function product_variation()
     {
         return $this->belongsTo(ProductVariation::class, 'product_id');
     }
