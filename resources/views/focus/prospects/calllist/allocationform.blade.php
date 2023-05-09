@@ -221,7 +221,11 @@
                             status = 'Not Called';
                         }else if (v.prospect.call_status == 'callednotpicked'){
                             status = 'Called Not Picked';
-                        }else{
+                        }
+                    else if (v.prospect.call_status == 'calledrescheduled'){
+                            status = 'Call Rescheduled';
+                        }
+                        else{
                             status = 'Called';
                         }
                         row.find('.index').text(i + 1);

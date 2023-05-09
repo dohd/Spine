@@ -125,7 +125,7 @@
             showModal() {
                 $('#mytodaycalllist-table tbody').on('click', '#call', function(e) {
                     var id = $(this).attr('data-id');
-
+                    var call_id = $(this).attr('call-id');
                     //show modal
                     $('#callModal').modal('show');
 
@@ -134,6 +134,8 @@
                     $('#prospect_id').val(id);
                     $('#hidden_prospect').val(id);
                     $('#busyprospect_id').val(id);
+                    $('#call_id').val(call_id);
+                    $('#busycall_id').val(call_id);
 
                 });
             },
@@ -197,6 +199,9 @@
                     $('#prospect_id').val('');
                     $('#hidden_prospect').val('');
                     $('#busyprospect_id').val('');
+                    $('#busycall_id').val('');
+                    $('#call_id').val('');
+                   
                     
                 });
             },

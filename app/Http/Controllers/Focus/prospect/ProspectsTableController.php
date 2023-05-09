@@ -103,6 +103,9 @@ class ProspectsTableController extends Controller
                 else if ($status == 'callednotpicked'){
                     $status = "Called Not Picked";
                 }
+                else if($status == 'calledrescheduled') {
+                    $status = "Call Rescheduled";
+                }
                 else  {
                     $status = "Called";
                 }

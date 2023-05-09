@@ -6,7 +6,9 @@ use App\Exceptions\GeneralException;
 
 use App\Models\prospect_calllist\ProspectCallList;
 use App\Repositories\BaseRepository;
+use Carbon\Carbon;
 use DB;
+
 
 
 /**
@@ -31,7 +33,7 @@ class ProspectCallListRepository extends BaseRepository
         $q = $this->query()->when(request('id'), function ($q) {
             $q->where('call_id', request('id'));
         })
-        ->whereDate('call_date', date('Y-m-d'));
+        ->whereDate('call_date','=', Carbon::today()->toDateString());
         
         return $q->get();
     }

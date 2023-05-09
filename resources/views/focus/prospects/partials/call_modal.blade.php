@@ -45,7 +45,7 @@
             </div>
             <div id="div_picked_busy"  style="display:none" class="mx-2">
                 <h3>Picked But Busy</h3>
-                {{-- {{ Form::open(['route' => 'biller.prospectcallresolves.pickedbusy', 'method' => 'POST' ]) }} --}}
+                {{ Form::open(['route' => 'biller.prospectcallresolves.pickedbusy', 'method' => 'POST' ]) }}
                 @include("focus.prospects.calllist.picked_busy_form")
                 {{ Form::submit('Save Reschedule', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_reshedule']) }}
                 {!! Form::close() !!}

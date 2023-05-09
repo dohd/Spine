@@ -19,6 +19,7 @@
 namespace App\Http\Controllers\Focus\calllist;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\prospect_call_list\ProspectCallListRepository;
 use Request;
@@ -52,7 +53,7 @@ class MyTodayCallListTableController extends Controller
     {
        
         $core = $this->prospectcalllist->getForDataTable();
-        
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -70,14 +71,24 @@ class MyTodayCallListTableController extends Controller
             //     return $prospectcalllist->prospect->email == null ? '-----':$prospectcalllist->prospect->email;
             // })
             ->addColumn('call_prospect', function ($prospectcalllist) {
+
+               
+                
                 $show = true;
                 $status =$prospectcalllist->prospect->call_status;
-                if($status=='notcalled'){
-                    $show = true;
-                }else{
+                if($status=='called'){
                     $show = false;
                 }
-                return $show? '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcalllist->prospect_id . '" data-toggle="tooltip"  title="Call" >
+                
+                else{
+                    $calldate = $prospectcalllist->call_date;
+                    if($calldate == Carbon::today()->toDateString()){
+                        $show = true;
+                    }else{
+                        $show = false;
+                    }
+                }
+                return $show? '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcalllist->prospect_id . '" call-id="'.$prospectcalllist->call_id.'" data-toggle="tooltip"  title="Call" >
                 <i  class="fa fa-vcard"></i>
                          </a>':'<a"><i  class="fa fa-check-circle  fa-2x text-primary"></i></a>';
             })
@@ -96,7 +107,9 @@ class MyTodayCallListTableController extends Controller
                 else if ($status == 'callednotpicked'){
                     $status = "Called Not Picked";
                 }
-                else  {
+                else if($status == 'calledrescheduled') {
+                    $status = "Call Rescheduled";
+                }else{
                     $status = "Called";
                 }
                 return  $status;

@@ -5,6 +5,7 @@ namespace App\Repositories\Focus\prospectcallresolved;
 
 use App\Exceptions\GeneralException;
 use App\Models\prospect\Prospect;
+use App\Models\prospect_calllist\ProspectCallList;
 use App\Models\prospectcallresolved\ProspectCallResolved;
 use App\Repositories\BaseRepository;
 use DB;
@@ -89,7 +90,7 @@ class ProspectCallResolvedRepository extends BaseRepository
 
         throw new GeneralException('Error Creating Prospect');
     }
-    public function notpickedcreate(array $data)
+    public function notpickedcreate(array $data,array $calllist)
     {
         
         $result = ProspectCallResolved::create($data);
@@ -101,13 +102,21 @@ class ProspectCallResolvedRepository extends BaseRepository
                     'call_status' => 'callednotpicked',
                     'temperate' => 'cold',
                 ]);
+                $calldate = date_for_database($calllist['reminder_date']);
+                $rescheduledata = [
+                    "call_id"=>$calllist['call_id'],
+                    "prospect_id"=>$calllist['prospect_id'],
+                    "call_date"=>$calldate
+                ];
+              
+                ProspectCallList::create($rescheduledata);
             }
         }
         return $result;
 
         throw new GeneralException('Error Creating Prospect');
     }
-    public function pickedbusycreate(array $data)
+    public function pickedbusycreate(array $data,array $calllist)
     {
         
         $result = ProspectCallResolved::create($data);
@@ -119,6 +128,15 @@ class ProspectCallResolvedRepository extends BaseRepository
                     'call_status' => 'calledrescheduled',
                     'temperate' => 'warm',
                 ]);
+                $calldate = date_for_database($calllist['reminder_date']);
+                $rescheduledata = [
+                    "call_id"=>$calllist['call_id'],
+                    "prospect_id"=>$calllist['prospect_id'],
+                    "call_date"=>$calldate
+                ];
+            
+                ProspectCallList::create($rescheduledata);
+
             }
         }
         return $result;

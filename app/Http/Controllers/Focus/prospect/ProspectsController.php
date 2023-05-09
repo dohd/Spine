@@ -18,6 +18,7 @@
 
 namespace App\Http\Controllers\Focus\prospect;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
@@ -159,6 +160,7 @@ class ProspectsController extends Controller
     //  */
     public function show(Prospect $prospect)
     {
+        
         return new ViewResponse('focus.prospects.view', compact('prospect'));
     }
 
