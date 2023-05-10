@@ -1,5 +1,11 @@
 <div class="tab-pane" id="tab_data12" aria-labelledby="tab12" role="tabpanel">
     <div class="card-body">
+        @php
+            $total_estimate = 0;
+            $total_actual = 0;
+            $total_balance = 0;
+        @endphp
+
         <h5>1. Quotation / Proforma Invoice</h5>
         <div class="table-responsive">
             <table class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
@@ -7,12 +13,13 @@
                     <tr>
                         <th>Quote / PI</th>
                         <th>Quoted Amount</th>                    
-                        <th>Purchase Estimate</th>
-                        <th>Gross Profit (Quoted - Purchase)</th>
+                        <th>Cost Amount</th>
+                        <th>Gross Profit (Quoted - Cost)</th>
                         <th>% Gross Profit</th>
                     </tr>
                 </thead>
                 <tbody>
+                    
                     @foreach ($project->quotes as $quote)
                         @php
                             $estimated_amount = $quote->subtotal;
@@ -21,6 +28,10 @@
                                 $actual_amount += $item->estimate_qty * $item->buy_price;
                             }
                             $balance = $estimated_amount - $actual_amount;
+                            // aggregate
+                            $total_estimate += $estimated_amount;
+                            $total_actual += $actual_amount;
+                            $total_balance += $balance;
                         @endphp
                         <tr>
                             <td>{{ gen4tid($quote->bank_id? 'PI-' : 'QT-', $quote->tid) }}</td>
@@ -30,6 +41,13 @@
                             <td>{{ round(div_num($balance, $actual_amount) * 100) }} %</td>
                         </tr>
                     @endforeach
+                    <tr>
+                        <td><b>Totals</b></td>
+                        <td>{{ numberFormat($total_estimate) }}</td>
+                        <td>{{ numberFormat($total_actual) }}</td>
+                        <td>{{ numberFormat($total_balance) }}</td>
+                        <td>{{ round(div_num($total_balance, $total_actual) * 100) }} %</td>
+                    </tr>
                 </tbody>
             </table>
         </div>    
@@ -41,9 +59,9 @@
                 <thead>
                     <tr>
                         <th>Quote / PI (Budget)</th>
-                        <th>Projected Sale</th>                    
-                        <th>Budgeted Expense</th>
-                        <th>Gross Profit (Sale - Expense)</th>
+                        <th>Quoted Amount</th>                    
+                        <th>Cost Amount</th>
+                        <th>Gross Profit (Quoted - Cost)</th>
                         <th>% Gross Profit</th>
                     </tr>
                 </thead>
@@ -54,6 +72,10 @@
                             $estimated_amount = 0;
                             if ($quote->budget) $estimated_amount = $quote->budget->budget_total;
                             $balance = $actual_amount - $estimated_amount;
+                            // aggregate
+                            $total_actual += $actual_amount;
+                            $total_estimate += $estimated_amount;
+                            $total_balance += $balance;
                         @endphp
                         <tr>
                             <td>{{ gen4tid($quote->bank_id? 'PI-' : 'QT-', $quote->tid) }}</td>
@@ -63,6 +85,13 @@
                             <td>{{ round(div_num($balance, $estimated_amount) * 100) }} %</td>
                         </tr>
                     @endforeach
+                    <tr>
+                        <td><b>Totals</b></td>
+                        <td>{{ numberFormat($total_actual) }}</td>
+                        <td>{{ numberFormat($total_estimate) }}</td>
+                        <td>{{ numberFormat($total_balance) }}</td>
+                        <td>{{ round(div_num($total_balance, $total_estimate) * 100) }} %</td>
+                    </tr>
                 </tbody>
             </table>
         </div>   
@@ -74,9 +103,9 @@
                 <thead>
                     <tr>
                         <th>Quote / PI (Budget)</th>
-                        <th>Projected Sale</th>                    
-                        <th>Actual Expense</th>
-                        <th>Gross Profit (Sale - Expense)</th>
+                        <th>Quoted Amount</th>                    
+                        <th>Actual Cost</th>
+                        <th>Gross Profit (Quoted - Cost)</th>
                         <th>% Gross Profit</th>
                     </tr>
                 </thead>
@@ -86,6 +115,10 @@
                             $actual_amount = $quote->subtotal;
                             $expense_amount = $project->purchase_items->sum('amount') / $project->quotes->count();
                             $balance = $actual_amount - $expense_amount;
+                            // aggregate
+                            $total_actual += $actual_amount;
+                            $total_estimate += $expense_amount;
+                            $total_balance += $balance;
                         @endphp
                         <tr>
                             <td>{{ gen4tid($quote->bank_id? 'PI-' : 'QT-', $quote->tid) }}</td>
@@ -95,6 +128,13 @@
                             <td>{{ round(div_num($balance, $expense_amount) * 100) }} %</td>
                         </tr>
                     @endforeach
+                    <tr>
+                        <td><b>Totals</b></td>
+                        <td>{{ numberFormat($total_actual) }}</td>
+                        <td>{{ numberFormat($total_estimate) }}</td>
+                        <td>{{ numberFormat($total_balance) }}</td>
+                        <td>{{ round(div_num($total_balance, $total_estimate) * 100) }} %</td>
+                    </tr>
                 </tbody>
             </table>
         </div>   
@@ -106,10 +146,10 @@
                 <thead>
                     <tr>
                         <th>Quote / PI (Budget)</th>
-                        <th>Verified Sale</th>                    
-                        <th>Actual Expense</th>
-                        <th>Profit (Sale - Expense)</th>
-                        <th>% Profit</th>
+                        <th>Verified Amount</th>                    
+                        <th>Actual Cost</th>
+                        <th>Profit (Verified - Cost)</th>
+                        <th>% Gross Profit</th>
                     </tr>
                 </thead>
                 <tbody>
