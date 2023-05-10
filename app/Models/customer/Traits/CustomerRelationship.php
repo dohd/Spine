@@ -14,6 +14,10 @@ use App\Models\quote\Quote;
  */
 trait CustomerRelationship
 {
+    function projects() {
+        return $this->hasMany(Project::class);
+    }
+
     function quotes() {
         return $this->hasMany(Quote::class);
     }

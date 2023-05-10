@@ -33,6 +33,7 @@ use App\Http\Requests\Focus\project\ManageProjectRequest;
 use App\Http\Requests\Focus\project\CreateProjectRequest;
 use App\Http\Requests\Focus\project\UpdateProjectRequest;
 use App\Models\Access\User\User;
+use App\Models\customer\Customer;
 use App\Models\hrm\Hrm;
 use App\Models\misc\Misc;
 use App\Models\project\Budget;
@@ -74,6 +75,7 @@ class ProjectsController extends Controller
      */
     public function index(ManageProjectRequest $request)
     {
+        $customers = Customer::whereHas('projects')->get(['id', 'company']);
         $accounts = Account::where('account_type', 'Income')->get(['id', 'holder', 'number']);
         $last_tid = Project::where('ins', auth()->user()->ins)->max('tid');
 
@@ -84,9 +86,7 @@ class ProjectsController extends Controller
         $employees = Hrm::all();
         $project = new Project;
 
-        // return new ViewResponse('focus.projects.index', compact('accounts', 'last_tid'));
-
-        return new ViewResponse('focus.projects.index-main', compact('accounts', 'last_tid', 'project', 'mics', 'employees', 'statuses', 'tags'));
+        return new ViewResponse('focus.projects.index-main', compact('customers', 'accounts', 'last_tid', 'project', 'mics', 'employees', 'statuses', 'tags'));
     }
 
 
