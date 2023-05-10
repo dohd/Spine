@@ -77,7 +77,11 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
+<<<<<<< HEAD
                     ...['period_from', 'period_to', 'return_no', 'payment_mode', 'amount', 'ackn_date'].map(v => ({data: v, name: v})),
+=======
+                    ...['return_month', 'code', 'payment_mode', 'amount', 'date'].map(v => ({data: v, name: v})),
+>>>>>>> tax-prn-fix
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],

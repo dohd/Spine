@@ -1,6 +1,10 @@
 @extends ('core.layouts.app')
 
+<<<<<<< HEAD
 @section('title', 'Return Acknowledgement Management')
+=======
+@section('title', 'Tax PRN Management')
+>>>>>>> tax-prn-fix
 
 @section('content')
 <div class="content-wrapper">
