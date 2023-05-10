@@ -21,6 +21,7 @@ namespace App\Http\Controllers\Focus\project;
 use App\Http\Controllers\Controller;
 use App\Models\items\ProjectstockItem;
 use App\Models\items\PurchaseItem;
+use App\Models\items\VerifiedItem;
 use App\Models\project\BudgetSkillset;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\project\ProjectRepository;
@@ -70,6 +71,15 @@ class ExpensesTableController extends Controller
                 if ($item->ledger_account) 
                     return "{$exp_category}<br>(Account: {$item->ledger_account})";
                 return $exp_category;
+            })
+            ->editColumn('qty', function($item) {
+                return +$item->qty;
+            })
+            ->editColumn('rate', function($item) {
+                return numberFormat($item->rate);
+            })
+            ->editColumn('amount', function($item) {
+                return numberFormat($item->amount);
             })
             ->addColumn('group_totals', function() use($group_totals) {
                 return $group_totals;
@@ -121,7 +131,7 @@ class ExpensesTableController extends Controller
         // direct purchase
         $dir_purchase_items = PurchaseItem::whereHas('project', fn($q) => $q->where('projects.id', request('project_id')))
             ->with('purchase', 'account')
-            ->latest()->get();
+            ->get();
         foreach ($dir_purchase_items as $item) {
             $indx++;
             $data = (object) [
@@ -146,10 +156,10 @@ class ExpensesTableController extends Controller
                 $q->whereHas('project', fn($q) => $q->where('projects.id', request('project_id')));
             });
         })
-        ->latest()->get();
+        ->get();
         foreach ($issued_items as $item) {
             $indx++;
-            $product_variation = @$item->product_variation;
+            $product_variation = $item->product_variation;
             $data = (object) [
                 'id' => $indx,
                 'exp_category' => 'inventory_stock',
@@ -166,13 +176,14 @@ class ExpensesTableController extends Controller
             $expenses->add($data);
         }
 
-        // labour service items
+        // budgeted labour service items
         $budget_skillsets = BudgetSkillset::whereHas('budget', function ($q) {
             $q->whereHas('quote', function ($q) {
+                $q->where('verified', 'Yes');
                 $q->whereHas('project', fn($q) => $q->where('projects.id', request('project_id')));
             });
         }) 
-        ->latest()->get();
+        ->get();
         foreach ($budget_skillsets as $item) {
             $indx++;
             switch ($item->skill) {
@@ -196,6 +207,41 @@ class ExpensesTableController extends Controller
             $expenses->add($data);
         }
 
+        // quoted labour service items
+        $verified_labour_items = VerifiedItem::whereHas('product_variation', function($q) {
+            $q->whereHas('product', fn($q) => $q->where('stock_type', 'consumable'));
+        })
+        ->whereHas('quote', fn($q) => $q->where('verified', 'Yes'))
+        ->get();
+        foreach ($verified_labour_items as $item) {
+            $indx++;
+
+            $rate = 0;
+            $amount = 0;
+            $product_variation = $item->product_variation;
+            if ($product_variation) {
+                $product = $product_variation->product;
+                if ($product) {
+                    $rate = $product_variation->purchase_price*1;
+                    $amount = $item->product_qty * $rate * (1+$product->taxrate/100);
+                }
+            }
+
+            $data = (object) [
+                'id' => $indx,
+                'exp_category' => 'labour_service',
+                'ledger_id' => '',
+                'ledger_account' => '',
+                'supplier_id' => '',
+                'supplier' => '',
+                'product_name' => $item->product_name,
+                'uom' => $item->unit,
+                'qty' => $item->product_qty,
+                'rate' => $rate,
+                'amount' => $amount,
+            ];
+            $expenses->add($data);
+        }
 
         // purchase order
         // $po_purchase_items = PurchaseorderItem::whereHas('project', fn($q) => $q->where('projects.id', request('project_id')))

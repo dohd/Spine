@@ -2,31 +2,26 @@
 
 namespace App\Models\items;
 
-use App\Models\items\Traits\InvoiceItemRelationship;
+use App\Models\items\Traits\VerifiedItemRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class VerifiedItem extends Model
 {
-     use InvoiceItemRelationship {
-            // CustomfieldAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+    use VerifiedItemRelationship;
+
     protected $table = 'verified_items';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -55,9 +50,9 @@ class VerifiedItem extends Model
     }
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
 }
