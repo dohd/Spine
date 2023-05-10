@@ -5,10 +5,6 @@ namespace App\Repositories\Focus\tax_prn;
 use App\Exceptions\GeneralException;
 use App\Models\tax_prn\TaxPrn;
 use App\Repositories\BaseRepository;
-<<<<<<< HEAD
-=======
-use DateTime;
->>>>>>> tax-prn-fix
 use Illuminate\Validation\ValidationException;
 
 class TaxPrnRepository extends BaseRepository
