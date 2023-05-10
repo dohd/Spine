@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Edit | Tax PRN Management')
+@section('title', 'Edit | Return Acknowledgement Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Tax PRN Management</h4>
+            <h4 class="content-header-title">Return Acknowledgement Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">

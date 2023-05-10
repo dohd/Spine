@@ -1,27 +1,36 @@
 <div class="form-group row">
-    <div class="col-6">
-        <label for="period_from">Period From</label>
+    <div class="col-3">
+        <label for="period_from">Return Period From</label>
         {{ Form::text('period_from', null, ['class' => 'form-control datepicker', 'id' => 'period_from', 'required']) }}
     </div> 
-    <div class="col-6">
-        <label for="period_to">Period To</label>
+    <div class="col-3">
+        <label for="period_to">Return Period To</label>
         {{ Form::text('period_to', null, ['class' => 'form-control datepicker', 'id' => 'period_to', 'required']) }}
     </div> 
+    <div class="col-2">
+        <label for="ackn_date">Acknowledgement Date</label>
+        {{ Form::text('ackn_date', null, ['class' => 'form-control datepicker', 'id' => 'ackn_date', 'required']) }}
+    </div> 
+    <div class="col-2">
+        <label for="return_no">Return Number</label>
+        {{ Form::text('return_no', null, ['class' => 'form-control', 'id' => 'return_no', 'required']) }}
+    </div> 
+    <div class="col-2">
+        <label for="search_code">Search Code</label>
+        {{ Form::text('search_code', null, ['class' => 'form-control', 'id' => 'search_code', 'required']) }}
+    </div> 
 </div>
 
 <div class="form-group row">
-    <div class="col-6">
-        <label for="date">Acknowledgement Date</label>
-        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date', 'required']) }}
+    <div class="col-3">
+        <label for="prn_no">PRN Number</label>
+        {{ Form::text('prn_no', null, ['class' => 'form-control', 'id' => 'prn_no', 'required']) }}
     </div> 
-    <div class="col-6">
-        <label for="prn_code">Return Number</label>
-        {{ Form::text('code', null, ['class' => 'form-control', 'id' => 'prn_code', 'required']) }}
+    <div class="col-3">
+        <label for="date">PRN Date</label>
+        {{ Form::text('prn_date', null, ['class' => 'form-control datepicker', 'id' => 'prn_date', 'required']) }}
     </div> 
-</div>
-
-<div class="form-group row">
-    <div class="col-6">
+    <div class="col-2">
         <label for="mode">Payment Mode</label>
         <select name="payment_mode" id="payment_mode" class="custom-select">
             @foreach (['eft', 'rtgs','cash', 'mpesa', 'cheque'] as $val)
@@ -29,12 +38,15 @@
             @endforeach
         </select>
     </div> 
-    <div class="col-6">
+    <div class="col-2">
+        <label for="prn_code">Payment Reference</label>
+        {{ Form::text('payment_ref', null, ['class' => 'form-control', 'id' => 'ref', 'required']) }}
+    </div> 
+    <div class="col-2">
         <label for="amount">Payment Amount</label>
         {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required']) }}
     </div> 
 </div>
-
 <div class="form-group row">
     <div class="col-12">
         <label for="note">Remark</label>
@@ -68,9 +80,9 @@
 
             if (this.taxPrn) {
                 const prn = this.taxPrn;
-                $('#date').datepicker('setDate', new Date(prn.date));
-                $('#period_from').datepicker('setDate', new Date(prn.period_from));
-                $('#period_to').datepicker('setDate', new Date(prn.period_to));
+                ['period_from', 'period_to', 'ackn_date', 'prn_date'].forEach(v => {
+                    $('#'+v).datepicker('setDate', new Date(prn[v]));
+                });
                 $('#payment_mode').val(prn.payment_mode);
                 $('#amount').val(accounting.formatNumber(prn.amount*1));
             }

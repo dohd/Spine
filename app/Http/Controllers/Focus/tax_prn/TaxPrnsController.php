@@ -58,11 +58,7 @@ class TaxPrnsController extends Controller
      */
     public function create()
     {
-        $month = date('m')-1? date('m')-1 : 12;
-        $year = date('m')-1? date('Y') : date('Y')-1;
-        $prev_month = strlen($month) == 1? "0{$month}-{$year}" : "{$month}-{$year}";
-
-        return view('focus.tax_prns.create', compact('prev_month'));
+        return view('focus.tax_prns.create');
     }
 
     /**
@@ -74,7 +70,7 @@ class TaxPrnsController extends Controller
     {
         try {
             $this->repository->create($request->except('_token'));
-        } catch (\Throwable $th) { dd($th);
+        } catch (\Throwable $th) {
             if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Tax PRN', $th);
         }

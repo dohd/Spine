@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Tax PRN Management')
+@section('title', 'Return Acknowledgement Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Tax PRN Management</h4>
+            <h4 class="content-header-title">Return Acknowledgement Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
@@ -22,12 +22,14 @@
                     <table class="table table-bordered table-sm">
                         @php
                             $details = [
-                                'Return Number' => $tax_prn->code,
-                                'Period From' => dateFormat($tax_prn->period_from),
-                                'Period To' => dateFormat($tax_prn->period_to),
+                                'Return Number' => $tax_prn->return_no,
+                                'Return Period' => dateFormat($tax_prn->period_from) . ' || ' . dateFormat($tax_prn->period_to),
+                                'Acknowledgement Date' => date('d-M-Y', strtotime($tax_prn->ackn_date)),
                                 'Payment Mode' => ucfirst($tax_prn->payment_mode),
-                                'Amount' => numberFormat($tax_prn->amount),
-                                'Acknowledgement Date' => dateFormat($tax_prn->date),
+                                'Payment Reference' => $tax_prn->payment_ref,
+                                'Payment Amount' => numberFormat($tax_prn->amount),
+                                'PRN Number' => $tax_prn->prn_no,
+                                'PRN Date' => dateFormat($tax_prn->prn_date),
                                 'Remark' => $tax_prn->note,
                             ];
                         @endphp

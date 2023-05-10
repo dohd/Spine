@@ -37,14 +37,15 @@ class TaxPrnRepository extends BaseRepository
     public function create(array $input)
     {
         // dd($input);
-        foreach ($input as $key => $val) {
-            if ($key == 'amount') $input[$key] = numberClean($val);
-            if (in_array($key, ['date', 'period_from', 'period_to'])) 
-                $input[$key] = date_for_database($val);
-        }
-        if (substr($input['period_from'], 0, 6) != substr($input['period_to'], 0, 6))
+        if (substr($input['period_from'], 3) != substr($input['period_to'], 3))
             throw ValidationException::withMessages(['Return period must be of the same month']);
 
+        foreach ($input as $key => $val) {
+            if ($key == 'amount') $input[$key] = numberClean($val);
+            if (in_array($key, ['ackn_date', 'prn_date', 'period_from', 'period_to'])) 
+                $input[$key] = date_for_database($val);
+        }
+    
         $result = TaxPrn::create($input);
         if ($result) return $result;
             
@@ -62,13 +63,14 @@ class TaxPrnRepository extends BaseRepository
     public function update(TaxPrn $tax_prn, array $input)
     {
         // dd($input);
+        if (substr($input['period_from'], 3) != substr($input['period_to'], 3))
+            throw ValidationException::withMessages(['Return period must be of the same month']);
+
         foreach ($input as $key => $val) {
             if ($key == 'amount') $input[$key] = numberClean($val);
-            if (in_array($key, ['date', 'period_from', 'period_to'])) 
+            if (in_array($key, ['ackn_date', 'prn_date', 'period_from', 'period_to'])) 
                 $input[$key] = date_for_database($val);
         }
-        if (substr($input['period_from'], 0, 6) != substr($input['period_to'], 0, 6))
-            throw ValidationException::withMessages(['Return period must be of the same month']);
 
         if ($tax_prn->update($input)) return $tax_prn;
 
