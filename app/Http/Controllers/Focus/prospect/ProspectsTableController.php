@@ -127,6 +127,11 @@ class ProspectsTableController extends Controller
 
                 return $status;
             })
+            ->addColumn('reason', function ($prospect) {
+                $reason = $prospect->reason == null ? '-----': $prospect->reason;
+
+                return $reason;
+            })
            
             ->addColumn('actions', function ($prospect) {
                 return $prospect->action_buttons;

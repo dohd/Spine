@@ -10,6 +10,9 @@ use App\Models\prospect\Prospect;
 trait ProspectCallListRelationship
 {
     function prospect(){
-return $this->belongsTo(Prospect::class,'prospect_id');
+    return $this->belongsTo(Prospect::class,'prospect_id');
+    }
+    function prospect_status(){
+        return $this->belongsTo(Prospect::class,'prospect_id')->where('is_called',0);
     }
 }

@@ -53,7 +53,7 @@ class MyTodayCallListTableController extends Controller
     {
        
         $core = $this->prospectcalllist->getForDataTable();
-
+        
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
@@ -67,35 +67,17 @@ class MyTodayCallListTableController extends Controller
             ->addColumn('industry', function ($prospectcalllist) {
                 return $prospectcalllist->prospect->industry == null ? '-----' : $prospectcalllist->prospect->industry;
             })
-            // ->addColumn('email', function ($prospectcalllist) {
-            //     return $prospectcalllist->prospect->email == null ? '-----':$prospectcalllist->prospect->email;
-            // })
             ->addColumn('call_prospect', function ($prospectcalllist) {
 
                 $show = true;
-                $status =$prospectcalllist->prospect->call_status;
-                if($status=='called'){
-                    $show = false;
-                }
-                else if($status=='notcalled'){
+                $status =$prospectcalllist->prospect->is_called;
+                if($status == 0){
                     $show = true;
-                }
-                else if($status=='callednotavailable'){
+                }else{
                     $show = false;
                 }
-                else {
-                    $call_date = $prospectcalllist->call_date;
-
-                    $now = Carbon::now();
-
-                   $checkdate= $now->gt($call_date);
-                   if(!$checkdate){
-                    $show = true;
-                   }else{
-                    $show = false;
-                   }
-                   
-                }
+                
+               
                 return $show? '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcalllist->prospect_id . '" call-id="'.$prospectcalllist->call_id.'" data-toggle="tooltip"  title="Call" >
                 <i  class="fa fa-vcard"></i>
                          </a>':'<a"><i  class="fa fa-check-circle  fa-2x text-primary"></i></a>';

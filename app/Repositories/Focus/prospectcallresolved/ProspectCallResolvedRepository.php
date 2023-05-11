@@ -82,6 +82,7 @@ class ProspectCallResolvedRepository extends BaseRepository
             if($prospect){
                 $prospect->update([
                     'call_status' => 'called',
+                    'is_called' => 1,
                     'temperate' => $temperate,
                 ]);
             }
@@ -100,16 +101,19 @@ class ProspectCallResolvedRepository extends BaseRepository
             if($prospect){
                 $prospect->update([
                     'call_status' => 'callednotpicked',
-                    'temperate' => 'cold',
+                    'temperate' => 'warm',
+                    'is_called' => 1,
                 ]);
-                $calldate =$calllist['reminder_date'];
-                $rescheduledata = [
-                    "call_id"=>$calllist['call_id'],
-                    "prospect_id"=>$calllist['prospect_id'],
-                    "call_date"=>$calldate
-                ];
+                // $calldate =$calllist['reminder_date'];
+                // $rescheduledata = [
+                //     "call_id"=>$calllist['call_id'],
+                //     "prospect_id"=>$calllist['prospect_id'],
+                //     "call_date"=>$calldate
+                // ];
               
-                ProspectCallList::create($rescheduledata);
+                // ProspectCallList::create($rescheduledata);
+
+                
             }
         }
         return $result;
@@ -126,6 +130,7 @@ class ProspectCallResolvedRepository extends BaseRepository
             if($prospect){
                 $prospect->update([
                     'call_status' => 'callednotavailable',
+                    'is_called' => 1,
                     'temperate' => 'cold',
                     'status'=>'lost',
                     'reason'=>$data['unavailable_remarks']
@@ -147,16 +152,17 @@ class ProspectCallResolvedRepository extends BaseRepository
             if($prospect){
                 $prospect->update([
                     'call_status' => 'calledrescheduled',
+                    'is_called' => 1,
                     'temperate' => 'warm',
                 ]);
                 $calldate = $calllist['reminder_date'];
-                $rescheduledata = [
-                    "call_id"=>$calllist['call_id'],
-                    "prospect_id"=>$calllist['prospect_id'],
-                    "call_date"=>$calldate
-                ];
+                // $rescheduledata = [
+                //     "call_id"=>$calllist['call_id'],
+                //     "prospect_id"=>$calllist['prospect_id'],
+                //     "call_date"=>$calldate
+                // ];
             
-                ProspectCallList::create($rescheduledata);
+                // ProspectCallList::create($rescheduledata);
 
             }
         }

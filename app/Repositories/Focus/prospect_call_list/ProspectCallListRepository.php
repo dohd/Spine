@@ -33,8 +33,8 @@ class ProspectCallListRepository extends BaseRepository
         $q = $this->query()->when(request('id'), function ($q) {
             $q->where('call_id', request('id'));
         })
-        ->whereDate('call_date','=', Carbon::today()->toDateString());
-        
+        ->whereHas('prospect_status')
+        ->whereDate('call_date','=', Carbon::today()->toDateString());       
         return $q->get();
     }
 

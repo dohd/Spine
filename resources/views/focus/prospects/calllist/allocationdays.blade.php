@@ -14,12 +14,12 @@
             </div>
         </div>
     </div>
-
+  
     <div class="content-body">
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::open(['route' => 'biller.attendances.store', 'method' => 'POST']) }}
+                    {{ Form::open() }}
                         @include('focus.prospects.calllist.allocationform')
                     {{ Form::close() }}
                 </div>

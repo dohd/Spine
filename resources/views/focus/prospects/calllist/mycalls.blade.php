@@ -21,16 +21,16 @@
             <div class="row">
                 <div class="col-12">
 
-                   
+
                     <div class="card">
                         <div class="card-body">
                             <input type="hidden" name="list_id" id="list_id" value="">
                             <div class="col-4">
-                                <label for="client">All CallLists</label>                             
-                                <select name="calllist_id" class="custom-select" id="calllist_id" data-placeholder="Choose CallList">
+                                <label for="client">All CallLists</label>
+                                <select name="calllist_id" class="custom-select" id="calllist_id"
+                                    data-placeholder="Choose CallList">
                                     <option value="0">Choose Call List</option>
                                     @foreach ($calllists as $calllist)
-                                        
                                         <option value="{{ $calllist->id }}">{{ $calllist->title }}</option>
                                     @endforeach
                                 </select>
@@ -111,16 +111,16 @@
                 this.draw_data();
                 this.showModal();
                 this.dismissModal();
-                
+                this.disableSubmitButtons();
                 $('#callModal').find('.erp-status').change(this.erpChange);
                 $('#callModal').find('.challenges-status').change(this.challengesChange);
                 $('#callModal').find('.demo-status').change(this.demoChange);
                 $('#callModal').find('.call-status').change(this.callTypeChange);
                 // $('#demo_date').datepicker(config.date).datepicker('setDate', new Date());
-               
+
                 $('#calllist_id').change(this.callListChange);
-                
-            },  
+
+            },
 
             showModal() {
                 $('#mytodaycalllist-table tbody').on('click', '#call', function(e) {
@@ -130,37 +130,62 @@
                     $('#callModal').modal('show');
 
 
-
+                    //picked
                     $('#prospect_id').val(id);
-                    $('#hidden_prospect').val(id);
-                    $('#notavailable_prospect').val(id);
-                    $('#busyprospect_id').val(id);
-                    $('#call_id').val(call_id);
+
+                    //notpicked
+                    $('#notpicked_call_id').val(call_id);
+                    $('#notpicked_prospect_id').val(id);
+
+                    //pickedbusy
                     $('#busycall_id').val(call_id);
+                    $('#busyprospect_id').val(id);
+
+                    //notavailable
+                    $('#notavailable_prospect').val(id);
+                    
 
                 });
             },
-          
-            callListChange(){
-            Index.callListId = $(this).val();
-            $('#mytodaycalllist-table').DataTable().destroy();
-            return Index.draw_data();
+
+            disableSubmitButtons() {
+                $("#picked").submit(function() {
+                    $("#save_call_chat").attr("disabled", true);
+                    return true;
+                });
+                $("#pickedbusy").submit(function() {
+                    $("#save_reshedule").attr("disabled", true);
+                    return true;
+                });
+                $("#notpicked").submit(function() {
+                    $("#save_reminder").attr("disabled", true);
+                    return true;
+                });
+                $("#notavailable").submit(function() {
+                    $("#notavailable").attr("disabled", true);
+                    return true;
+                });
             },
-            erpChange(){
+            callListChange() {
+                Index.callListId = $(this).val();
+                $('#mytodaycalllist-table').DataTable().destroy();
+                return Index.draw_data();
+            },
+            erpChange() {
                 if ($(this).val() == 0) {
                     $("#erp_div").css("display", "none");
                 } else {
                     $("#erp_div").css("display", "block");
                 }
             },
-            challengesChange(){
+            challengesChange() {
                 if ($(this).val() == "0") {
                     $("#erpchallenges").css("display", "none");
                 } else {
                     $("#erpchallenges").css("display", "block");
                 }
             },
-            demoChange(){
+            demoChange() {
                 if ($(this).val() == "0") {
                     $("#demo").css("display", "none");
                     $("#notes").val('');
@@ -170,31 +195,28 @@
                 }
             },
             callTypeChange() {
-               
+
                 if ($(this).val() == 'picked') {
                     $("#div_picked").css("display", "block");
                     $("#div_notpicked").css("display", "none");
                     $("#div_picked_busy").css("display", "none");
                     $("#div_notpicked_available").css("display", "none");
-                }
-                else if($(this).val() == 'pickedbusy'){
+                } else if ($(this).val() == 'pickedbusy') {
                     $("#div_picked_busy").css("display", "block");
                     $("#div_picked").css("display", "none");
                     $("#div_notpicked").css("display", "none");
                     $("#div_notpicked_available").css("display", "none");
-                }
-                 else if($(this).val() == 'notpicked') {
+                } else if ($(this).val() == 'notpicked') {
                     $("#div_notpicked").css("display", "block");
                     $("#div_picked").css("display", "none");
                     $("#div_picked_busy").css("display", "none");
                     $("#div_notpicked_available").css("display", "none");
-                }
-                 else if($(this).val() == 'notavailable') {
+                } else if ($(this).val() == 'notavailable') {
                     $("#div_notpicked_available").css("display", "block");
                     $("#div_notpicked").css("display", "none");
                     $("#div_picked").css("display", "none");
                     $("#div_picked_busy").css("display", "none");
-                    
+
                 }
 
 
@@ -205,23 +227,25 @@
                 $('#callModal').on('hidden.bs.modal', function() {
                     $("#notes").val('');
                     $("#demo_date").datepicker(config.date).datepicker('setDate', new Date());
-             
+
                     $("#current_erp_challenges").val('');
                     $('#prospect_id').val('');
-                    $('#hidden_prospect').val('');
+                    $('#notpicked_prospect_id').val('');
                     $('#busyprospect_id').val('');
                     $('#notavailable_prospect').val('');
                     $('#busycall_id').val('');
                     $('#call_id').val('');
-                   
-                    
+                    $("#save_call_chat").attr("disabled", false);
+                    $("#save_reshedule").attr("disabled", false);
+                    $("#save_reminder").attr("disabled", false);
+                    $("#notavailable").attr("disabled", false);
                 });
             },
 
 
 
             draw_data() {
-                
+
                 $('#mytodaycalllist-table').dataTable({
                     stateSave: true,
                     processing: true,
@@ -235,7 +259,7 @@
                         data: {
                             id: this.callListId
                         }
-                       
+
                     },
                     columns: [{
                             data: 'DT_Row_Index',

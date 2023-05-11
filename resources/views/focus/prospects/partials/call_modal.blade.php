@@ -8,6 +8,38 @@
                 </button>
             </div>
 
+            <div class="mx-2">
+                <table id="prospect_details_table" class="table p-1 table-striped table-bordered remarkTable">
+                    <thead >
+                        <tr>
+                            <td>COMPANY</td>
+                            <td>PROSPECT NAME</td>
+                            <td>PHONE</td>
+                            <td>INDUSTRY</td>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                        
+                        {{-- @if($prosect)
+                            <tr>
+                            
+                                <td> {{ $prospect->company }} </td>
+                                <td> {{ $prospect->contact_person }} </td>
+                                <td> {{ $prospect->phone }} </td>
+                                <td> {{ $prospect->industry }} </td>
+                                
+                            </tr>
+                       
+                    @else
+                        <tr>
+                            <td  style="text-align: center; vertical-align: middle;" colspan="5"> No record found </td>
+                        </tr>
+                    @endif --}}
+                       
+                    </tbody>
+                </table>  
+            </div>
 
             <div class="mx-2 mt-3">
                 <div class="form-group row">
@@ -43,14 +75,14 @@
 
             <div id="div_picked" class="mx-2">
                 <h3>Follow up questions</h3>
-                {{ Form::open(['route' => 'biller.prospectcallresolves.store', 'method' => 'POST' ]) }}
+                {{ Form::open(['route' => 'biller.prospectcallresolves.store', 'method' => 'POST', 'id'=>'picked' ]) }}
                 @include("focus.prospects.calllist.picked_form")
                 {{ Form::submit('Save Call Chat', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_call_chat']) }}
                 {!! Form::close() !!}
             </div>
             <div id="div_picked_busy"  style="display:none" class="mx-2">
                 <h3>Picked But Busy</h3>
-                {{ Form::open(['route' => 'biller.prospectcallresolves.pickedbusy', 'method' => 'POST' ]) }}
+                {{ Form::open(['route' => 'biller.prospectcallresolves.pickedbusy', 'method' => 'POST', 'id'=>'pickedbusy' ]) }}
                 @include("focus.prospects.calllist.picked_busy_form")
                 {{ Form::submit('Save Reschedule', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_reshedule']) }}
                 {!! Form::close() !!}
@@ -59,7 +91,7 @@
 
             <div id="div_notpicked" style="display:none" class="mx-2">
                 <h3>Busy Not Picking</h3>
-                {{ Form::open(['route' => 'biller.prospectcallresolves.notpicked', 'method' => 'POST' ]) }}
+                {{ Form::open(['route' => 'biller.prospectcallresolves.notpicked', 'method' => 'POST', 'id'=>'notpicked' ]) }}
                 @include("focus.prospects.calllist.notpicked_form")
                 {{ Form::submit('Record As Not Picked', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_reminder']) }}
                 {{ Form::close() }}
@@ -68,7 +100,7 @@
             </div>
             <div id="div_notpicked_available" style="display:none" class="mx-2">
                 <h3>Not Available</h3>
-                {{ Form::open(['route' => 'biller.prospectcallresolves.notavailable', 'method' => 'POST' ]) }}
+                {{ Form::open(['route' => 'biller.prospectcallresolves.notavailable', 'method' => 'POST', 'id'=>'notavailable' ]) }}
                 @include("focus.prospects.calllist.picked_notavailable_form")
                 {{ Form::submit('Record As Not Available', ['class' => ' my-2 btn btn-md btn-primary', 'id' => 'save_remark']) }}
                 {{ Form::close() }}

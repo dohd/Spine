@@ -2,7 +2,7 @@
     <div class="col-2">
         <label for="month">Monthly Calendar Days</label>
 
-       
+
         <input type="hidden" id="callId" name="callId" value={{ $id }}>
         <select name="month" id="month" class="custom-select">
             <option value="">Choose Month</option>
@@ -37,7 +37,7 @@
 <div class="form-group row">
     <div class="col-12">
         <div class="table-responsive">
-            <table id="prospectTbl" class="table tfr my_stripe_single text-center">
+            <table id="prospectTbl" class="table tfr my_stripe_single">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -49,6 +49,8 @@
                         <th>Phone</th>
                         <th>Region</th>
                         <th>Call Status</th>
+                        <th>Call Date</th>
+                        <th>Remove</th>
 
 
                     </tr>
@@ -66,6 +68,7 @@
                         <td class="region"></td>
                         <td class="status"></td>
                         <td class="calldate"></td>
+                        <td class="remove"></td>
                     </tr>
                 </tbody>
             </table>
@@ -79,7 +82,11 @@
         <a href="{{ route('biller.calllists.index') }}" class="btn btn-danger block">Cancel</a>
     </div>
     <div class="col-1 ml-1">
-        {{ Form::submit(@$prospect ? 'Update' : 'Generate', ['class' => 'form-control btn btn-primary text-white hidden']) }}
+        <button class="form-control btn btn-primary text-white" id="add_prospect">
+           Add Prospect
+        </button>
+
+       
     </div>
 </div>
 
@@ -107,24 +114,35 @@
                 Index.defaultProspectRows = $('#prospectTbl tbody').html().replace(/class="hidden"/g, '');
 
                 $('#weeksTbl').on('click', '.day-btn', this.dayBtnClick);
+                $('#add_prospect').on('click', this.addProspectBtnClick);
 
                 $('#month').change(this.monthChange).trigger('change');
-                $('#day').focus(() => alert('Please, click on day from calendar!'));
+               
 
                 Index.rowTemplate = $('#prospectTbl tbody').html();
                 $('#prospectTbl tbody tr:first').remove();
+
+                
             },
 
-
+            addProspectBtnClick() {
+                    alert('clicked');
+                },
 
             dayBtnClick() {
+              
+                if($('#month').val() === ''){
+                    alert('Select month first');
+                    return;
+                }
                 const day = $(this).text();
                 const monthLabel = $('#month option:selected').text().replace(/\s+/g, '');
                 $('.calendar-title').text(`Prospects for ${monthLabel}, day ${day}`);
+
                 $('#day').val(day);
                 $('input:submit').removeClass('hidden');
                 Index.loadCallListProspects();
-                //Index.callCount();
+
             },
 
             monthChange() {
@@ -150,7 +168,7 @@
 
                 const rows = Index.loadWeekRow(weeks);
                 $('#weeksTbl tbody').html('').append(rows);
-                
+
             },
 
             // callCount() {
@@ -164,14 +182,14 @@
             //         id
             //     }, data => {
             //         console.log(data.length);
-                   
+
 
             //         $('#weeksTbl').find('td').each(function() {
             //             const td = $(this);
             //             let count = 0;
             //             const monthDay = td.find('.day-btn').text();
             //             data.forEach((v,i) => {
-                           
+
             //                 if (v.prospect.call_status == 0) count++;
             //             });
             //             if (count) td.find('.call-ratio').text(`${count}/${data.length}`);
@@ -217,29 +235,44 @@
                         $('#prospectTbl tbody').append(Index.rowTemplate);
                         row = $('#prospectTbl tbody tr:last');
                         status = '';
-                        if(v.prospect.call_status == 'notcalled'){
+                        if (v.prospect.call_status == 'notcalled') {
                             status = 'Not Called';
-                        }else if (v.prospect.call_status == 'callednotpicked'){
+                        } else if (v.prospect.call_status == 'callednotpicked') {
                             status = 'Called Not Picked';
-                        }
-                    else if (v.prospect.call_status == 'calledrescheduled'){
+                        } else if (v.prospect.call_status == 'calledrescheduled') {
                             status = 'Call Rescheduled';
-                        }
-                        else{
+                        } else {
                             status = 'Called';
                         }
                         row.find('.index').text(i + 1);
-                        row.find('.title').text(v.prospect.title);
-                        row.find('.company').text(v.prospect.company);
-                        row.find('.industry').text(v.prospect.industry);
-                        row.find('.name').text(v.prospect.contact_person);
-                        row.find('.email').text(v.prospect.email);
-                        row.find('.phone').text(v.prospect.phone);
-                        row.find('.region').text(v.prospect.region);
+                        row.find('.title').text(v.prospect.title == null ? '---' : v.prospect.title);
+                        row.find('.company').text(v.prospect.company == null ? '---' : v.prospect
+                            .company);
+                        row.find('.industry').text(v.prospect.industry == null ? '---' : v.prospect
+                            .industry);
+                        row.find('.name').text(v.prospect.contact_person == null ? '---' : v.prospect
+                            .contact_person);
+                        row.find('.email').text(v.prospect.email == null ? '---' : v.prospect.email);
+                        row.find('.phone').text(v.prospect.phone == null ? '---' : v.prospect.phone);
+                        row.find('.region').text(v.prospect.region == null ? '---' : v.prospect.region);
                         row.find('.status').text(status);
+                        row.find('.calldate').text(v.call_date == null ? '---' : v.call_date);
+                        var calldate = new Date(v.call_date);
+                        var today = new Date();
+
+                        if (calldate.getTime() > today.getTime()) {
+                            row.find('.remove').append(v.prospect.id == null ? '---' :
+                                '<a><i  class="fa fa-trash  fa-2x text-danger "></i></a>'
+                            );
+                        } else {
+                            row.find('.remove').text(v.prospect.id == null ? '---' : '---');
+                        }
+
                     });
                 })
             },
+
+
         };
 
         $(() => Index.init());
