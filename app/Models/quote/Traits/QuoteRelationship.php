@@ -30,7 +30,6 @@ trait QuoteRelationship
 {
     public function project()
     {
-        // return $this->hasOne(Project::class, 'main_quote_id');
         return $this->hasOneThrough(Project::class, ProjectQuote::class, 'quote_id', 'id', 'id', 'project_id')->withoutGlobalScopes();
     }
 

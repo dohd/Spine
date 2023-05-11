@@ -1,11 +1,5 @@
 <div class="tab-pane" id="tab_data12" aria-labelledby="tab12" role="tabpanel">
     <div class="card-body">
-        @php
-            $total_estimate = 0;
-            $total_actual = 0;
-            $total_balance = 0;
-        @endphp
-
         <h5>1. Quotation / Proforma Invoice</h5>
         <div class="table-responsive">
             <table class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
@@ -19,7 +13,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    
+                    @php
+                        // aggregate
+                        $total_actual = 0;
+                        $total_estimate = 0;
+                        $total_balance = 0;
+                    @endphp
                     @foreach ($project->quotes as $quote)
                         @php
                             $estimated_amount = $quote->subtotal;
@@ -66,6 +65,12 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        // aggregate
+                        $total_actual = 0;
+                        $total_estimate = 0;
+                        $total_balance = 0;
+                    @endphp
                     @foreach ($project->quotes as $quote)
                         @php
                             $actual_amount = $quote->subtotal;
@@ -110,10 +115,17 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        // aggregate
+                        $total_actual = 0;
+                        $total_estimate = 0;
+                        $total_balance = 0;
+                    @endphp
                     @foreach ($project->quotes as $quote)
                         @php
                             $actual_amount = $quote->subtotal;
                             $expense_amount = $project->purchase_items->sum('amount') / $project->quotes->count();
+                            if ($quote->projectstock) $expense_amount += $quote->projectstock->sum('total');
                             $balance = $actual_amount - $expense_amount;
                             // aggregate
                             $total_actual += $actual_amount;
@@ -153,11 +165,22 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        // aggregate
+                        $total_actual = 0;
+                        $total_estimate = 0;
+                        $total_balance = 0;
+                    @endphp
                     @foreach ($project->quotes as $quote)
                         @php
                             $actual_amount = $quote->verified_amount;
                             $expense_amount = $project->purchase_items->sum('amount') / $project->quotes->count();
+                            if ($quote->projectstock) $expense_amount += $quote->projectstock->sum('total');
                             $balance = $actual_amount - $expense_amount;
+                            // aggregate
+                            $total_actual += $actual_amount;
+                            $total_estimate += $expense_amount;
+                            $total_balance += $balance;
                         @endphp
                         <tr>
                             <td>{{ gen4tid($quote->bank_id? 'PI-' : 'QT-', $quote->tid) }}</td>
@@ -167,6 +190,13 @@
                             <td>{{ round(div_num($balance, $expense_amount) * 100) }} %</td>
                         </tr>
                     @endforeach
+                    <tr>
+                        <td><b>Totals</b></td>
+                        <td>{{ numberFormat($total_actual) }}</td>
+                        <td>{{ numberFormat($total_estimate) }}</td>
+                        <td>{{ numberFormat($total_balance) }}</td>
+                        <td>{{ round(div_num($total_balance, $total_estimate) * 100) }} %</td>
+                    </tr>
                 </tbody>
             </table>
         </div>   
