@@ -242,7 +242,9 @@ class QuotesController extends Controller
      */
     public function get_verify_quote(ManageQuoteRequest $request)
     {
-        return new ViewResponse('focus.quotesverify.index');
+        $customers = Customer::get(['id', 'company']);
+        
+        return new ViewResponse('focus.quotesverify.index', compact('customers'));
     }
 
     /**

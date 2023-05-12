@@ -42,22 +42,27 @@ class AccountRepository extends BaseRepository
   {
     $q = Project::query();
 
+    // date filter
     $q->when(request('start_date') && request('end_date'), function ($q) {
       $q->whereBetween('start_date', array_map(fn($v) => date_for_database($v), [request('start_date'), request('end_date')]));
     });
 
-    $q->when(request('status') == 'active', function ($q) {
-      $q->whereHas('quotes', function ($q) {
-        $q->whereHas('budget')->where('verified', 'No');
-      });
-    })->when(request('status') == 'complete', function ($q) {
-      $q->whereHas('quotes', function ($q) {
-        $q->whereHas('budget')->where('verified', 'Yes');
-      });
-    });
+    // status filter 
+    switch (request('status')) {
+      case 'active':
+        $q->whereHas('quotes', fn($q) =>  $q->whereHas('budget')->where('verified', 'No'));
+        break;
+      case 'complete':
+        $q->whereHas('quotes', fn($q) =>  $q->whereHas('budget')->where('verified', 'Yes'));
+        break;
+    }
 
-    $q->with(['customer_project', 'quotes', 'purchase_items']);
-    return $q->get();
+    if (request('customer_id')) {
+      $q->where('customer_id', request('customer_id'));
+      if (request('branch_id')) $q->where('branch_id', request('branch_id'));
+    } else $q->limit(500);
+
+    return $q->with(['customer_project', 'quotes', 'purchase_items'])->get();
   }
 
 
@@ -111,8 +116,20 @@ class AccountRepository extends BaseRepository
         $deposit = Deposit::create($data);
 
         // transaction
-        double_entry($tid, $result->id, $seco_account->id, $opening_balance, $entry_type, $pri_tr->id,
-          'company', $deposit->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
+        double_entry(
+          $tid,
+          $result->id,
+          $seco_account->id,
+          $opening_balance,
+          $entry_type,
+          $pri_tr->id,
+          'company',
+          $deposit->user_id,
+          $date,
+          $result->opening_balance_date,
+          $pri_tr->code,
+          $note,
+          $result->ins
         );
       } else {
         // debit asset Account and credit Retained Earning
@@ -140,8 +157,20 @@ class AccountRepository extends BaseRepository
           $entry_type = 'cr';
 
         // transaction
-        double_entry($tid, $result->id, $seco_account->id,  $opening_balance,  $entry_type, $pri_tr->id,
-          'company', $journal->user_id, $date, $result->opening_balance_date, $pri_tr->code, $note, $result->ins
+        double_entry(
+          $tid,
+          $result->id,
+          $seco_account->id,
+          $opening_balance,
+          $entry_type,
+          $pri_tr->id,
+          'company',
+          $journal->user_id,
+          $date,
+          $result->opening_balance_date,
+          $pri_tr->code,
+          $note,
+          $result->ins
         );
       }
     }
@@ -207,8 +236,20 @@ class AccountRepository extends BaseRepository
         $deposit->fill($data);
         $deposit->save();
 
-        double_entry($tid,$account->id, $seco_account->id,$opening_balance,$entry_type,$pri_tr->id,
-          'employee',$deposit->user_id, $date,$account->opening_balance_date,$pri_tr->code,$note,$account->ins
+        double_entry(
+          $tid,
+          $account->id,
+          $seco_account->id,
+          $opening_balance,
+          $entry_type,
+          $pri_tr->id,
+          'employee',
+          $deposit->user_id,
+          $date,
+          $account->opening_balance_date,
+          $pri_tr->code,
+          $note,
+          $account->ins
         );
       } else {
         // remove previous transactions
@@ -252,8 +293,20 @@ class AccountRepository extends BaseRepository
         if (in_array($account_type->system, ['other_current_liability', 'long_term_liability', 'equity']))
           $entry_type = 'cr';
 
-        double_entry($tid,$account->id,$seco_account->id,$opening_balance,$entry_type,$pri_tr->id,
-          'company', $journal->user_id,$date,$account->opening_balance_date,$pri_tr->code,$note,$account->ins
+        double_entry(
+          $tid,
+          $account->id,
+          $seco_account->id,
+          $opening_balance,
+          $entry_type,
+          $pri_tr->id,
+          'company',
+          $journal->user_id,
+          $date,
+          $account->opening_balance_date,
+          $pri_tr->code,
+          $note,
+          $account->ins
         );
       }
     }

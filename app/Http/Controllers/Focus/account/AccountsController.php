@@ -28,6 +28,7 @@ use App\Http\Responses\Focus\account\EditResponse;
 use App\Repositories\Focus\account\AccountRepository;
 use App\Http\Requests\Focus\account\ManageAccountRequest;
 use App\Http\Requests\Focus\account\StoreAccountRequest;
+use App\Models\customer\Customer;
 use App\Models\transaction\Transaction;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\ValidationException;
@@ -354,7 +355,9 @@ class AccountsController extends Controller
      */
     public function project_gross_profit()
     {
-        return new ViewResponse('focus.accounts.project_gross_profit');
+        $customers = Customer::whereHas('projects')->get(['id', 'company']);
+
+        return new ViewResponse('focus.accounts.project_gross_profit', compact('customers'));
     }
 
     /**

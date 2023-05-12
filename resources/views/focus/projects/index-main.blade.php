@@ -95,6 +95,18 @@
 <script>
     const config = {
         ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
+        branchSelect: {
+            allowClear: true,
+            ajax: {
+                url: "{{ route('biller.branches.select') }}",
+                dataType: 'json',
+                type: 'POST',
+                data: ({term}) => ({search: term, customer_id: $("#customerFilter").val()}),
+                processResults: (data) => {
+                    return { results: data.map(v => ({text: v.name, id: v.id})) };
+                },
+            }
+        }
     };
 
     // form submit callback
@@ -110,10 +122,9 @@
 
         init() {
             $.ajaxSetup(config.ajax);
-            $('.select2').select2({allowClear: true});
             $("#submit-data_project").on("click", Index.onSubmitProject);
-            $("#customerFilter").on("change", Index.onChangeCustomer);
-            $("#branchFilter").on("change", Index.onChangeBranch);
+            $("#customerFilter").select2({allowClear: true}).change(Index.onChangeCustomer);
+            $("#branchFilter").select2(config.branchSelect).change(Index.onChangeBranch);
             $('#AddProjectModal').on('shown.bs.modal', Index.onShownModal);
             Index.drawDataTable();
         },
@@ -129,11 +140,6 @@
 
         onChangeCustomer() {
             $("#branchFilter option:not(:eq(0))").remove();
-            $.post("{{ route('biller.branches.select') }}", {customer_id: this.value}, data => {
-                data.forEach(v => {
-                    $("#branchFilter").append(`<option value=${v.id}>${v.name}</option>`);
-                });
-            });
             $('#projectsTbl').DataTable().destroy();
             Index.drawDataTable();
         },
