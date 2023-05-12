@@ -80,8 +80,12 @@ class TermsController extends Controller
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $this->repository->create($input);
+        try {
+            //Create the model using repository create method
+            $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Terms', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.terms.index'), ['flash_success' => trans('alerts.backend.terms.created')]);
     }
@@ -109,8 +113,12 @@ class TermsController extends Controller
     {
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($term, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($term, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Terms', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.terms.index'), ['flash_success' => trans('alerts.backend.terms.updated')]);
     }
@@ -124,8 +132,12 @@ class TermsController extends Controller
      */
     public function destroy(Term $term, ManageCompanyRequest $request)
     {
-        //Calling the delete method on repository
-        $result = $this->repository->delete($term);
+        try {
+            //Calling the delete method on repository
+            $result = $this->repository->delete($term);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Terms', $th);
+        }
         //returning with successfull message
         if ($result) return new RedirectResponse(route('biller.terms.index'), ['flash_success' => trans('alerts.backend.terms.deleted')]);
         return new RedirectResponse(route('biller.terms.index'), ['flash_error' => trans('exceptions.backend.terms.delete_error')]);

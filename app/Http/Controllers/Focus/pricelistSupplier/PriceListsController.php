@@ -65,7 +65,11 @@ class PriceListsController extends Controller
      */
     public function store(Request $request)
     {
-        $this->repository->create($request->except('_token'));
+        try {
+            $this->repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler($th, 'Error creating Supplier Pricelist');
+        }
 
         return new RedirectResponse(route('biller.pricelistsSupplier.index'), ['flash_success' => 'Pricelist Item Created Successfully']);
     }
@@ -105,9 +109,12 @@ class PriceListsController extends Controller
      */
     public function update($id, Request $request)
     {
-        
-        $supplier_product = SupplierProduct::find($id);
-        $this->repository->update($supplier_product, $request->except('_token'));
+        try {
+            $supplier_product = SupplierProduct::find($id);
+            $this->repository->update($supplier_product, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler($th, 'Error Updating Supplier Pricelist');
+        }
 
         return new RedirectResponse(route('biller.pricelistsSupplier.index'), ['flash_success' => 'Pricelist Item Updated Successfully']);
     }
@@ -120,12 +127,16 @@ class PriceListsController extends Controller
      */
     public function destroy($id, Request $request)
     {
-        if ($id == 0) {
-            $request->validate(['supplier_id' => 'required']);
-            $this->repository->mass_delete($request->except('_token'));
-        } else {
-            $supplier_product = SupplierProduct::find($id);
-            $this->repository->delete($supplier_product);    
+        try {
+            if ($id == 0) {
+                $request->validate(['supplier_id' => 'required']);
+                $this->repository->mass_delete($request->except('_token'));
+            } else {
+                $supplier_product = SupplierProduct::find($id);
+                $this->repository->delete($supplier_product);    
+            }
+        } catch (\Throwable $th) {
+            return errorHandler($th, 'Error Deleting Supplier Pricelist');
         }
             
         return new RedirectResponse(route('biller.pricelistsSupplier.index'), ['flash_success' => 'Pricelist Item Deleted Successfully']);

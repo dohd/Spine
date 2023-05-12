@@ -70,7 +70,11 @@ class ReconciliationsController extends Controller
         $data['user_id'] = auth()->user()->id;
         $data_items = modify_array($data_items);
 
-        $this->repository->create(compact('data', 'data_items'));
+        try {
+            $this->repository->create(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Bank reconcilliaton', $th);
+        }
 
         return new RedirectResponse(route('biller.reconciliations.index'), ['flash_success' => 'Bank reconcilliaton successfully completed']);
     }
@@ -94,7 +98,11 @@ class ReconciliationsController extends Controller
      */
     public function destroy(Reconciliation $reconciliation)
     {
-        $this->repository->delete($reconciliation);
+        try {
+            $this->repository->delete($reconciliation);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Reconciliation', $th);
+        }
 
         return new RedirectResponse(route('biller.reconciliations.index'), ['flash_sucess' => 'Reconciliation deleted successfully']);
     }

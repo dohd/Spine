@@ -99,7 +99,11 @@ class AccountsController extends Controller
         $input = $request->except(['_token']);
         $input['ins'] =  auth()->user()->ins;
 
-        $this->repository->create($input);
+        try {
+            $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Accounts!', $th);
+        }
 
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.created')]);
     }
@@ -131,7 +135,11 @@ class AccountsController extends Controller
         ]);
         $input = $request->except(['_token', 'ins']);
 
-        $this->repository->update($account, $input);
+        try {
+            $this->repository->update($account, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Accounts!', $th);
+        }
 
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.updated')]);
     }
@@ -145,7 +153,12 @@ class AccountsController extends Controller
      */
     public function destroy(Account $account)
     {
-        $this->repository->delete($account);
+        
+        try {
+            $this->repository->delete($account);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Accounts!', $th);
+        }
 
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.deleted')]);
     }

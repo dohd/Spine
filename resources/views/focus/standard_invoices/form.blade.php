@@ -49,7 +49,7 @@
             <option value="">-- Select Bank --</option>
             @foreach ($banks as $bank)
                 <option value="{{ $bank->id }}" {{ $bank->id == @$invoice->bank_id ? 'selected' : '' }}>
-                    {{ $bank->bank }} - {{ $bank->note }}
+                    {{ $bank->bank }} {{ $bank->note? "- {$bank->note}" : '' }}
                 </option>
             @endforeach
         </select>                               

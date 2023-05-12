@@ -94,7 +94,11 @@ class CustomersController extends Controller
         if (!$request->password || strlen($request->password) < 6) 
             $input['password'] = rand(111111, 999999);
 
-        $result = $this->repository->create($input);
+        try {
+            $result = $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Customers', $th);
+        }
 
         if (!$result) return redirect()->back();
         // case ajax request
@@ -131,7 +135,11 @@ class CustomersController extends Controller
         // extract input fields
         $input = $request->except(['_token', 'ins', 'balance']);
         
-        $this->repository->update($customer, $input);
+        try {
+            $this->repository->update($customer, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Customers', $th);
+        }
 
         return new RedirectResponse(route('biller.customers.show', $customer), ['flash_success' => trans('alerts.backend.customers.updated')]);
     }
@@ -145,7 +153,11 @@ class CustomersController extends Controller
      */
     public function destroy(Customer $customer)
     {
-        $this->repository->delete($customer);
+        try {
+            $this->repository->delete($customer);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Customers', $th);
+        }
 
         return new RedirectResponse(route('biller.customers.index'), ['flash_success' => trans('alerts.backend.customers.deleted')]);
     }

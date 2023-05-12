@@ -117,7 +117,7 @@ class QuoteRepository extends BaseRepository
      */
     public function getForVerifyDataTable()
     {
-        $q = $this->query()->where(function($q) { 
+        $q = $this->query()->where('status', '!=', 'cancelled')->where(function($q) { 
             $q->whereHas('budget')->orWhere('quote_type', 'standard'); 
         });
 

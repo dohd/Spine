@@ -94,7 +94,11 @@ class ProjectsController extends Controller
 
         $data['ins'] = auth()->user()->ins;
 
-        $this->repository->create(compact('data', 'data_items'));
+        try {
+            $this->repository->create(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Project', $th); 
+        }
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.created')]);
     }
@@ -125,7 +129,11 @@ class ProjectsController extends Controller
         $data = $request->except(['_token', 'main_quote', 'other_quote']);
         $data_items = array_merge([$request->main_quote], ...array_values($request->only('other_quote')));
 
-        $this->repository->update($project, compact('data', 'data_items'));
+        try {
+            $this->repository->update($project, compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Project', $th);
+        }
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.updated')]);
     }
@@ -139,7 +147,11 @@ class ProjectsController extends Controller
      */
     public function destroy(Project $project)
     {
-        $this->repository->delete($project);
+        try {
+            $this->repository->delete($project);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Project', $th);
+         }
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => trans('alerts.backend.projects.deleted')]);
     }
@@ -213,7 +225,11 @@ class ProjectsController extends Controller
         $data_items = modify_array($data_items);
         $data_skillset = modify_array($data_skillset);
 
-        $this->repository->create_budget(compact('data', 'data_items', 'data_skillset'));
+        try {
+            $this->repository->create_budget(compact('data', 'data_items', 'data_skillset'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Project Budget', $th);
+        }
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Budget created successfully']);
     }
@@ -236,7 +252,11 @@ class ProjectsController extends Controller
         $data_items = modify_array($data_items);
         $data_skillset = modify_array($data_skillset);
 
-        $this->repository->update_budget($budget, compact('data', 'data_items', 'data_skillset'));
+        try {
+            $this->repository->update_budget($budget, compact('data', 'data_items', 'data_skillset'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Project Budget', $th);
+        }
 
         return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Project Budget updated successfully']);
     }
@@ -246,7 +266,11 @@ class ProjectsController extends Controller
      */
     public function update_budget_tool(Request $request, Budget $budget)
     {
-        $budget->update(['tool' => $request->tool, 'tool_reqxn' => $request->tool_reqxn]);
+        try {
+            $budget->update(['tool' => $request->tool, 'tool_reqxn' => $request->tool_reqxn]);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Project Budget Tool', $th);
+        }
 
         return redirect()->back();
     }

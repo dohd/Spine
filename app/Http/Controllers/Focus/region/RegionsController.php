@@ -93,7 +93,11 @@ class RegionsController extends Controller
         $input['ins'] = auth()->user()->ins;
         //Create the model using repository create method
          
-        $id = $this->repository->create($input);
+        try {
+            $id = $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Region', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.regions.index'), ['flash_success' => 'Region  Successfully Created' . ' <a href="' . route('biller.regions.show', [$id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.regions.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.regions.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
     }
@@ -135,8 +139,12 @@ class RegionsController extends Controller
         ]);
         //Input received from the request
         $input = $request->only(['name', 'rel_id', 'location', 'contact_name', 'contact_phone']);
-        //Update the model using repository update method
-        $this->repository->update($branch, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($branch, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Branch', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.branches.index'), ['flash_success' => 'Branch  Successfully Updated'  . ' <a href="' . route('biller.branches.show', [$branch->id]) . '" class="ml-5 btn btn-outline-light round btn-min-width bg-blue"><span class="fa fa-eye" aria-hidden="true"></span> ' . trans('general.view') . '  </a> &nbsp; &nbsp;' . ' <a href="' . route('biller.branches.create') . '" class="btn btn-outline-light round btn-min-width bg-purple"><span class="fa fa-plus-circle" aria-hidden="true"></span> ' . trans('general.create') . '  </a>&nbsp; &nbsp;' . ' <a href="' . route('biller.branches.index') . '" class="btn btn-outline-blue round btn-min-width bg-amber"><span class="fa fa-list blue" aria-hidden="true"></span> <span class="blue">' . trans('general.list') . '</span> </a>']);
 
@@ -153,8 +161,12 @@ class RegionsController extends Controller
     {
 
         //dd($branch);
-        //Calling the delete method on repository
-        $this->repository->delete($branch);
+        try {
+            //Calling the delete method on repository
+            $this->repository->delete($branch);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Branch', $th);
+        }
         //returning with successfull message
         return new RedirectResponse(route('biller.regions.index'), ['flash_success' => 'Branch Successfully Deleted']);
     }

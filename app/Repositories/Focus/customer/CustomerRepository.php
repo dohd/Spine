@@ -260,17 +260,18 @@ class CustomerRepository extends BaseRepository
 
         if (isset($input['picture'])) $input['picture'] = $this->uploadPicture($input['picture']);
             
-        $email_exists = Customer::where('email', $input['email'])->count();
+        $is_company = Customer::where('company', $input['company'])->count();
+        if ($is_company) throw ValidationException::withMessages(['Company already exists!']);
+
+        $email_exists = Customer::where('email', $input['email'])->whereNotNull('email')->count();
         if ($email_exists) throw ValidationException::withMessages(['Duplicate email!']);
 
-        if (isset($input['taxid'])) {
-            $taxid_exists = Customer::where('taxid', $input['taxid'])->count();
-            if ($taxid_exists) throw ValidationException::withMessages(['Duplicate tax pin!']);
+        $taxid_exists = Customer::where('taxid', $input['taxid'])->whereNotNull('taxid')->count();
+        if ($taxid_exists) throw ValidationException::withMessages(['Duplicate tax pin!']);
 
-            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['taxid']])->count();
-            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
-        }
-
+        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['taxid']])->whereNotNull('taxid')->count();
+        if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
+        
         $input['open_balance'] = numberClean($input['open_balance']);
         $input['open_balance_date'] = date_for_database($input['open_balance_date']);  
         
@@ -368,18 +369,17 @@ class CustomerRepository extends BaseRepository
         }
         if (empty($input['password'])) unset($input['password']);
 
-        if (isset($input['email'])) {
-            $email_exists = Customer::where('id', '!=', $customer->id)->where('email', $input['email'])->count();
-            if ($email_exists) throw ValidationException::withMessages(['Email already in use!']);
-        }
+        $is_company = Customer::where('id', '!=', $customer->id)->where('company', $input['company'])->count();
+        if ($is_company) throw ValidationException::withMessages(['Company already exists!']);
 
-        if (isset($input['taxid'])) {
-            $taxid_exists = Customer::where('id', '!=', $customer->id)->where('taxid', $input['taxid'])->count();
-            if ($taxid_exists) throw ValidationException::withMessages(['Tax pin already in use!']);
+        $email_exists = Customer::where('id', '!=', $customer->id)->where('email', $input['email'])->whereNotNull('email')->count();
+        if ($email_exists) throw ValidationException::withMessages(['Email already in use!']);
+        
+        $taxid_exists = Customer::where('id', '!=', $customer->id)->where('taxid', $input['taxid'])->whereNotNull('taxid')->count();
+        if ($taxid_exists) throw ValidationException::withMessages(['Tax pin already in use!']);
 
-            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['taxid']])->count();
-            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
-        }
+        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['taxid']])->whereNotNull('taxid')->count();
+        if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
 
         $input = array_replace($input, [
             'open_balance' => numberClean($input['open_balance']),

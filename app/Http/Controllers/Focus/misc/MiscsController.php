@@ -97,8 +97,12 @@ class MiscsController extends Controller
         $input['ins'] = auth()->user()->ins;
 
         if ($input['section'] == 'tag') $input['section'] = 1; else   $input['section'] = 2;
-        //Create the model using repository create method
-        $this->repository->create($input);
+        try {
+            //Create the model using repository create method
+            $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Miscs', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.miscs.index') . '?module=' . $request->section, ['flash_success' => trans('alerts.backend.miscs.created')]);
     }
@@ -126,8 +130,12 @@ class MiscsController extends Controller
     {
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($misc, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($misc, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Miscs', $th);
+        }
         //return with successfull message
         if ($misc->section == 2) return new RedirectResponse(route('biller.miscs.index') . '?module=task', ['flash_success' => trans('alerts.backend.miscs.updated')]);
         return new RedirectResponse(route('biller.miscs.index'), ['flash_success' => trans('alerts.backend.miscs.updated')]);
@@ -142,8 +150,12 @@ class MiscsController extends Controller
      */
     public function destroy(Misc $misc, EditMiscRequest $request)
     {
-        //Calling the delete method on repository
-        $this->repository->delete($misc);
+        try {
+            //Calling the delete method on repository
+            $this->repository->delete($misc);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Miscs', $th);
+        }
         //returning with successfull message
         return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.miscs.deleted')));
 

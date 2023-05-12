@@ -67,7 +67,11 @@ class LeaveCategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $this->repository->create($request->except('_token'));
+        try {
+            $this->repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Leave Category', $th);
+        }
 
         return new RedirectResponse(route('biller.leave_category.index'), ['flash_success' => 'Leave Category Created Successfully']);
     }
@@ -92,7 +96,11 @@ class LeaveCategoryController extends Controller
      */
     public function update(Request $request, LeaveCategory $leave_category)
     {
-        $this->repository->update($leave_category, $request->except('_token'));
+        try {
+            $this->repository->update($leave_category, $request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Leave Category', $th);
+        }
 
         return new RedirectResponse(route('biller.leave_category.index'), ['flash_success' => 'Leave Category Updated Successfully']);
     }
@@ -105,7 +113,11 @@ class LeaveCategoryController extends Controller
      */
     public function destroy(LeaveCategory $leave_category)
     {
-        $this->repository->delete($leave_category);
+        try {
+            $this->repository->delete($leave_category);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Leave Category', $th);
+        }
 
         return new RedirectResponse(route('biller.leave_category.index'), ['flash_success' => 'Leave Category Deleted Successfully']);
     }

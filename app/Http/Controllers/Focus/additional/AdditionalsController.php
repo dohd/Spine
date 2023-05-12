@@ -81,8 +81,12 @@ class AdditionalsController extends Controller
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $this->repository->create($input);
+        try {
+            //Create the model using repository create method
+            $this->repository->create($input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Addittionals!',$th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.additionals.index'), ['flash_success' => trans('alerts.backend.additionals.created')]);
     }
@@ -110,8 +114,13 @@ class AdditionalsController extends Controller
     {
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($additional, $input);
+        
+        try {
+            //Update the model using repository update method
+            $this->repository->update($additional, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Additionals!', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.additionals.index'), ['flash_success' => trans('alerts.backend.additionals.updated')]);
     }
@@ -125,8 +134,13 @@ class AdditionalsController extends Controller
      */
     public function destroy(Additional $additional, ManageCompanyRequest $request)
     {
-        //Calling the delete method on repository
-        $this->repository->delete($additional);
+        
+        try {
+            //Calling the delete method on repository
+            $this->repository->delete($additional);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Additionals!', $th);
+        }
         //returning with successfull message
         return new RedirectResponse(route('biller.additionals.index'), ['flash_success' => trans('alerts.backend.additionals.deleted')]);
     }

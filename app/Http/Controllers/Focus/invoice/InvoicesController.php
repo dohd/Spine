@@ -136,7 +136,11 @@ class InvoicesController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        $this->repository->delete($invoice);
+        try {
+            $this->repository->delete($invoice);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Invoice', $th);
+        }
         
         return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => trans('alerts.backend.invoices.deleted')]);
     }
@@ -240,7 +244,11 @@ class InvoicesController extends Controller
         $bill['ins'] = auth()->user()->ins;
         $bill_items = modify_array($bill_items);
 
-        $result = $this->repository->create_project_invoice(compact('bill', 'bill_items'));
+        try {
+            $result = $this->repository->create_project_invoice(compact('bill', 'bill_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Project Invoice', $th);
+        }
 
         // print preview
         $valid_token = token_validator('', 'i' . $result->id . $result->tid, true);
@@ -290,7 +298,11 @@ class InvoicesController extends Controller
 
         $bill_items = modify_array($bill_items);
 
-        $result = $this->repository->update_project_invoice($invoice, compact('bill', 'bill_items'));
+        try {
+            $result = $this->repository->update_project_invoice($invoice, compact('bill', 'bill_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Project Invoice', $th);
+        }
 
         // print preview
         $valid_token = token_validator('', 'i' . $result->id . $result->tid, true);
@@ -343,7 +355,11 @@ class InvoicesController extends Controller
         $data_items = modify_array($data_items);
         $data_items = array_filter($data_items, fn($v) => $v['paid'] > 0);
 
-        $result = $this->inv_payment_repository->create(compact('data', 'data_items'));
+        try {
+            $result = $this->inv_payment_repository->create(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Payment', $th);
+        }
 
         return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment updated successfully']);
     }
@@ -385,7 +401,11 @@ class InvoicesController extends Controller
         $data['user_id'] = auth()->user()->id;
         $data_items = modify_array($data_items);
 
-        $result = $this->inv_payment_repository->update($payment, compact('data', 'data_items'));
+        try {
+            $result = $this->inv_payment_repository->update($payment, compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Payment', $th);
+        }
 
         return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment updated successfully']);
     }    
@@ -396,7 +416,11 @@ class InvoicesController extends Controller
     public function delete_payment($id)
     {
         $payment = PaidInvoice::find($id);
-        $this->inv_payment_repository->delete($payment);
+        try {
+            $this->inv_payment_repository->delete($payment);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Payment', $th);
+        }
 
         return new RedirectResponse(route('biller.invoices.index_payment'), ['flash_success' => 'Payment deleted successfully']);
     }
@@ -476,7 +500,11 @@ class InvoicesController extends Controller
         }
         
         // dd($request->all());
-        $result = $this->pos_repository->create($request->except('_token'));
+        try {
+            $result = $this->pos_repository->create($request->except('_token'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating POS Transaction', $th);
+        }
         
         return response()->json([
             'status' => 'Success', 

@@ -101,7 +101,11 @@ class StandardInvoicesController extends Controller
             'product_id'
         ]);
 
-        $this->repository->create(compact('data', 'data_items'));
+        try {
+            $this->repository->create(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Invoice', $th);
+        }
 
         return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Invoice successfully created']);
     }
@@ -135,8 +139,12 @@ class StandardInvoicesController extends Controller
         ]);
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($invoice, $input);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($invoice, $input);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Standard Invoice', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Invoice successfully updated']);
     }
@@ -150,10 +158,14 @@ class StandardInvoicesController extends Controller
      */
     public function destroy(Invoice $invoice, Request  $request)
     {
-        dd($invoice);
+        //dd($invoice);
 
-        //Calling the delete method on repository
-        $this->repository->delete($invoice);
+        try {
+            //Calling the delete method on repository
+            $this->repository->delete($invoice);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Standard Invoice', $th);
+        }
         //returning with successfull message
         return new RedirectResponse(route('biller.invoices.index'), ['flash_success' => 'Invoice successfully deleted']);
     }
@@ -182,19 +194,17 @@ class StandardInvoicesController extends Controller
 
         $input = $request->only(['company', 'name', 'email', 'phone', 'address', 'tax_pin']);
 
-        $email_exists = Customer::where('email', $input['email'])->count();
-        if ($email_exists) throw ValidationException::withMessages(['Email already exists!']);
-
         $is_company = Customer::where('company', $input['company'])->count();
         if ($is_company) throw ValidationException::withMessages(['Company already exists!']);
 
-        if (isset($input['tax_pin'])) {
-            $taxid_exists = Customer::where('taxid', $input['tax_pin'])->count();
-            if ($taxid_exists) throw ValidationException::withMessages(['Tax Pin already exists!']);
+        $email_exists = Customer::where('email', $input['email'])->whereNotNull('email')->count();
+        if ($email_exists) throw ValidationException::withMessages(['Email already exists!']);
 
-            $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['tax_pin']])->count();
-            if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
-        } 
+        $taxid_exists = Customer::where('taxid', $input['tax_pin'])->whereNotNull('taxid')->count();
+        if ($taxid_exists) throw ValidationException::withMessages(['Tax Pin already exists!']);
+
+        $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $input['tax_pin']])->whereNotNull('taxid')->count();
+        if ($is_company) throw ValidationException::withMessages(['Company Tax Pin is not allowed!']);
         
         $input['taxid'] = $input['tax_pin'];
         unset($input['tax_pin']);

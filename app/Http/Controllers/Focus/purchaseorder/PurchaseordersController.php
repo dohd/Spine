@@ -99,7 +99,11 @@ class PurchaseordersController extends Controller
         $order_items = modify_array($order_items);
         $order_items = array_filter($order_items, function ($v) { return $v['item_id']; });
 
-        $result = $this->repository->create(compact('order', 'order_items'));
+        try {
+            $result = $this->repository->create(compact('order', 'order_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error creating Purchase Order', $th);
+        }
 
         return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order created successfully']);
     }
@@ -141,7 +145,11 @@ class PurchaseordersController extends Controller
         $order_items = modify_array($order_items);
         $order_items = array_filter($order_items, function ($val) { return $val['item_id']; });
 
-        $result = $this->repository->update($purchaseorder, compact('order', 'order_items'));
+        try {
+            $result = $this->repository->update($purchaseorder, compact('order', 'order_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Purchase Order', $th);
+        }
 
         return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order updated successfully']);
     }
@@ -155,7 +163,11 @@ class PurchaseordersController extends Controller
      */
     public function destroy(Purchaseorder $purchaseorder)
     {
-        $this->repository->delete($purchaseorder);
+        try {
+            $this->repository->delete($purchaseorder);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Deleting Purchase Order', $th);
+        }
 
         return new RedirectResponse(route('biller.purchaseorders.index'), ['flash_success' => 'Purchase Order deleted successfully']);        
     }
