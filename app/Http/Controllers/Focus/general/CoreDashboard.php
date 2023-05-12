@@ -38,12 +38,14 @@ class CoreDashboard extends Controller
         $start_date = date('Y-m') . '-01';
         $today = date('Y-m-d');
 
-        $invoice = Invoice::whereBetween('invoicedate', [$start_date, $today])
-        ->orderBy('id', 'desc')
-        ->with(['customer'])->take(10);
+        $data['invoices'] = Invoice::whereBetween('invoicedate', [$start_date, $today])
+        ->with('customer')
+        ->latest()->limit(10)->get();
         
-        $data['invoices'] = $invoice->get();
-        $data['customers'] = $invoice->groupBy('customer_id')->get();
+        $data['customers'] = [];
+        foreach ($data['invoices'] as $invoice) {
+            $data['customers'][] = $invoice->customer;
+        }
 
         $data['stock_alert'] = ProductVariation::whereRaw('qty <= alert')->whereHas('product', function ($q) {
             $q->where('stock_type', 'general');
