@@ -140,7 +140,7 @@
         <select id="branch_id" name="branch_id" class="form-control required select-box"  data-placeholder="Choose Branch" >
             <option value="">-- Select Branch --</option>
             @isset($project->branch)
-                <option value="{{ $project->branch->id }}">
+                <option value="{{ $project->branch->id }}" selected>
                     {{ $project->branch->name}}
                 </option>
             @endisset

@@ -104,7 +104,7 @@ class ProjectsController extends Controller
             return errorHandler('Error Creating Project', $th); 
         }
 
-        return response()->json(['status' => 'Success', 'message' => trans('alerts.backend.projects.created'), 'data' => $project, 'meta' => $project->actions]);
+        return new RedirectResponse(route('biller.projects.index'), ['flash_success' => 'Project Successfully Created']);
     }
 
     /**

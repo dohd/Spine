@@ -27,10 +27,10 @@
                                 <div class="form-group">
                                     {{-- Including Form blade file --}}
                                     @include("focus.projects.form")
-                                    <div class="edit-form-btn">
+                                    <div class="edit-form-btn float-right mb-2">
                                         {{ link_to_route('biller.projects.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
                                         {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
-                                        <div class="clearfix"></div>
+                                        {{-- <div class="clearfix"></div> --}}
                                     </div><!--edit-form-btn-->
                                 </div><!--form-group-->
                                 {{ Form::close() }}
