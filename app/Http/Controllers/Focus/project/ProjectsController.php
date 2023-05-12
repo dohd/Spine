@@ -86,7 +86,7 @@ class ProjectsController extends Controller
         $employees = Hrm::all();
         $project = new Project;
 
-        return new ViewResponse('focus.projects.index-main', compact('customers', 'accounts', 'last_tid', 'project', 'mics', 'employees', 'statuses', 'tags'));
+        return new ViewResponse('focus.projects.index', compact('customers', 'accounts', 'last_tid', 'project', 'mics', 'employees', 'statuses', 'tags'));
     }
 
 
@@ -116,8 +116,6 @@ class ProjectsController extends Controller
      */
     public function edit(Project $project)
     {
-        // $valid_project_creator = isset($project->creator) && $project->creator->id == auth()->user()->id;
-
         return new EditResponse($project);
     }
 
@@ -179,7 +177,7 @@ class ProjectsController extends Controller
         $mics = Misc::all();
         $employees = User::all();
 
-        return new ViewResponse('focus.projects.view-main', compact('project', 'accounts', 'exp_accounts', 'suppliers', 'last_tid', 'mics', 'employees'));
+        return new ViewResponse('focus.projects.view', compact('project', 'accounts', 'exp_accounts', 'suppliers', 'last_tid', 'mics', 'employees'));
     }
 
     /**
