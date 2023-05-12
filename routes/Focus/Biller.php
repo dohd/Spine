@@ -208,8 +208,9 @@ Route::group(['namespace' => 'prospectcallresolved'], function () {
     Route::post('prospectcallresolves/notpicked','ProspectsCallResolvedController@notpicked')->name('prospectcallresolves.notpicked');
     Route::post('prospectcallresolves/pickedbusy','ProspectsCallResolvedController@pickedbusy')->name('prospectcallresolves.pickedbusy');
     Route::post('prospectcallresolves/notavailable','ProspectsCallResolvedController@notavailable')->name('prospectcallresolves.notavailable');
+    Route::resource('prospectscallresolved', 'ProspectsCallResolvedController');
     //For Datatable
-   // Route::post('prospectcallresolves/get', 'ProspectsTableController')->name('prospectcallresolves.get');
+    Route::post('prospectcallresolves/get', 'ProspectsCallResolvedTableController')->name('prospectcallresolves.get');
     Route::post('prospectcallresolves/followup', 'ProspectsCallResolvedController@followup')->name('prospectcallresolves.followup');
 });
 

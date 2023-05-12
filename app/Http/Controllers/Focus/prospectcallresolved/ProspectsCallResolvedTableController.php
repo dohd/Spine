@@ -16,31 +16,31 @@
  * ***********************************************************************
  */
 
-namespace App\Http\Controllers\Focus\prospect;
+namespace App\Http\Controllers\Focus\prospectcallresolved;
 
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
-use App\Repositories\Focus\prospect\ProspectRepository;
+use App\Repositories\Focus\prospectcallresolved\ProspectCallResolvedRepository;
 
 /**
  * Class BranchTableController.
  */
-class ProspectsTableController extends Controller
+class ProspectsCallResolvedTableController extends Controller
 {
     /**
      * variable to store the repository object
      * @var ProductcategoryRepository
      */
-    protected $prospect;
+    protected $prospectcallresolved;
 
     /**
      * contructor to initialize repository object
      * @param ProductcategoryRepository $productcategory ;
      */
-    public function __construct(ProspectRepository $prospect)
+    public function __construct(ProspectCallResolvedRepository $prospectcallresolved)
     {
 
-        $this->prospect = $prospect;
+        $this->prospectcallresolved = $prospectcallresolved;
     }
 
     /**
@@ -49,56 +49,115 @@ class ProspectsTableController extends Controller
      */
     public function __invoke()
     {
-        $core = $this->prospect->getForDataTable();
+        $core = $this->prospectcallresolved->getForDataTable();
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('title', function ($prospect) {
+            ->addColumn('title', function ($prospectcallresolved) {
 
-                $name = $prospect->title == null ? '-----' : $prospect->title;
-                return $name;
+                $title = $prospectcallresolved->prospect->title == null ? '-----' : $prospectcallresolved->prospect->title;
+                return $title;
             })
-            ->addColumn('company', function ($prospect) {
+            ->addColumn('company', function ($prospectcallresolved) {
 
-                $name = $prospect->company == null ? '-----' : $prospect->company;
-                return $name;
+                $company = $prospectcallresolved->prospect->company == null ? '-----' : $prospectcallresolved->prospect->company;
+                return $company;
             })
-            ->addColumn('email', function ($prospect) {
-                $client_email = $prospect->email == null ? '-----' : $prospect->email ;
 
-                return $client_email;
-            })
-            ->addColumn('phone', function ($prospect) {
-                $phone = $prospect->phone == null ? '-----' : $prospect->phone ;
-
-                return $phone;
-            })
-            ->addColumn('industry', function ($prospect) {
-                $client_industry = $prospect->industry == null ? '-----' : $prospect->industry;
+            ->addColumn('industry', function ($prospectcallresolved) {
+                $client_industry = $prospectcallresolved->prospect->industry == null ? '-----' : $prospectcallresolved->prospect->industry;
 
                 return $client_industry;
             })
-            ->addColumn('region', function ($prospect) {
-                $client_region = $prospect->region == null ? '-----': $prospect->region;
+            ->addColumn('name', function ($prospectcallresolved) {
+                $name = $prospectcallresolved->prospect->contact_person == null ? '-----' : $prospectcallresolved->prospect->contact_person;
+
+                return $name;
+            })
+            ->addColumn('phone', function ($prospectcallresolved) {
+                $phone = $prospectcallresolved->prospect->phone == null ? '-----' : $prospectcallresolved->prospect->phone;
+
+                return $phone;
+            })
+            ->addColumn('region', function ($prospectcallresolved) {
+                $client_region = $prospectcallresolved->prospect->region == null ? '-----' : $prospectcallresolved->prospect->region;
 
                 return $client_region;
             })
-            ->addColumn('status', function ($prospect) {
-                $status = $prospect->status;
-                if ($status == 0) {
-                    $status = "Open";
-                } else {
-                    $status = "Closed";
+            ->addColumn('follow_up', function ($prospectcallresolved) {
+              
+                $status = $prospectcallresolved->prospect->call_status;
+                $show = true;
+                if($status == 'called'){
+                    $show = true;
+                }
+                else if ($status == 'callednotavailable'){
+                    $show = true;
+                }
+                else{
+                    $show = false;
+                }
+
+                $text = "";
+                $openstatus = $prospectcallresolved->prospect->status;
+                if($openstatus == 'open'){
+                    $text = "Follow up";
+                }else{
+                    $text = "Show details";
+                }
+
+                return $show? '<a id="follow" href="javascript:void(0)" class="btn btn-primary follow" data-id="' . $prospectcallresolved->prospect->id . '" >
+                         '.$text.'
+                         </a>': '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcallresolved->prospect_id . '" call-id="'.$prospectcallresolved->call_id.'" data-toggle="tooltip"  title="Call" >
+                         <i  class="fa fa-vcard"></i>
+                                  </a>';
+            })
+            ->addColumn('temperate', function ($prospectcallresolved) {
+                $status = $prospectcallresolved->prospect->temperate;
+               
+
+                return $status;
+            })
+            ->addColumn('call_status', function ($prospectcallresolved) {
+                $status = $prospectcallresolved->prospect->call_status;
+                if ($status == 'notcalled') {
+                    $status = "Not called";
+                } 
+                else if ($status == 'callednotpicked'){
+                    $status = "Called Not Picked";
+                }
+                else if($status == 'calledrescheduled') {
+                    $status = "Call Rescheduled";
+                }
+                else if($status == 'callednotavailable') {
+                    $status = "Called Not Available";
+                }
+                else  {
+                    $status = "Called";
                 }
 
                 return $status;
             })
-            ->addColumn('created_at', function ($prospect) {
-                return dateFormat($prospect->created_at);
+            ->addColumn('status', function ($prospectcallresolved) {
+                $status = $prospectcallresolved->prospect->status;
+                if ($status == 'open') {
+                    $status = "Open";
+                } else if ($status == 'won') {
+                    $status = "Closed - Won";
+                }else{
+                    $status = "Closed - Lost";
+                }
+
+                return $status;
             })
-            ->addColumn('actions', function ($prospect) {
-                return $prospect->action_buttons;
+            ->addColumn('reason', function ($prospectcallresolved) {
+                $reason = $prospectcallresolved->prospect->reason == null ? '-----': $prospectcallresolved->prospect->reason;
+
+                return $reason;
+            })
+            ->addColumn('actions', function ($prospectcallresolved) {
+                return $prospectcallresolved->action_buttons;
             })
             ->make(true);
     }

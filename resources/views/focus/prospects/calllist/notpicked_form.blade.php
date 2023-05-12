@@ -19,7 +19,7 @@
     </div>
     <div class="col-md-6">
         <p>Reminder Note</p>
-        {!! Form::text('reminder_notes', null, [
+        {!! Form::text('any_remarks', null, [
             'class' => 'form-control ',
             'placeholder' => 'Reminder note',
             'id' => 'notpicked_reminder_notes',

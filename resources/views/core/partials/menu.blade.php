@@ -564,6 +564,12 @@
                                                 data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Prospect</a>
                                         </li>
                                     @endauth
+                                   
+                                    @permission('create-lead')
+                                        <li><a class="dropdown-item" href="{{ route('biller.prospectscallresolved.index') }}"
+                                                data-toggle="dropdown"> <i class="fa fa-arrow-up"></i> Follow Up</a>
+                                        </li>
+                                    @endauth
                                     @permission('create-lead')
                                         <li><a class="dropdown-item" href="{{ route('biller.calllists.create') }}"
                                                 data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Call List</a>

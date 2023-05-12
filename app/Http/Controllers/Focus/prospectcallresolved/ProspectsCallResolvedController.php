@@ -23,8 +23,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
-use App\Http\Responses\Focus\prospect\CreateResponse;
-use App\Http\Responses\Focus\prospect\EditResponse;
+use App\Http\Responses\Focus\prospectcallresolved\CreateResponse;
+use App\Http\Responses\Focus\prospectcallresolved\EditResponse;
 use App\Repositories\Focus\prospectcallresolved\ProspectCallResolvedRepository;
 use App\Http\Requests\Focus\prospectcallresolved\ProspectCallResolvedRequest;
 use App\Models\prospectcallresolved\ProspectCallResolved;
@@ -58,11 +58,11 @@ class ProspectsCallResolvedController extends Controller
      */
     public function index()
     {
-        $open_prospect = ProspectCallResolved::where('status', 0)->count();
-        $closed_prospect = ProspectCallResolved::where('status', 1)->count();
-        $total_prospect = ProspectCallResolved::count();
+        // $open_prospect = ProspectCallResolved::where('status', 0)->count();
+        // $closed_prospect = ProspectCallResolved::where('status', 1)->count();
+        // $total_prospect = ProspectCallResolved::count();
 
-        return new ViewResponse('focus.prospects.index', compact('open_prospect', 'closed_prospect', 'total_prospect'));
+        return new ViewResponse('focus.prospectscallresolved.index');
     }
 
     /**
@@ -99,13 +99,13 @@ class ProspectsCallResolvedController extends Controller
     // /**
     //  * Show the form for editing the specified resource.
     //  *
-    //  * @param \App\Models\prospect\ProspectCallResolved $prospect
+    //  * @param \App\Models\prospectcallresolved\ProspectCallResolved $prospectcallresolved
     //  * @param EditProductcategoryRequestNamespace $request
     //  * @return \App\Http\Responses\Focus\productcategory\EditResponse
     //  */
-    public function edit(ProspectCallResolved $prospect)
+    public function edit(ProspectCallResolved $prospectcallresolved)
     {
-        return new EditResponse('focus.prospects.edit', compact('prospect'));
+        return new EditResponse('focus.prospectscallresolved.edit', compact('prospectcallresolved'));
     }
 
 
@@ -121,11 +121,11 @@ class ProspectsCallResolvedController extends Controller
     // /**
     //  * Update the specified resource.
     //  *
-    //  * @param \App\Models\prospect\ProspectCallResolved $prospect
+    //  * @param \App\Models\prospectcallresolved\ProspectCallResolved $prospectcallresolved
     //  * @param EditProductcategoryRequestNamespace $request
     //  * @return \App\Http\Responses\Focus\productcategory\EditResponse
     //  */
-    public function update(ProspectCallResolvedRequest $request, ProspectCallResolved $prospect)
+    public function update(ProspectCallResolvedRequest $request, ProspectCallResolved $prospectcallresolved)
     {
 
         //dd($request);
@@ -133,45 +133,45 @@ class ProspectsCallResolvedController extends Controller
         $data = $request->only(['company', 'name', 'email', 'phone', 'region', 'industry']);
 
         //Update the model using repository update method
-        $this->repository->update($prospect, compact('data'));
+        $this->repository->update($prospectcallresolved, compact('data'));
 
-        return new RedirectResponse(route('biller.prospects.index'), ['flash_success' => 'ProspectCallResolved Successfully Updated']);
+        return new RedirectResponse(route('biller.prospectcallresolved.index'), ['flash_success' => 'ProspectCallResolved Successfully Updated']);
     }
 
     // /**
     //  * Remove the specified resource from storage.
     //  *
-    //  * @param \App\Models\prospect\ProspectCallResolved $prospect
+    //  * @param \App\Models\prospectcallresolved\ProspectCallResolved $prospectcallresolved
     //  * @return \App\Http\Responses\RedirectResponse
     //  */
-    public function destroy(ProspectCallResolved $prospect)
+    public function destroy(ProspectCallResolved $prospectcallresolved)
     {
-        $this->repository->delete($prospect);
+        $this->repository->delete($prospectcallresolved);
 
-        return new RedirectResponse(route('biller.prospects.index'), ['flash_success' => 'ProspectCallResolved Successfully Deleted']);
+        return new RedirectResponse(route('biller.prospectcallresolved.index'), ['flash_success' => 'ProspectCallResolved Successfully Deleted']);
     }
 
     // /**
     //  * Show the view for the specific resource
     //  *
     //  * @param DeleteProductcategoryRequestNamespace $request
-    //  * @param \App\Models\prospect\ProspectCallResolved $prospect
+    //  * @param \App\Models\prospectcallresolved\ProspectCallResolved $prospectcallresolved
     //  * @return \App\Http\Responses\RedirectResponse
     //  */
-    public function show(ProspectCallResolved $prospect)
+    public function show(ProspectCallResolved $prospectcallresolved)
     {
-        return new ViewResponse('focus.prospects.view', compact('prospect'));
+        return new ViewResponse('focus.prospectscallresolved.view', compact('prospectcallresolved'));
     }
 
     // /**
     //  * Update ProspectCallResolved Open Status
     //  */
-    public function update_status(ProspectCallResolved $prospect, Request $request)
+    public function update_status(ProspectCallResolved $prospectcallresolved, Request $request)
     {
 
         $status = $request->status;
         $reason = $request->reason;
-        $prospect->update(compact('status', 'reason'));
+        $prospectcallresolved->update(compact('status', 'reason'));
 
         return redirect()->back();
     }

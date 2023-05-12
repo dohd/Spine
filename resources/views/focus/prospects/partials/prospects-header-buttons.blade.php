@@ -6,6 +6,9 @@
         <a href="{{ route('biller.prospects.create') }}" class="btn btn-pink  btn-lighten-3">
             <i class="fa fa-plus-circle"></i> Prospect
         </a>
+        <a href="{{ route('biller.prospectscallresolved.index') }}" class="btn btn-success  btn-lighten-3">
+            <i class="fa fa-arrow-up"></i> Follow_up
+        </a>
         &nbsp;&nbsp;
         <a href="{{ route('biller.leads.create') }}" class="btn btn-success  btn-lighten-3">
             <i class="fa fa-plus-circle"></i> Ticket

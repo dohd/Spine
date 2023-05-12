@@ -42,7 +42,7 @@ class ProspectCallResolvedRepository extends BaseRepository
      */
     public function create(array $data)
     {
-        $data['demo_date'] = date_for_database($data['demo_date']);
+        $data['reminder_date'] = date_for_database($data['reminder_date']);
 
 
         //determine if prospect is hot,warm or cold
@@ -104,15 +104,6 @@ class ProspectCallResolvedRepository extends BaseRepository
                     'temperate' => 'warm',
                     'is_called' => 1,
                 ]);
-                // $calldate =$calllist['reminder_date'];
-                // $rescheduledata = [
-                //     "call_id"=>$calllist['call_id'],
-                //     "prospect_id"=>$calllist['prospect_id'],
-                //     "call_date"=>$calldate
-                // ];
-              
-                // ProspectCallList::create($rescheduledata);
-
                 
             }
         }
@@ -156,13 +147,7 @@ class ProspectCallResolvedRepository extends BaseRepository
                     'temperate' => 'warm',
                 ]);
                 $calldate = $calllist['reminder_date'];
-                // $rescheduledata = [
-                //     "call_id"=>$calllist['call_id'],
-                //     "prospect_id"=>$calllist['prospect_id'],
-                //     "call_date"=>$calldate
-                // ];
-            
-                // ProspectCallList::create($rescheduledata);
+               
 
             }
         }

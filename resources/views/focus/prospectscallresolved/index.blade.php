@@ -21,7 +21,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-body">
+                        {{-- <div class="card-body">
                             <div class="row no-gutters">
                                 <div class="col-sm-3 col-md-2 h4">Open Prospects</div>
                                 <div class="col-sm-2 col-md-1 h4 text-primary font-weight-bold">{{ $open_prospect }}</div>
@@ -34,8 +34,8 @@
                                 <div class="col-sm-12 col-md-1 h4 text-success font-weight-bold">
                                     {{ numberFormat(div_num($closed_prospect, $total_prospect) * 100) }}%</div>
                             </div>
-                        </div>
-                        <div class="row mb-3 ml-1">
+                        </div> --}}
+                        {{-- <div class="row mb-3 ml-1">
                             <div class="col-2">
                                 <label for="client">Title</label>                             
                                 <select name="bytitle" class="custom-select" id="bytitle" data-placeholder="Choose Title">
@@ -78,48 +78,51 @@
                                    
                                    
                                 </select>
-                            </div>
-                            
-                        </div>
-                        
+                            </div> --}}
+
                     </div>
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-body">
-                                <table id="prospects-table" class="table table-striped table-bordered zero-configuration"
-                                    cellspacing="0" width="100%">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Title</th>
-                                            <th>Company Name</th>
-                                            <th>Industry</th>
-                                            <th>Contact Name</th>
-                                            <th>Phone</th>
-                                            <th>Region</th>
-                                            <th>Type</th>
-                                            <th>CallStatus</th>
-                                            <th>Status</th>
-                                            <th>Reason</th>
-                                            <th>{{ trans('labels.general.actions') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="100%" class="text-center text-success font-large-1">
-                                                <i class="fa fa-spinner spinner"></i>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+
+                </div>
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <table id="prospectscallresolved-table"
+                                class="table table-striped table-bordered zero-configuration" cellspacing="0"
+                                width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Title</th>
+                                        <th>Company Name</th>
+                                        <th>Industry</th>
+                                        <th>Contact Name</th>
+                                        <th>Phone</th>
+                                        <th>Region</th>
+                                        <th>Type</th>
+                                        <th>Follow up</th>
+                                        <th>CallStatus</th>
+                                        <th>Status</th>
+                                        <th>Reason</th>
+                                        <th>{{ trans('labels.general.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="100%" class="text-center text-success font-large-1">
+                                            <i class="fa fa-spinner spinner"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    </div>
     @include('focus.prospects.partials.remarks_modal')
+    @include('focus.prospects.partials.call_modal')
 @endsection
 
 @section('after-scripts')
@@ -146,103 +149,203 @@
                 $.ajaxSetup(config.ajax);
                 this.draw_data();
                 this.showModal();
+                this.showCallModal();
                 //form remark
                 remark: @json(@$remark),
-                $('#reminder_date').datepicker(config.date).datepicker('setDate', new Date());
                 $('#bytitle').change(this.titleChange);
                 $('#bytemperate').change(this.temperateChange);
                 $('#bycallstatus').change(this.callStatusChange);
                 $('#bystatus').change(this.statusChange);
-                
+
+                //callModal
+                $('#callModal').find('.erp-status').change(this.erpChange);
+                $('#callModal').find('.challenges-status').change(this.challengesChange);
+                $('#callModal').find('.demo-status').change(this.demoChange);
+                $('#callModal').find('.call-status').change(this.callTypeChange);
+                this.dismissCallModal();
             },
-            titleChange(){
-            Index.title = $(this).val();
-            $('#prospects-table').DataTable().destroy();
-            return Index.draw_data();
+            titleChange() {
+                Index.title = $(this).val();
+                $('#prospects-table').DataTable().destroy();
+                return Index.draw_data();
             },
-            temperateChange(){
-            Index.temperate = $(this).val();
-            $('#prospects-table').DataTable().destroy();
-            return Index.draw_data();
+            temperateChange() {
+                Index.temperate = $(this).val();
+                $('#prospects-table').DataTable().destroy();
+                return Index.draw_data();
             },
-            callStatusChange(){
-            Index.callstatus = $(this).val();
-            $('#prospects-table').DataTable().destroy();
-            return Index.draw_data();
+            callStatusChange() {
+                Index.callstatus = $(this).val();
+                $('#prospects-table').DataTable().destroy();
+                return Index.draw_data();
             },
-            statusChange(){
-            Index.status = $(this).val();
-            $('#prospects-table').DataTable().destroy();
-            return Index.draw_data();
+            statusChange() {
+                Index.status = $(this).val();
+                $('#prospectscallresolved-table').DataTable().destroy();
+                return Index.draw_data();
             },
-            showModal(){
-                $('#prospects-table tbody').on('click','#follow', function(e) {
-                 var id = $(this).attr('data-id');
-                
-                //show modal
-                $('#remarksModal').modal('show');
-                
+            showModal() {
+                $('#prospectscallresolved-table tbody').on('click', '#follow', function(e) {
+                    var id = $(this).attr('data-id');
 
-                //varible to check if data is saved
-                let saved = false;
-                //set prospect id to form
-                $('#prospect_id').val(id);
+                    //show modal
+                    $('#remarksModal').modal('show');
 
-                $.ajax({
-                    url: "{{ route('biller.prospects.followup') }}",
-                    type: 'POST',
-                    data: {
-                        id: id
-                    },
-                    success: function(response) {
 
-                        $('#tableModal').append(response);
-                    }
-                });
+                    //varible to check if data is saved
+                    let saved = false;
+                    //set prospect id to form
+                    $('#prospect_id').val(id);
 
-                $('#save_remark').on('click', function(e) {
-
-                    var recepient = $('#recepient').val();
-                    var reminder_date = $('#reminder_date').val();
-                    var remarks = $('#remarks').val();
-
-                    //disable button
-                    $("#save_remark").prop("disabled", true);
-                    let formData = $('#save_remark').parents('form').serializeArray();
                     $.ajax({
-                        url: "remarks",
+                        url: "{{ route('biller.prospects.followup') }}",
                         type: 'POST',
-                        data: formData,
-                        success: function(response) {
-                            saved = true;
-                            $('#remarks_table').remove();
-                            $('#tableModal').append(response);
+                        data: {
+                            id: id
                         },
-                        error: function(error) {
-                            console.log(error.responseText);
+                        success: function(response) {
 
+                            $('#tableModal').append(response);
                         }
                     });
 
-                    $('#recepient').val('');
-                    $('#reminder_date').val('');
-                    $('#remarks').val('');
-                    $("#save_remark").prop("disabled", false);
-                });
+                    $('#save_remark').on('click', function(e) {
 
-                $('#remarksModal').on('hidden.bs.modal', function(e) {
-                    $('#remarks_table').remove();
-                    $('#prospect_id').val();
-                    id= "";
-                    saved?window.location.reload():null;
+                        var recepient = $('#recepient').val();
+                        var reminder_date = $('#reminder_date').val();
+                        var remarks = $('#remarks').val();
+
+                        //disable button
+                        $("#save_remark").prop("disabled", true);
+                        let formData = $('#save_remark').parents('form').serializeArray();
+                        $.ajax({
+                            url: "remarks",
+                            type: 'POST',
+                            data: formData,
+                            success: function(response) {
+                                saved = true;
+                                $('#remarks_table').remove();
+                                $('#tableModal').append(response);
+                            },
+                            error: function(error) {
+                                console.log(error.responseText);
+
+                            }
+                        });
+
+                        $('#recepient').val('');
+                        $('#reminder_date').val('');
+                        $('#remarks').val('');
+                        $("#save_remark").prop("disabled", false);
+                    });
+
+                    $('#remarksModal').on('hidden.bs.modal', function(e) {
+                        $('#remarks_table').remove();
+                        $('#prospect_id').val();
+                        id = "";
+                        saved ? window.location.reload() : null;
+                    });
                 });
-            });
             },
-          
+
+            showCallModal() {
+                $('#prospectscallresolved-table tbody').on('click', '#call', function(e) {
+                    var id = $(this).attr('data-id');
+                    var call_id = $(this).attr('call-id');
+                    //show modal
+                    $('#callModal').modal('show');
+
+
+                    //picked
+                    $('#prospect_id').val(id);
+
+                    //notpicked
+                    $('#notpicked_call_id').val(call_id);
+                    $('#notpicked_prospect_id').val(id);
+
+                    //pickedbusy
+                    $('#busycall_id').val(call_id);
+                    $('#busyprospect_id').val(id);
+
+                    //notavailable
+                    $('#notavailable_prospect').val(id);
+
+
+                });
+            },
+            erpChange() {
+                if ($(this).val() == 0) {
+                    $("#erp_div").css("display", "none");
+                } else {
+                    $("#erp_div").css("display", "block");
+                }
+            },
+            challengesChange() {
+                if ($(this).val() == "0") {
+                    $("#erpchallenges").css("display", "none");
+                } else {
+                    $("#erpchallenges").css("display", "block");
+                }
+            },
+            demoChange() {
+                if ($(this).val() == "0") {
+                    $("#demo").css("display", "none");
+                    $("#notes").val('');
+                    $("#demo_date").val('');
+                } else {
+                    $("#demo").css("display", "");
+                }
+            },
+            callTypeChange() {
+
+                if ($(this).val() == 'picked') {
+                    $("#div_picked").css("display", "block");
+                    $("#div_notpicked").css("display", "none");
+                    $("#div_picked_busy").css("display", "none");
+                    $("#div_notpicked_available").css("display", "none");
+                } else if ($(this).val() == 'pickedbusy') {
+                    $("#div_picked_busy").css("display", "block");
+                    $("#div_picked").css("display", "none");
+                    $("#div_notpicked").css("display", "none");
+                    $("#div_notpicked_available").css("display", "none");
+                } else if ($(this).val() == 'notpicked') {
+                    $("#div_notpicked").css("display", "block");
+                    $("#div_picked").css("display", "none");
+                    $("#div_picked_busy").css("display", "none");
+                    $("#div_notpicked_available").css("display", "none");
+                } else if ($(this).val() == 'notavailable') {
+                    $("#div_notpicked_available").css("display", "block");
+                    $("#div_notpicked").css("display", "none");
+                    $("#div_picked").css("display", "none");
+                    $("#div_picked_busy").css("display", "none");
+
+                }
+
+
+            },
+            dismissCallModal() {
+
+
+                $('#callModal').on('hidden.bs.modal', function() {
+                    $("#notes").val('');
+                    $("#current_erp_challenges").val('');
+                    $('#prospect_id').val('');
+                    $('#notpicked_prospect_id').val('');
+                    $('#busyprospect_id').val('');
+                    $('#notavailable_prospect').val('');
+                    $('#busycall_id').val('');
+                    $('#call_id').val('');
+                    $("#save_call_chat").attr("disabled", false);
+                    $("#save_reshedule").attr("disabled", false);
+                    $("#save_reminder").attr("disabled", false);
+                    $("#notavailable").attr("disabled", false);
+                });
+            },
+
 
             draw_data() {
-                
-                $('#prospects-table').dataTable({
+
+                $('#prospectscallresolved-table').dataTable({
                     stateSave: true,
                     processing: true,
                     responsive: true,
@@ -250,14 +353,14 @@
                         @lang('datatable.strings')
                     },
                     ajax: {
-                        url: '{{ route('biller.prospects.get') }}',
+                        url: '{{ route('biller.prospectcallresolves.get') }}',
                         type: 'post',
-                        data: {
-                            bytitle: this.title,
-                            bytemperate: this.temperate,
-                            bycallstatus: this.callstatus,
-                            bystatus: this.status,
-                        }
+                        // data: {
+                        //     bytitle: this.title,
+                        //     bytemperate: this.temperate,
+                        //     bycallstatus: this.callstatus,
+                        //     bystatus: this.status,
+                        // }
                     },
                     columns: [{
                             data: 'DT_Row_Index',
@@ -271,7 +374,7 @@
                             data: 'company',
                             name: 'company'
                         },
-                        
+
                         {
                             data: 'industry',
                             name: 'industry'
@@ -280,24 +383,24 @@
                             data: 'name',
                             name: 'name'
                         },
-                        // {
-                        //     data: 'email',
-                        //     name: 'email'
-                        // },
                         {
                             data: 'phone',
                             name: 'phone'
                         },
-                       
+
                         {
                             data: 'region',
                             name: 'region'
                         },
-                       
                         {
                             data: 'temperate',
                             name: 'temperate'
                         },
+                        {
+                            data: 'follow_up',
+                            name: 'follow_up'
+                        },
+
                         {
                             data: 'call_status',
                             name: 'call_status'
@@ -310,7 +413,7 @@
                             data: 'reason',
                             name: 'reason'
                         },
-                        
+
                         {
                             data: 'actions',
                             name: 'actions',

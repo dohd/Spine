@@ -116,8 +116,6 @@
                 $('#callModal').find('.challenges-status').change(this.challengesChange);
                 $('#callModal').find('.demo-status').change(this.demoChange);
                 $('#callModal').find('.call-status').change(this.callTypeChange);
-                // $('#demo_date').datepicker(config.date).datepicker('setDate', new Date());
-
                 $('#calllist_id').change(this.callListChange);
 
             },
@@ -186,6 +184,7 @@
                 }
             },
             demoChange() {
+                
                 if ($(this).val() == "0") {
                     $("#demo").css("display", "none");
                     $("#notes").val('');
@@ -226,8 +225,6 @@
 
                 $('#callModal').on('hidden.bs.modal', function() {
                     $("#notes").val('');
-                    $("#demo_date").datepicker(config.date).datepicker('setDate', new Date());
-
                     $("#current_erp_challenges").val('');
                     $('#prospect_id').val('');
                     $('#notpicked_prospect_id').val('');

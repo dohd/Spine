@@ -4,6 +4,7 @@ namespace App\Repositories\Focus\prospect;
 
 use App\Models\prospect\Prospect;
 use App\Exceptions\GeneralException;
+use App\Models\prospect_calllist\ProspectCallList;
 use App\Models\remark\Remark;
 use App\Repositories\Focus\remark\RemarkRepository;
 use App\Repositories\BaseRepository;
@@ -61,7 +62,15 @@ class ProspectRepository extends BaseRepository
     {
         
         $result = Prospect::create($data);
+        $response = $result->refresh();
+        //dd($response['id']);
+
+        $calldata = [
+                "prospect_id"=>$response['id'],
+                "call_date"=>date("Y-m-d H:i:s")
+            ];
         
+        ProspectCallList::create($calldata);
         return $result;
 
         throw new GeneralException('Error Creating Prospect');
