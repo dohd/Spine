@@ -98,6 +98,9 @@ class ProjectGrossProfitTableController extends Controller
             })
             ->addColumn('expense', function($project) {
                 $expense = $project->purchase_items->sum('amount');
+                foreach ($project->quotes as $quote) {
+                   $expense += $quote->projectstock->sum('total');
+                }
                 $this->expense = $expense;
 
                 return numberFormat($expense);
