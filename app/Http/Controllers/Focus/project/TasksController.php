@@ -80,7 +80,7 @@ class TasksController extends Controller
     {
         try {
             $result = $this->repository->create($request->except(['_token', 'ins']));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) { 
             return errorHandler('Error Creating Tasks', $th);
         }
 
@@ -109,7 +109,7 @@ class TasksController extends Controller
         $status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span>';
         
         // project task
-        if ($request->milestone) {
+        if ($result->milestone) {
             $row = '<tr>
                 <td>*</td>
                 <td>'. @$result->milestone->name. '</td>
@@ -151,16 +151,18 @@ class TasksController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
     public function update(EditTaskRequest $request, Task $task)
-    {
-        //Input received from the request
+    {           
         $input = $request->except(['_token', 'ins']);
+
         try {
-            //Update the model using repository update method
-            $this->repository->update($task, $input);
+            $result = $this->repository->update($task, $input);
+            
+            if (@$result->milestone->project) 
+            return new RedirectResponse(route('biller.projects.show', $result->milestone->project), ['flash_success' => trans('alerts.backend.tasks.updated')]);
         } catch (\Throwable $th) {
             return errorHandler('Error Updating Tasks', $th);
         }
-        //return with successfull message
+        
         return new RedirectResponse(route('biller.tasks.index'), ['flash_success' => trans('alerts.backend.tasks.updated')]);
     }
 
@@ -171,17 +173,17 @@ class TasksController extends Controller
      * @param App\Models\project\Task $task
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Task $task, DeleteTaskRequest $request)
+    public function destroy(Task $task)
     {
         try {
-            //Calling the delete method on repository
             $this->repository->delete($task);
         } catch (\Throwable $th) {
-            return errorHandler('Error Deleting Tasks', $th);
+            \Log::error($th->getMessage() . ' at ' . $th->getFile() . ':' . $th->getLine());
+            return response()->json(['status' => 'Error', 'message' => trans('alerts.backend.tasks.deleted')]);
         }
 
-        return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.tasks.deleted')));
-    }
+        return response()->json(['status' => 'Success', 'message' => trans('alerts.backend.tasks.deleted')]);
+    } 
 
     /**
      * Remove the specified resource from storage.

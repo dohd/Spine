@@ -8,7 +8,6 @@ use App\Models\hrm\Hrm;
 use App\Models\misc\Misc;
 use App\Models\project\ProjectMileStone;
 use App\Models\project\ProjectRelations;
-use App\Models\project\TaskRelations;
 
 /**
  * Class TaskRelationship
@@ -22,7 +21,7 @@ trait TaskRelationship
 
     public function tags()
     {
-        return $this->hasManyThrough(Misc::class, TaskRelations::class, 'todolist_id', 'id', 'id', 'rid')->where('section', '=', 1);
+        return $this->hasManyThrough(Misc::class, ProjectRelations::class, 'task_id', 'id', 'id', 'misc_id');
     }
 
     public function events()
@@ -37,7 +36,7 @@ trait TaskRelationship
 
     public function users()
     {
-        return $this->hasManyThrough(Hrm::class, TaskRelations::class, 'todolist_id', 'id', 'id', 'rid');
+        return $this->hasManyThrough(Hrm::class, ProjectRelations::class, 'task_id', 'id', 'id', 'user_id');
     }
 
     public function creator()

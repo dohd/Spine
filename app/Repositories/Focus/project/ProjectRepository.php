@@ -96,18 +96,19 @@ class ProjectRepository extends BaseRepository
             EventRelation::create(['event_id' => $event->id, 'related' => 1, 'r_id' => $result->id]);
         }
         
-        // employee notifiation
-        $message = ['title' => trans('projects.project') . ' - ' . $result->name, 'icon' => 'fa-bullhorn', 'background' => 'bg-success', 'data' => $input['short_desc']];
-        if ($employees) {
-            $users = User::whereIn('id', $employees)->get();
-            \Illuminate\Support\Facades\Notification::send($users, new Rose('', $message));
-        } else {
-            $notification = new Rose(auth()->user(), $message);
-            auth()->user()->notify($notification);
-        }
-
         if ($result) {
             DB::commit();
+
+            // employee notifiation
+            $message = ['title' => trans('projects.project') . ' - ' . $result->name, 'icon' => 'fa-bullhorn', 'background' => 'bg-success', 'data' => $input['short_desc']];
+            if ($employees) {
+                $users = User::whereIn('id', $employees)->get();
+                \Illuminate\Support\Facades\Notification::send($users, new Rose('', $message));
+            } else {
+                $notification = new Rose(auth()->user(), $message);
+                auth()->user()->notify($notification);
+            }
+
             return $result;
         }
 
@@ -155,10 +156,10 @@ class ProjectRepository extends BaseRepository
         $employees = @$input['employees'] ?: [];
         ProjectRelations::whereNotIn('user_id', $employees)->where('project_id', $project->id)
             ->whereNotNull('user_id')->whereNull('task_id')->delete();
-        foreach ($employees as $tag) {
+        foreach ($employees as $id) {
             ProjectRelations::updateOrCreate(
-                ['user_id' => $tag, 'project_id' => $project->id],
-                ['user_id' => $tag, 'project_id' => $project->id]
+                ['user_id' => $id, 'project_id' => $project->id],
+                ['user_id' => $id, 'project_id' => $project->id]
             );
         }
 
