@@ -189,7 +189,7 @@
     $(document).on('click', ".milestone-del", function() {
         const obj = $(this);
         const url = $(this).attr('data-url');
-        $.post(url, {object_id: $(this).attr('data-id'), obj_type: 2}, data => obj.parents('tr').remove());
+        $.post(url, {object_id: $(this).attr('data-id'), obj_type: 2}, data => obj.parents('li').remove());
     });  
 
     // quote show modal
