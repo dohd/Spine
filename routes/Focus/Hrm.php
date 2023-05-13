@@ -69,3 +69,10 @@ Route::group(['namespace' => 'salary'], function () {
     //For Datatable
     Route::post('salary/get', 'SalaryTableController')->name('salary.get');
 });
+
+Route::group(['namespace' => 'payroll'], function () {
+    Route::post('payroll/get_employee', 'PayrollController@get_employee')->name('payroll.get_employee');
+    Route::resource('payroll', 'PayrollController');
+    //For Datatable
+    Route::post('payroll/get', 'PayrollTableController')->name('payroll.get');
+});

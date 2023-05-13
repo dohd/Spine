@@ -179,7 +179,6 @@
                 
             });
             $('#employment_type').val(allVals);
-        console.log(allVals);
         var name = $('.start_contract:checked').val();
         if(name == '1'){
             console.log(name);

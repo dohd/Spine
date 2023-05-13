@@ -66,7 +66,7 @@
 @section('extra-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
  <script>
-
+    $('.datepicker').datepicker(format: "{{ config('core.user_date_format') }}", autoHide: true).datepicker('setDate', new Date());
     // On searching supplier
     $('#employeebox').change(function() {
         const name = $('#employeebox option:selected').text().split(' : ')[0];
@@ -79,7 +79,7 @@
     const departmentVal = "{{ $salary->employee_id }}";
     $('#employeebox').append(new Option(departmentText, true)).change();
     // load employees
-    const employeeUrl = "{{ route('biller.assetissuance.select') }}";
+    const employeeUrl = "{{ route('biller.salary.select') }}";
     function employeeData(data) {
         return {results: data.map(v => ({id: v.id, text: v.first_name+' : '+v.email}))};
     }

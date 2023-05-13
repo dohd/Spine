@@ -91,6 +91,7 @@ class LoansController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request->all());
         try {
             $this->repository->create($request->except(['_token']));
         } catch (\Throwable $th) {

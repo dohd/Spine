@@ -4,6 +4,7 @@ namespace App\Http\Responses\Focus\salary;
 
 use Illuminate\Contracts\Support\Responsable;
 use App\Models\department\Department;
+use App\models\workshift\Workshift;
 
 class CreateResponse implements Responsable
 {
@@ -16,7 +17,7 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-       // $dept_jobtitle = Department::whereHas('jobtitles')->get(['id', 'name']);
-        return view('focus.salary.create');
+        $workshifts = Workshift::all(['id','name']);
+        return view('focus.salary.create', compact('workshifts'));
     }
 }

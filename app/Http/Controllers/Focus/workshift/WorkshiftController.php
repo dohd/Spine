@@ -45,7 +45,7 @@ class WorkshiftController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {
+    { 
         return view('focus.workshift.create');
     }
 

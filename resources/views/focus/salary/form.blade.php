@@ -36,8 +36,16 @@
     </div>
     <div class="form-group row">
         <div class="col-4">
+            {{ Form::label('workshift', 'Select Workshift',['class' => 'control-label']) }}
+            <select class="form-control round" name="workshift_id"  data-placeholder="Search Workshift">
+                @foreach ($workshifts as $work)
+                    <option value="{{$work->id}}" {{ $work->id == @$salary->workshift_id ? 'selected' : '' }}>{{$work->name}}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-4">
             {{ Form::label( 'start_date', 'Start Date',['class' => 'control-label']) }}
-            {{ Form::date('start_date', null, ['class' => 'form-control round', 'placeholder' => '', 'required']) }}
+            {{ Form::date('start_date', null, ['class' => 'form-control round datepicker', 'placeholder' => '', 'required']) }}
         </div>
         <div class="col-4">
             {{ Form::label( 'duration', 'Duration',['class' => 'control-label']) }}
@@ -46,38 +54,4 @@
         
     </div>
 
-@section("after-scripts")
-{{ Html::script('focus/js/select2.min.js') }}
-    <script type="text/javascript">
-        $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
-// On searching supplier
-$('#employeebox').change(function() {
-    const name = $('#employeebox option:selected').text().split(' : ')[0];
-    const [id, taxId] = $(this).val().split('-');
-    $('#employeeid').val(id);
-    $('#employee').val(name);
-});
-
-
-// load employees
-const employeeUrl = "{{ route('biller.salary.select') }}";
-function employeeData(data) {
-    return {results: data.map(v => ({id: v.id, text: v.first_name}))};
-}
-$('#employeebox').select2(select2Config(employeeUrl, employeeData));
-// select2 config
-function select2Config(url, callback) {
-    return {
-        ajax: {
-            url,
-            dataType: 'json',
-            type: 'POST',
-            quietMillis: 50,
-            data: ({term}) => ({q: term, keyword: term}),
-            processResults: callback
-        }
-    }
-}
-    </script>
-@endsection

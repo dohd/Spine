@@ -18,6 +18,6 @@ trait WorkshiftRelationship
 
     public function item()
     {
-        return $this->hasMany(WorkshiftItems::class, 'workshift_id','id');
+        return $this->hasOne(WorkshiftItems::class, 'workshift_id','id');
     }
  }

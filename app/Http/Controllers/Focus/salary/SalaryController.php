@@ -26,6 +26,7 @@ use App\Http\Responses\Focus\salary\CreateResponse;
 use App\Http\Responses\Focus\salary\EditResponse;
 use App\Repositories\Focus\salary\SalaryRepository;
 use App\Models\hrm\Hrm;
+use App\models\workshift\Workshift;
 
 
 /**
@@ -142,8 +143,9 @@ class SalaryController extends Controller
      */
     public function show(Salary $salary, Request $request)
     {
+        $workshifts = Workshift::all(['id','name']);
         //returning with successfull message
-        return new ViewResponse('focus.salary.view', compact('salary'));
+        return new ViewResponse('focus.salary.view', compact('salary','workshifts'));
     }
     public function select(Request $request)
     {
@@ -157,18 +159,27 @@ class SalaryController extends Controller
 
     public function renew_contract(Request $request)
     {
-        //dd($request->all());
-        $renew_contract = Salary::find($request->id);
-        $renew_contract->basic_pay = $request->basic_pay;
-        $renew_contract->house_allowance = $request->house_allowance;
-        $renew_contract->transport_allowance = $request->transport_allowance;
-        $renew_contract->directors_fee = $request->directors_fee;
-        $renew_contract->contract_type = $request->contract_type;
+        
+        $old_contract = Salary::find($request->id);
+        if($old_contract->status == 'ongoing'){
+            $old_contract->status = 'terminated';
+            $old_contract->update();
+        }
+        $new_contract = new Salary();
+        $new_contract->employee_name = $request->employee_name;
+        $new_contract->employee_id = $request->employee_id;
+        $new_contract->basic_pay = $request->basic_pay;
+        $new_contract->house_allowance = $request->house_allowance;
+        $new_contract->transport_allowance = $request->transport_allowance;
+        $new_contract->directors_fee = $request->directors_fee;
+        $new_contract->contract_type = $request->contract_type;
         $start_date = date_for_database($request->start_date);
-        $renew_contract->start_date = $start_date;
-        $renew_contract->duration = $request->duration;
-        $renew_contract->status = 'ongoing';
-        $renew_contract->update();
+        $new_contract->start_date = $start_date;
+        $new_contract->duration = $request->duration;
+        $new_contract->status = 'ongoing';
+        $new_contract['ins'] = auth()->user()->ins;
+        $new_contract['user_id'] = auth()->user()->id;
+        $new_contract->save();
         return new RedirectResponse(route('biller.salary.index'), ['flash_success' => 'Contract Renewed Successfully!!']);
     }
     public function terminate_contract(Request $request)

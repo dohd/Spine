@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Class salaryRepository.
  */
-class salaryRepository extends BaseRepository
+class SalaryRepository extends BaseRepository
 {
     /**
      * Associated Repository Model.
@@ -28,8 +28,8 @@ class salaryRepository extends BaseRepository
     public function getForDataTable()
     {
 
-        return $this->query()
-            ->get(['id','contract_type','employee_id','employee_name','basic_pay','status','duration','start_date','created_at']);
+        return $this->query()->latest()
+            ->get()->unique('employee_id');
     }
 
     /**

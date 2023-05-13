@@ -29,7 +29,7 @@ class DeductionRepository extends BaseRepository
     {
 
         return $this->query()
-            ->get(['id','name','rate','deduction_id','brackets','created_at']);
+            ->get();
     }
 
     /**

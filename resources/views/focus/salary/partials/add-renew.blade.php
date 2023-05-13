@@ -15,7 +15,7 @@
             <div class='form-group row'>
                 <div class='col-4'>
                     {{ Form::label( 'employee', 'Employee Name',['class' => 'control-label']) }}
-                    <input type="text" name="employee_name" class="form-control" id="employee" readonly>
+                    <input type="text" name="employee_name" value="{{ @$salary->employee_name?: 1 }}" disabled class="form-control" id="employee">
                     <input type="hidden" name="employee_id" value="{{ @$salary->employee_id ?: 1 }}" id="employeeid">
                     <input type="hidden" name="employee_name" value="{{ @$salary->employee_name?: 1 }}" id="employee">
                     <input type="hidden" name="id" id="id" value="{{ @$salary->id?: 1 }}">
@@ -49,6 +49,14 @@
                 </div>
             </div>
             <div class="form-group row">
+                <div class="col-4">
+                    {{ Form::label('workshift', 'Select Workshift',['class' => 'control-label']) }}
+                    <select class="form-control round" name="workshift_id"  data-placeholder="Search Workshift">
+                        @foreach ($workshifts as $work)
+                            <option value="{{$work->id}}" {{ $work->id == @$salary->workshift_id ? 'selected' : '' }}>{{$work->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="col-4">
                     {{ Form::label( 'start_date', 'Start Date',['class' => 'control-label']) }}
                     {{ Form::date('start_date', null, ['class' => 'form-control round', 'placeholder' => '','required']) }}

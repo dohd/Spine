@@ -14,6 +14,10 @@ use App\Models\hrm\HrmMeta;
 use App\Models\project\Project;
 use App\Models\quote\Quote;
 use App\Models\transaction\Transaction;
+use App\Models\salary\Salary;
+use App\Models\hrm\Attendance;
+use App\Models\workshift\Workshift;
+use App\Models\advance_payment\AdvancePayment;
 
 /**
  * Class HrmRelationship
@@ -91,6 +95,23 @@ trait HrmRelationship
     {
         return $this->belongsTo(EmployeeSalary::class, 'id','user_id')->where('status','Active');
     }
+    public function employees_salary() {
+     
+        return $this->hasOne(Salary::class, 'employee_id')->withoutGlobalScopes();
+    }
 
+    public function attendance() {
+     
+        return $this->hasMany(Attendance::class, 'employee_id');
+    }
 
+    public function workshifts()
+    {
+        return $this->hasOneThrough(Workshift::class, Salary::class, 'workshift_id', 'id', 'id', 'employee_id')->withoutGlobalScopes();
+    }
+
+    public function advance_payment()
+    {
+        return $this->hasOne(AdvancePayment::class, 'employee_id');
+    }
 }

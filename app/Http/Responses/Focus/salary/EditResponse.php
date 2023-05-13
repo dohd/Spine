@@ -3,6 +3,7 @@
 namespace App\Http\Responses\Focus\salary;
 
 use Illuminate\Contracts\Support\Responsable;
+use App\models\workshift\Workshift;
 
 class EditResponse implements Responsable
 {
@@ -28,8 +29,10 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
+        $workshifts = Workshift::all(['id','name']);
         return view('focus.salary.edit')->with([
-            'salary' => $this->salary
+            'salary' => $this->salary,
+            'workshifts' => $workshifts
         ]);
     }
 }

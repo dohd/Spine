@@ -3,7 +3,8 @@
         <thead>
             <tr class="item_header bg-gradient-directional-blue white ">
                 <th width="20%" class="text-center">Name</th>
-                <th width="20%" class="text-center">Brackets</th>
+                <th width="10%" class="text-center">Amount From</th>
+                <th width="10%" class="text-center">Amount To</th>
                 <th width="10%" class="text-center">Rate</th>
                 {{-- <th width="10%" class="text-center">Category</th> --}}
                 <th width="10%" class="text-center">Actions</th>               
@@ -13,18 +14,6 @@
             <!-- layout -->
             <tr>
                 <td>
-                    {{-- <input type="text" class="form-control deductname" name="name[]" id="deductname-0"> --}}
-                    <select class="form-control round deduct" name="name[]" id="deductname" data-placeholder="Select Deduction Type">
-                        <option value="">Default</option>
-                        <option value="NHIF">NHIF</option>
-                        <option value="NSSF">NSSF</option>
-                        <option value="PAYE">PAYE</option>
-                    </select>
-                </td>
-                <td><input type="text" class="form-control bracket" id="bracket-0" name="brackets[]"></td>  
-                <td><input type="text" class="form-control rate" name="rate[]" id="rate-0" value="1"></td> 
-                {{-- <td><input readonly type="text" class="form-control deduction_id" name="deduction_id[]" id="deduction_id-0"></td> --}}
-                <td><button type="button" class="btn btn-danger remove" id="remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
 
 
                 @isset ($deductions)
@@ -44,7 +33,8 @@
                             @endisset>PAYE</option>
                         </select>
                     </td>
-                    <td><input type="text" class="form-control bracket" id="bracket-0" value="{{ $deductions->brackets}}" name="brackets"></td>  
+                    <td><input type="text" class="form-control amount_from" id="amount_from-0" value="{{ $deductions->amount_from}}" name="amount_from"></td>
+                    <td><input type="text" class="form-control amount_to" id="amount_to-0" value="{{ $deductions->amount_to}}" name="amount_to"></td>  
                     <td><input type="text" class="form-control rate" name="rate" id="rate-0" value="{{$deductions->rate}}"></td> 
                     {{-- <td><input readonly type="text" class="form-control deduction_id" name="deduction_id[]" id="deduction_id-0"></td> --}}
                     <td><button type="button" class="btn btn-danger remove" id="remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>

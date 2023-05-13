@@ -1,9 +1,9 @@
 @extends ('core.layouts.app')
 
-@section ('title', "Deductions Management")
+@section ('title', 'Payroll Management')
 
 @section('page-header')
-    <h1>{{ "Deductions Management" }}</h1>
+    <h1>Payroll Management</h1>
 @endsection
 
 @section('content')
@@ -11,14 +11,14 @@
         <div class="content-wrapper">
             <div class="content-header row">
                 <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title mb-0">{{ 'Deductions Management' }}</h4>
+                    <h4 class="content-header-title mb-0">Payroll Management</h4>
 
                 </div>
                 <div class="content-header-right col-md-6 col-12">
                     <div class="media width-250 float-right">
 
                         <div class="media-body media-right text-right">
-                            @include('focus.deduction.partials.deductions-header-buttons')
+                            @include('focus.payroll.partials.payroll-header-buttons')
                         </div>
                     </div>
                 </div>
@@ -31,16 +31,14 @@
                             <div class="card-content">
 
                                 <div class="card-body">
-                                    <table id="deductions-table"
+                                    <table id="payroll-table"
                                            class="table table-striped table-bordered zero-configuration" cellspacing="0"
                                            width="100%">
                                         <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>{{ 'Title' }}</th>
-                                            <th>Amount From</th>
-                                            <th>Amount To</th>
-                                            <th>Rate</th>
+                                            <th>{{ trans('general.title') }}</th>
+                                            <th>{{ trans('general.employee') }}</th>
                                             <th>{{ trans('general.createdat') }}</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -83,7 +81,7 @@
                 }
             });
 
-            var dataTable = $('#deductions-table').dataTable({
+            var dataTable = $('#payroll-table').dataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
@@ -91,15 +89,13 @@
                     @lang('datatable.strings')
                 },
                 ajax: {
-                    url: '{{ route("biller.deductions.get") }}',
+                    url: '{{ route("biller.payroll.get") }}',
                     type: 'post'
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'name', name: 'name'},
-                    {data: 'amount_from', name: 'amount_from'},
-                    {data: 'amount_to', name: 'amount_to'},
-                    {data: 'rate', name: 'rate'},
+                    {data: 'employee', name: 'employee'},
                     {data: 'created_at', name: 'created_at'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
@@ -115,7 +111,7 @@
                     ]
                 }
             });
-            $('#deductions-table_wrapper').removeClass('form-inline');
+            $('#payroll-table_wrapper').removeClass('form-inline');
 
         }
     </script>

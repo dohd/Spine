@@ -3,7 +3,9 @@
         <thead>
             <tr class="item_header bg-gradient-directional-blue white ">
                 <th width="20%" class="text-center">Name</th>
-                <th width="20%" class="text-center">Brackets</th>
+                {{-- <th width="20%" class="text-center">Brackets</th> --}}
+                <th width="10%" class="text-center">Amount From</th>
+                <th width="10%" class="text-center">Amount To</th>
                 <th width="10%" class="text-center">Rate</th>
                 {{-- <th width="10%" class="text-center">Category</th> --}}
                 <th width="10%" class="text-center">Actions</th>               
@@ -21,7 +23,9 @@
                         <option value="PAYE">PAYE</option>
                     </select>
                 </td>
-                <td><input type="text" class="form-control bracket" id="bracket-0" name="brackets[]"></td>  
+                {{-- <td><input type="text" class="form-control bracket" id="bracket-0" name="brackets[]"></td>   --}}
+                <td><input type="text" class="form-control from" id="amount_from-0" name="amount_from[]"></td> 
+                <td><input type="text" class="form-control to" id="amount_to-0" name="amount_to[]"></td> 
                 <td><input type="text" class="form-control rate" name="rate[]" id="rate-0" value="1"></td> 
                 {{-- <td><input readonly type="text" class="form-control deduction_id" name="deduction_id[]" id="deduction_id-0"></td> --}}
                 <td><button type="button" class="btn btn-danger remove" id="remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
@@ -44,7 +48,9 @@
                             @endisset>PAYE</option>
                         </select>
                     </td>
-                    <td><input type="text" class="form-control bracket" id="bracket-0" value="{{ $deductions->brackets}}" name="brackets[]"></td>  
+                    {{-- <td><input type="text" class="form-control bracket" id="bracket-0" value="{{ $deductions->brackets}}" name="brackets[]"></td>  --}}
+                    <td><input type="text" class="form-control from" id="amount_from-0" value="{{ $deductions->amount_from}}" name="amount_from[]"></td> 
+                    <td><input type="text" class="form-control to" id="amount_to-0" value="{{ $deductions->amount_to}}" name="amount_to[]"></td>  
                     <td><input type="text" class="form-control rate" name="rate[]" id="rate-0" value="{{$deductions->rate}}"></td> 
                     {{-- <td><input readonly type="text" class="form-control deduction_id" name="deduction_id[]" id="deduction_id-0"></td> --}}
                     <td><button type="button" class="btn btn-danger remove" id="remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
@@ -85,7 +91,6 @@
         let i = rowId;
         if (name == "NHIF") {
             $('#deduction_id-'+i).val('1').change();
-            console.log(name);
         }
         else if (name == 'NSSF') {
             $('#deduction_id-'+i).val('2').change();

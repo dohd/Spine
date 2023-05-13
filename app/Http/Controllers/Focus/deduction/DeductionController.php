@@ -81,7 +81,7 @@ class DeductionController extends Controller
         // dd($request->all());
         //Input received from the request
         $input = $request->only([
-            'name','rate','brackets',
+            'name','rate','amount_from','amount_to'
         ]);
         $user['ins'] = auth()->user()->ins;
         $user['user_id'] = auth()->user()->id;
@@ -118,7 +118,7 @@ class DeductionController extends Controller
         //Update the model using repository update method
         $this->repository->update($deduction, $input);
         //return with successfull message
-        return new RedirectResponse(route('biller.deductions.index'), ['flash_success' => trans('alerts.backend.deductions.updated')]);
+        return new RedirectResponse(route('biller.deductions.index'), ['flash_success' => 'Statutory Deductions Updated!!']);
     }
 
     /**
