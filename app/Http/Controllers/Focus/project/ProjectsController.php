@@ -39,6 +39,7 @@ use App\Models\misc\Misc;
 use App\Models\project\Budget;
 use App\Models\project\Project;
 use App\Models\project\ProjectQuote;
+use App\Models\project\ProjectRelations;
 use App\Models\quote\Quote;
 use App\Models\supplier\Supplier;
 use DB;
@@ -339,6 +340,11 @@ class ProjectsController extends Controller
                     ]);
                     unset($data['duedate'], $data['time_to'], $data['description']);
                     $milestone = ProjectMileStone::create($data);
+                    ProjectRelations::create(['project_id' => $milestone->project_id, 'milestone_id' => $milestone->id]);
+
+                    // log
+                    $data = ['project_id' => $milestone->project_id, 'value' => '['. trans('projects.milestone') .']' .'['. trans('general.new') .'] '. $input['name'], 'user_id' => auth()->user()->id];
+                    ProjectLog::create($data);                    
     
                     $result = '
                         <li id="m_'. $milestone->id .'">
@@ -367,13 +373,6 @@ class ProjectsController extends Controller
                             </div>
                         </li>
                     ';
-    
-                    $data = [
-                        'project_id' => $milestone->project_id, 
-                        'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.new') . '] ' . $input['name'],
-                    ];
-                    ProjectLog::create($data);
-    
                     $response = array_replace($response, ['status' => 'Success', 't_type' => 2, 'meta' => $result]);
                     break;
                 case 5: // project activity log 
@@ -461,13 +460,12 @@ class ProjectsController extends Controller
 
         try {
             switch ($input['obj_type']) {
-                case 2 :
+                case 2: //milestone
                     $milestone = ProjectMileStone::find($input['object_id']);
-                    ProjectLog::create([
-                        'project_id' => $milestone->project_id, 
-                        'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.delete') . '] ' . $milestone->name, 
-                        'user_id' => auth()->user()->id
-                    ]);
+                    
+                    $data = ['project_id' => $milestone->project_id, 'value' => '['. trans('projects.milestone') .']' .'['. trans('general.deleted') .'] '. $milestone['name'], 'user_id' => auth()->user()->id];
+                    ProjectLog::create($data); 
+
                     $milestone->delete();
                     $data = ['status' => 'Success', 'message' => trans('general.delete'), 't_type' => 1, 'meta' => $input['object_id']];
                     break;
@@ -500,14 +498,13 @@ class ProjectsController extends Controller
                         'amount' => numberClean($data['amount']),
                     ]);
                     unset($data['duedate'], $data['time_to'], $data['description']);
-
                     $milestone = ProjectMileStone::find($input['object_id']);
                     $milestone->update($data);
-                    ProjectLog::create([
-                        'project_id' => $milestone->project_id, 
-                        'value' => '[' . trans('projects.milestone') . '] ' . '[' . trans('general.update') . '] ' . $milestone->name, 
-                        'user_id' => auth()->user()->id
-                    ]);
+
+                    // log
+                    $data = ['project_id' => $milestone->project_id, 'value' => '['. trans('projects.milestone') .']' .'['. trans('general.update') .'] '. $input['name'], 'user_id' => auth()->user()->id];
+                    ProjectLog::create($data);  
+
                     $data = ['status' => 'Success', 'message' => trans('general.update'), 't_type' => 1, 'meta' => $input['object_id'], 'refresh' => 1];
                     break;
             }
