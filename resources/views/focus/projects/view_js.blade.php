@@ -142,11 +142,13 @@
         $.get("{{ route('biller.projects.budget_limit', $project) }}", ({data}) => {
             const budgetLimit = accounting.formatNumber(data.milestone_budget);
             $('.milestone-limit').text(budgetLimit);
+            let limit = accounting.unformat($('.milestone-limit').text()); 
             if (milestoneState == 'edit') {
                 const amount = accounting.unformat($('#milestone-amount').val());
-                let limit = accounting.unformat($('.milestone-limit').text());
                 limit += amount;
                 $('.milestone-limit').text(accounting.formatNumber(limit));
+            } else {
+                if (!limit || limit < 0) $('#milestone-amount').attr('disabled', true);
             }
         });
 
@@ -155,12 +157,11 @@
             if (this.value > milestoneBudget) this.value = milestoneBudget;
             this.value = accounting.formatNumber(this.value);
         });
-        const amount = accounting.unformat($('#milestone-amount').val()); 
-        if (!amount) $('#milestone-amount').attr('disabled', true);
         
         // milestone submit
         $("#submit-data_mile_stone").on("click", function(e) {
             e.preventDefault();
+            const amount = accounting.unformat($('#milestone-amount').val());
             if (!amount) return swal('Milestone amount required!');
 
             const form_data = {};
