@@ -11,7 +11,7 @@
                 {{ Form::open(['route' => 'biller.projects.store', 'id' => 'data_form_project']) }}   
                  @include('focus.projects.form')
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-info" id="submit-data_project">
+                    <button type="submit" class="btn btn-primary" id="submit-data_project">
                         Create Project
                     </button>
                 </div>

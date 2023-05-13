@@ -1,4 +1,3 @@
-
 <div class="row">
     <fieldset class="form-group col-12"> 
         {{ Form::text('name', null, ['class' => 'new-todo-item form-control required', 'placeholder' => trans('projects.name')]) }}
@@ -7,7 +6,7 @@
 <div class="row">
     <fieldset class="form-group col-md-4">
         <select class="custom-select required" id="todo-select" name="status">
-            <option value="">-- select status --</option>
+            <option value="">-- Select Project Status --</option>
             @foreach($statuses as $row)
                 <option value="{{ $row->id }}" {{ $project->status == $row->id? 'selected' : '' }}>
                     {{ $row->name }}
@@ -18,7 +17,7 @@
 
     <fieldset class="form-group col-md-4">
         <select class="custom-select required" id="todo-select" name="priority">
-            <option value="">-- select priority --</option>
+            <option value="">-- Select Project Priority --</option>
             @foreach (['low', 'medium', 'high', 'urgent'] as $val)
                 <option value="{{ $val }}" {{ in_array($project->priority, [$val, ucfirst($val)]) ? 'selected' : '' }}>
                     {{ ucfirst($val) }}
@@ -28,7 +27,8 @@
     </fieldset>
 
     <fieldset class="form-group col-md-4">
-        <select class="form-control select-box" name="tags[]" id="tags" data-placeholder="{{ trans('tags.select') }}" multiple>
+        <select class="form-control select-box" name="tags[]" id="tags" data-placeholder="Choose tags" multiple>
+            <option value=""></option>
             @foreach($tags as $row)
                 <option value="{{ $row->id }}" {{ in_array($row->id, (@$project->tags->pluck('id')->toArray() ?: [])) ? 'selected' : '' }}>
                     {{ $row->name }}
@@ -46,55 +46,51 @@
 </fieldset>
 <div class="form-group row">
     <div class="col-md-4 col-xs-12 mt-1">
-        <div class="row">
-            <label class="col-sm-4 col-xs-6 control-label" for="sdate">
-                {{ trans('meta.from_date') }}
-            </label>
-            <div class="col-sm-6 col-xs-6">
+        <label class="col-sm-4 col-xs-6 control-label" for="sdate">{{ trans('meta.from_date') }}</label>
+        <div class="row no-gutters">
+            <div class="col">
                 {{ Form::text('start_date', null, ['class' => 'form-control from_date required', 'data-toggle' => 'datepicker']) }}
+            </div>
+            <div class="col">
                 {{ Form::time('time_from', timeFormat(@$project->start_date), ['class' => 'form-control']) }}
             </div>
         </div>
     </div>
+
     <div class="col-md-4 col-xs-12 mt-1">
-        <div class="row">
-            <label class="col-sm-4 col-xs-6  control-label" for="sdate">{{ trans('meta.to_date') }}</label>
-            <div class="col-sm-6 col-xs-6 ">
+        <label class="col-sm-4 col-xs-6  control-label" for="sdate">{{ trans('meta.to_date') }}</label>
+        <div class="row no-gutters">
+            <div class="col">
                 {{ Form::text('end_date', null, ['class' => 'form-control to_date required', 'data-toggle' => 'datepicker']) }}
+            </div>
+            <div class="col">
                 {{ Form::time('time_to', timeFormat(@$project->end_date), ['class' => 'form-control']) }}
             </div>
         </div>
     </div>
 
     <div class="col-md-4 col-xs-12 mt-1">
-        <div class="row">
-            <label class="col-sm-4 col-xs-6 control-label" for="sdate">{{trans('tasks.link_to_calender')}}</label>
-            @if(@$project->events)
-                <div class="col-sm-6 col-xs-6">
-                    <input type="checkbox" class="form-control" name="link_to_calender" checked>
-                    {{ Form::text('color', $project->events->first()->color, ['class' => 'form-control round', 'id'=>'color']) }}
-                </div>
-            @else
-                <div class="col-sm-6 col-xs-6">
-                    <input type="checkbox" class="form-control" name="link_to_calender">
-                    {{ Form::text('color', '#0b97f4', ['class' => 'form-control round', 'id'=>'color']) }}
-                </div>
-            @endif
-        </div>
+        <label class="col-sm-4 col-xs-6 control-label" for="sdate">{{trans('tasks.link_to_calender')}}</label>
+        @if(@$project->events)
+            <div class="row no-gutters">
+                <div class="col-4"><input type="checkbox" class="form-control" name="link_to_calender" checked></div>
+                <div class="col-8">{{ Form::text('color', $project->events->first()->color, ['class' => 'form-control round', 'id'=>'color']) }}</div>
+            </div>
+        @else
+            <div class="row no-gutters">
+                <div class="col-4"><input type="checkbox" class="form-control" name="link_to_calender" checked></div>
+                <div class="col-8">{{ Form::text('color', '#0b97f4', ['class' => 'form-control round', 'id'=>'color']) }}</div>
+            </div>
+        @endif
     </div>
 </div>
 
 <div class="row">
-    <fieldset class="form-group col-md-6">
-        {{ Form::text('phase', null, ['class' => 'new-todo-item form-control', 'placeholder' => trans('projects.phase')]) }}
+    <fieldset class="form-group col-md-4">
+        {{ Form::text('worth', @$project->worth? numberFormat(@$project->worth) : '', ['class' => 'new-todo-item form-control', 'placeholder' => 'Budget Estimate: 0.00']) }}
     </fieldset>
-
-    <fieldset class="form-group col-md-3">
-        {{ Form::text('worth', @$project->worth? numberFormat(@$project->worth) : '', ['class' => 'new-todo-item form-control', 'placeholder' => 'Estimated Budget']) }}
-    </fieldset>
-    <fieldset class="form-group col-md-3">
-        <select class="form-control select-box" name="project_share" data-placeholder="{{trans('projects.project_share')}}">
-            <option value="{{ @$projectshare }}" selected>-- {{trans('projects.project_share')}} --</option>
+    <fieldset class="form-group col-md-4">
+        <select class="form-control select-box" name="project_share">
             @php
                 $shares_types = [
                     trans('projects.private'),
@@ -106,9 +102,19 @@
                     trans('projects.global_view')
                 ];
             @endphp
+            <option value="" selected>-- {{trans('projects.project_share')}} --</option>
             @foreach ($shares_types as $i => $val)
-                <option value="{{ $i }}" {{ $i == $project->project_share? 'selected' : '' }}>
+                <option value="{{ $i }}" {{ @$project->project_share != '' && $i == $project->project_share? 'selected' : '' }}>
                     {{ $val }}
+                </option>
+            @endforeach
+        </select>
+    </fieldset>
+    <fieldset class="form-group position-relative has-icon-left col-md-4">
+        <select class="form-control select-box" name="employees[]" id="employee" data-placeholder="{{trans('tasks.assign')}}" multiple>
+            @foreach($employees as $employee)
+                <option value="{{ $employee['id'] }}" {{ in_array($employee->id, (@$project->users->pluck('id')->toArray() ?: []))? 'selected' : '' }}>
+                    {{ $employee->fullname }}
                 </option>
             @endforeach
         </select>
@@ -116,29 +122,26 @@
 </div>
 
 <div class="row">
-    <fieldset class="form-group position-relative has-icon-left col-md-4">
-        <select class="form-control select-box" name="employees[]" id="employee" data-placeholder="{{trans('tasks.assign')}}" multiple>
-            @foreach($employees as $employee)
-                <option value="{{ $employee['id'] }}" {{ in_array($employee->id, (@$project->users->pluck('id')->toArray() ?: []))? 'selected' : '' }}>
-                    {{ $employee['first_name'] }} {{ $employee['last_name'] }} 
+    <fieldset class="form-group position-relative has-icon-left  col-md-4">
+        <select id="person" name="customer_id" class="form-control required select-box"  data-placeholder="{{trans('customers.customer')}}">
+            <option value=""></option>
+            @if(@$project->customer)
+                <option value="{{ $project->customer->id }}" selected>
+                    {{ $project->customer->company}}
                 </option>
-            @endforeach
+            @else
+                @foreach ($customers as $customer)
+                    <option value="{{ $customer->id }}">
+                        {{ $customer->company}}
+                    </option>
+                @endforeach
+            @endif
         </select>
     </fieldset>
 
     <fieldset class="form-group position-relative has-icon-left  col-md-4">
-        <select id="person" name="customer_id" class="form-control required select-box"  data-placeholder="{{trans('customers.customer')}}" >
-            @isset($project->customer)
-                <option value="{{ $project->customer->id }}">
-                    {{ $project->customer->name}} - {{ $project->customer->company}}
-                </option>
-            @endisset
-        </select>
-    </fieldset>
-
-    <fieldset class="form-group position-relative has-icon-left  col-md-4">
-        <select id="branch_id" name="branch_id" class="form-control required select-box"  data-placeholder="Choose Branch" >
-            <option value="">-- Select Branch --</option>
+        <select id="branch_id" name="branch_id" class="form-control required select-box"  data-placeholder="Choose Branch">
+            <option value=""></option>
             @isset($project->branch)
                 <option value="{{ $project->branch->id }}" selected>
                     {{ $project->branch->name}}

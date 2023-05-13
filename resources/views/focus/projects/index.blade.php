@@ -95,6 +95,7 @@
 <script>
     const config = {
         ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
+        date: {autoHide: true, format: "{{ date(config('core.user_date_format')) }}"},
         branchSelect: {
             allowClear: true,
             ajax: {
@@ -154,62 +155,33 @@
                 autoHide: true,
                 format: '{{config('core.user_date_format')}}'
             });
-
-            $('.from_date').datepicker('setDate', 'today');
-            $('.from_date').datepicker({autoHide: true, format: '{{date(config('core.user_date_format'))}}'});
-            $('.to_date').datepicker('setDate', '{{dateFormat(date('Y-m-d', strtotime('+30 days', strtotime(date('Y-m-d')))))}}');
-            $('.to_date').datepicker({autoHide: true, format: '{{date(config('core.user_date_format'))}}'});
+            
+            $('.from_date').datepicker(config.date).datepicker('setDate', new Date());
+            $('.to_date').datepicker(config.date).datepicker('setDate', '{{dateFormat(date('Y-m-d', strtotime('+30 days', strtotime(date('Y-m-d')))))}}');
+            $('#color').colorpicker();
             $("#tags").select2();
             $("#employee").select2();
-            $("#sales_account").select2();
-            $('#color').colorpicker();
-            
-            $("#person").select2({
+            $("#person").select2({allowClear: true, dropdownParent: $('#AddProjectModal .modal-body')});
+            $("#branch_id").select2({
+                allowClear: true,
+                dropdownParent: $('#AddProjectModal .modal-body'),
                 ajax: {
-                    url: '{{route('biller.customers.select')}}',
+                    url: "{{ route('biller.branches.select') }}",
                     dataType: 'json',
                     type: 'POST',
                     quietMillis: 50,
-                    data: (person) => ({person}),
+                    data: ({term}) => ({search:term, customer_id: $('#person').val()}),
                     processResults: function (data) {
                         return {
-                            results: $.map(data, function (item) {
-                                return {
-                                    text: item.name+' - '+item.company,
-                                    id: item.id
-                                }
-                            })
+                            results: data.map(v => ({text: v.name, id: v.id})), 
                         };
                     },
                 }
             });
 
-            $("#person").on('change', function () {
+            $("#person").change(function() {
                 $("#branch_id").val('').trigger('change');
-                const tips = $('#person').val();
-
-                $("#branch_id").select2({
-                    ajax: {
-                        url: "{{ route('biller.branches.select') }}",
-                        dataType: 'json',
-                        type: 'POST',
-                        quietMillis: 50,
-                        params: {'cat_id': tips},
-                        data: (person) => ({person, customer_id: tips}),
-                        processResults: function (data) {
-                            return {
-                                results: $.map(data, function (item) {
-                                    return {
-                                        text: item.name,
-                                        id: item.id
-                                    }
-                                })
-                            };
-                        },
-                    }
-                });
             });
-            
         },
 
         drawDataTable() {
