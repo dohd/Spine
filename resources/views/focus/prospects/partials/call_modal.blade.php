@@ -9,7 +9,6 @@
             </div>
 
             <div class="mx-2 my-2">
-                
                 <p>Prospect Details</p>
                 <div id="prospectTableDetails" class="mt-2">
                     

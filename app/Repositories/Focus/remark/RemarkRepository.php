@@ -40,8 +40,7 @@ class RemarkRepository extends BaseRepository
      */
     public function create(array $data)
     {
-        $data['reminder_date'] = date_for_database($data['reminder_date']);
-        
+  
         $result = Remark::create($data);
         $response = $result->fresh();
         return $response;

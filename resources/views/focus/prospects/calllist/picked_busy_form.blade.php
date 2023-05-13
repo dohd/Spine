@@ -4,12 +4,15 @@
     
     'id' => 'busyprospect_id',
 ]) !!}
-{!! Form::hidden('call_id', null, [
-    'class' => 'form-control ',
-    
-    'id' => 'busycall_id',
-]) !!}
 
+<div class="form-group row">
+    <div class="col-sm-6"><label for="recepient" class="caption">Recepient Name</label>
+        <div class="input-group">
+            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+            {{ Form::text('recepient', null, ['class' => 'form-control ', 'placeholder' => 'Name', 'id'=>'picked_busy_recepient' ]) }}
+        </div>
+    </div>
+</div>
 <div class="form-group row">
     <div class="col-md-6">
         <p>Reminder Date</p>

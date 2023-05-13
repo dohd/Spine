@@ -4,11 +4,7 @@
     
     'id' => 'notpicked_prospect_id',
 ]) !!}
-{!! Form::hidden('call_id', null, [
-    'class' => 'form-control ',
-    
-    'id' => 'notpicked_call_id',
-]) !!}
+
 <div class="form-group row">
     <div class="col-md-6">
         <p>Reminder Date</p>

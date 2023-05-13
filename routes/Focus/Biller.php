@@ -213,6 +213,7 @@ Route::group(['namespace' => 'prospectcallresolved'], function () {
     //For Datatable
     Route::post('prospectcallresolves/get', 'ProspectsCallResolvedTableController')->name('prospectcallresolves.get');
     Route::post('prospectcallresolves/followup', 'ProspectsCallResolvedController@followup')->name('prospectcallresolves.followup');
+    Route::post('prospectcallresolves/fetchprospectrecord', 'ProspectsCallResolvedController@fetchprospectrecord')->name('prospectcallresolves.fetchprospectrecord');
 });
 
 //CallList

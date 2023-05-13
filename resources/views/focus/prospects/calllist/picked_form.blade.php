@@ -2,8 +2,16 @@
 {!! Form::hidden('prospect_id', null, [
     'class' => 'form-control ',
     
-    'id' => 'prospect_id',
+    'id' => 'picked_prospect_id',
 ]) !!}
+<div class="form-group row">
+    <div class="col-sm-6"><label for="recepient" class="caption">Recepient Name</label>
+        <div class="input-group">
+            <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+            {{ Form::text('recepient', null, ['class' => 'form-control ', 'placeholder' => 'Name', 'id'=>'picked_recepient' ]) }}
+        </div>
+    </div>
+</div>
 <div class="form-group">
     <p>Do you have an ERP</p>
     <div class="d-inline-block">

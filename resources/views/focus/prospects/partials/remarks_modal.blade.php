@@ -7,8 +7,25 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div id="tableModal" class="mx-3 mt-2">
+
+            <div class="mx-2 my-2">
+                <p>Prospect Details</p>
+                <div id="prospectTableDetailsRemarks" class="mt-2">
+                    
+                </div>
+            </div>
+
+            <div class="mx-2">
+                <p>Records</p>
+                <div id="recordsTableModal" class="mt-2">
                
+                </div>
+            </div>
+            <div class="mx-2">
+                <p>Call History</p>
+                <div id="tableModal" class="mt-2">
+               
+                </div>
             </div>
            
            
@@ -23,13 +40,13 @@
                             <div class="col-sm-9"><label for="recepient" class="caption">Recepient Name</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                    {{ Form::text('recepient', null, ['class' => 'form-control ', 'placeholder' => 'Name', 'id'=>'recepient' ,'required']) }}
+                                    {{ Form::text('recepient', null, ['class' => 'form-control ', 'placeholder' => 'Name', 'id'=>'remarksrecepient' ,'required']) }}
                                 </div>
                             </div>
                             <div class="col-sm-3"><label for="reminder_date" class="caption">Next Reminder Date</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                                    {{ Form::text('reminder_date', null, ['class' => 'form-control datepicker', 'placeholder' => 'Date', 'id' => 'reminder_date' ,'required']) }}
+                                    <input type="datetime-local" name="reminder_date" id="remarksreminder_date" class="form-control"/>
                                 </div>
                             </div>
                         </div>
@@ -37,7 +54,7 @@
                             <div class="col-sm-12"><label for="remarks" class="caption">Remarks</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                                    {{ Form::textarea('remarks', null, ['class' => 'form-control','rows' => 3, 'placeholder' => 'Remark','id'=>'remarks','required']) }}
+                                    {{ Form::textarea('any_remarks', null, ['class' => 'form-control','rows' => 3, 'placeholder' => 'Remark','id'=>'remarksanyremarks','required']) }}
                                 </div>
                             </div>
                         </div>

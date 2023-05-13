@@ -210,16 +210,39 @@
                             $('#tableModal').append(response);
                         }
                     });
-
+                     //append prospect details
+                     $.ajax({
+                        url: "{{ route('biller.prospects.fetchprospect') }}",
+                        type: 'post',
+                        data: {
+                            id: id
+                        },
+                        success: function(response) {
+                           
+                            $('#prospectTableDetailsRemarks').append(response);
+                        }
+                    });
+                     //append prospectcall resolved details
+                     $.ajax({
+                        url: "{{ route('biller.prospectcallresolves.fetchprospectrecord') }}",
+                        type: 'post',
+                        data: {
+                            id: id
+                        },
+                        success: function(response) {
+                            $('#recordsTableModal').append(response);
+                        }
+                    });
                     $('#save_remark').on('click', function(e) {
 
-                        var recepient = $('#recepient').val();
-                        var reminder_date = $('#reminder_date').val();
-                        var remarks = $('#remarks').val();
+                        var recepient = $('#remarksrecepient').val();
+                        var reminder_date = $('#remarksreminder_date').val();
+                        var remarks = $('#remarksanyremarks').val();
 
                         //disable button
                         $("#save_remark").prop("disabled", true);
                         let formData = $('#save_remark').parents('form').serializeArray();
+                        
                         $.ajax({
                             url: "remarks",
                             type: 'POST',
@@ -227,7 +250,7 @@
                             success: function(response) {
                                 saved = true;
                                 $('#remarks_table').remove();
-                                $('#tableModal').append(response);
+                                $('#recordsTableModal').append(response);
                             },
                             error: function(error) {
                                 console.log(error.responseText);
@@ -235,17 +258,19 @@
                             }
                         });
 
-                        $('#recepient').val('');
-                        $('#reminder_date').val('');
-                        $('#remarks').val('');
+                        $('#remarksrecepient').val('');
+                        $('#remarksreminder_date').val('');
+                        $('#remarksanyremarks').val('');
                         $("#save_remark").prop("disabled", false);
                     });
 
                     $('#remarksModal').on('hidden.bs.modal', function(e) {
                         $('#remarks_table').remove();
                         $('#prospect_id').val();
+                        $('#prospect_prospect_table').remove();
+                        $('#records_table').remove();
                         id = "";
-                        saved ? window.location.reload() : null;
+                        //saved ? window.location.reload() : null;
                     });
                 });
             },
@@ -257,16 +282,16 @@
                     //show modal
                     $('#callModal').modal('show');
 
-
+                  
                     //picked
-                    $('#prospect_id').val(id);
-
+                    $('#picked_prospect_id').val(id);
+                    
                     //notpicked
-                    $('#notpicked_call_id').val(call_id);
+                    
                     $('#notpicked_prospect_id').val(id);
 
                     //pickedbusy
-                    $('#busycall_id').val(call_id);
+                    
                     $('#busyprospect_id').val(id);
 
                     //notavailable
@@ -290,7 +315,6 @@
                             id: id
                         },
                         success: function(response) {
-                            console.log(response);
                             $('#prospectTableDetails').append(response);
                         }
                     });
@@ -354,12 +378,10 @@
                 $('#callModal').on('hidden.bs.modal', function() {
                     $("#notes").val('');
                     $("#current_erp_challenges").val('');
-                    $('#prospect_id').val('');
+                    $('#picked_prospect_id').val('');
                     $('#notpicked_prospect_id').val('');
                     $('#busyprospect_id').val('');
                     $('#notavailable_prospect').val('');
-                    $('#busycall_id').val('');
-                    $('#call_id').val('');
                     $("#save_call_chat").attr("disabled", false);
                     $("#save_reshedule").attr("disabled", false);
                     $("#save_reminder").attr("disabled", false);
@@ -367,7 +389,7 @@
                     $('#remarks_table').remove();
                     $('#prospect_prospect_table').remove();
                     id= "";
-                    saved?window.location.reload():null;
+                    //saved?window.location.reload():null;
                 });
             },
 

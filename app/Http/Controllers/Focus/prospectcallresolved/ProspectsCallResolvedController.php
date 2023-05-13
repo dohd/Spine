@@ -87,13 +87,13 @@ class ProspectsCallResolvedController extends Controller
     {
 
         // filter request input fields
-        $data = $request->except(['_token', 'ins', 'files']);
+        $data = $request->except(['_token', 'ins', 'files','recepient']);
        
-
+        $remarks = $request->only('prospect_id','recepient','any_remarks','reminder_date');
         //Create the model using repository create method
-        $this->repository->create($data);
+        $this->repository->create($data,$remarks);
 
-        return new RedirectResponse(route('biller.calllists.mytoday'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
+        return new RedirectResponse(route('biller.prospectscallresolved.index'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
     }
 
     // /**
@@ -148,7 +148,7 @@ class ProspectsCallResolvedController extends Controller
     {
         $this->repository->delete($prospectcallresolved);
 
-        return new RedirectResponse(route('biller.prospectcallresolved.index'), ['flash_success' => 'ProspectCallResolved Successfully Deleted']);
+        return new RedirectResponse(route('biller.prospectscallresolved.index'), ['flash_success' => 'ProspectCallResolved Successfully Deleted']);
     }
 
     // /**
@@ -180,37 +180,47 @@ class ProspectsCallResolvedController extends Controller
     {
 
         // filter request input fields
-        $data = $request->except(['_token', 'ins', 'files','call_id']);
-        $calllist = $request->only(['prospect_id', 'call_id', 'reminder_date']);
+        $data = $request->except(['_token', 'ins', 'files']);
+        $remarks = $request->only('prospect_id','any_remarks','reminder_date');
+       
         
         //Create the model using repository create method
-        $this->repository->notpickedcreate($data,$calllist);
+        $this->repository->notpickedcreate($data,$remarks);
 
-        return new RedirectResponse(route('biller.calllists.mytoday'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
+        return new RedirectResponse(route('biller.prospectscallresolved.index'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
     }
     public function notavailable(Request $request)
     {
 
         // filter request input fields
-        $data = $request->except(['_token', 'ins', 'files','call_id']);
-        
+        $data = $request->except(['_token', 'ins', 'files']);
+        $remarks = $request->only('prospect_id','any_remarks');
         
         //Create the model using repository create method
-        $this->repository->notavailablecreate($data);
+        $this->repository->notavailablecreate($data,$remarks);
 
-        return new RedirectResponse(route('biller.calllists.mytoday'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
+        return new RedirectResponse(route('biller.prospectscallresolved.index'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
     }
     public function pickedbusy(Request $request)
     {
 
         // filter request input fields
-        $data = $request->except(['_token', 'ins', 'files','call_id']);
+        $data = $request->except(['_token', 'ins', 'files','recepient']);
 
-        $calllist = $request->only(['prospect_id', 'call_id', 'reminder_date']);
+        $remarks = $request->only('prospect_id','recepient','any_remarks','reminder_date');
         
         //Create the model using repository create method
-        $this->repository->pickedbusycreate($data,$calllist);
+        $this->repository->pickedbusycreate($data,$remarks);
 
-        return new RedirectResponse(route('biller.calllists.mytoday'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
+        return new RedirectResponse(route('biller.prospectscallresolved.index'), ['flash_success' => 'ProspectCallResolved Successfully Created']);
+    }
+
+    public function fetchprospectrecord(Request $request){
+        $prospectid = $request->id;
+        $prospectrecord = ProspectCallResolved::where('prospect_id',$prospectid)->get()[0];
+
+        
+        
+         return view('focus.prospects.partials.records_table', compact('prospectrecord'));
     }
 }

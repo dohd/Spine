@@ -26,7 +26,7 @@ class RemarkRequest extends FormRequest
         return [
             'recepient' => 'required',
             'reminder_date' => 'required',
-            'remarks' => 'required',
+            'any_remarks' => 'required',
         ];
     }
 

@@ -7,6 +7,7 @@ use App\Exceptions\GeneralException;
 use App\Models\prospect\Prospect;
 use App\Models\prospect_calllist\ProspectCallList;
 use App\Models\prospectcallresolved\ProspectCallResolved;
+use App\Models\remark\Remark;
 use App\Repositories\BaseRepository;
 use DB;
 
@@ -40,10 +41,8 @@ class ProspectCallResolvedRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function create(array $data)
+    public function create(array $data, array $remarks)
     {
-        $data['reminder_date'] = date_for_database($data['reminder_date']);
-
 
         //determine if prospect is hot,warm or cold
 
@@ -75,27 +74,48 @@ class ProspectCallResolvedRepository extends BaseRepository
         }
 
         
-        $result = ProspectCallResolved::create($data);
+        $result = ProspectCallResolved::updateOrCreate(
+            ['prospect_id'=>$data['prospect_id']],
+            [
+                'erp'=>$data['erp'],
+                'current_erp'=>$data['current_erp'],
+                'current_erp_usage'=>$data['current_erp_usage'],
+                'erp_challenges'=>$data['erp_challenges'],
+                'current_erp_challenges'=>$data['current_erp_challenges'],
+                'erp_demo'=>$data['erp_demo'],
+                'reminder_date'=>$data['reminder_date'],
+                'any_remarks'=>$data['any_remarks'],
+            ]
+        );
         if($result){
+            Remark::create($remarks);
             $id = $data['prospect_id'];
             $prospect = Prospect::find($id);
-            if($prospect){
+           
                 $prospect->update([
                     'call_status' => 'called',
                     'is_called' => 1,
                     'temperate' => $temperate,
                 ]);
-            }
+           
+
         }
         return $result;
 
         throw new GeneralException('Error Creating Prospect');
     }
-    public function notpickedcreate(array $data,array $calllist)
+    public function notpickedcreate(array $data,array $remarks)
     {
         
-        $result = ProspectCallResolved::create($data);
+        $result = ProspectCallResolved::updateOrCreate(
+            ['prospect_id'=>$data['prospect_id']],
+            [
+                'reminder_date'=>$data['reminder_date'],
+                'any_remarks'=>$data['any_remarks'],
+            ]
+        );
         if($result){
+            Remark::create($remarks);
             $id = $data['prospect_id'];
             $prospect = Prospect::find($id);
             if($prospect){
@@ -114,8 +134,15 @@ class ProspectCallResolvedRepository extends BaseRepository
     public function notavailablecreate(array $data)
     {
         
-        $result = ProspectCallResolved::create($data);
+        $result = ProspectCallResolved::updateOrCreate(
+            ['prospect_id'=>$data['prospect_id']],
+            [
+                'reminder_date'=>$data['reminder_date'],
+                'any_remarks'=>$data['any_remarks'],
+            ]
+        );
         if($result){
+           
             $id = $data['prospect_id'];
             $prospect = Prospect::find($id);
             if($prospect){
@@ -133,11 +160,18 @@ class ProspectCallResolvedRepository extends BaseRepository
 
         throw new GeneralException('Error Creating Prospect');
     }
-    public function pickedbusycreate(array $data,array $calllist)
+    public function pickedbusycreate(array $data,array $remarks)
     {
         
-        $result = ProspectCallResolved::create($data);
+        $result = ProspectCallResolved::updateOrCreate(
+            ['prospect_id'=>$data['prospect_id']],
+            [
+                'reminder_date'=>$data['reminder_date'],
+                'any_remarks'=>$data['any_remarks'],
+            ]
+        );
         if($result){
+            Remark::create($remarks);
             $id = $data['prospect_id'];
             $prospect = Prospect::find($id);
             if($prospect){
@@ -146,7 +180,7 @@ class ProspectCallResolvedRepository extends BaseRepository
                     'is_called' => 1,
                     'temperate' => 'warm',
                 ]);
-                $calldate = $calllist['reminder_date'];
+                
                
 
             }
