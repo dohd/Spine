@@ -182,4 +182,12 @@ class ProspectsController extends Controller
 
         return redirect()->back();
     }
+
+    public function fetchprospect(Request $request){
+        $prospectid = $request->id;
+        $prospect = Prospect::find($prospectid);
+
+        
+        return view('focus.prospects.partials.prospect_table', compact('prospect'));
+    }
 }

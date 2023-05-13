@@ -141,8 +141,40 @@
 
                     //notavailable
                     $('#notavailable_prospect').val(id);
-                    
 
+                    //append response to call history
+                    $.ajax({
+                        url: "{{ route('biller.prospects.followup') }}",
+                        type: 'post',
+                        data: {
+                            id: id
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            $('#remarksTableModal').append(response);
+                        }
+                    });
+
+                    //append prospect details
+                    $.ajax({
+                        url: "{{ route('biller.prospects.fetchprospect') }}",
+                        type: 'post',
+                        data: {
+                            id: id
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            $('#prospectTableDetails').append(response);
+                        }
+                    });
+
+                    $('#callModal').on('hidden.bs.modal', function(e) {
+                        $('#remarks_table').remove();
+                        $('#prospect_prospect_table').remove();
+                        $('#prospect_id').val();
+                        id = "";
+                        saved ? window.location.reload() : null;
+                    });
                 });
             },
 
@@ -184,7 +216,7 @@
                 }
             },
             demoChange() {
-                
+
                 if ($(this).val() == "0") {
                     $("#demo").css("display", "none");
                     $("#notes").val('');

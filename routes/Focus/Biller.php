@@ -200,6 +200,7 @@ Route::group(['namespace' => 'prospect'], function () {
     //For Datatable
     Route::post('prospects/get', 'ProspectsTableController')->name('prospects.get');
     Route::post('prospects/followup', 'ProspectsController@followup')->name('prospects.followup');
+    Route::post('prospects/fetchprospect', 'ProspectsController@fetchprospect')->name('prospects.fetchprospect');
 });
 //ProspectsCallResolved
 Route::group(['namespace' => 'prospectcallresolved'], function () {

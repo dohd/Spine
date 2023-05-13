@@ -152,6 +152,8 @@
                 this.showCallModal();
                 //form remark
                 remark: @json(@$remark),
+
+                //filters
                 $('#bytitle').change(this.titleChange);
                 $('#bytemperate').change(this.temperateChange);
                 $('#bycallstatus').change(this.callStatusChange);
@@ -196,15 +198,15 @@
                     let saved = false;
                     //set prospect id to form
                     $('#prospect_id').val(id);
-
-                    $.ajax({
+                    
+                     //append response to call history
+                     $.ajax({
                         url: "{{ route('biller.prospects.followup') }}",
-                        type: 'POST',
+                        type: 'post',
                         data: {
                             id: id
                         },
                         success: function(response) {
-
                             $('#tableModal').append(response);
                         }
                     });
@@ -269,8 +271,31 @@
 
                     //notavailable
                     $('#notavailable_prospect').val(id);
+                    //append response to call history
+                    $.ajax({
+                        url: "{{ route('biller.prospects.followup') }}",
+                        type: 'post',
+                        data: {
+                            id: id
+                        },
+                        success: function(response) {
+                            $('#remarksTableModal').append(response);
+                        }
+                    });
+                    //append prospect details
+                    $.ajax({
+                        url: "{{ route('biller.prospects.fetchprospect') }}",
+                        type: 'post',
+                        data: {
+                            id: id
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            $('#prospectTableDetails').append(response);
+                        }
+                    });
 
-
+                    
                 });
             },
             erpChange() {
@@ -339,6 +364,10 @@
                     $("#save_reshedule").attr("disabled", false);
                     $("#save_reminder").attr("disabled", false);
                     $("#notavailable").attr("disabled", false);
+                    $('#remarks_table').remove();
+                    $('#prospect_prospect_table').remove();
+                    id= "";
+                    saved?window.location.reload():null;
                 });
             },
 

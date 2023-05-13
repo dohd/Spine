@@ -8,40 +8,22 @@
                 </button>
             </div>
 
-            <div class="mx-2">
-                <table id="prospect_details_table" class="table p-1 table-striped table-bordered remarkTable">
-                    <thead >
-                        <tr>
-                            <td>COMPANY</td>
-                            <td>PROSPECT NAME</td>
-                            <td>PHONE</td>
-                            <td>INDUSTRY</td>
-                        </tr>
-                    </thead>
+            <div class="mx-2 my-2">
+                
+                <p>Prospect Details</p>
+                <div id="prospectTableDetails" class="mt-2">
                     
-                    <tbody>
-                        
-                        {{-- @if($prosect)
-                            <tr>
-                            
-                                <td> {{ $prospect->company }} </td>
-                                <td> {{ $prospect->contact_person }} </td>
-                                <td> {{ $prospect->phone }} </td>
-                                <td> {{ $prospect->industry }} </td>
-                                
-                            </tr>
-                       
-                    @else
-                        <tr>
-                            <td  style="text-align: center; vertical-align: middle;" colspan="5"> No record found </td>
-                        </tr>
-                    @endif --}}
-                       
-                    </tbody>
-                </table>  
+                </div>
+            </div>
+            <div class="mx-2">
+                <p>Call History</p>
+                <div id="remarksTableModal" class="mt-2">
+               
+                </div>
             </div>
 
             <div class="mx-2 mt-3">
+            
                 <div class="form-group row">
                     <div class=' mb-2'>
 

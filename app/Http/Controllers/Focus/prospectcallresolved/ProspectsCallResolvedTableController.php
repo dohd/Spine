@@ -106,7 +106,7 @@ class ProspectsCallResolvedTableController extends Controller
                 }else{
                     $text = "Show details";
                 }
-
+                
                 return $show? '<a id="follow" href="javascript:void(0)" class="btn btn-primary follow" data-id="' . $prospectcallresolved->prospect->id . '" >
                          '.$text.'
                          </a>': '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcallresolved->prospect_id . '" call-id="'.$prospectcallresolved->call_id.'" data-toggle="tooltip"  title="Call" >
