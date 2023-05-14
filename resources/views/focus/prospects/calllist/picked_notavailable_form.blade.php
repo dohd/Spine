@@ -9,7 +9,7 @@
   
     <div class="col-md-6">
         <p>Remarks/Notes</p>
-        {!! Form::textarea('unavailable_remarks', null, [
+        {!! Form::textarea('any_remarks', null, [
             'class' => 'form-control ',
             'rows'=>3,
             'placeholder' => 'Remarks',

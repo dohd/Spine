@@ -131,18 +131,17 @@ class ProspectCallResolvedRepository extends BaseRepository
 
         throw new GeneralException('Error Creating Prospect');
     }
-    public function notavailablecreate(array $data)
+    public function notavailablecreate(array $data,array $remarks)
     {
         
         $result = ProspectCallResolved::updateOrCreate(
             ['prospect_id'=>$data['prospect_id']],
             [
-                'reminder_date'=>$data['reminder_date'],
                 'any_remarks'=>$data['any_remarks'],
             ]
         );
         if($result){
-           
+            Remark::create($remarks);
             $id = $data['prospect_id'];
             $prospect = Prospect::find($id);
             if($prospect){
@@ -151,7 +150,7 @@ class ProspectCallResolvedRepository extends BaseRepository
                     'is_called' => 1,
                     'temperate' => 'cold',
                     'status'=>'lost',
-                    'reason'=>$data['unavailable_remarks']
+                    'reason'=>$data['any_remarks']
                 ]);
                 
             }
