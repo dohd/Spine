@@ -123,24 +123,25 @@
             showModal() {
                 $('#mytodaycalllist-table tbody').on('click', '#call', function(e) {
                     var id = $(this).attr('data-id');
-                    var call_id = $(this).attr('call-id');
+                    
                     //show modal
                     $('#callModal').modal('show');
 
 
                     //picked
-                    $('#prospect_id').val(id);
-
+                    $('#picked_prospect_id').val(id);
+                    
                     //notpicked
-                    $('#notpicked_call_id').val(call_id);
+                    
                     $('#notpicked_prospect_id').val(id);
 
                     //pickedbusy
-                    $('#busycall_id').val(call_id);
+                    
                     $('#busyprospect_id').val(id);
 
                     //notavailable
                     $('#notavailable_prospect').val(id);
+                    
 
                     //append response to call history
                     $.ajax({
@@ -150,7 +151,6 @@
                             id: id
                         },
                         success: function(response) {
-                            console.log(response);
                             $('#remarksTableModal').append(response);
                         }
                     });
@@ -163,7 +163,7 @@
                             id: id
                         },
                         success: function(response) {
-                            console.log(response);
+                           
                             $('#prospectTableDetails').append(response);
                         }
                     });
@@ -258,16 +258,18 @@
                 $('#callModal').on('hidden.bs.modal', function() {
                     $("#notes").val('');
                     $("#current_erp_challenges").val('');
-                    $('#prospect_id').val('');
+                    $('#picked_prospect_id').val('');
                     $('#notpicked_prospect_id').val('');
                     $('#busyprospect_id').val('');
                     $('#notavailable_prospect').val('');
-                    $('#busycall_id').val('');
-                    $('#call_id').val('');
                     $("#save_call_chat").attr("disabled", false);
                     $("#save_reshedule").attr("disabled", false);
                     $("#save_reminder").attr("disabled", false);
                     $("#notavailable").attr("disabled", false);
+                    $('#remarks_table').remove();
+                    $('#prospect_prospect_table').remove();
+                    id= "";
+                    //saved?window.location.reload():null;
                 });
             },
 

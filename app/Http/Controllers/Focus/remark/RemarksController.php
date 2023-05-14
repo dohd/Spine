@@ -83,7 +83,7 @@ class RemarksController extends Controller
 
         // filter request input fields
         $data = $request->except(['_token', 'ins', 'files']);
-
+       
         //Create the model using repository create method
         $this->repository->create($data);
         $remarks = Remark::where('prospect_id', $request->prospect_id)->orderBy('created_at', 'DESC')->limit(10)->get();
