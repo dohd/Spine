@@ -188,6 +188,7 @@ class CallListController extends Controller
        $start = Carbon::parse($calllist->start_date)->format('n');
        $end =Carbon::parse($calllist->end_date)->format('n');
         $id = $calllist->id;
+
         return view('focus.prospects.calllist.allocationdays',compact('id','start','end','daterange'));
     }
     public function prospectviacalllist(Request $request)
@@ -200,8 +201,18 @@ class CallListController extends Controller
             $q->select('id', 'title', 'company','industry','contact_person','email','phone','region','call_status');
         }])
         ->get();
+        $todayscount = ProspectCallList::where('call_id',$request->id)->whereMonth('call_date', $request->month)
+        ->whereDay('call_date', $request->day)
+        ->count();
+        $notcalledcount = ProspectCallList::where('call_id',$request->id)->whereMonth('call_date', $request->month)
+        ->whereDay('call_date', $request->day)
+        ->whereHas('prospect', function ($q) {
+                $q->select('id', 'title', 'company','industry','contact_person','email','phone','region','call_status')->where('is_called',0);
+            })
+       
+        ->count();
       
-    return response()->json($prospects);
+    return response()->json(['total'=>$todayscount,'notcalled'=>$notcalledcount,'prospects'=>$prospects]);
     }
 
 

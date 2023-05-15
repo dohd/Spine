@@ -6,21 +6,21 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\prospect\Prospect;
+use App\Models\prospectcallresolved\ProspectCallResolved;
 
-class TicketNotification extends Notification
+class ProspectNotification extends Notification
 {
     use Queueable;
 
     protected $user;
     protected $message;
 
-    protected $prospect;
+    protected $prospectcallresolved;
 
-    public function __construct(Prospect $prospect)
+    public function __construct(ProspectCallResolved $prospectcallresolved)
     {
         // $this->reference = $reference;
-        $this->prospect = $prospect;
+        $this->prospectcallresolved = $prospectcallresolved;
     }
 
     /**
@@ -61,9 +61,9 @@ class TicketNotification extends Notification
 
             'data' => [
                 'title' => 'Reminder to call Prospect',
-                'data' => 'Prospect - ' . $this->prospect->contact_person . 'From '. $this->prospect->company,
-                'background' =>  $this->prospect->note,
-                
+                'data' => $this->prospectcallresolved->prospect->contact_person . ' From '. $this->prospectcallresolved->prospect->company,
+                'background' =>  $this->prospectcallresolved->any_remarks,
+                'icon' =>$this->prospectcallresolved->reminder_date
             ],
 
         ];

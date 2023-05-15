@@ -129,14 +129,14 @@
 
 
                     //picked
-                    $('#prospect_id').val(id);
+                    $('#picked_prospect_id').val(id);
 
                     //notpicked
-                    $('#notpicked_call_id').val(call_id);
+
                     $('#notpicked_prospect_id').val(id);
 
                     //pickedbusy
-                    $('#busycall_id').val(call_id);
+
                     $('#busyprospect_id').val(id);
 
                     //notavailable
@@ -169,9 +169,18 @@
                     });
 
                     $('#callModal').on('hidden.bs.modal', function(e) {
+                        $("#notes").val('');
+                        $("#current_erp_challenges").val('');
+                        $('#picked_prospect_id').val('');
+                        $('#notpicked_prospect_id').val('');
+                        $('#busyprospect_id').val('');
+                        $('#notavailable_prospect').val('');
+                        $("#save_call_chat").attr("disabled", false);
+                        $("#save_reshedule").attr("disabled", false);
+                        $("#save_reminder").attr("disabled", false);
+                        $("#notavailable").attr("disabled", false);
                         $('#remarks_table').remove();
                         $('#prospect_prospect_table').remove();
-                        $('#prospect_id').val();
                         id = "";
                         saved ? window.location.reload() : null;
                     });

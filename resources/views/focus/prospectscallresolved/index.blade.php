@@ -95,11 +95,13 @@
                                         <th>Title</th>
                                         <th>Company Name</th>
                                         <th>Industry</th>
-                                        <th>Contact Name</th>
-                                        <th>Phone</th>
+                                        {{-- <th>Contact Name</th>
+                                        <th>Phone</th> --}}
                                         <th>Region</th>
                                         <th>Type</th>
+                                        <th>Reminder Date</th>
                                         <th>Follow up</th>
+                                       
                                         <th>CallStatus</th>
                                         <th>Status</th>
                                         <th>Reason</th>
@@ -430,14 +432,14 @@
                             data: 'industry',
                             name: 'industry'
                         },
-                        {
-                            data: 'name',
-                            name: 'name'
-                        },
-                        {
-                            data: 'phone',
-                            name: 'phone'
-                        },
+                        // {
+                        //     data: 'name',
+                        //     name: 'name'
+                        // },
+                        // {
+                        //     data: 'phone',
+                        //     name: 'phone'
+                        // },
 
                         {
                             data: 'region',
@@ -448,10 +450,13 @@
                             name: 'temperate'
                         },
                         {
+                            data: 'reminder_date',
+                            name: 'reminder_date'
+                        },
+                        {
                             data: 'follow_up',
                             name: 'follow_up'
                         },
-
                         {
                             data: 'call_status',
                             name: 'call_status'
@@ -474,7 +479,7 @@
                     ],
                     columnDefs: [{
                         type: "custom-date-sort",
-                        targets: [5]
+                        targets: []
                     }],
                     order: [
                         [0, "desc"]

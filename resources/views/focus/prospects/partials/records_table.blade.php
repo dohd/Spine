@@ -3,6 +3,7 @@
         <tr>
             <td>CURRENT ERP</td>
             <td>ERP USAGE</td>
+            <td>HAS CHALLENGES</td>
             <td>ERP CHALLENGES</td>
             <td>DEMO DATE</td>
             <td>REMARKS</td>
@@ -16,6 +17,7 @@
         <tr>
             <td> {{ $prospectrecord->current_erp }} </td>
             <td> {{ $prospectrecord->current_erp_usage }} </td>
+            <td> {{ $prospectrecord->erp_challenges == "1" ?'Yes':'No' }} </td>
             <td> {{ $prospectrecord->current_erp_challenges }} </td>
             <td> {{ $prospectrecord->reminder_date }} </td>
             <td> {{ $prospectrecord->any_remarks }} </td>

@@ -70,16 +70,16 @@ class ProspectsCallResolvedTableController extends Controller
 
                 return $client_industry;
             })
-            ->addColumn('name', function ($prospectcallresolved) {
-                $name = $prospectcallresolved->prospect->contact_person == null ? '-----' : $prospectcallresolved->prospect->contact_person;
+            // ->addColumn('name', function ($prospectcallresolved) {
+            //     $name = $prospectcallresolved->prospect->contact_person == null ? '-----' : $prospectcallresolved->prospect->contact_person;
 
-                return $name;
-            })
-            ->addColumn('phone', function ($prospectcallresolved) {
-                $phone = $prospectcallresolved->prospect->phone == null ? '-----' : $prospectcallresolved->prospect->phone;
+            //     return $name;
+            // })
+            // ->addColumn('phone', function ($prospectcallresolved) {
+            //     $phone = $prospectcallresolved->prospect->phone == null ? '-----' : $prospectcallresolved->prospect->phone;
 
-                return $phone;
-            })
+            //     return $phone;
+            // })
             ->addColumn('region', function ($prospectcallresolved) {
                 $client_region = $prospectcallresolved->prospect->region == null ? '-----' : $prospectcallresolved->prospect->region;
 
@@ -112,6 +112,12 @@ class ProspectsCallResolvedTableController extends Controller
                          </a>': '<a id="call" href="javascript:void(0)" class="btn btn-primary" data-id="' . $prospectcallresolved->prospect_id . '" call-id="'.$prospectcallresolved->call_id.'" data-toggle="tooltip"  title="Call" >
                          <i  class="fa fa-vcard"></i>
                                   </a>';
+            })
+            ->addColumn('reminder_date', function ($prospectcallresolved) {
+                $date = $prospectcallresolved->reminder_date;
+               
+
+                return $date;
             })
             ->addColumn('temperate', function ($prospectcallresolved) {
                 $status = $prospectcallresolved->prospect->temperate;
