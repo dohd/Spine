@@ -52,9 +52,7 @@ class NotesTableController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $core = collect();
-        $note_access = access()->allow('manage-note') || project_view(request('project_id', 0));
-        if ($note_access) $core = $this->note->getForDataTable();
+        $core = $this->note->getForDataTable();
         
         return Datatables::of($core)
             ->escapeColumns(['id'])
@@ -63,10 +61,18 @@ class NotesTableController extends Controller
                 return Carbon::parse($note->created_at)->toDateString();
             })
             ->addColumn('user', function ($note) {
-                return user_data($note->user_id)['first_name'];
+                return @$note->creator->fullname;
             })
             ->addColumn('actions', function ($note) {
-                return $note->action_buttons;
+                if (request('project_id')) {
+                    $btn_view = '<a href="'. route('biller.notes.show', [$note->id]) .'" class="btn btn-primary round" data-toggle="tooltip" data-placement="top" title="View"><i class="fa fa-eye"></i></a>';
+                    $btn_edit = '<a href="'. route('biller.notes.edit', [$note->id]) .'" class="btn btn-warning round" data-toggle="tooltip" data-placement="top" title="Edit"><i class="fa fa-pencil "></i> </a>';
+                    $btn_del = '<a class="btn btn-danger round" table-method="delete" data-trans-button-cancel="Cancel" data-trans-button-confirm="Delete" data-trans-title="Are you sure you want to do this?" data-toggle="tooltip" data-placement="top" title="Delete" style="cursor:pointer;" onclick="$(this).find(&quot;form&quot;).submit();">
+                    <i class="fa fa-trash"></i> <form action="' . route('biller.notes.show', [$note->id]) . '" method="POST" name="delete_table_item" style="display:none"></form></a>';
+                
+                    return $btn_edit . ' ' . $btn_del;
+                }
+                // return $note->action_buttons;
             })
             ->make(true);
     }

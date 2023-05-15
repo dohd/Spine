@@ -60,7 +60,7 @@ class NoteRepository extends BaseRepository
     {
         $input['title'] = strip_tags($input['title']);
         $input['content'] = clean(html_entity_decode($input['content']), 'purifier.settings.custom_definition');
-        if ($note->update($input)) return true;
+        if ($note->update($input)) return $note;
     }
 
     /**

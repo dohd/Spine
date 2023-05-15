@@ -115,16 +115,18 @@ class NotesController extends Controller
      */
     public function update(EditNoteRequest $request, Note $note)
     {
-        //Input received from the request
-
         $input = $request->only(['title', 'content']);
+
         try {
-            //Update the model using repository update method
+            $project = $note->project;
             $this->repository->update($note, $input);
+            
+            if ($project) 
+            return new RedirectResponse(route('biller.projects.show', $project), ['flash_success' => trans('alerts.backend.notes.updated')]);
         } catch (\Throwable $th) {
             return errorHandler('Error Updating Notes', $th);
         }
-        //return with successfull message
+
         return new RedirectResponse(route('biller.notes.index'), ['flash_success' => trans('alerts.backend.notes.updated')]);
     }
 
@@ -139,14 +141,15 @@ class NotesController extends Controller
     {
         try {
             $project = $note->project;
-
             $this->repository->delete($note);
 
-            if ($project) return new RedirectResponse(route('biller.projects.show', $project), ['flash_success' => trans('alerts.backend.notes.deleted')]);
-            return new RedirectResponse(route('biller.notes.index'), ['flash_success' => trans('alerts.backend.notes.deleted')]);
+            if ($project) 
+            return new RedirectResponse(route('biller.projects.show', $project), ['flash_success' => trans('alerts.backend.notes.deleted')]);
         } catch (\Throwable $th) {
             return errorHandler('Error Deleting Notes', $th);
         }
+
+        return new RedirectResponse(route('biller.notes.index'), ['flash_success' => trans('alerts.backend.notes.deleted')]);
     }
 
     /**
