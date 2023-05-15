@@ -249,10 +249,8 @@
             $('#t_end').html(data.duedate);
             $('#t_status').html(data.status);
             $('#t_status_list').html(data.status_list);
-            $('#t_status_list').html(data.status_list);
             $('#t_creator').html(data.creator);
             $('#t_assigned').html(data.assigned);
-            $('#ts_description').html(data.short_desc);
             $('#t_description').html(data.description);
         });
     });
@@ -384,9 +382,9 @@
         });
     }
     
+    // fetch expenses
     ['accountLedger', 'supplier'].forEach(v => $('#'+v).select2({allowClear: true}));
     ['expCategory', 'accountLedger', 'supplier'].forEach(v => $('#'+v).change(() =>  expenses(render=true)));
-    // fetch expenses
     function expenses(render=false) {
         if (!render) {
             if ($('#expItems tbody tr').length) return;   
@@ -474,7 +472,7 @@
             },
             columns: [
                 {data: 'DT_Row_Index', name: 'id'},
-                ...['title', 'created_at', 'user'].map(v => ({data:v, name:v})),
+                ...['title', 'content', 'user', 'created_at'].map(v => ({data:v, name:v})),
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ],
             order: [[0, "desc"]],
@@ -499,7 +497,7 @@
             },
             columns: [
                 {data: 'DT_Row_Index', name: 'id'},
-                ...['milestone', 'tags','start', 'duedate', 'status'].map(v => ({data:v, name:v})),
+                ...['milestone', 'tags','start', 'duedate', 'status', 'assigned_to'].map(v => ({data:v, name:v})),
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ],
             order: [[0, "desc"]],

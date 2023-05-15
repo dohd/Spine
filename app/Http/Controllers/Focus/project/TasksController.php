@@ -97,6 +97,12 @@ class TasksController extends Controller
             business_alerts($mail);
         }
 
+        $task_users = $result->users->map(fn($v) => $v->full_name)->toArray();
+        $task_users = implode(', ', $task_users);
+
+        $task_back = task_status($result->status);
+        $status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span>';
+
         $tag = '';
         foreach ($result->tags as $row) {
             $tag .= '<span class="badge" style="background-color:'. $row['color'] .'">'. $row['name'] .'</span> ';
@@ -105,8 +111,6 @@ class TasksController extends Controller
         $btn .= '&nbsp;&nbsp;<a href="' . route("biller.tasks.edit", [$result->id]) . '" data-toggle="tooltip" data-placement="top" title="Edit"><i  class="ft-edit"></i></a>';
         $btn .= '&nbsp;&nbsp;<a class="danger" href="' . route("biller.tasks.destroy", [$result->id]) . '" table-method="delete" data-trans-button-cancel="' . trans('buttons.general.cancel') . '" data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '" data-trans-title="' . trans('strings.backend.general.are_you_sure') . '" data-toggle="tooltip" data-placement="top" title="Delete"> <i  class="fa fa-trash"></i> </a>';
 
-        $task_back = task_status($result->status);
-        $status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span>';
         
         // project task
         if ($result->milestone) {
@@ -117,6 +121,7 @@ class TasksController extends Controller
                 <td>' . dateTimeFormat($result->start) . '</td>
                 <td>' . dateTimeFormat($result->duedate) . '</td>
                 <td>' . $status . '</td>
+                <td>' . $task_users . '</td>
                 <td>' . $btn . '</td>
             </tr>';            
         } else {
@@ -155,10 +160,11 @@ class TasksController extends Controller
         $input = $request->except(['_token', 'ins']);
 
         try {
-            $result = $this->repository->update($task, $input);
+            $project = @$task->milestone->project;
+            $this->repository->update($task, $input);
             
-            if (@$result->milestone->project) 
-            return new RedirectResponse(route('biller.projects.show', $result->milestone->project), ['flash_success' => trans('alerts.backend.tasks.updated')]);
+            if ($project) 
+            return new RedirectResponse(route('biller.projects.show', $project), ['flash_success' => trans('alerts.backend.tasks.updated')]);
         } catch (\Throwable $th) {
             return errorHandler('Error Updating Tasks', $th);
         }
@@ -208,7 +214,7 @@ class TasksController extends Controller
         ]);
 
         foreach (status_list() as $row) {
-            if ($row['id'] == @$task_back->id) $task->status_list .= '<option value="' . $row['id'] . '" selected>--' . $row['name'] . '--</option>';
+            if ($row['id'] == @$task_back->id) $task->status_list .= '<option value="' . $row['id'] . '" selected>' . $row['name'] . '</option>';
             else $task->status_list .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
         }
 

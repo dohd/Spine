@@ -62,11 +62,11 @@ class TasksTableController extends Controller
                 return @$task->milestone->name;
             })
             ->addColumn('tags', function ($task) {
-                $tag = '';
+                $tags = '';
                 foreach ($task->tags as $row) {
-                    $tag .= '<span class="badge" style="background-color:' . $row['color'] . '">' . $row['name'] . '</span> ';
+                    $tags .= '<span class="badge" style="background-color:' . $row['color'] . '">' . $row['name'] . '</span> ';
                 }
-                return $task->name . '<div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $task->short_desc . '</span></div></div>';
+                return $task->name . '<br><div>' . $tags . '</div>';
             })
             ->addColumn('start', function ($task) {
                 return '<span  class="font-size-small">'. dateTimeFormat($task->start) .'</span>';
@@ -78,7 +78,10 @@ class TasksTableController extends Controller
                 $task_back = task_status($task->status);
                 return '<span class="badge" style="background-color:'. $task_back['color'] .'">'. $task_back['name'] . '</span> ';
             })
-            
+            ->addColumn('assigned_to', function ($task) {
+                $task_users = $task->users->map(fn($v) => $v->full_name)->toArray();
+                return implode(', ', $task_users);
+            })
             ->addColumn('actions', function ($task) {
                 $btn = '<a href="#" title="View" class="view_task success" data-toggle="modal" data-target="#ViewTaskModal" data-id="'. $task->id .'">
                     <i class="ft-eye" style="font-size:1.5em;"></i></a> ';

@@ -16,7 +16,7 @@
             <div class="card-content">
                 <div class="card-body  py-0 px-0">
                     <div class="list-group">
-                        @foreach ($project->users as $i => $row)
+                        @foreach ($project->users->unique('id') as $i => $row)
                             <a href="javascript:" class="list-group-item">
                                 <div class="media">
                                     <div class="media-left pr-1">

@@ -31,13 +31,14 @@ class EditResponse implements Responsable
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function toResponse($request)
-    {   
-        $tasks=$this->tasks;
+    {
+        $tasks = $this->tasks;
         $mics = Misc::all();
         $employees = Hrm::all();
-        $user = auth()->user()->id;
-        $project_select = Project::whereHas('users')->get();
-        return view('focus.projects.tasks.edit',compact('tasks','mics', 'employees', 'project_select'));
 
+        $project_id = @$tasks->milestone->project->id;
+        $milestones = ProjectMileStone::where('project_id', $project_id)->get();
+
+        return view('focus.projects.tasks.edit', compact('tasks', 'mics', 'employees', 'milestones'));
     }
 }

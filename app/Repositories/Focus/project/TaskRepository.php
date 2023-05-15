@@ -147,10 +147,6 @@ class TaskRepository extends BaseRepository
         $milestone_id = @$task->milestone->id;
         $project_id = @$task->milestone->project->id;
 
-        // log
-        $data = ['project_id' => $project_id, 'value' => '[Milestone Task][' . trans('general.update') . '] ' . $task->name, 'user_id' => auth()->user()->id];
-        ProjectLog::create($data);
-
         // tags
         $tags = @$input['tags'] ?: [];
         ProjectRelations::whereNotIn('misc_id', $tags)->where('project_id', $project_id)->whereNotNull('task_id')->delete();
