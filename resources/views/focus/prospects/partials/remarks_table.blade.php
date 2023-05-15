@@ -17,7 +17,7 @@
                         <td> {{ $index + 1 }} </td>
                         <td> {{ $remark->created_at }} </td>
                         <td> {{ $remark->recepient }} </td>
-                        <td> {{ $remark->remarks }} </td>
+                        <td> {{ $remark->any_remarks }} </td>
                         <td> {{ $remark->reminder_date }} </td>
                     </tr>
                 @endforeach

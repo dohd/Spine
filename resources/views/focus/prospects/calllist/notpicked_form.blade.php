@@ -14,10 +14,10 @@
         </div>
     </div>
     <div class="col-md-6">
-        <p>Reminder Note</p>
+        <p>Remarks/Notes</p>
         {!! Form::text('any_remarks', null, [
             'class' => 'form-control ',
-            'placeholder' => 'Reminder note',
+            'placeholder' => 'Remarks',
             'id' => 'notpicked_reminder_notes',
         ]) !!}
     </div>

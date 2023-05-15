@@ -5,7 +5,8 @@
                 <h3 class="title pl-1">Customer Info </h3>
             </div>
         </div>
-
+        
+        {{ Form::hidden('title', "Direct-(".date("Y-m-d").")", ['class' => 'form-control round','id' => 'prospect_title']) }}
         <div class="form-group row">
             <div class="col-sm-6"><label for="prospect_company" class="caption">Prospect Company</label>
                 <div class="input-group">
