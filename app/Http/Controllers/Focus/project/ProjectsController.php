@@ -322,10 +322,8 @@ class ProjectsController extends Controller
      */
     public function store_meta(ManageProjectRequest $request)
     {
-        // if (!project_access($input['project_id'])) exit;
         $input = $request->except(['_token', 'ins']);
-        $response = ['status' => 'Error', 'message' => 'Something Went Wrong'];
-        $milestone_response = ['status' => 'Error', 'message' => 'Milestone Already Attached, Quote CANNOT be Attached'];
+        $response = ['status' => 'Error', 'message' => 'Something Went Wrong. Try again later'];
 
         DB::beginTransaction();
 
@@ -408,24 +406,25 @@ class ProjectsController extends Controller
                     
                     $response = array_replace($response, ['status' => 'Success', 't_type' => 6, 'meta' => $log_text]);
                     break;
-                case 7: // project quote
+                case 7: // attach project quote
                     $project = Project::find($input['project_id']);
-                    $milestones = $project->milestones()->first();
-                    if($milestones) return response()->json($milestone_response);
-                    if (!$project->main_quote_id) $project->update(['main_quote_id' => current($input['quote_ids'])]);
+                    if (!$project->main_quote_id) 
+                        $project->update(['main_quote_id' => @$input['quote_ids'][0]]);
     
                     foreach($input['quote_ids'] as $val) {
-                        $item = ProjectQuote::firstOrCreate(['project_id' => $project->id, 'quote_id' => $val]);
-                        Quote::find($val)->update(['project_quote_id' => $item->id]); 
+                        $item = ProjectQuote::firstOrCreate(
+                            ['project_id' => $project->id, 'quote_id' => $val],
+                            ['project_id' => $project->id, 'quote_id' => $val]
+                        );
+                        $item->quote->update(['project_quote_id' => $item->id]);
                     }
     
                     $response = array_replace($response, ['status' => 'Success', 't_type' => 7, 'meta' => '', 'refresh' => 1]);
                     break;
             }
         } catch (\Throwable $th) {
-            //throw $th;
+            \Log::error($th->getMessage() . ' ' . $th->getFile() . ' : ' . $th->getLine());
         }
-
 
         if ($response['status'] == 'Success') {
             DB::commit();
@@ -544,11 +543,12 @@ class ProjectsController extends Controller
             $project_budget = $project->quotes->sum('total');
 
             if ($expense_total >= $project_budget - $quote->total) {
-                $error_data = ['status' => 'Error', 'message' => "Not allowed! Project has attached expenses."];
+                $error_data = ['status' => 'Error', 'message' => "Not allowed! Project has been expensed."];
                 trigger_error($error_data['message']);
-            } elseif ($quote->invoiced == 'Yes') {
+            } elseif ($quote->invoice) {
                 $doc = $quote->bank_id? 'Proforma Invoice' : 'Quote';
-                $error_data = ['status' => 'Error', 'message' => "Not allowed! {$doc} has an attached invoice."];
+                $inv_tid = @$quote->invoice->tid ?: '';
+                $error_data = ['status' => 'Error', 'message' => "Not allowed! {$doc} is attached to Invoice no. {$inv_tid}"];
                 trigger_error($error_data['message']);
             }
 
@@ -562,7 +562,7 @@ class ProjectsController extends Controller
             DB::commit();
             return response()->json(['status' => 'Success', 'message' => 'Resource Detached Successfully', 't_type' => 7]);
         } catch (\Throwable $th) {
-            Log::error($th->getMessage());
+            \Log::error($th->getMessage());
             if (!$error_data) $error_data = ['status' => 'Error', 'message' => 'Something went wrong!'];
             return response()->json($error_data, 500);
         }
