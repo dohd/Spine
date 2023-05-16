@@ -78,7 +78,7 @@ trait ProjectRelationship
 
     public function users()
     {
-        return $this->hasManyThrough(Hrm::class, ProjectRelations::class, 'project_id', 'id', 'id', 'user_id');
+        return $this->hasManyThrough(Hrm::class, ProjectRelations::class, 'project_id', 'id', 'id', 'user_id')->whereNull('task_id');
     }
 
     public function creator()
