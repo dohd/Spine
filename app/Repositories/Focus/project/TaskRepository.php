@@ -2,20 +2,18 @@
 
 namespace App\Repositories\Focus\project;
 
-use App\Http\Utilities\Notification;
 use App\Models\Access\User\User;
 use App\Models\event\Event;
 use App\Models\event\EventRelation;
-use App\Models\project\ProjectLog;
-use App\Models\project\ProjectRelations;
 use App\Models\project\TaskRelations;
 use App\Notifications\Rose;
 use DB;
-use Carbon\Carbon;
 use App\Models\project\Task;
 use App\Exceptions\GeneralException;
+use App\Models\project\ProjectLog;
+use App\Models\project\ProjectRelations;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class TaskRepository.
@@ -36,25 +34,13 @@ class TaskRepository extends BaseRepository
     public function getForDataTable($uid = 0)
     {
         $q = $this->query();
-        if (request('p') AND project_access(request('p'))) {
-            $q->whereHas('project', function ($s) {
+        
+        // filter project
+        if (request('project_id')) {
+            $q->whereHas('milestone', fn($q) => $q->where('project_milestones.project_id', request('project_id')));
+        }
 
-                return $s->where('project_id', '=', request('p', 0));
-            });
-        }
-             if (request('p_c') AND project_client(request('p_c'))) {
-                 $q->withoutGlobalScopes();
-            $q->whereHas('project', function ($s) {
-
-                return $s->withoutGlobalScopes()->where('project_id', '=', request('p_c', 0));
-            });
-        }
-        if ($uid) {
-            $q->whereHas('users', function ($s) use ($uid) {
-                return $s->where('users.id', '=', $uid);
-            });
-        }
-        return $q->get(['id','name','status','start','duedate','ins AS cus']);
+        return $q->get();
     }
 
     /**
@@ -69,77 +55,71 @@ class TaskRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        $employees = @$input['employees'];
-        $tags = @$input['tags'];
-        $projects = @$input['projects'];
-        $calender = @$input['link_to_calender'];
-        $color = @$input['color'];
+        $project_id = @$input['projects'][0];
+        if (!$project_id) trigger_error('Project required!');
 
-        $input = array_diff_key($input, array_flip(['tags', 'employees', 'projects', 'link_to_calender', 'color']));
-        $input['start'] = datetime_for_database($input['start'] . ' ' . $input['time_from']);
-        $input['duedate'] = datetime_for_database($input['duedate'] . ' ' . $input['time_to']);
-        if ($employees) $input['creator_id'] = current($employees);
-        unset($input['time_from'], $input['time_to']);
-        
-        $result = Task::create($input);
+        $milestone_id = @$input['milestone_id'];
+        if (!$project_id) trigger_error('Milestone required!');
 
-        $tag_group = [];
-        if (is_array($tags)) {
-            foreach ($tags as $row) {
-                $tag_group[] = ['todolist_id' => $result->id, 'related' => 1, 'rid' => $row];
-            }
-        }
+        // task
+        $task_input = array_diff_key($input, array_flip(['milestone_id', 'tags', 'employees', 'projects', 'link_to_calender', 'color']));
+        $task_input = array_replace($task_input, [
+            'start' => datetime_for_database("{$task_input['start']} {$task_input['time_from']}"),
+            'duedate' => datetime_for_database("{$task_input['duedate']} {$task_input['time_to']}"),
+            'creator_id' => auth()->user()->id,
+        ]);
+        unset($task_input['time_from'], $task_input['time_to']);
+        $result = Task::create($task_input);
 
-        $employee_group = [];
-        if (is_array($employees)) {
-            foreach ($employees as $row) {
-                $tag_group[] = array('todolist_id' => $result->id, 'related' => 2, 'rid' => $row);
-                $employee_group[] = $row;
-            }
-        }
+        // log
+        $data = ['project_id' => $project_id, 'value' => '[Milestone Task][' . trans('general.create') . '] ' . $result->name, 'user_id' => $result->user_id];
+        ProjectLog::create($data);
 
-        $project_group = [];
-        if (is_array($projects)) {
-            foreach ($projects as $row) {
-                if (project_access($row)) 
-                    $project_group[] = ['project_id' => $row, 'related' => 4, 'rid' => $result->id];
-            }
-            ProjectRelations::insert($project_group);
-        }
-        TaskRelations::insert($tag_group);
+        // tags
+        $tags = @$input['tags'] ?: [];
+        $tag_group = array_map(fn($v) => ['misc_id' => $v, 'task_id' => $result->id, 'milestone_id' => $milestone_id, 'project_id' => $project_id], $tags);
+        ProjectRelations::insert($tag_group);
 
-        if ($calender) {
+        // task users
+        $employees = @$input['employees'] ?: [];
+        $employees_group = array_map(fn($v) => ['user_id' => $v, 'task_id' => $result->id, 'milestone_id' => $milestone_id, 'project_id' => $project_id], $employees);
+        ProjectRelations::insert($employees_group);
+
+        // calendar link
+        if (@$input['link_to_calender']) {
             $data = [
-                'title' => trans('tasks.task') . ' - ' . $input['name'], 
+                'title' => trans('tasks.task') . ' - ' . $input['name'],
                 'description' => $input['short_desc'], 
-                'start' => $input['start'], 
-                'end' => $input['duedate'], 
-                'color' => $color,
+                'start' => $result->start, 
+                'end' => $result->duedate, 
+                'color' => @$input['color'], 
+                'user_id' => $result->user_id, 
+                'ins' => $result['ins']
             ];
             $event = Event::create($data);
             EventRelation::create(['event_id' => $event->id, 'related' => 2, 'r_id' => $result->id]);
         }
 
-        $message = [
-            'title' => trans('tasks.task') . ' - ' . $input['name'], 
-            'icon' => 'fa-bullhorn', 
-            'background' => 'bg-success', 
-            'data' => $input['short_desc']
-        ];
-        if ($employee_group) {
-            $users = User::whereIn('id', $employee_group)->get();
-            \Illuminate\Support\Facades\Notification::send($users, new Rose('', $message));
-        } else {
-            $notification = new Rose(auth()->user(), $message);
-            auth()->user()->notify($notification);
-        }
-        
         if ($result) {
             DB::commit();
+
+            // user notify
+            $message = [
+                'title' => trans('tasks.task') . ' - ' . $input['name'], 
+                'icon' => 'fa-bullhorn',
+                'background' => 'bg-success',
+                'data' => $input['short_desc']
+            ];
+            if ($employees_group) {
+                $users = User::whereIn('id', $employees_group)->get();
+                \Illuminate\Support\Facades\Notification::send($users, new Rose('', $message));
+            } else {
+                $notification = new Rose(auth()->user(), $message);
+                auth()->user()->notify($notification);
+            }
+
             return $result;
         }
-
-        throw new GeneralException(trans('exceptions.backend.tasks.create_error'));
     }
 
     /**
@@ -152,65 +132,64 @@ class TaskRepository extends BaseRepository
      */
     public function update(Task $task, array $input)
     {
+        // dd($input);
+        DB::beginTransaction();
 
-        $employees = @$input['employees'];
-        $tags = @$input['tags'];
-        $projects = @$input['projects'];
-        $calender = @$input['link_to_calender'];
-        $color = @$input['color'];
-        unset($input['tags']);
-        unset($input['employees']);
-        unset($input['projects']);
-        unset($input['link_to_calender']);
-        unset($input['color']);
-        $user_id = auth()->user()->id;
-        $input['start'] = datetime_for_database($input['start'] . ' ' . $input['time_from']);
-        $input['duedate'] = datetime_for_database($input['duedate'] . ' ' . $input['time_to']);
-        unset($input['time_from']);
-        unset($input['time_to']);
-        $input = array_map( 'strip_tags', $input);
-        $result = $task->update($input);
-        if ($result) {
-            ProjectRelations::where(['related' => 4, 'rid' => $task->id])->delete();
-            TaskRelations::where(['related' => 1, 'todolist_id' => $task->id])->delete();
-            TaskRelations::where(['related' => 2, 'todolist_id' => $task->id])->delete();
-            $er = EventRelation::where(['related' => 2, 'r_id' => $task->id])->first();
-            if ($er) {
-                $er->event->delete();
-                $er->delete();
-            }
+        // task
+        $task_input = array_diff_key($input, array_flip(['milestone_id', 'tags', 'employees', 'projects', 'link_to_calender', 'color']));
+        $task_input = array_replace($task_input, [
+            'start' => datetime_for_database("{$task_input['start']} {$task_input['time_from']}"),
+            'duedate' => datetime_for_database("{$task_input['duedate']} {$task_input['time_to']}"),
+        ]);
+        unset($task_input['time_from'], $task_input['time_to']);
+        $task->update($task_input);
 
+        $milestone_id = @$task->milestone->id;
+        $project_id = @$task->milestone->project->id;
 
-            $tag_group = array();
-            if (is_array($tags)) {
-                foreach ($tags as $row) {
-                    $tag_group[] = array('todolist_id' => $task->id, 'related' => 1, 'rid' => $row);
-                }
-            }
-
-            if (is_array($employees)) {
-                foreach ($employees as $row) {
-                    $tag_group[] = array('todolist_id' => $task->id, 'related' => 2, 'rid' => $row);
-                }
-            }
-            if (is_array($projects)) {
-                $p_group = array();
-                foreach ($projects as $row) {
-                    if (project_access($row)) $p_group[] = array('project_id' => $row, 'related' => 4, 'rid' => $task->id);
-                }
-                ProjectRelations::insert($p_group);
-
-            }
-            TaskRelations::insert($tag_group);
-            if ($calender) {
-                $event = Event::create(array('title' => trans('tasks.task') . ' - ' . $input['name'], 'description' => $input['short_desc'], 'start' => $input['start'], 'end' => $input['duedate'], 'color' => $color, 'user_id' => $user_id, 'ins' => $task->ins));
-                EventRelation::create(array('event_id' => $event->id, 'related' => 2, 'r_id' => $task->id));
-            }
-            return $result;
+        // tags
+        $tags = @$input['tags'] ?: [];
+        ProjectRelations::whereNotIn('misc_id', $tags)->where('project_id', $project_id)->whereNotNull('task_id')->delete();
+        foreach ($tags as $tag) {
+            ProjectRelations::updateOrCreate(
+                ['misc_id' => $tag, 'task_id' => $task->id],
+                ['misc_id' => $tag, 'task_id' => $task->id, 'milestone_id' => $milestone_id, 'project_id' => $project_id]
+            );
         }
 
+        // task users
+        $employees = @$input['employees'] ?: [];
+        ProjectRelations::whereNotIn('user_id', $employees)->whereNotNull('user_id')
+            ->whereNotNull('task_id')->where('task_id', $task->id)->delete();
+        foreach ($employees as $id) {
+            ProjectRelations::updateOrCreate(
+                ['user_id' => $id, 'task_id' => $task->id],
+                ['user_id' => $id, 'task_id' => $task->id, 'milestone_id' => $milestone_id, 'project_id' => $project_id]
+            );
+        }
 
-        throw new GeneralException(trans('exceptions.backend.tasks.update_error'));
+        // calendar link
+        if (@$input['link_to_calender']) {
+            $data = [
+                'title' => trans('tasks.task') . ' - ' . $input['name'],
+                'description' => $input['short_desc'], 
+                'start' => $task['start'], 
+                'end' => $task['duedate'], 
+                'color' => @$input['color'], 
+                'user_id' => $task->user_id, 
+                'ins' => $task->ins
+            ];
+            $event_relation = EventRelation::where('r_id', $task->id)->first();
+            if ($event_relation) {
+                $event = Event::find($event_relation->event_id);
+                if ($event) $event->update($data);
+            }
+        }
+        
+        if ($task) {
+            DB::commit();
+            return $task;
+        }
     }
 
     /**
@@ -222,17 +201,23 @@ class TaskRepository extends BaseRepository
      */
     public function delete(Task $task)
     {
-        if ($task) {
-            ProjectRelations::where('related', '=', 4)->where('rid', '=', $task->id)->delete();
-            $er = EventRelation::where(['related' => 2, 'r_id' => $task->id])->first();
-            if ($er) {
-                $er->event->delete();
-                $er->delete();
-            }
-            $task->delete();
-            return true;
+        DB::beginTransaction();
+
+        // log
+        $project = @$task->milestone->project;
+        $data = ['project_id' => @$project->id, 'value' => '[Milestone Task][' . trans('general.delete') . '] ' . $task->name, 'user_id' => $task->user_id];
+        ProjectLog::create($data);
+
+        // event 
+        $event_relation = EventRelation::where(['related' => 2, 'r_id' => $task->id])->first();
+        if ($event_relation) {
+            if ($event_relation) $event_relation->event->delete();
+            $event_relation->delete();
         }
 
-        throw new GeneralException(trans('exceptions.backend.tasks.delete_error'));
+        if ($task->delete()) {
+            DB::commit();
+            return true;
+        }
     }
 }

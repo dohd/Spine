@@ -53,13 +53,21 @@ class TasksTableController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $core = collect();
-        if (access()->allow('manage-task') || project_access(request('project_id')))
-            $core = $this->task->getForDataTable();
+        $core = $this->task->getForDataTable();
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('milestone', function ($task) {
+                return @$task->milestone->name;
+            })
+            ->addColumn('tags', function ($task) {
+                $tags = '';
+                foreach ($task->tags as $row) {
+                    $tags .= '<span class="badge" style="background-color:' . $row['color'] . '">' . $row['name'] . '</span> ';
+                }
+                return $task->name . '<br><div>' . $tags . '</div>';
+            })
             ->addColumn('start', function ($task) {
                 return '<span  class="font-size-small">'. dateTimeFormat($task->start) .'</span>';
             })
@@ -70,26 +78,20 @@ class TasksTableController extends Controller
                 $task_back = task_status($task->status);
                 return '<span class="badge" style="background-color:'. $task_back['color'] .'">'. $task_back['name'] . '</span> ';
             })
-            ->addColumn('tags', function ($task) {
-                $tag = '';
-                foreach ($task->tags as $row) {
-                    $tag .= '<span class="badge" style="background-color:' . $row['color'] . '">' . $row['name'] . '</span> ';
-                }
-
-                return '<div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="#" title="View" class="view_task success" data-toggle="modal" data-target="#ViewTaskModal" data-item="' . $task->id . '">'
-                    . $task->name . '</a><div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $task->short_desc . '</span></div> </div>';
+            ->addColumn('assigned_to', function ($task) {
+                $task_users = $task->users->map(fn($v) => $v->full_name)->toArray();
+                return implode(', ', $task_users);
             })
             ->addColumn('actions', function ($task) {
                 $btn = '<a href="#" title="View" class="view_task success" data-toggle="modal" data-target="#ViewTaskModal" data-id="'. $task->id .'">
-                    <i  class="ft-eye"></i></a> ';
-
+                    <i class="ft-eye" style="font-size:1.5em;"></i></a> ';
                 if (access()->allow('edit-task')) 
-                    $btn .= '&nbsp;&nbsp;<a href="'. route("biller.tasks.edit", [$task->id]) . '" data-toggle="tooltip" data-placement="top" title="Edit"><i  class="ft-edit"></i></a>';
-                
+                    $btn .= '&nbsp;&nbsp;<a href="'. route("biller.tasks.edit", [$task->id]) . '" data-toggle="tooltip" data-placement="top" title="Edit">
+                        <i class="ft-edit" style="font-size:1.2em;"></i></a>';                
                 if (access()->allow('delete-task')) 
                     $btn .= '&nbsp;&nbsp;<a class="danger" href="' . route("biller.tasks.destroy", [$task->id]) . '" table-method="delete" data-trans-button-cancel="' 
                         .trans('buttons.general.cancel') . '" data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '" data-trans-title="'
-                        .trans('strings.backend.general.are_you_sure') .'"title="Delete"> <i  class="fa fa-trash"></i> </a>';
+                        .trans('strings.backend.general.are_you_sure') .'"title="Delete"> <i  class="fa fa-trash fa-lg"></i> </a>';
                         
                 return $btn;
             })

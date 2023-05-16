@@ -6,10 +6,8 @@ use App\Models\event\Event;
 use App\Models\event\EventRelation;
 use App\Models\hrm\Hrm;
 use App\Models\misc\Misc;
-use App\Models\project\Project;
 use App\Models\project\ProjectMileStone;
 use App\Models\project\ProjectRelations;
-use App\Models\project\TaskRelations;
 
 /**
  * Class TaskRelationship
@@ -18,17 +16,17 @@ trait TaskRelationship
 {
     public function milestone()
     {
-        return $this->belongsTo(ProjectMileStone::class, 'milestone_id');
+        return $this->hasOneThrough(ProjectMileStone::class, ProjectRelations::class, 'task_id', 'id', 'id', 'milestone_id');
     }
 
     public function tags()
     {
-        return $this->hasManyThrough(Misc::class, TaskRelations::class, 'todolist_id', 'id', 'id', 'rid')->where('section', '=', 1);
+        return $this->hasManyThrough(Misc::class, ProjectRelations::class, 'task_id', 'id', 'id', 'misc_id');
     }
 
-      public function events()
+    public function events()
     {
-        return $this->hasOneThrough(Event::class, EventRelation::class, 'r_id','id','id','event_id')->where('related', '=', 2)->withoutGlobalScopes();
+        return $this->hasOneThrough(Event::class, EventRelation::class, 'r_id', 'id', 'id', 'event_id')->where('related', '=', 2)->withoutGlobalScopes();
     }
 
     public function task_status()
@@ -38,22 +36,11 @@ trait TaskRelationship
 
     public function users()
     {
-        return $this->hasManyThrough(Hrm::class, TaskRelations::class, 'todolist_id', 'id', 'id', 'rid');
+        return $this->hasManyThrough(Hrm::class, ProjectRelations::class, 'task_id', 'id', 'id', 'user_id');
     }
 
     public function creator()
     {
         return $this->hasOne(Hrm::class, 'id', 'creator_id');
     }
-
-    public function project()
-    {
-        return $this->hasMany(ProjectRelations::class, 'rid','id');
-    }
-
-       public function projects()
-    {
-        return $this->hasManyThrough(Project::class, ProjectRelations::class, 'rid','id','id','project_id')->where('related','=',4)->withoutGlobalScopes();
-    }
-
 }

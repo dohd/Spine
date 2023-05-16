@@ -30,7 +30,6 @@ trait QuoteRelationship
 {
     public function project()
     {
-        // return $this->hasOne(Project::class, 'main_quote_id');
         return $this->hasOneThrough(Project::class, ProjectQuote::class, 'quote_id', 'id', 'id', 'project_id')->withoutGlobalScopes();
     }
 
@@ -62,6 +61,11 @@ trait QuoteRelationship
     public function budget()
     {
         return $this->hasOne(Budget::class);
+    }
+
+    public function budget_skillsets()
+    {
+        return $this->hasManyThrough(BudgetSkillset::class, Budget::class, 'quote_id', 'budget_id', 'id', 'id');
     }
 
     public function budgets()

@@ -1,46 +1,48 @@
 <div class="tab-pane" id="tab_data2" aria-labelledby="tab2" role="tabpanel">
-    @if (project_access($project->id))
-        <button type="button" class="btn btn-info" id="addt" data-toggle="modal"
-            data-target="#AddMileStoneModal">
-            {{ trans('projects.milestone_add') }}
+    {{-- @if(project_access($project->id)) --}}
+        <button type="button" class="btn btn-info" id="addMilestone" data-toggle="modal" data-target="#AddMileStoneModal">
+            <i class="fa fa-plus-circle"></i> Milestone
         </button>
-    @endif
+    {{-- @endif --}}
     <ul class="timeline">
         @php
             $flag = true;
             $total = count($project->milestones);
         @endphp
         @foreach ($project->milestones as $row)
-            <li class="@if (!$flag) timeline-inverted @endif "
-                id="m_{{ $row['id'] }}">
-                <div class="timeline-badge"
-                    style="background-color:@if ($row['color']) {{ $row['color'] }} @else #0b97f4 @endif;">
-                    {{ $total }}</div>
+            <li class="{!! (!$flag)? 'timeline-inverted' : '' !!}" id="m_{{$row['id']}}">
+                <div class="timeline-badge" style="background-color:@if ($row['color']) {{$row['color']}} @else #0b97f4  @endif;">
+                    {{$total}}
+                </div>
                 <div class="timeline-panel">
                     <div class="timeline-heading">
-                        <h4 class="timeline-title">{{ $row['name'] }}</h4>
+                        <h4 class="timeline-title">{{$row['name']}}</h4>
                         <p>
                             <small class="text-muted">
-                                [{{ trans('general.due_date') }}
-                                {{ dateTimeFormat($row['due_date']) }}
-                                ]
+                                [{{trans('general.due_date')}} {{dateTimeFormat($row['due_date'])}}]
                             </small>
-
                         </p>
                     </div>
-                    @if (project_access($project->id))
+                    {{-- @if (project_access($project->id)) --}}
                         <div class="timeline-body mb-1">
-                            <p>{{ $row['note'] }}</p><a href="#" class=" delete-object"
-                                data-object-type="2" data-object-id="{{ $row['id'] }}"><i
-                                    class="danger fa fa-trash"></i></a>
+                            <p>{{$row['note']}}</p>
+                            <p>Milestone Amount: <b>{{ amountFormat($row['amount']) }}</b></p>
                         </div>
-                    @endif
+                    {{-- @endif --}}
                     <small class="text-muted"><i class="fa fa-user"></i>
-                        <strong>{{ $row->creator->first_name }}
-                            {{ $row->creator->last_name }}</strong>
-                        <i class="fa fa-clock-o"></i> {{ trans('general.created') }}
-                        {{ dateTimeFormat($row['created_at']) }}
+                        <strong>{{ @$row->creator->fullname }}</strong>
+                        <i class="fa fa-clock-o"></i> {{trans('general.created')}} {{dateTimeFormat($row['created_at'])}}
                     </small>
+                    <div>
+                        <div class="btn-group">
+                            <button class="btn btn-link milestone-edit" obj-type="2" data-id="{{$row['id']}}" data-url="{{ route('biller.projects.edit_meta') }}">
+                                <i class="ft ft-edit" style="font-size: 1.2em"></i>
+                            </button>
+                            <button class="btn btn-link milestone-del" obj-type="2" data-id="{{$row['id']}}" data-url="{{ route('biller.projects.delete_meta') }}">
+                                <i class="fa fa-trash fa-lg danger"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </li>
             @php
@@ -48,8 +50,5 @@
                 $total--;
             @endphp
         @endforeach
-
-
     </ul>
-
 </div>

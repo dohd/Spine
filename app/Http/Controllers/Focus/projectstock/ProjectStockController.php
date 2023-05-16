@@ -12,6 +12,7 @@ use App\Models\quote\Quote;
 use App\Repositories\Focus\projectstock\ProjectStockRepository;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class ProjectStockController extends Controller
 {
@@ -97,7 +98,22 @@ class ProjectStockController extends Controller
      */
     public function edit(Projectstock $projectstock)
     {
-        return view('focus.projectstock.edit', compact('projectstock'));
+        return redirect()->route('biller.projectstock.index');
+
+        // to be updated
+        $quote = Quote::find($projectstock->quote_id);
+        if (!$quote) throw ValidationException::withMessages(['Related Quote/PI cannot be found']);
+
+        $tid = Projectstock::where('ins', auth()->user()->ins)->max('tid');
+        $budget_items = $quote->budget? $quote->budget->items()->with('product')->get() : collect();
+
+        $stock = ProductVariation::select(DB::raw('parent_id, warehouse_id, SUM(qty) as qty'))
+            ->groupBy('parent_id', 'warehouse_id')
+            ->whereIn('id', $budget_items->pluck('product_id')->toArray())
+            ->with('warehouse')
+            ->get();
+
+        return view('focus.projectstock.edit', compact('projectstock', 'tid', 'quote', 'budget_items', 'stock'));
     }
 
     /**

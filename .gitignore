@@ -11,10 +11,6 @@ app/storage/
 public/storage
 public/hot
 
-# Laravel 5 & Lumen specific with changed public path
-public_html/storage
-public_html/hot
-
 storage/*.key
 .env
 Homestead.yaml
@@ -25,7 +21,6 @@ Homestead.json
 # Laravel Framework 6.18.1
 local
 node_modules
-public/**/
 **/assets
 build
 resources/lang
@@ -47,5 +42,6 @@ yarn-error.log
 
 # Local pattern
 public/**/*
-!public/focus/js/
+!public/focus/js/control.js
+!public/focus/js/custom.js
 !resources/lang/en/

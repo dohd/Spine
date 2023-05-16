@@ -2,60 +2,89 @@
 
 @section ('title', trans('labels.backend.projects.management'))
 
-@section('content') 
-<div class="content-wrapper">
-    <div class="content-header row mb-1">
-        <div class="content-header-left col-6">
-            <h4 class="content-header-title">Project Management</h4>
-        </div>
-        <div class="content-header-right col">
-            <div class="media width-250 float-right">
+@section('content')
+    <div class="content-wrapper">
+        <!-- Header -->
+        <div class="content-header row mb-1">
+            <div class="content-header-left col-6">
+                <h4 class="content-header-title">Project Management</h4>
+            </div>
+            <div class="col-6">
                 <div class="media-body media-right text-right">
                     @include('focus.projects.partials.projects-header-buttons')
                 </div>
             </div>
         </div>
-    </div>
+        <!-- End Header -->
 
-    <div class="content-body">
-        <div class="card todo-details rounded-0">
-            <div class="sidebar-toggle d-block d-lg-none info"><i class="ft-menu font-large-1"></i></div>
-            <div class="search"></div>
-            <div class="card-body">
-                <table id="projects-table" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>#Project No</th>
-                            <th>Name</th>
-                            <th>Customer-Branch</th>
-                            <th>#Quote / PI Budget (status)</th>
-                            <th>Ticket No</th>                           
-                            <th>Start Date</th>
-                            <th>Project Status</th>
-                            <th>{{ trans('general.action') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="100%" class="text-center text-success font-large-1"><i class="fa fa-spinner spinner"></i></td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- Left sidebar -->
+        @include('focus.projects.partials.sidebar')
+        <!-- End Left sidebar -->
+
+        <!-- Content -->
+        <div class="content-right">
+            <div class="content-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-4">
+                                <select class="form-control select2" id="customerFilter" data-placeholder="Search Customer">
+                                    <option value=""></option>
+                                    @foreach ($customers as $customer)
+                                        <option value="{{ $customer->id }}">{{ $customer->company }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-3">
+                                <select class="form-control select2" id="branchFilter" data-placeholder="Search Branch">
+                                    <option value=""></option>
+                                    @foreach ([] as $branch)
+                                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div> 
+                        <hr>
+                        <table id="projectsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Project No.</th>
+                                    <th>Name</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Deadline</th>
+                                    <th>{{ trans('general.action') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="100%" class="text-center text-success font-large-1">
+                                        <i class="fa fa-spinner spinner"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
+        <!-- End Content -->
     </div>
-</div>    
-@include('focus.projects.modal.project_new')
-@endsection
 
+    <div class="sidenav-overlay"></div>
+    <div class="drag-target"></div>
+    {{-- <input type="hidden" id="loader_url" value="{{route('biller.projects.load')}}"> --}}
+    @include('focus.projects.modal.project_new')
+    @include('focus.projects.modal.project_view')
+@endsection
 @section('after-styles')
-{{ Html::style('core/app-assets/css-'.visual().'/pages/app-todo.css') }}
-{{ Html::style('core/app-assets/css-'.visual().'/plugins/forms/checkboxes-radios.css') }}
-{!! Html::style('focus/css/bootstrap-colorpicker.min.css') !!}
+    {{ Html::style('core/app-assets/css-'.visual().'/pages/app-todo.css') }}
+    {{ Html::style('core/app-assets/css-'.visual().'/plugins/forms/checkboxes-radios.css') }}
+    {!! Html::style('focus/css/bootstrap-colorpicker.min.css') !!}
 @endsection
-
 @section('after-scripts')
+{{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('core/app-assets/vendors/js/extensions/moment.min.js') }}
 {{ Html::script('core/app-assets/vendors/js/extensions/fullcalendar.min.js') }}
@@ -65,98 +94,98 @@
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
     const config = {
-        ajax: { headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"} },
-        select: {
+        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
+        date: {autoHide: true, format: "{{ date(config('core.user_date_format')) }}"},
+        branchSelect: {
             allowClear: true,
-            dropdownParent: $('#AddProjectModal'),
-        },
+            ajax: {
+                url: "{{ route('biller.branches.select') }}",
+                dataType: 'json',
+                type: 'POST',
+                data: ({term}) => ({search: term, customer_id: $("#customerFilter").val()}),
+                processResults: (data) => {
+                    return { results: data.map(v => ({text: v.name, id: v.id})) };
+                },
+            }
+        }
     };
 
+    // form submit callback
+    function trigger(res) {
+        // $(data.row).prependTo("table > tbody");
+        // $("#data_form_project").trigger('reset');
+        $('#projects-table').DataTable().destroy();
+        Index.drawDataTable();
+    }
+
     const Index = {
+        customerBrances: [],
 
         init() {
             $.ajaxSetup(config.ajax);
-            this.drawDataTable();
-            $('#AddProjectModal').on('shown.bs.modal', this.showCreateModal);
+            $("#submit-data_project").on("click", Index.onSubmitProject);
+            $("#customerFilter").select2({allowClear: true}).change(Index.onChangeCustomer);
+            $("#branchFilter").select2(config.branchSelect).change(Index.onChangeBranch);
+            $('#AddProjectModal').on('shown.bs.modal', Index.onShownModal);
+            Index.drawDataTable();
+        },
+        
+        onSubmitProject() {
+            e.preventDefault();
+            let form_data = {};
+            form_data['form'] = $("#data_form_project").serialize();
+            form_data['url'] = $('#action-url').val();
+            $('#AddProjectModal').modal('toggle');
+            addObject(form_data, true);
         },
 
-        showCreateModal() {
-            $("#main_quote").select2();
-            $("#other_quote").select2();
-            $("#branch_id").select2();
-            // fetch customers
-            $("#person").select2({
-                ...config.select,
+        onChangeCustomer() {
+            $("#branchFilter option:not(:eq(0))").remove();
+            $('#projectsTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        onChangeBranch() {
+            $('#projectsTbl').DataTable().destroy();
+            Index.drawDataTable(); 
+        },
+
+        onShownModal() {
+            $('[data-toggle="datepicker"]').datepicker({
+                autoHide: true,
+                format: '{{config('core.user_date_format')}}'
+            });
+            
+            $('.from_date').datepicker(config.date).datepicker('setDate', new Date());
+            $('.to_date').datepicker(config.date).datepicker('setDate', '{{dateFormat(date('Y-m-d', strtotime('+30 days', strtotime(date('Y-m-d')))))}}');
+            $('#color').colorpicker();
+            $("#tags").select2();
+            $("#employee").select2();
+            $("#person").select2({allowClear: true, dropdownParent: $('#AddProjectModal .modal-body')});
+            $("#branch_id").select2({
+                allowClear: true,
+                dropdownParent: $('#AddProjectModal .modal-body'),
                 ajax: {
-                    url: "{{ route('biller.customers.select') }}",
+                    url: "{{ route('biller.branches.select') }}",
                     dataType: 'json',
                     type: 'POST',
-                    data: ({term}) => ({ search: term }),
-                    processResults: (data) => {
+                    quietMillis: 50,
+                    data: ({term}) => ({search:term, customer_id: $('#person').val()}),
+                    processResults: function (data) {
                         return {
-                            results: $.map(data, (item) => ({
-                                text: `${item.name} - ${item.company}`,
-                                id: item.id
-                            }))
+                            results: data.map(v => ({text: v.name, id: v.id})), 
                         };
                     },
                 }
             });
 
-            // on selecting customer fetch branches
-            const quoteData = [];
-            $("#person").on('change', function() {
-                $("#branch_id").html('').select2({
-                    ...config.select,
-                    ajax: {
-                        url: "{{ route('biller.branches.select') }}",
-                        type: 'POST',
-                        data: ({term}) => ({ 
-                            search: term, 
-                            customer_id: $("#person").val(),
-                        }),
-                        processResults: data => {
-                            return { 
-                                results: data.filter(v => v.name != 'All Branches').map(v => ({ text: v.name, id: v.id })),
-                            };
-                        },
-                    }
-                });
-
-                // fetch customer quotes
-                $("#main_quote").html('').select2({
-                    ...config.select,
-                    ajax: {
-                        url: "{{ route('biller.quotes.customer_quotes') }}?id=" + $(this).val(),
-                        processResults: function(data) {
-                            const results = data.map(v => {
-                                const tid = `${v.tid}`.length < 4? `000${v.tid}`.slice(-4) : v.tid;
-                                const text = `${v.bank_id ? '#PI-' : '#QT-'}${tid} - ${v.branch? v.branch.name : ''} - ${v.notes}`;
-                                return {id: v.id, text}; 
-                            });
-                            // replace array data
-                            quoteData.length = 0;
-                            quoteData.push.apply(quoteData, results);
-                            return { results };
-                        },
-                    }
-                });
-            });
-
-            // On selecting Main Quote
-            $("#main_quote").change(function() {
-                // set Other Quotes select options 
-                $("#other_quote").html('').select2({ 
-                    allowClear: true,
-                    data: quoteData.filter(v => v.id != $(this).val())
-                });
-                const quoteTitle = $(this).find(':selected').text().split(' - ')[2];
-                $('#project-name').val(quoteTitle);
+            $("#person").change(function() {
+                $("#branch_id").val('').trigger('change');
             });
         },
 
         drawDataTable() {
-            $('#projects-table').dataTable({
+            $('#projectsTbl').dataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
@@ -164,55 +193,25 @@
                 language: {@lang('datatable.strings')},
                 ajax: {
                     url: "{{ route('biller.projects.get') }}",
-                    type: 'post'
-                },
-                columns: [{
-                        data: 'DT_Row_Index',
-                        name: 'id'
-                    },
-                    {
-                        data: 'tid',
-                        name: 'tid'
-                    },
-                    {
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: 'customer',
-                        name: 'customer'
-                    },
-                    {
-                        data: 'quote_budget',
-                        name: 'quote_budget'
-                    },
-                    {
-                        data: 'lead_tid',
-                        name: 'lead_tid'
-                    },
-                    {
-                        data: 'start_date',
-                        name: 'start_date'
-                    },
-                    {
-                        data: 'status',
-                        name: 'status'
-                    },
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        searchable: false,
-                        sortable: false
+                    type: 'POST',
+                    data: {
+                        customer_id: $("#customerFilter").val(),
+                        branch_id: $("#branchFilter").val(),
                     }
+                },
+                columns: [
+                    {data: 'DT_Row_Index', name: 'id'},
+                    ...['tid', 'name', 'priority', 'status', 'end_date'].map(v => ({data: v, name: v})),
+                    {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
                 searchDelay: 500,
                 dom: 'Blfrtip',
-                buttons: ['csv', 'excel', 'print'] 
+                buttons: ['csv', 'excel', 'print'],
             });
         },
     };
 
-    $(() => Index.init());
+    $(Index.init);
 </script>
 @endsection

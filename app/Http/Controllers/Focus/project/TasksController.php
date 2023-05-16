@@ -64,10 +64,7 @@ class TasksController extends Controller
         $mics = Misc::all();
         $employees = Hrm::all();
         $user = auth()->user()->id;
-        $project_select = Project::whereHas('users', function ($q) use ($user) {
-            return $q->where('rid', '=', $user);
-        })->get();
-
+        $project_select = Project::whereHas('users', fn($q) => $q->where('users.id', '=', $user))->get();
 
         return new ViewResponse('focus.projects.tasks.index', compact('mics', 'employees', 'project_select'));
     }
@@ -83,7 +80,7 @@ class TasksController extends Controller
     {
         try {
             $result = $this->repository->create($request->except(['_token', 'ins']));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) { 
             return errorHandler('Error Creating Tasks', $th);
         }
 
@@ -100,6 +97,12 @@ class TasksController extends Controller
             business_alerts($mail);
         }
 
+        $task_users = $result->users->map(fn($v) => $v->full_name)->toArray();
+        $task_users = implode(', ', $task_users);
+
+        $task_back = task_status($result->status);
+        $status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span>';
+
         $tag = '';
         foreach ($result->tags as $row) {
             $tag .= '<span class="badge" style="background-color:'. $row['color'] .'">'. $row['name'] .'</span> ';
@@ -108,9 +111,27 @@ class TasksController extends Controller
         $btn .= '&nbsp;&nbsp;<a href="' . route("biller.tasks.edit", [$result->id]) . '" data-toggle="tooltip" data-placement="top" title="Edit"><i  class="ft-edit"></i></a>';
         $btn .= '&nbsp;&nbsp;<a class="danger" href="' . route("biller.tasks.destroy", [$result->id]) . '" table-method="delete" data-trans-button-cancel="' . trans('buttons.general.cancel') . '" data-trans-button-confirm="' . trans('buttons.general.crud.delete') . '" data-trans-title="' . trans('strings.backend.general.are_you_sure') . '" data-toggle="tooltip" data-placement="top" title="Delete"> <i  class="fa fa-trash"></i> </a>';
 
-        $task_back = task_status($result->status);
-        $status = '<span class="badge" style="background-color:' . $task_back['color'] . '">' . $task_back['name'] . '</span>';
-        $row = '<tr><td><div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.tasks.show", [$result->id]) . '" >' . $result->name . '</a><div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $result->short_desc . '</span></div> </div></td><td>' . dateTimeFormat($result->start) . '</td><td>' . dateTimeFormat($result->duedate) . '</td><td>' . $status . '</td><td>' . $btn . '</td></tr>';
+        
+        // project task
+        if ($result->milestone) {
+            $row = '<tr>
+                <td>*</td>
+                <td>'. @$result->milestone->name. '</td>
+                <td><div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.tasks.show", [$result->id]) . '" >' . $result->name . '</a><div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $result->short_desc . '</span></div> </div></td>
+                <td>' . dateTimeFormat($result->start) . '</td>
+                <td>' . dateTimeFormat($result->duedate) . '</td>
+                <td>' . $status . '</td>
+                <td>' . $task_users . '</td>
+                <td>' . $btn . '</td>
+            </tr>';            
+        } else {
+            $row = '<tr>
+                <td><div class="todo-item media"><div class="media-body"><div class="todo-title"><a href="' . route("biller.tasks.show", [$result->id]) . '" >' . $result->name . '</a><div class="float-right">' . $tag . '</div></div><span class="todo-desc">' . $result->short_desc . '</span></div> </div></td>
+                <td>' . dateTimeFormat($result->start) . '</td><td>' . dateTimeFormat($result->duedate) . '</td>
+                <td>' . $status . '</td>
+                <td>' . $btn . '</td>
+            </tr>';
+        }
 
         return response()->json(['status' => 'Success', 'message' => trans('alerts.backend.tasks.created'), 'title' => $result->name, 'short_desc' => $result->short_desc, 'row' => $row, 't_type' => 3]);
     }
@@ -135,16 +156,19 @@ class TasksController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
     public function update(EditTaskRequest $request, Task $task)
-    {
-        //Input received from the request
+    {           
         $input = $request->except(['_token', 'ins']);
+
         try {
-            //Update the model using repository update method
+            $project = @$task->milestone->project;
             $this->repository->update($task, $input);
+            
+            if ($project) 
+            return new RedirectResponse(route('biller.projects.show', $project), ['flash_success' => trans('alerts.backend.tasks.updated')]);
         } catch (\Throwable $th) {
             return errorHandler('Error Updating Tasks', $th);
         }
-        //return with successfull message
+        
         return new RedirectResponse(route('biller.tasks.index'), ['flash_success' => trans('alerts.backend.tasks.updated')]);
     }
 
@@ -155,17 +179,17 @@ class TasksController extends Controller
      * @param App\Models\project\Task $task
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Task $task, DeleteTaskRequest $request)
+    public function destroy(Task $task)
     {
         try {
-            //Calling the delete method on repository
             $this->repository->delete($task);
         } catch (\Throwable $th) {
-            return errorHandler('Error Deleting Tasks', $th);
+            \Log::error($th->getMessage() . ' at ' . $th->getFile() . ':' . $th->getLine());
+            return response()->json(['status' => 'Error', 'message' => trans('alerts.backend.tasks.deleted')]);
         }
 
-        return json_encode(array('status' => 'Success', 'message' => trans('alerts.backend.tasks.deleted')));
-    }
+        return response()->json(['status' => 'Success', 'message' => trans('alerts.backend.tasks.deleted')]);
+    } 
 
     /**
      * Remove the specified resource from storage.
@@ -190,7 +214,7 @@ class TasksController extends Controller
         ]);
 
         foreach (status_list() as $row) {
-            if ($row['id'] == @$task_back->id) $task->status_list .= '<option value="' . $row['id'] . '" selected>--' . $row['name'] . '--</option>';
+            if ($row['id'] == @$task_back->id) $task->status_list .= '<option value="' . $row['id'] . '" selected>' . $row['name'] . '</option>';
             else $task->status_list .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
         }
 

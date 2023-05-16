@@ -15,11 +15,26 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
+                        <div class="row">                            
+                            <div class="col-4">
+                                <select class="form-control select2" id="customerFilter" data-placeholder="Search Customer">
+                                    <option value=""></option>
+                                    @foreach ($customers as $customer)
+                                        <option value="{{ $customer->id }}">{{ $customer->company }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-3">
+                                <select class="form-control select2" id="branchFilter" data-placeholder="Search Branch">
+                                    <option value=""></option>
+                                    @foreach ([] as $branch)
+                                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>                            
                             <div class="col-2">
-                                <label for="status">Project Status</label>
                                 <select name="status" id="status" class="custom-select">
-                                    <option value="">-- select status --</option>
+                                    <option value="">-- Select Project Status --</option>
                                     @foreach (['active', 'complete'] as $val)
                                         <option value="{{ $val }}">{{ ucfirst($val) }}</option>
                                     @endforeach
@@ -83,40 +98,63 @@
 
 @section('after-scripts')
 {{ Html::script(mix('js/dataTable.js')) }}
+{{ Html::script('focus/js/select2.min.js') }}
 <script>
     config = {
         ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}" }},
-        date: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true},
+        branchSelect: {
+            allowClear: true,
+            ajax: {
+                url: "{{ route('biller.branches.select') }}",
+                dataType: 'json',
+                type: 'POST',
+                data: ({term}) => ({search: term, customer_id: $("#customerFilter").val()}),
+                processResults: (data) => {
+                    return { results: data.map(v => ({text: v.name, id: v.id})) };
+                },
+            }
+        }
     };
 
     const Index = {
-        status: '',
         startDate: '',
         endDate: '',
 
         init() {
+            $.ajaxSetup(config.ajax);
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
             this.drawDataTable();
+
             $('#status').change(this.statusChange);
             $('#search').click(this.searchDateClick);
+            $("#customerFilter").select2({allowClear: true}).change(Index.onChangeCustomer);
+            $("#branchFilter").select2(config.branchSelect).change(Index.onChangeBranch);
         },
 
         statusChange() {
-            Index.status = $(this).val();
             $('#projectsTbl').DataTable().destroy();
             return Index.drawDataTable();
         },
 
         searchDateClick() {
-            const startDate = $('#start_date').val();
-            const endDate = $('#end_date').val();
-            const verifyState = $('#verify_state').val();
-            if (!startDate || !endDate) return alert("Date range required!"); 
-
-            Index.startDate = startDate;
-            Index.endDate = endDate;
+            if (!$('#start_date').val() || !$('#end_date').val()) 
+                return alert("Start-End Date range required!"); 
+            Index.startDate = $('#start_date').val();
+            Index.endDate = $('#end_date').val();
             $('#projectsTbl').DataTable().destroy();
-            return Index.drawDataTable();
+            Index.drawDataTable();
+        },
+
+        onChangeCustomer() {
+            $("#branchFilter option:not(:eq(0))").remove();
+            $('#projectsTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        onChangeBranch() {
+            $('#projectsTbl').DataTable().destroy();
+            Index.drawDataTable(); 
         },
 
         drawDataTable() {
@@ -129,65 +167,30 @@
                     url: "{{ route('biller.accounts.get_project_gross_profit') }}",
                     type: 'post',
                     data: {
-                        status: this.status,
+                        status: $('#status').val(),
                         start_date: this.startDate,
-                        end_date: this.endDate
+                        end_date: this.endDate,                                  
+                        customer_id: $("#customerFilter").val(),
+                        branch_id: $("#branchFilter").val(),
                     }
                 },
-                columns: [{
-                        data: 'DT_Row_Index',
-                        name: 'id'
-                    },
-                    {
-                        data: 'tid',
-                        name: 'tid'
-                    },
-                    {
-                        data: 'customer',
-                        name: 'customer'
-                    },
-                    {
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: 'quote_amount',
-                        name: 'quote_amount'
-                    },
-                    {
-                        data: 'verify_date',
-                        name: 'verify_date'
-                    },
-                    {
-                        data: 'income',
-                        name: 'income'
-                    },
-                    {
-                        data: 'expense',
-                        name: 'expense'
-                    },
-                    {
-                        data: 'gross_profit',
-                        name: 'gross_profit'
-                    },
-                    {
-                        data: 'percent_profit',
-                        name: 'percent_profit'
-                    },
+                columns: [{data: 'DT_Row_Index',name: 'id'},
+                    ...[
+                        'tid', 'customer', 'name', 'quote_amount', 'verify_date', 'income', 'expense',
+                        'gross_profit', 'percent_profit',
+                    ].map(v => ({data:v, name:v})),
                 ],
                 columnDefs: [
                     { type: "custom-number-sort", targets: [6, 7, 8, 9] },
                     { type: "custom-date-sort", targets: [5] }
                 ],
-                order: [
-                    [0, "desc"]
-                ],
+                order: [[0, "desc"]],
                 searchDelay: 500,
                 dom: 'Blfrtip',
                 buttons: ['csv', 'excel', 'print'],
             });
-        }
-    };
+        },
+    }
 
     $(() => Index.init());
 </script>

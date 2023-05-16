@@ -121,8 +121,12 @@ class QuotesTableController extends Controller
                     $query->whereHas('invoice', fn($q) => $q->where('tid', floatval($tid)));
                 }
             })
-            ->addColumn('sum_total', function ($quote) use($sum_total) {
+            ->addColumn('sum_total', function() use($sum_total) {
                 return $sum_total;
+            })
+            ->addColumn('budget_status', function ($quote) {
+                return $quote->budget? '<span class="badge badge-success">budgeted</span>' : 
+                    '<span class="badge badge-secondary">pending</span>';
             })
             ->addColumn('actions', function ($quote) {
                 $action_buttons = $quote->action_buttons;

@@ -71,12 +71,13 @@ class BudgetsController extends Controller
     public function store(Request $request)
     {
         try {
-            $this->repository->create($request->except('_token'));
+            $budget = $this->repository->create($request->except('_token', 'files'));
+            $project = @$budget->quote->project;
+            if ($project) return new RedirectResponse(route('biller.projects.show', $project), ['flash_success' => 'Budget Created Successfully']);
+            return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Created Successfully']);
         } catch (\Throwable $th) {
             return errorHandler('Error Creating Budget!', $th);
         }
-
-        return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Created Successfully']);
     }
 
     /**
@@ -87,7 +88,9 @@ class BudgetsController extends Controller
      */
     public function edit(Budget $budget)
     {
-        return view('focus.budgets.edit', compact('budget'));
+        $quote = $budget->quote;
+
+        return view('focus.budgets.edit', compact('budget', 'quote'));
     }
 
     /**
@@ -100,12 +103,13 @@ class BudgetsController extends Controller
     public function update(Request $request, Budget $budget)
     {
         try {
-            $this->repository->update($budget, $request->except('_token'));
-        } catch (\Throwable $th) {
+            $this->repository->update($budget, $request->except('_token', 'files'));
+            $project = @$budget->quote->project;
+            if ($project) return new RedirectResponse(route('biller.projects.show', $project), ['flash_success' => 'Budget Updated Successfully']);
+            return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Updated Successfully']);
+        } catch (\Throwable $th) { dd($th);
             return errorHandler('Error Updating Budget!', $th);
         }
-
-        return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Updated Successfully']);
     }
 
     /**
@@ -117,12 +121,14 @@ class BudgetsController extends Controller
     public function destroy(Budget $budget)
     {
         try {
+            $project = @$budget->quote->project;
             $this->repository->delete($budget);
+            if ($project) return redirect()->route('biller.projects.show', $project);
+
         } catch (\Throwable $th) {
             return errorHandler('Error Deleting Budget!', $th);
         }
         
-
         return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Deleted Successfully']);
     }
 

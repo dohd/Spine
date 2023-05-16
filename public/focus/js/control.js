@@ -66,9 +66,13 @@ function isNumber(evt) {
 }
 
 function addObject(action, trigger_n = false) {
-    var form_name = false;
-    if (action['form_name']) form_name = action['form_name'];
-    var errorNum = farmCheck(form_name);
+    let form_name = false;
+    let errorNum = 0;
+    if (action['form_name']) {
+        form_name = action['form_name'];
+        errorNum = formCheck(form_name);
+    }
+    
     if ($("#notify").length == 0) {
         $("#c_body").html('<div id="notify" class="alert m-1" style="display:none;"><a href="#" class="close" data-dismiss="alert">&times;</a><div class="message"></div></div>');
     }
@@ -111,24 +115,17 @@ function addObject(action, trigger_n = false) {
     }
 }
 
-function farmCheck(form_name = false) {
-    var errorNum = 0;
-    $(".required").each(function () {
+function formCheck(form_name = false) {
+    let errorNum = 0;
+    let elements = $(".required");
+    if (form_name) elements = $('#' + form_name + " .required");
+    elements.each(function () {
         $(this).parent().removeClass("has-error");
         if (!$(this).val()) {
             $(this).parent().addClass("has-error");
             errorNum++;
         } 
     });
-    if (form_name) {
-        $('#' + form_name + " .required").each(function () {
-            $(this).parent().removeClass("has-error");
-            if (!$(this).val()) {
-                $(this).parent().addClass("has-error");
-                errorNum++;
-            }
-        });
-    } 
 
     return errorNum;
 }
@@ -261,7 +258,7 @@ function addObjectPage(action) {
 
 function doTransaction(payment_data) {
     $("#c_body").html('<div id="notify" class="alert m-1" style="display:none;"><a href="#" class="close" data-dismiss="alert">&times;</a><div class="message"></div></div>');
-    var errorNum = farmCheck();
+    var errorNum = formCheck();
     $('#' + payment_data['modal_id']).modal('hide');
     if (errorNum > 0) {
         $("#notify").removeClass("alert-success").addClass("alert-danger").fadeIn();
@@ -442,7 +439,7 @@ function saveMData(o_data, action_url) {
     if ($("#notify").length == 0) {
         $("#c_body").html('<div id="notify" class="alert m-1" style="display:none;"><a href="#" class="close" data-dismiss="alert">&times;</a><div class="message"></div></div>');
     }
-    var errorNum = farmCheck();
+    var errorNum = formCheck();
     if (errorNum > 0) {
         $("#notify").removeClass("alert-success").addClass("alert-danger").fadeIn();
         $("#notify .message").html("<strong>Error</strong>");

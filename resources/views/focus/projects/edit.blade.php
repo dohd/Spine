@@ -1,134 +1,84 @@
 @extends ('core.layouts.app')
 
-@section ('title', trans('labels.backend.projects.management') . ' | ' . trans('labels.backend.projects.edit'))
+@section ('title', trans('labels.backend.projects.edit') . ' | ' . trans('labels.backend.projects.management'))
 
 @section('content')
-<div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-6 mb-2">
-            <h4 class="content-header-title">{{ trans('labels.backend.projects.edit') }}</h4>
-        </div>
-        <div class="content-header-right col-6">
-            <div class="media width-250 float-right">
-                <div class="media-body media-right text-right">
-                    @include('focus.projects.partials.projects-header-buttons')
+    <div class="content-wrapper">
+        <div class="content-header row mb-2">
+            <div class="content-header-left col-md-6 col-12">
+                <h4 class="content-header-title">{{ trans('labels.backend.projects.edit') }}</h4>
+            </div>
+            <div class="content-header-right col-md-6 col-12">
+                <div class="media width-250 float-right">
+                    <div class="media-body media-right text-right">
+                        @include('focus.projects.partials.projects-header-buttons')
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="content-body">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            {{ Form::model($project, ['route' => ['biller.projects.update', $project], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-project']) }}
+        <div class="content-body">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-body">
+                                {{ Form::model($project, ['route' => ['biller.projects.update', $project], 'method' => 'PATCH', 'id' => 'edit-project']) }}
                                 <div class="form-group">
+                                    {{-- Including Form blade file --}}
                                     @include("focus.projects.form")
                                     <div class="edit-form-btn float-right mb-2">
-                                        {{ link_to_route('biller.projects.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-lg']) }}
-                                        {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-lg']) }}
-                                    </div>
-                                </div>
-                            {{ Form::close() }}
+                                        {{ link_to_route('biller.projects.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                                        {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
+                                        {{-- <div class="clearfix"></div> --}}
+                                    </div><!--edit-form-btn-->
+                                </div><!--form-group-->
+                                {{ Form::close() }}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 @endsection
-
 @section('after-styles')
-{!! Html::style('focus/css/bootstrap-colorpicker.min.css') !!}
+    {!! Html::style('focus/css/bootstrap-colorpicker.min.css') !!}
 @endsection
-
 @section('after-scripts')
-{{ Html::script('focus/js/select2.min.js') }}
-<script>
-    // initialize datepicker
-    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
-    $('[data-toggle="datepicker"]').datepicker({ format: "{{config('core.user_date_format')}}" });
-    $('.from_date').datepicker('setDate', "{{ dateFormat($project->start_date) }}");
-    $('.from_date').datepicker({ format: "{{ config('core.user_date_format') }}" });
-    $('.to_date').datepicker('setDate', "{{ dateFormat($project->end_date) }}");
-    $('.to_date').datepicker({ format: "{{ config('core.user_date_format') }}"});
-    // $('#color').colorpicker();
-    // initialize select2
-    $("#tags").select2();
-    $("#employee").select2();
-    $("#main_quote").select2();
-    $("#other_quote").select2();
-    $("#branch_id").select2();
+    {{-- For DataTables --}}
+    {{ Html::script(mix('js/dataTable.js')) }}
+    {{ Html::script('core/app-assets/vendors/js/extensions/moment.min.js') }}
+    {{ Html::script('core/app-assets/vendors/js/extensions/fullcalendar.min.js') }}
+    {{ Html::script('core/app-assets/vendors/js/extensions/dragula.min.js') }}
+    {{ Html::script('core/app-assets/js/scripts/pages/app-todo.js') }}
+    {{ Html::script('focus/js/bootstrap-colorpicker.min.js') }}
+    {{ Html::script('focus/js/select2.min.js') }}
+    <script>
+        $('[data-toggle="datepicker"]').datepicker({
+            autoHide: true,
+            format: '{{config('core.user_date_format')}}'
+        });
+        $('.from_date').datepicker('setDate', '{{dateFormat($project->start_date)}}');
+        $('.from_date').datepicker({autoHide: true, format: '{{date(config('core.user_date_format'))}}'});
+        $('.to_date').datepicker('setDate', '{{dateFormat($project->end_date)}}');
+        $('.to_date').datepicker({autoHide: true, format: '{{date(config('core.user_date_format'))}}'});
 
-    // customer
-    const customer = @json($project->customer_project);
-    $("#person").append(new Option(customer.name, customer.id, 'selected', true));
-    // branch
-    const branch = @json($branch);
-    $("#branch_id").append(new Option(branch.name, branch.id, 'selected', true));
-    // quotes
-    const quotes = @json($project->quotes);
-    const quoteId = @json($project->main_quote_id);
+        $('#color').colorpicker();
 
-    const mainQuote = quotes.filter(v => v.id == quoteId)[0];
-    if (mainQuote) {
-        const tid = String(mainQuote.tid).length < 4 ? ('000'+mainQuote.tid).slice(-4) : mainQuote.tid;
-        const text = `${mainQuote.bank_id? '#PI-' : '#QT-'}${tid} - ${mainQuote.notes}`;
-        $("#main_quote").append(new Option(text, mainQuote.id, 'selected', true));
-    }
-
-    const otherqt = quotes.filter(v => v.id !== quoteId);
-    otherqt.forEach(v => {
-        const tid = String(v.tid).length < 4 ? ('000'+v.tid).slice(-4) : v.tid;
-        const text = `${v.bank_id? '#PI-' : '#QT-'}${tid} - ${v.notes}`;
-        $("#other_quote").append(new Option(text, v.id, 'selected', true));
-    });
-
-    $("#person").select2({
-        tags: [],
-        ajax: {
-            url: "{{ route('biller.customers.select') }}",
-            dataType: 'json',
-            type: 'POST',
-            quietMillis: 50,
-            data: function (person) {
-                return { person };
-            },
-            processResults: function (data) {
-                return {
-                    results: $.map(data, function (item) {
-                        return {
-                            text: item.name,
-                            id: item.id
-                        }
-                    })
-                };
-            },
-        }
-    });
-    
-    // on customer change
-    $("#person").on('change', function() {
-        var id = $(this).val();
-        // fetch customer branches
-        $("#branch_id").html('').select2({
+        $("#tags").select2();
+        $("#employee").select2();
+        $("#person").select2({
             ajax: {
-                url: "{{route('biller.branches.select')}}",
-                method: "POST",
+                url: "{{route('biller.customers.select')}}",
                 dataType: 'json',
-                data: ({term}) => ({ 
-                            search: term, 
-                            customer_id: id,
-                        }),
-                quietMillis: 50,
-                processResults: function(data) {
+                type: 'POST',
+                data: person => ({person}),
+                processResults: function (data) {
                     return {
-                        results: $.map(data, function(item) {
+                        results: $.map(data, function (item) {
                             return {
-                                text: item.name,
+                                text: item.company,
                                 id: item.id
                             }
                         })
@@ -137,39 +87,31 @@
             }
         });
 
-        // fetch customer quotes
-        const quoteData = [];
-        $("#main_quote").html('').select2({
-            ajax: {
-                url: "{{route('biller.quotes.customer_quotes')}}?id=" + id,
-                dataType: 'json',
-                quietMillis: 50,
-                processResults: function(data) {
-                    const results = $.map(data, function(item) {
-                        const tid = String(item.tid).length < 4 ? ('000'+item.tid).slice(-4) : item.tid;
+        $("#person").change(function() {
+            $("#branch_id").val('').trigger('change');
+            const tips = $('#person').val();
+
+            $("#branch_id").select2({
+                ajax: {
+                    url: "{{ route('biller.branches.select') }}",
+                    dataType: 'json',
+                    type: 'POST',
+                    quietMillis: 50,
+                    params: {'cat_id': tips},
+                    data: (person) => ({person, customer_id: tips}),
+                    processResults: function (data) {
                         return {
-                            text: `${item.bank_id ? '#PI-' : '#QT-'}${tid} - ${item.notes}`,
-                            id: item.id
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.name,
+                                    id: item.id
+                                }
+                            })
                         };
-                    });
-                    // replace array data
-                    quoteData.length = 0;
-                    quoteData.push.apply(quoteData, results);
-
-                    return { results };
-                },
-            }
+                    },
+                }
+            });
         });
-    });
-
-    // On selecting Main Quote
-    $("#main_quote").change(function(e) {
-        // set Other Quote select options 
-        const data = quoteData.filter(v => v.id !== Number($(this).val()));
-        $("#other_quote").html('').select2({ data });
-        // set project title
-        const name = $(this).find(':selected').text().split(' - ')[1];
-        $('#project-name').val(name);
-    });
-</script>
+        
+    </script>
 @endsection

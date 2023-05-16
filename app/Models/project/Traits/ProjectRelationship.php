@@ -12,7 +12,6 @@ use App\Models\items\PurchaseItem;
 use App\Models\misc\Misc;
 use App\Models\note\Note;
 use App\Models\project\Budget;
-use App\Models\project\Project;
 use App\Models\project\ProjectLog;
 use App\Models\project\ProjectMeta;
 use App\Models\project\ProjectMileStone;
@@ -69,7 +68,7 @@ trait ProjectRelationship
 
     public function tags()
     {
-        return $this->hasManyThrough(Misc::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('section', '=', 1)->withoutGlobalScopes();
+        return $this->hasManyThrough(Misc::class, ProjectRelations::class, 'project_id', 'id', 'id', 'misc_id');
     }
 
     public function task_status()
@@ -79,13 +78,14 @@ trait ProjectRelationship
 
     public function users()
     {
-        return $this->hasManyThrough(Hrm::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 2)->withoutGlobalScopes();
+        return $this->hasManyThrough(Hrm::class, ProjectRelations::class, 'project_id', 'id', 'id', 'user_id');
     }
 
     public function creator()
     {
-        return $this->hasOneThrough(Hrm::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 3)->withoutGlobalScopes();
+        return $this->hasOneThrough(Hrm::class, ProjectRelations::class, 'project_id', 'id', 'id', 'user_id');
     }
+    
     public function branch()
     {
         return $this->belongsTo(Branch::class);
@@ -93,12 +93,12 @@ trait ProjectRelationship
 
     public function tasks()
     {
-        return $this->hasOneThrough(Task::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 4)->withoutGlobalScopes();
+        return $this->hasOneThrough(Task::class, ProjectRelations::class, 'project_id', 'id', 'id', 'task_id');
     }
 
     public function tasks_status()
     {
-        return $this->hasOneThrough(Task::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 4)->withoutGlobalScopes();
+        return $this->hasOneThrough(Task::class, ProjectRelations::class, 'project_id', 'id', 'id', 'task_id');
     }
 
     public function milestones()
@@ -118,12 +118,7 @@ trait ProjectRelationship
 
     public function notes()
     {
-        return $this->hasManyThrough(Note::class, ProjectRelations::class, 'project_id', 'id', 'id', 'rid')->where('related', '=', 6)->withoutGlobalScopes();
-    }
-
-    public function project()
-    {
-        return $this->hasOne(Project::class, 'project_id', 'id')->withoutGlobalScopes();
+        return $this->hasManyThrough(Note::class, ProjectRelations::class, 'project_id', 'id', 'id', 'note_id');
     }
 
     public function events()

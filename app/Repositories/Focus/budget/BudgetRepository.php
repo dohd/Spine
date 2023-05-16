@@ -8,6 +8,7 @@ use App\Models\project\BudgetItem;
 use App\Models\project\BudgetSkillset;
 use App\Repositories\BaseRepository;
 use DB;
+use Illuminate\Support\Arr;
 
 class BudgetRepository extends BaseRepository
 {
@@ -25,6 +26,12 @@ class BudgetRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+
+        $q->when(request('project_id'), function ($q) {
+            $q->whereHas('quote', function ($q) {
+                $q->whereHas('project', fn($q) => $q->where('projects.id', request('project_id')));
+            });
+        });
             
         return $q->get();
     }
@@ -41,15 +48,19 @@ class BudgetRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
         
-        $data = $input['data'];
-        $keys = array('quote_total', 'budget_total', 'labour_total');
-        foreach ($data as $key => $val) {
-            if (in_array($key, $keys, 1)) 
-                $data[$key] = numberClean($val);
-        }                
+        foreach ($input as $key => $val) {
+            if (in_array($key, ['quote_total', 'budget_total', 'labour_total'])) 
+                $input[$key] = numberClean($val);
+        }     
+        $data = Arr::only($input, ['quote_total', 'budget_total', 'labour_total', 'note', 'quote_id']);       
         $result = Budget::create($data);
 
-        $data_items = $input['data_items'];
+        // budget items
+        $data_items = Arr::only($input, [
+            'numbering', 'row_index', 'a_type', 'product_id', 'product_name',            
+            'product_qty', 'unit', 'new_qty',  'price'
+        ]);
+        $data_items = modify_array($data_items);
         $data_items = array_map(function ($v) use($result) {
             return array_replace($v, [
                 'budget_id' => $result->id,
@@ -58,8 +69,11 @@ class BudgetRepository extends BaseRepository
         }, $data_items); 
         BudgetItem::insert($data_items);
 
-        $data_skillset = $input['data_skillset'];
+        // budget labour items
+        $data_skillset = Arr::only($input, ['skillitem_id', 'skill', 'charge', 'hours', 'no_technician']);
+        $data_skillset = modify_array($data_skillset);
         foreach ($data_skillset as $item) {
+            if (!$item['skill']) continue;
             $item = array_replace($item, [
                 'charge' => numberClean($item['charge']),
                 'budget_id' => $result->id,
@@ -93,18 +107,21 @@ class BudgetRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        $data = $input['data'];
-        $keys = array('quote_total', 'budget_total', 'labour_total');
-        foreach ($data as $key => $val) {
-            if (in_array($key, $keys)) 
-                $data[$key] = numberClean($val);
-        }   
+        foreach ($input as $key => $val) {
+            if (in_array($key, ['quote_total', 'budget_total', 'labour_total'])) 
+                $input[$key] = numberClean($val);
+        }     
+        $data = Arr::only($input, ['quote_total', 'budget_total', 'labour_total', 'note', 'quote_id']);    
         $result = $budget->update($data);
 
-        $data_items = $input['data_items'];
-        // delete omitted line items
-        $budget->items()->whereNotIn('id', array_map(fn($v) => $v['item_id'], $data_items))->delete();
+        // budget items
+        $data_items = Arr::only($input, [
+            'numbering', 'row_index', 'a_type', 'product_id', 'product_name',            
+            'product_qty', 'unit', 'new_qty',  'price', 'item_id'
+        ]);
+        $data_items = modify_array($data_items); 
         // new or update item
+        $budget->items()->whereNotIn('id', array_map(fn($v) => $v['item_id'], $data_items))->delete();
         foreach($data_items as $item) {
             $item = array_replace($item, [
                 'price' => numberClean($item['price']),
@@ -118,15 +135,18 @@ class BudgetRepository extends BaseRepository
             $new_item->save();
         }
 
-        $data_skillset = $input['data_skillset'];
-        // delete omitted labour items
-        $budget->skillsets()->whereNotIn('id', array_map(fn($v) => $v['skillitem_id'], $data_skillset))->delete();
+        // budget labour items
+        $data_skillset = Arr::only($input, ['skillitem_id', 'skill', 'charge', 'hours', 'no_technician']);
+        $data_skillset = modify_array($data_skillset);
         // create or update items
+        $budget->skillsets()->whereNotIn('id', array_map(fn($v) => $v['skillitem_id'], $data_skillset))->delete();
         foreach($data_skillset as $item) {
-            $item['charge'] = numberClean($item['charge']);
+            if (!$item['skill']) continue;
             $new_item = BudgetSkillset::firstOrNew([
                 'id' => $item['skillitem_id'],
                 'budget_id' => $budget->id,
+                'quote_id' => $budget->quote_id,
+                'charge' => numberClean($item['charge']),
             ]);
             $new_item->fill($item);
             if (!$new_item->id) unset($new_item->id);
@@ -136,7 +156,7 @@ class BudgetRepository extends BaseRepository
         
         if ($result) {
             DB::commit();
-            return $result;
+            return $budget;
         }        
 
         throw new GeneralException(trans('exceptions.backend.leave_category.update_error'));
@@ -150,7 +170,7 @@ class BudgetRepository extends BaseRepository
      * @return bool
      */
     public function delete(Budget $budget)
-    {
+    {   
         if ($budget->delete()) return true;
             
         throw new GeneralException(trans('exceptions.backend.leave_category.delete_error'));

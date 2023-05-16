@@ -28,9 +28,22 @@
                     <div class="card-content">
                         <div class="card-body">
                             <div class="row">
+                                <div class="col-4">
+                                    <select class="form-control select2" id="customerFilter" data-placeholder="Search Customer">
+                                        <option value=""></option>
+                                        @foreach ($customers as $customer)
+                                            <option value="{{ $customer->id }}">{{ $customer->company }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <select class="form-control select2" id="branchFilter" data-placeholder="Search Branch">
+                                        <option value=""></option>
+                                    </select>
+                                </div> 
                                 <div class="col-3">
                                     <select name="verify_state" id="verify_state" class="custom-select">
-                                        <option value="">-- Verification Status--</option>
+                                        <option value="">-- Select Status--</option>
                                         @foreach (['yes' => 'verified', 'no' => 'unverified'] as $key => $val)
                                             <option value="{{ ucfirst($key) }}">{{ ucfirst($val) }}</option>
                                         @endforeach
@@ -87,21 +100,34 @@
 
 @section('after-scripts')
 {{ Html::script(mix('js/dataTable.js')) }}
+{{ Html::script('focus/js/select2.min.js') }}
 <script>
     const config = {
-        ajaxSetup: {
-            headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }
-        },
-        datepicker: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+        ajaxSetup: {headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }},
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true},
+        branchSelect: {
+            allowClear: true,
+            ajax: {
+                url: "{{ route('biller.branches.select') }}",
+                dataType: 'json',
+                type: 'POST',
+                data: ({term}) => ({search: term, customer_id: $("#customerFilter").val()}),
+                processResults: (data) => {
+                    return { results: data.map(v => ({text: v.name, id: v.id})) };
+                },
+            }
+        }
     };
 
     const Index = {
         init(config) {
             $.ajaxSetup(config.ajaxSetup);
-            $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
+            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
 
             $('#verify_state').change(this.verifyStateChange);
             $('#search').click(this.searchDateClick);
+            $("#customerFilter").select2({allowClear: true}).change(Index.onChangeCustomer);
+            $("#branchFilter").select2(config.branchSelect).change(Index.onChangeBranch);
             this.drawDataTable();
         },
 
@@ -125,6 +151,17 @@
             });
         },
 
+        onChangeCustomer() {
+            $("#branchFilter option:not(:eq(0))").remove();
+            $('#quotesTbl').DataTable().destroy();
+            Index.drawDataTable();
+        },
+
+        onChangeBranch() {
+            $('#quotesTbl').DataTable().destroy();
+            Index.drawDataTable(); 
+        },
+
         drawDataTable(params={}) {
             $('#quotesTbl').dataTable({
                 processing: true,
@@ -135,57 +172,17 @@
                     url: '{{ route("biller.quotes.get_project") }}',
                     type: 'post',
                     data: {
+                        pi_page: location.href.includes('page=pi') ? 1 : 0,
+                        customer_id: $("#customerFilter").val(),
+                        branch_id: $("#branchFilter").val(),
                         ...params,
-                        pi_page: location.href.includes('page=pi') ? 1 : 0
                     },
                 },
-                columns: [{
-                        data: 'DT_Row_Index',
-                        name: 'id'
-                    },
-                    {
-                        data: 'date',
-                        name: 'date'
-                    },
-                    {
-                        data: 'tid',
-                        name: 'tid'
-                    },
-                    {
-                        data: 'customer',
-                        name: 'customer'
-                    },
-                    {
-                        data: 'notes',
-                        name: 'notes'
-                    },
-                    {
-                        data: 'total',
-                        name: 'total'
-                    },
-                    {
-                        data: 'verified_total',
-                        name: 'verified_total'
-                    },
-                    {
-                        data: 'project_tid',
-                        name: 'project_tid'
-                    },
-                    {
-                        data: 'lpo_number',
-                        name: 'lpo_number'
-                    },
-                    
-                    {
-                        data: 'client_ref',
-                        name: 'client_ref'
-                    },
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        searchable: false,
-                        sortable: false
-                    }
+                columns: [{data: 'DT_Row_Index', name: 'id'},
+                    ...[
+                        'date', 'tid', 'customer', 'notes', 'total', 'verified_total', 'project_tid', 'lpo_number', 'client_ref',
+                    ].map(v => ({data:v, name: v})),    
+                    {data: 'actions', name: 'actions', searchable: false, sortable: false},
                 ],
                 columnDefs: [
                     { type: "custom-number-sort", targets: [4, 5] },

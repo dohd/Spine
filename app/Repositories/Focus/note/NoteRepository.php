@@ -24,34 +24,28 @@ class NoteRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-
         $q = $this->query();
 
         if (request('project_id')) {
-            $q->whereHas('project', function ($q) {
-                return $q->where('project_id', request('project_id'));
-            });
-        } else $q->where('section', 0);
+            $q->whereHas('project', fn($q) => $q->where('projects.id', request('project_id')));
+        }
 
-        return $q->get(['id','title','created_at']);
+        return $q->get();
     }
 
     /**
      * For Creating the respective model in storage
      *
      * @param array $input
-     * @return bool
+     * @return App\Models\note\Note $note;
      * @throws GeneralException
      */
     public function create(array $input)
     {
-
-         $input['title'] = strip_tags( $input['title']);
-         $input['content'] = clean(html_entity_decode($input['content']),'purifier.settings.custom_definition');
-        if (Note::create($input)) {
-            return true;
-        }
-        throw new GeneralException(trans('exceptions.backend.notes.create_error'));
+        $input['title'] = strip_tags($input['title']);
+        $input['content'] = clean(html_entity_decode($input['content']), 'purifier.settings.custom_definition');
+        $note = Note::create($input);
+        return $note;
     }
 
     /**
@@ -64,12 +58,9 @@ class NoteRepository extends BaseRepository
      */
     public function update(Note $note, array $input)
     {
-          $input['title'] = strip_tags( $input['title']);
-           $input['content'] = clean(html_entity_decode($input['content']),'purifier.settings.custom_definition');
-        if ($note->update($input))
-            return true;
-
-        throw new GeneralException(trans('exceptions.backend.notes.update_error'));
+        $input['title'] = strip_tags($input['title']);
+        $input['content'] = clean(html_entity_decode($input['content']), 'purifier.settings.custom_definition');
+        if ($note->update($input)) return $note;
     }
 
     /**
@@ -81,11 +72,6 @@ class NoteRepository extends BaseRepository
      */
     public function delete(Note $note)
     {
-        $note->project()->delete();
-        if ($note->delete()) {
-            return true;
-        }
-
-        throw new GeneralException(trans('exceptions.backend.notes.delete_error'));
+        if ($note->delete()) return true;
     }
 }

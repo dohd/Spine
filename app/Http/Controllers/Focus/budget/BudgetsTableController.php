@@ -78,7 +78,7 @@ class BudgetsTableController extends Controller
                 return numberFormat($budget->budget_total);
             })
             ->addColumn('actions', function ($budget) {
-                // return $budget->action_buttons;
+                return $budget->action_buttons;
             })
             ->make(true);
     }

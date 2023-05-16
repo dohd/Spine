@@ -103,10 +103,9 @@ class QuoteRepository extends BaseRepository
         }
         $q->when($status, fn($q) => $q->where('status', '!=', 'cancelled'));
 
-        // project quote filter
+        // project filter
         $q->when(request('project_id'), function($q) {
-            if (request('quote_ids')) $q->whereIn('id', explode(',', request('quote_ids')));
-            else $q->whereIn('id', [0]);
+            $q->whereHas('project', fn($q) => $q->where('projects.id', request('project_id')));
         });
         
         return $q;
@@ -117,17 +116,26 @@ class QuoteRepository extends BaseRepository
      */
     public function getForVerifyDataTable()
     {
-        $q = $this->query()->where('status', '!=', 'cancelled')->where(function($q) { 
-            $q->whereHas('budget')->orWhere('quote_type', 'standard'); 
-        });
+        $q = $this->query();
+        // customer filter
+        if(request('customer_id')) {
+            $q->where('customer_id', request('customer_id'));
+            if (request('branch_id')) $q->where('branch_id', request('branch_id'));
+        } else $q->limit(500);
 
+        // date filter
         $q->when(request('start_date') && request('end_date'), function ($q) {
             $q->whereBetween('date', array_map(fn($v) => date_for_database($v), [request('start_date'), request('end_date')]));
         });
-        $q->when(request('customer_id'), fn($q) => $q->where('customer_id', request('customer_id')));
-        $q->when(request('verify_state'), fn($q) => $q->where('verified', request('verify_state')));
+
+        // state filter
+        if (request('verify_state')) $q->where('verified', request('verify_state'));
+
+        // standard quote or budget project quote
+        $q->where(fn($q) =>  $q->whereHas('budget')->orWhere('quote_type', 'standard'));
+        $q->where('status', '!=', 'cancelled');
         
-        return $q;
+        return $q->get();
     }
 
     /**
