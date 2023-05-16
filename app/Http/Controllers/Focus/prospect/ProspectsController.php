@@ -150,9 +150,17 @@ class ProspectsController extends Controller
     //  * @param \App\Models\prospect\Prospect $prospect
     //  * @return \App\Http\Responses\RedirectResponse
     //  */
-    public function destroy(Prospect $prospect)
+    public function destroy($id, Request $request)
     {
-        $this->repository->delete($prospect);
+        if($id == 0){
+            
+            $request->validate(['bytitle' => 'required']);
+            $this->repository->mass_delete($request->only('bytitle'));
+        }else{
+            $prospect = Prospect::find($id);
+            $this->repository->delete($prospect);   
+        }
+        
 
         return new RedirectResponse(route('biller.prospects.index'), ['flash_success' => 'Prospect Successfully Deleted']);
     }
@@ -190,4 +198,7 @@ class ProspectsController extends Controller
         
         return view('focus.prospects.partials.prospect_table', compact('prospect'));
     }
+
+
+
 }

@@ -78,7 +78,7 @@ class RemarksController extends Controller
     //  * @param StoreProductcategoryRequestNamespace $request
     //  * @return \App\Http\Responses\RedirectResponse
     //  */
-    public function store(RemarkRequest $request)
+    public function store(RemarkRequest $request)   
     {
 
         // filter request input fields

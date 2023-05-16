@@ -64,26 +64,38 @@ class ProspectsCallResolvedTableController extends Controller
                 $company = $prospectcallresolved->prospect->company == null ? '-----' : $prospectcallresolved->prospect->company;
                 return $company;
             })
+            ->addColumn('contact_person', function ($prospectcallresolved) {
+
+                $contact_person = $prospectcallresolved->prospect->contact_person == null ? '-----' : $prospectcallresolved->prospect->contact_person;
+                return $contact_person;
+            })
+            ->addColumn('phone', function ($prospectcallresolved) {
+
+                $phone = $prospectcallresolved->prospect->phone == null ? '-----' : $prospectcallresolved->prospect->phone;
+                return $phone;
+            })
 
             ->addColumn('industry', function ($prospectcallresolved) {
                 $client_industry = $prospectcallresolved->prospect->industry == null ? '-----' : $prospectcallresolved->prospect->industry;
 
                 return $client_industry;
             })
-            // ->addColumn('name', function ($prospectcallresolved) {
-            //     $name = $prospectcallresolved->prospect->contact_person == null ? '-----' : $prospectcallresolved->prospect->contact_person;
-
-            //     return $name;
-            // })
-            // ->addColumn('phone', function ($prospectcallresolved) {
-            //     $phone = $prospectcallresolved->prospect->phone == null ? '-----' : $prospectcallresolved->prospect->phone;
-
-            //     return $phone;
-            // })
             ->addColumn('region', function ($prospectcallresolved) {
                 $client_region = $prospectcallresolved->prospect->region == null ? '-----' : $prospectcallresolved->prospect->region;
 
                 return $client_region;
+            })
+            ->addColumn('temperate', function ($prospectcallresolved) {
+                $status = $prospectcallresolved->prospect->temperate;
+               
+
+                return $status;
+            })
+            ->addColumn('reminder_date', function ($prospectcallresolved) {
+                $date = $prospectcallresolved->reminder_date;
+               
+
+                return $date;
             })
             ->addColumn('follow_up', function ($prospectcallresolved) {
               
@@ -113,18 +125,8 @@ class ProspectsCallResolvedTableController extends Controller
                          <i  class="fa fa-vcard"></i>
                                   </a>';
             })
-            ->addColumn('reminder_date', function ($prospectcallresolved) {
-                $date = $prospectcallresolved->reminder_date;
-               
-
-                return $date;
-            })
-            ->addColumn('temperate', function ($prospectcallresolved) {
-                $status = $prospectcallresolved->prospect->temperate;
-               
-
-                return $status;
-            })
+           
+           
             ->addColumn('call_status', function ($prospectcallresolved) {
                 $status = $prospectcallresolved->prospect->call_status;
                 if ($status == 'notcalled') {

@@ -35,15 +35,21 @@
                                     {{ numberFormat(div_num($closed_prospect, $total_prospect) * 100) }}%</div>
                             </div>
                         </div>
-                        <div class="row mb-3 ml-1">
+                        <div class="row ml-1">
                             <div class="col-2">
-                                <label for="client">Title</label>                             
+                                <label for="client">Title</label>  
+                                {{ Form::open(['route' => array('biller.prospects.destroy', 0), 'method' => 'DELETE']) }}                           
                                 <select name="bytitle" class="custom-select" id="bytitle" data-placeholder="Choose Title">
                                     <option value="">Choose Title</option>
                                     @foreach ($titles as $title)
                                         <option value="{{ $title->title }}">{{ $title->title }}</option>
                                     @endforeach
                                 </select>
+                                <div class="edit-form-btn mb-3">
+                                    <label for="">&nbsp;</label>
+                                    {{ Form::submit('Mass Delete', ['class' => 'form-control btn-danger mass-delete']) }}
+                                </div>
+                                {{ Form::close() }}
                             </div>
                             <div class="col-2">
                                 <label for="client">Call Status</label>                             
@@ -81,6 +87,7 @@
                             </div>
                             
                         </div>
+                        
                         
                     </div>
                     <div class="card">
@@ -146,6 +153,7 @@
                 $.ajaxSetup(config.ajax);
                 this.draw_data();
                 this.showModal();
+                $('.mass-delete').click(this.massDelete);
                 //form remark
                 remark: @json(@$remark),
                 $('#reminder_date').datepicker(config.date).datepicker('setDate', new Date());
@@ -155,6 +163,18 @@
                 $('#bystatus').change(this.statusChange);
                 
             },
+            massDelete() {
+            event.preventDefault();
+            if (!$('#bytitle').val()) return alert('Title is required!');
+            const form = $(this).parents('form');
+            swal({
+                title: 'Are You  Sure?',
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+                showCancelButton: true,
+            }, () => form.submit());
+        },
             titleChange(){
             Index.title = $(this).val();
             $('#prospects-table').DataTable().destroy();

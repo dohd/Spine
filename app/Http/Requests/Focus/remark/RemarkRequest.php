@@ -24,7 +24,7 @@ class RemarkRequest extends FormRequest
     public function rules()
     {
         return [
-            'any_remarks' => 'required',
+           
         ];
     }
 

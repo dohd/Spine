@@ -7,7 +7,7 @@ use App\Models\prospect\Prospect;
 use App\Models\calllist\CallList;
 use App\Exceptions\GeneralException;
 use App\Models\items\Prefix;
-
+use App\Models\prospect_calllist\ProspectCallList;
 use App\Repositories\BaseRepository;
 use App\Repositories\Focus\prospect_call_list\ProspectCallListRepository;
 use DB;
@@ -97,15 +97,13 @@ class CallListRepository extends BaseRepository
      */
     public function delete(CallList $calllist)
     {
-        $prefix = Prefix::where('note', 'calllist')->first();
-        $tid = gen4tid("{$prefix}-", $calllist->reference);
-
-        if ($calllist->djcs->count())
-            throw ValidationException::withMessages(["{$tid} is attached to DJC Report!"]);
-        if ($calllist->quotes->count())
-            throw ValidationException::withMessages(["{$tid} is attached to Quote!"]);
-
-        if ($calllist->delete()) return true;
+       
+        $id = $calllist->id;
+        $childrendeleted = ProspectCallList::where('call_id',$id)->delete();
+        if ( $childrendeleted){
+            $calllistdeleted = $calllist->delete();
+            if( $calllistdeleted) return true;
+        } 
 
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }

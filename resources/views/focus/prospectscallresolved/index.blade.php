@@ -87,21 +87,20 @@
                     <div class="card-content">
                         <div class="card-body">
                             <table id="prospectscallresolved-table"
-                                class="table table-striped table-bordered zero-configuration" cellspacing="0"
-                                width="100%">
+                            class="table table-striped table-bordered zero-configuration"
+                            cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Title</th>
                                         <th>Company Name</th>
+                                        <th>Contact Person</th>
+                                        <th>Phone</th>
                                         <th>Industry</th>
-                                        {{-- <th>Contact Name</th>
-                                        <th>Phone</th> --}}
                                         <th>Region</th>
                                         <th>Type</th>
                                         <th>Reminder Date</th>
                                         <th>Follow up</th>
-                                       
                                         <th>CallStatus</th>
                                         <th>Status</th>
                                         <th>Reason</th>
@@ -143,10 +142,10 @@
         };
 
         const Index = {
-            title: @json(request('bytitle')),
-            temperate: @json(request('bytemperate')),
-            callstatus: @json(request('bycallstatus')),
-            status: @json(request('bystatus')),
+            // title: @json(request('bytitle')),
+            // temperate: @json(request('bytemperate')),
+            // callstatus: @json(request('bycallstatus')),
+            // status: @json(request('bystatus')),
             init() {
                 $.ajaxSetup(config.ajax);
                 this.draw_data();
@@ -156,10 +155,10 @@
                 remark: @json(@$remark),
 
                 //filters
-                $('#bytitle').change(this.titleChange);
-                $('#bytemperate').change(this.temperateChange);
-                $('#bycallstatus').change(this.callStatusChange);
-                $('#bystatus').change(this.statusChange);
+                // $('#bytitle').change(this.titleChange);
+                // $('#bytemperate').change(this.temperateChange);
+                // $('#bycallstatus').change(this.callStatusChange);
+                // $('#bystatus').change(this.statusChange);
 
                 //callModal
                 $('#callModal').find('.erp-status').change(this.erpChange);
@@ -168,26 +167,26 @@
                 $('#callModal').find('.call-status').change(this.callTypeChange);
                 this.dismissCallModal();
             },
-            titleChange() {
-                Index.title = $(this).val();
-                $('#prospects-table').DataTable().destroy();
-                return Index.draw_data();
-            },
-            temperateChange() {
-                Index.temperate = $(this).val();
-                $('#prospects-table').DataTable().destroy();
-                return Index.draw_data();
-            },
-            callStatusChange() {
-                Index.callstatus = $(this).val();
-                $('#prospects-table').DataTable().destroy();
-                return Index.draw_data();
-            },
-            statusChange() {
-                Index.status = $(this).val();
-                $('#prospectscallresolved-table').DataTable().destroy();
-                return Index.draw_data();
-            },
+            // titleChange() {
+            //     Index.title = $(this).val();
+            //     $('#prospects-table').DataTable().destroy();
+            //     return Index.draw_data();
+            // },
+            // temperateChange() {
+            //     Index.temperate = $(this).val();
+            //     $('#prospects-table').DataTable().destroy();
+            //     return Index.draw_data();
+            // },
+            // callStatusChange() {
+            //     Index.callstatus = $(this).val();
+            //     $('#prospects-table').DataTable().destroy();
+            //     return Index.draw_data();
+            // },
+            // statusChange() {
+            //     Index.status = $(this).val();
+            //     $('#prospectscallresolved-table').DataTable().destroy();
+            //     return Index.draw_data();
+            // },
             showModal() {
                 $('#prospectscallresolved-table tbody').on('click', '#follow', function(e) {
                     var id = $(this).attr('data-id');
@@ -408,12 +407,6 @@
                     ajax: {
                         url: '{{ route('biller.prospectcallresolves.get') }}',
                         type: 'post',
-                        // data: {
-                        //     bytitle: this.title,
-                        //     bytemperate: this.temperate,
-                        //     bycallstatus: this.callstatus,
-                        //     bystatus: this.status,
-                        // }
                     },
                     columns: [{
                             data: 'DT_Row_Index',
@@ -427,19 +420,19 @@
                             data: 'company',
                             name: 'company'
                         },
+                        {
+                            data: 'contact_person',
+                            name: 'contact_person'
+                        },
+                        {
+                            data: 'phone',
+                            name: 'phone'
+                        },
 
                         {
                             data: 'industry',
                             name: 'industry'
                         },
-                        // {
-                        //     data: 'name',
-                        //     name: 'name'
-                        // },
-                        // {
-                        //     data: 'phone',
-                        //     name: 'phone'
-                        // },
 
                         {
                             data: 'region',

@@ -34,7 +34,7 @@ use App\Models\calllist\CallList;
 use App\Models\prospect_calllist\ProspectCallList;
 use DB;
 use Illuminate\Support\Carbon;
-
+use DateTime;
 /**
  * CallListController
  */
@@ -169,10 +169,16 @@ class CallListController extends Controller
 
         return new EditResponse('focus.calllists.edit', compact('calllist'));
     }
+    public function destroy(CallList $calllist)
+    {
+        $this->repository->delete($calllist);
+
+        return new RedirectResponse(route('biller.calllists.index'), ['flash_success' => 'CallList Deleted Successfully']);
+    }
     public function show(CallList $calllist)
     {
      
-        return new ViewResponse('focus.prospects.calllist.view', compact('calllist'));
+        return new ViewResponse('biller.calllists.index', compact('calllist'));
     }
 
     public function mytoday()
@@ -201,18 +207,54 @@ class CallListController extends Controller
             $q->select('id', 'title', 'company','industry','contact_person','email','phone','region','call_status');
         }])
         ->get();
-        $todayscount = ProspectCallList::where('call_id',$request->id)->whereMonth('call_date', $request->month)
-        ->whereDay('call_date', $request->day)
-        ->count();
-        $notcalledcount = ProspectCallList::where('call_id',$request->id)->whereMonth('call_date', $request->month)
-        ->whereDay('call_date', $request->day)
+        $prospectstotal = ProspectCallList::where('call_id',$request->id)->whereMonth('call_date', $request->month)
         ->whereHas('prospect', function ($q) {
-                $q->select('id', 'title', 'company','industry','contact_person','email','phone','region','call_status')->where('is_called',0);
+                $q->select('id','call_status')->where('is_called',0)->orWhere('is_called',1);
             })
        
-        ->count();
-      
-    return response()->json(['total'=>$todayscount,'notcalled'=>$notcalledcount,'prospects'=>$prospects]);
+        ->get()
+        ->toArray();
+        $total_call_group = array_reduce($prospectstotal, function ($init, $curr) {
+            $d = (new DateTime($curr['call_date']))->format('j');
+            $key_exists = in_array($d, array_keys($init));
+            if (!$key_exists) $init[$d] = array();
+            $init[$d][] = $curr['prospect_id'];
+            
+            return $init;
+        }, []);
+        $total_day_call = array();
+        foreach ($total_call_group as $key => $val) {
+            $total_day_call[] = array(
+                'day' => $key,
+                'count' => count(array_unique($val))
+            );
+        }
+          
+        $not = ProspectCallList::where('call_id',$request->id)->whereMonth('call_date', $request->month)
+        ->whereHas('prospect', function ($q) {
+                $q->select('id','call_status')->where('is_called',0);
+            })
+       
+        ->get()->toArray();
+
+
+        $day_call_group = array_reduce($not, function ($init, $curr) {
+            $d = (new DateTime($curr['call_date']))->format('j');
+            $key_exists = in_array($d, array_keys($init));
+            if (!$key_exists) $init[$d] = array();
+            $init[$d][] = $curr['prospect_id'];
+            
+            return $init;
+        }, []);
+        $day_call = array();
+        foreach ($day_call_group as $key => $val) {
+            $day_call[] = array(
+                'day' => $key,
+                'count' => count(array_unique($val))
+            );
+        }
+        
+     return response()->json(['notcalled'=>$day_call,'prospectstotal'=>$total_day_call,'prospects'=>$prospects]);
     }
 
 

@@ -111,4 +111,23 @@ class ProspectRepository extends BaseRepository
         
         throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
+
+    public function mass_delete($input)
+    {
+        $result = null;
+         if(request('bytitle')) {
+            
+            $prospectsundertitle = Prospect::where(['title' => request('bytitle')])->get()->toArray();
+
+            $matchingRecords = ProspectCallList::whereIn('prospect_id', $prospectsundertitle)->get();
+                dd($prospectsundertitle);
+            //$result = Prospect::where(['title' => request('bytitle')])->delete();
+            if($result){
+                
+            }
+            
+        }
+
+        return $result;
+    }
 }
