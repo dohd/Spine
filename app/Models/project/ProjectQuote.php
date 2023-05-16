@@ -2,6 +2,7 @@
 
 namespace App\Models\project;
 
+use App\Models\quote\Quote;
 use Illuminate\Database\Eloquent\Model;
 
 class ProjectQuote extends Model
@@ -12,9 +13,16 @@ class ProjectQuote extends Model
 
     public $timestamps = false;
 
-    // relation
+    /**
+     * Relations
+     */
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function quote()
+    {
+        return $this->belongsTo(Quote::class);
     }
 }
