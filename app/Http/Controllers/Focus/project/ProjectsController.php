@@ -76,7 +76,7 @@ class ProjectsController extends Controller
      */
     public function index(ManageProjectRequest $request)
     {
-        $customers = Customer::whereHas('projects')->get(['id', 'company']);
+        $customers = Customer::whereHas('quotes')->get(['id', 'company']);
         $accounts = Account::where('account_type', 'Income')->get(['id', 'holder', 'number']);
         $last_tid = Project::where('ins', auth()->user()->ins)->max('tid');
 
