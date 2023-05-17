@@ -1,9 +1,9 @@
 @extends ('core.layouts.app')
 
-@section ('title', "OverTime Rate Management")
+@section ('title', "OverTime Pay Management")
 
 @section('page-header')
-    <h1>{{ "OverTime Rate Management" }}</h1>
+    <h1>{{ "OverTime Pay Management" }}</h1>
 @endsection
 
 @section('content')
@@ -11,14 +11,14 @@
         <div class="content-wrapper">
             <div class="content-header row">
                 <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title mb-0">{{ 'OverTime Rate Management' }}</h4>
+                    <h4 class="content-header-title mb-0">{{ 'OverTime Pay Management' }}</h4>
 
                 </div>
                 <div class="content-header-right col-md-6 col-12">
                     <div class="media width-250 float-right">
 
                         <div class="media-body media-right text-right">
-                            @include('focus.overtimerate.partials.overtimerates-header-buttons')
+                            @include('focus.overtimepay.partials.overtimepay-header-buttons')
                         </div>
                     </div>
                 </div>
@@ -31,21 +31,19 @@
                             <div class="card-content">
 
                                 <div class="card-body">
-                                    <table id="overtimerates-table"
+                                    <table id="overtimepay-table"
                                            class="table table-striped table-bordered zero-configuration" cellspacing="0"
                                            width="100%">
                                         <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>{{ 'OverTime Rate Name' }}</th>
-                                            <th>{{ 'Percentage/Value Type' }}</th>
-                                            <th>{{ 'Rate' }}</th>
-                                            <th>{{ trans('general.createdat') }}</th>
+                                            <th>Employee</th>
+                                            <th>Date</th>
+                                            <th>Clock In</th>
+                                            <th>Clock Out</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                         </thead>
-
-
                                         <tbody>
                                         <tr>
                                             <td colspan="100%" class="text-center text-success font-large-1"><i
@@ -82,7 +80,7 @@
                 }
             });
 
-            var dataTable = $('#overtimerates-table').dataTable({
+            var dataTable = $('#overtimepay-table').dataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
@@ -90,15 +88,15 @@
                     @lang('datatable.strings')
                 },
                 ajax: {
-                    url: '{{ route("biller.overtimerates.get") }}',
+                    url: '{{ route("biller.overtimepays.get") }}',
                     type: 'post'
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    {data: 'name', name: 'name'},
-                    {data: 'rate_option', name: 'rate_option'},
-                    {data: 'rate', name: 'rate'},
-                    {data: 'created_at', name: 'created_at'},
+                    {data: 'employee_name', name: 'employee_name'},
+                    {data: 'date', name: 'date'},
+                    {data: 'clock_in', name: 'clock_in'},
+                    {data: 'clock_out', name: 'clock_out'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "asc"]],
@@ -113,7 +111,7 @@
                     ]
                 }
             });
-            $('#overtimerates-table_wrapper').removeClass('form-inline');
+            $('#overtimepay-table_wrapper').removeClass('form-inline');
 
         }
     </script>

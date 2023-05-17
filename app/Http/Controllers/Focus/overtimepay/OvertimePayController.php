@@ -63,7 +63,7 @@ class OvertimePayController extends Controller
      * Show the form for creating a new resource.
      *
      * @param CreateovertimepayRequestNamespace $request
-     * @return \App\Http\Responses\Focus\overtimepay\CreateResponse
+     * @return \App\Http\Responses\Focus\overtimeview
      */
     public function create(Request $request)
     {

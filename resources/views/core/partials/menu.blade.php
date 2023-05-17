@@ -1095,6 +1095,23 @@
                             </ul>
                         </li>
                         @endauth
+                        @permission('manage-holiday')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fas fa-hotel"></i> OverTime Pay Management</a>
+                            <ul class="dropdown-menu">
+                                @permission('manage-holiday')
+                                <li><a class="dropdown-item" href="{{ route('biller.overtimepay.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage OvertimePay
+                                    </a>
+                                </li>
+                                @endauth
+                                @permission('create-holiday')
+                                <li><a class="dropdown-item" href="{{ route('biller.overtimepay.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create OvertimePay
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth
 
                         @permission('manage-holiday')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">

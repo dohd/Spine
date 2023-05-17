@@ -1,10 +1,10 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Overtime Rate Management' . ' | ' . 'Create')
+@section ('title', 'Overtime Pay Management' . ' | ' . 'Create')
 
 @section('page-header')
     <h1>
-        {{ 'Overtime Rate Management' }}
+        {{ 'Overtime Pay Management' }}
         <small>{{ 'Create' }}</small>
     </h1>
 @endsection
@@ -21,7 +21,7 @@
                     <div class="media width-250 float-right">
 
                         <div class="media-body media-right text-right">
-                            @include('focus.overtimerate.partials.overtimerates-header-buttons')
+                            @include('focus.overtimepay.partials.overtimepay-header-buttons')
                         </div>
                     </div>
                 </div>
@@ -36,26 +36,34 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                            <p>OverTime Name</p>
+                                            <p>Employee Name</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$overtimerate['name']}}</p>
+                                            <p>{{$overtimepay['employee_name']}}</p>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                            <p>Rate</p>
+                                            <p>Date</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$overtimerate['rate']}}</p>
+                                            <p>{{dateFormat($overtimepay['date'])}}</p>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-3 border-blue-grey border-lighten-5  p-1">
-                                            <p>{{'Note'}}</p>
+                                            <p>Clock In</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$overtimerate['note']}}</p>
+                                            <p>{{$overtimepay['clock_in']}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            <p>Clock Out</p>
+                                        </div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            <p>{{$overtimepay['clock_out']}}</p>
                                         </div>
                                     </div>
 

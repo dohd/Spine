@@ -27,8 +27,7 @@
                 </div>
             </div>
             <div class="content-body">
-                <div class="row">
-                    <div class="col-12">
+                
                         <div class="card">
 
                             <div class="card-content">
@@ -37,7 +36,6 @@
                                     {{ Form::open(['route' => 'biller.overtimepay.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'create-department']) }}
 
 
-                                    <div class="form-group">
                                         {{-- Including Form blade file --}}
                                         @include("focus.overtimepay.form")
                                         <div class="edit-form-btn">
@@ -45,7 +43,6 @@
                                             {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md']) }}
                                             <div class="clearfix"></div>
                                         </div><!--edit-form-btn-->
-                                    </div><!-- form-group -->
 
                                     {{ Form::close() }}
                                 </div>
@@ -53,8 +50,6 @@
 
                             </div>
                         </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

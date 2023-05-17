@@ -45,7 +45,7 @@ class OvertimePayRepository extends BaseRepository
         if (OvertimePay::create($input)) {
             return true;
         }
-        throw new GeneralException(trans('exceptions.backend.overtimepays.create_error'));
+        throw new GeneralException(trans('exceptions.backend.overtimepay.create_error'));
     }
 
     /**
@@ -62,7 +62,7 @@ class OvertimePayRepository extends BaseRepository
     	if ($overtimepay->update($input))
             return true;
 
-        throw new GeneralException(trans('exceptions.backend.overtimepays.update_error'));
+        throw new GeneralException(trans('exceptions.backend.overtimepay.update_error'));
     }
 
     /**
@@ -78,6 +78,6 @@ class OvertimePayRepository extends BaseRepository
             return true;
         }
 
-        throw new GeneralException(trans('exceptions.backend.overtimepays.delete_error'));
+        throw new GeneralException(trans('exceptions.backend.overtimepay.delete_error'));
     }
 }
