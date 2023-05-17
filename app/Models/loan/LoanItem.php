@@ -1,19 +1,14 @@
 <?php
 
-namespace App\Models\overtimerate;
+namespace App\Models\loan;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\overtimerate\Traits\OvertimeRateAttribute;
-use App\Models\overtimerate\Traits\OvertimeRateRelationship;
+use App\Models\loan\Traits\LoanItemRelationship;
 
-class overtimerate extends Model
+class LoanItem extends Model
 {
-    use ModelTrait,
-        OvertimeRateAttribute,
-    	OvertimeRateRelationship {
-            // overtimerateAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+    use ModelTrait, LoanItemRelationship;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -24,23 +19,19 @@ class overtimerate extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'overtimerates';
+    protected $table = 'loan_items';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -67,11 +58,23 @@ class overtimerate extends Model
     {
         parent::__construct($attributes);
     }
+
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->user_id = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
 }

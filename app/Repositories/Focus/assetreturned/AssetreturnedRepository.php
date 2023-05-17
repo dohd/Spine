@@ -77,7 +77,7 @@ class AssetreturnedRepository extends BaseRepository
             $assetreturned_items['purchase_price'] = (int)$assetreturned_items['returned_item'] * (int)$variations->purchase_price;
            // $assetreturns = Assetreturned::where('id',$assetreturned_items['asset_returned_id'])->first();
             //$requisition_number = $assetreturns->acquisition_number;
-            dd($assetreturned_items);
+            //dd($assetreturned_items);
             //Show each item the total price of items returned
             $assetissuance = Assetissuance::where('acquisition_number', $assetreturned['acquisition_number'])->first();
             $issuance_id =$assetissuance->id;
@@ -92,6 +92,7 @@ class AssetreturnedRepository extends BaseRepository
         $returns->item()->sum('purchase_price');
         $issuance = Assetissuance::where('acquisition_number', $result['acquisition_number'])->first();
         $issuance->total_cost = $issuance->total_cost - $returns->item()->sum('purchase_price');
+        $issuance->status = 'return_initialized';
         $issuance->update();
 
         DB::commit();

@@ -155,6 +155,7 @@
 
                 $('#bank').attr('disabled', false);
                 $('#employee').attr('disabled', true);
+                $('#loan_type').attr('disabled', false);
 
                 $('#payment_day').attr('disabled', false);
                 $('.payment-day-div').removeClass('d-none');

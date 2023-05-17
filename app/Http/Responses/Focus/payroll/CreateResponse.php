@@ -33,9 +33,14 @@ class CreateResponse implements Responsable
             $query->whereBetween('approve_date', [$startDate, $endDate])
                     ->where('status', 'approved');
                     
+        }])->with(['loan_items' => function ($q) use ($startDate, $endDate){
+                $q->whereBetween('payment_date', [$startDate, $endDate])
+                    ->where('status', '0');
+        }])->with(['surcharge_item' => function ($q) use ($startDate, $endDate){
+                $q->whereBetween('datepermonth', [$startDate, $endDate])
+                    ->where('status', '0');
         }])
         ->get();
-        //dd($employees);
         foreach ($employees as $employee) {
            //Counting Absent Days
             $employee->absent_days = $employee->attendance->count();
@@ -60,8 +65,28 @@ class CreateResponse implements Responsable
                     $advance = $employee->gross_less_deductions - $employee->advance;
                     $employee->gross_less_advance = $advance;
                 }else{
+                    //Gross without advance payment
                     $employee->gross_less_advance = $employee->gross_less_deductions;
                 }
+                $employee->loans = 0;
+                foreach ($employee->loan_items as $loan_item) {
+                    if ($loan_item) {
+                        //loan
+                        $employee->loans = $loan_item->month_installment;
+                        //Post Loan id frontend
+                    }
+                }
+                $employee->surcharge = 0;
+                foreach ($employee->surcharge_item as $surcharge_item) {
+                    if ($surcharge_item) {
+                        //Surcharges
+                        $employee->surcharge = $surcharge_item->costpermonth;
+                        //Post Surcharge id frontend
+                    }
+                }
+                $total_other_deductions = $employee->loans + $employee->surcharge;
+                // Gross Less All deductions
+                $employee->gross_less_deductions = $employee->gross_less_advance - $total_other_deductions;
             }
             
            // dd($employee->employee);

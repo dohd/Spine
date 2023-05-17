@@ -16,6 +16,7 @@ use App\Repositories\Focus\surcharge\SurchargeRepository;
 use App\Http\Responses\ViewResponse;
 use App\Http\Responses\Focus\surcharge\CreateResponse;
 use App\Http\Responses\Focus\surcharge\EditResponse;
+use Carbon\Carbon;
 
 class SurchargeController extends Controller
 {
@@ -145,7 +146,7 @@ class SurchargeController extends Controller
         //dd($surcharge);
         $surcharge = $this->repository->update($surcharge, compact('data', 'data_items'));
        
-        $msg = 'Direct surcharge Updated Successfully.';
+        $msg = 'Surcharge Updated Successfully.';
 
         return new RedirectResponse(route('biller.surcharges.create'), ['flash_success' => $msg]);
 
@@ -172,24 +173,58 @@ class SurchargeController extends Controller
     }
     public function get_issuance(Request $request)
     {
-        $q = $request->employee_id;
-        $surcharge_value = $request->value;
-        if($surcharge_value == '1'){
-            $assetissuance = Assetissuance::where('employee_id', $q)->get()->sum('total_cost');
-            $payable = Assetissuance::where('employee_id',$q)->get()->sum('surcharge_payable');
-            $name = 'Lost/Broken Items';
-            // foreach ($assetissuance as $key => $value) {
-            //     //dd($value->id);
-            //     $assetissuanceItems = AssetissuanceItems::all();
-            //     //return response()->json($value->item());
-            // }
-            //dd($assetissuance->item());
-            return response()->json(['cost'=>$assetissuance, 'name'=>$name, 'payable'=>$payable]);
+        //dd($request->all());
+        $employee_id = $request->employee_id;
+        $issue_type = $request->issue_type;
+        $assetissuance = Assetissuance::where('employee_id', $employee_id)->get();
+        if($issue_type == 'lost_broken'){
+            $total_cost = $assetissuance->sum('total_cost');
+            $payable = $assetissuance->sum('surcharge_payable');
+            $dates = [];
 
+                // Get the current date
+                $currentDate = Carbon::parse($request->date);
+
+                $dates[] = $currentDate->format('Y-m-d');
+
+                // Generate 5 dates per month
+                for ($i = 1; $i < $request->months; $i++) {
+                    // Add $i months to the current date
+                    $date = $currentDate->addMonthNoOverflow();
+
+                    // Add the date to the array
+                    $dates[] = $date->toDateString();
+                }
+                foreach ($dates as $date) {
+                    
+                }
+                $month_installment = 0;
+                $result = [];
+                
+                if($request->cost_type == 'total_cost'){
+                    $month_installment = $total_cost / $request->months;
+                    $result = array_map(function($date) use ($month_installment) {
+                        return [
+                            'date' => $date,
+                            'month_installment' => $month_installment
+                        ];
+                    }, $dates);
+                    
+                }else if($request->cost_type == 'payable'){
+                    $month_installment = $payable / $request->months;
+                    $result = array_map(function($date) use ($month_installment) {
+                        return [
+                            'date' => $date,
+                            'month_installment' => $month_installment
+                        ];
+                    }, $dates);
+                }
+                
+                //dd($result);
             
         }
 
-        return response()->json($assetissuance->item());
+        return response()->json($result);
     }
 
     public function load($employeeId)

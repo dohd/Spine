@@ -136,22 +136,25 @@ class AssetissuanceRepository extends BaseRepository
             $getQty = AssetissuanceItems::where('id', $item['id'])->get()->first(); 
            if ($getQty) {
             
-            $x = $getQty->qty_issued;
+            $previous_issued = $getQty->qty_issued;
             $qty_updated = $item['qty_issued'];
             
-            if ($qty_updated > $x) {
-                $y = $qty_updated - $x;
+            if ($qty_updated) {
+                $new_previous_diff = $qty_updated - $previous_issued;
                 $variations = ProductVariation::where('id', $item['item_id'])->get()->first();
                 $db_variation = $variations->qty;
-                if ($y > $db_variation) {
+               // dd($getQty);
+                if ($new_previous_diff > $db_variation) {
                     $variations->qty = $variations->qty - $db_variation;
                     $getQty->qty_issued = $getQty->qty_issued + $db_variation;
+                    $getQty->purchase_price = (int)$getQty->qty_issued  * (int)$variations['purchase_price'];
                     $variations->update();
                     $getQty->update();
                 }
                 else{
-                    $variations->qty = $variations->qty - $y;
-                    $getQty->qty_issued = $getQty->qty_issued + $y;
+                    $variations->qty = $variations->qty - $new_previous_diff;
+                    $getQty->qty_issued = $getQty->qty_issued + $new_previous_diff;
+                    $getQty->purchase_price = (int)$getQty->qty_issued  * (int)$variations['purchase_price'];
                     $variations->update();
                     $getQty->update();
                 }
@@ -163,20 +166,17 @@ class AssetissuanceRepository extends BaseRepository
             if (!$assetissuance_item->id) unset($assetissuance_item->id);
             $assetissuance_item->save();
         }
-
-        // direct assetissuance bill 
-        // $this->generate_bill($assetissuance);
-
-        // /** accounting */
-        // $assetissuance->transactions()->where('note', $prev_note)->delete();
-        // $this->post_transaction($assetissuance);
+        //dd($assetissuance);
+        $issuance = Assetissuance::where('acquisition_number', $assetissuance['acquisition_number'])->first();
+        $issuance->total_cost = $assetissuance->item->sum('purchase_price');
+        $issuance->update();
 
         if ($result) {
             DB::commit();
             return $assetissuance;
         }
 
-        throw new GeneralException(trans('exceptions.backend.assetissuanceorders.update_error'));
+        throw new GeneralEprevious_issuedception(trans('exceptions.backend.assetissuanceorders.update_error'));
 
     }
 

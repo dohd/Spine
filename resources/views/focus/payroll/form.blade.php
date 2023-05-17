@@ -90,6 +90,8 @@
                                     <th>Gross Less Deduction</th>
                                     <th>Advance Payment</th>
                                     <th>Gross Less Advance</th>
+                                    <th>Loan</th>
+                                    <th>Surcharge</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -107,6 +109,38 @@
                                         <td>{{amountFormat($employee->gross_less_deductions)}}</td>
                                         <td>{{amountFormat($employee->advance)}}</td>
                                         <td>{{amountFormat($employee->gross_less_advance)}}</td>
+                                        <td>{{amountFormat($employee->loans)}}</td>
+                                        <td>{{amountFormat($employee->surcharge)}}</td>
+                                    
+                                        <input type="hidden" name="basic_pay" value="{{$employee->employees_salary->basic_pay}}" id="">
+                                    </tr>
+                                    @endif
+                                @endforeach
+                               
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="tab3" role="tabpanel" aria-labelledby="base-tab3">
+                <div class="card-content">
+                    <div class="card-body">
+                        <table id="employeebl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Gross After Deductions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $i = 1;
+                                @endphp
+                                @foreach ($employees as $employee)
+                                    @if ($employee->employees_salary)
+                                    <tr>
+                                        <td>{{ $i++ }}</td>
+                                        <td>{{amountFormat($employee->gross_less_deductions)}}</td>
                                     
                                         <input type="hidden" name="basic_pay" value="{{$employee->employees_salary->basic_pay}}" id="">
                                     </tr>

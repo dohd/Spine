@@ -73,9 +73,9 @@
                         <td class="text-center">{{ $item->id }}</td>
                         <td class="text-center">{{ $item->name }}</td>
                         <td class="text-center">{{ $item->qty_issued }}</td>
-                        <td class="text-center"><input class="form-control" type="number" name="returned_item[]"></td>
-                        <td class="text-center"><input class="form-control" type="number" name="lost_items[]"></td>
-                        <td class="text-center"><input class="form-control" type="number" name="broken[]"></td>
+                        <td class="text-center"><input class="form-control" type="number" value="0" name="returned_item[]"></td>
+                        <td class="text-center"><input class="form-control" type="number" value="0" name="lost_items[]"></td>
+                        <td class="text-center"><input class="form-control" type="number" value="0" name="broken[]"></td>
                         <td class="text-center"><input class="form-control datepicker" id="actual_return_date" type="date" name="actual_return_date[]"></td>
                         <input type="hidden" name="item_id[]" value="{{ $item->item_id }}">
                         <input type="hidden" name="qty_issued[]" value="{{ $item->qty_issued }}">

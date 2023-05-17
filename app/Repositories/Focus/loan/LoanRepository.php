@@ -10,6 +10,8 @@ use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
 use Illuminate\Validation\ValidationException;
+use Carbon\Carbon;
+use App\Models\loan\LoanItem;
 /**
  * Class CustomerRepository.
  */
@@ -42,7 +44,7 @@ class LoanRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
+         //dd($input);
         DB::beginTransaction();
 
         foreach ($input as $key => $val) {
@@ -52,7 +54,6 @@ class LoanRepository extends BaseRepository
         }
 
         $result = Loan::create($input);
-
         if ($result) {
             DB::commit();
             return $result;
@@ -76,7 +77,7 @@ class LoanRepository extends BaseRepository
 
         foreach ($input as $key => $val) {
             if (in_array($key, ['date', 'approval_date'])) $input[$key] = date_for_database($val);
-            if (in_array($key, ['amount', 'fee', 'month_installment'])) 
+            if (in_array($key, ['amount', 'fee', 'month_installment', 'loan_type'])) 
                 $input[$key] = numberClean($val);
         }
 
@@ -85,9 +86,40 @@ class LoanRepository extends BaseRepository
 
         if ($loan->approval_status == 'approved') {
             $loan->amount += $loan->fee; 
+          
 
             $loan->transactions()->delete();
             $this->post_transaction($loan);
+            //dd($loan->id);
+            if($loan->loan_type){
+                $dates = [];
+
+                // Get the current date
+                $currentDate = Carbon::now();
+
+                $dates[] = $currentDate->format('Y-m-d');
+
+                // Generate 5 dates per month
+                for ($i = 1; $i < $loan->month_period; $i++) {
+                    // Add $i months to the current date
+                    $date = $currentDate->addMonthNoOverflow();
+
+                    // Add the date to the array
+                    $dates[] = $date->toDateString();
+                }
+                foreach ($dates as $date) {
+                    $loan_item = new LoanItem();
+                    $loan_item->loan_id = $loan->id;
+                    $loan_item->payment_date = $date;
+                    $loan_item->month_installment = $loan->month_installment;
+                    $loan_item->status = 0;
+                    $loan_item->month_period = $loan->month_period;
+                    $loan_item->ins = auth()->user()->ins;
+                    $loan_item->user_id = auth()->user()->id;
+                    $loan_item->save();
+                }
+               // dd($dates);
+            }
         }
 
         if ($result) {

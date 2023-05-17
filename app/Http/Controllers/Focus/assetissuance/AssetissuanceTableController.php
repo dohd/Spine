@@ -38,7 +38,8 @@ class AssetissuanceTableController extends Controller
             ->addIndexColumn()
             ->escapeColumns(['id'])
             ->addColumn('checkbox', function ($assetissuance) {
-                return '<input type="checkbox" class="select-row" value="'. $assetissuance->id .'">';
+                if(!$assetissuance->status == 'return_initialized')
+                    return '<input type="checkbox" class="select-row" value="'. $assetissuance->id .'">';
             })
             ->addColumn('employee_id', function ($assetissuance) {
                 return $assetissuance->employee_id;

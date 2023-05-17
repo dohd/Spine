@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Models\overtimerate;
+namespace App\Models\overtimepay;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\overtimerate\Traits\OvertimeRateAttribute;
-use App\Models\overtimerate\Traits\OvertimeRateRelationship;
+use App\Models\overtimepay\Traits\OvertimePayAttribute;
+use App\Models\overtimepay\Traits\OvertimePayRelationship;
 
-class overtimerate extends Model
+class OvertimePay extends Model
 {
     use ModelTrait,
-        OvertimeRateAttribute,
-    	OvertimeRateRelationship {
-            // overtimerateAttribute::getEditButtonAttribute insteadof ModelTrait;
+        OvertimePayAttribute,
+    	OvertimePayRelationship {
+            // overtimepayAttribute::getEditButtonAttribute insteadof ModelTrait;
         }
 
     /**
@@ -24,7 +24,7 @@ class overtimerate extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'overtimerates';
+    protected $table = 'overtimepay';
 
     /**
      * Mass Assignable fields of model

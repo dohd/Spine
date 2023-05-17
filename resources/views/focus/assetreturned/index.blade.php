@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class=" mb-0">Asset Return Management </h4>
+            <h4 class=" mb-0">Asset Return Creation </h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
@@ -68,7 +68,6 @@
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}"} });
 
     function selectRow() {
-        console.log($(this).val());
             const el = $(this);
             if (el.prop('checked')) {
                 $('#quote').val(el.val());

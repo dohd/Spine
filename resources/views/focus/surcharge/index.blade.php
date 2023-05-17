@@ -3,7 +3,6 @@
 @section ('title', 'Create | Surcharges')
 
 @section('content')
-<div>
     <div class="content-wrapper">
         <div class="content-header row mb-1">
             <div class="content-header-left col-6">
@@ -17,32 +16,20 @@
                 </div>
             </div>
         </div>
-
-        <div class="content-body">
-            <div class="row">
-                
-                    <div class="col-12">
-                        <form action="{{route('biller.surcharges.store')}}" method="post">
-                            @csrf
-                        @include('focus.surcharge.form')
-                    </form>
-                    </div>
-                    
-               
-            </div>
+        <div class="card">
+            <form action="{{route('biller.surcharges.store')}}" method="post">
+                @csrf
+            @include('focus.surcharge.form')
+        </form>
         </div>
     </div>
-</div>
 @endsection
 
 @section('extra-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
 
-<script>
-    // $('form').submit(function (e) { 
-    //     e.preventDefault();
-    //     console.log($(this).serializeArray());
-    // });
+{{-- <script>
+    
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
 
     // On searching supplier
@@ -177,6 +164,69 @@
     $('.datepicker').datepicker({autoHide: true})
     $('#date').datepicker('setDate', new Date());
     // $('#issue_type').select2(getIssuance(getIssuanceUrl, issuanceData));
+</script> --}}
+<script>
+    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
+    $('.datepicker').datepicker({autoHide: true})
+    $('#date').datepicker('setDate', new Date());
+
+    // On searching supplier
+    $('#employeebox').change(function() {
+        const name = $('#employeebox option:selected').text().split(' : ')[0];
+        const [id, taxId] = $(this).val().split('-');
+        $('#employeeid').val(id);
+        $('#employee').val(name);
+        $('#issue_type').prop("disabled", false);
+    });
+
+    // load employees
+    const employeeUrl = "{{ route('biller.surcharge.select') }}";
+    function employeeData(data) {
+        return {results: data.map(v => ({id: v.id, text: v.first_name+' : '+v.email}))};
+    }
+    $('#employeebox').select2(select2Config(employeeUrl, employeeData));
+    // select2 config
+    function select2Config(url, callback) {
+        return {
+            ajax: {
+                url,
+                dataType: 'json',
+                type: 'POST',
+                quietMillis: 50,
+                data: ({term}) => ({q: term, keyword: term}),
+                processResults: callback
+            }
+        }
+    }
+    $('.process').on('click', function () {
+        var issue_type = $('#issue_type').find(":selected").val();
+        var employee_id = $('#employeeid').val();
+        var date = $('#date').val();
+        var months = $('#months').val();
+        var cost_type = $('#cost_type').find(":selected").val();
+        //console.log(employee_id, issue_type, date, months, cost_type);
+        $.post("{{ route('biller.surcharge.get_issuance') }}", 
+                {employee_id: employee_id,
+                     issue_type: issue_type,
+                      date: date, months: months,
+                       cost_type: cost_type }, function (response) {
+                    //console.log(response);    
+        }).done(response => {
+                $('#monthTbl tbody').html('');
+                response.forEach((v,i) => $('#monthTbl tbody').append(monthRow(v,i)));
+            });
+    });
+    function monthRow(v,i) {
+        return `
+                <tr>
+                    <td>${i+1}</td>    
+                    <td>${v.date}</td>    
+                    <td>${v.month_installment}</td>         
+                    <input type="hidden" name="datepermonth[]" value="${v.date}">
+                    <input type="hidden" name="costpermonth[]" value="${v.month_installment}" class="">
+                </tr>
+            `;
+    }
 </script>
 
 @endsection

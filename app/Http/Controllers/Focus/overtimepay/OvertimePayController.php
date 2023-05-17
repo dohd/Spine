@@ -15,35 +15,35 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
-namespace App\Http\Controllers\Focus\overtimerate;
+namespace App\Http\Controllers\Focus\overtimepay;
 
-use App\Models\overtimerate\OvertimeRate;
+use App\Models\overtimepay\OvertimePay;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
-use App\Http\Responses\Focus\overtimerate\CreateResponse;
-use App\Http\Responses\Focus\overtimerate\EditResponse;
-use App\Repositories\Focus\overtimerate\OvertimeRateRepository;
+use App\Http\Responses\Focus\overtimepay\CreateResponse;
+use App\Http\Responses\Focus\overtimepay\EditResponse;
+use App\Repositories\Focus\overtimepay\OvertimePayRepository;
 use App\Models\department\Department;
 
 
 /**
- * overtimeratesController
+ * overtimepaysController
  */
-class OvertimeRateController extends Controller
+class OvertimePayController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var overtimerateRepository
+     * @var overtimepayRepository
      */
     protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param overtimerateRepository $repository ;
+     * @param overtimepayRepository $repository ;
      */
-    public function __construct(OvertimeRateRepository $repository)
+    public function __construct(OvertimePayRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -51,29 +51,29 @@ class OvertimeRateController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param App\Http\Requests\Focus\overtimerate\Request $request
+     * @param App\Http\Requests\Focus\overtimepay\Request $request
      * @return \App\Http\Responses\ViewResponse
      */
     public function index()
     {
-        return new ViewResponse('focus.overtimerate.index');
+        return new ViewResponse('focus.overtimepay.index');
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @param CreateovertimerateRequestNamespace $request
-     * @return \App\Http\Responses\Focus\overtimerate\CreateResponse
+     * @param CreateovertimepayRequestNamespace $request
+     * @return \App\Http\Responses\Focus\overtimepay\CreateResponse
      */
     public function create(Request $request)
     {
-        return new CreateResponse('focus.overtimerate.create');
+        return new CreateResponse('focus.overtimepay.create');
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param StoreovertimerateRequestNamespace $request
+     * @param StoreovertimepayRequestNamespace $request
      * @return \App\Http\Responses\RedirectResponse
      */
     public function store(Request $request)
@@ -86,64 +86,64 @@ class OvertimeRateController extends Controller
         //Create the model using repository create method
         $this->repository->create($input);
         //return with successfull messagetrans
-        return new RedirectResponse(route('biller.overtimerates.index'), ['flash_success' => 'OverTimeRate Created Successfully']);
+        return new RedirectResponse(route('biller.overtimepay.index'), ['flash_success' => 'OverTimePay Created Successfully']);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param App\Models\overtimerate\overtimerate $overtimerate
-     * @param EditovertimerateRequestNamespace $request
-     * @return \App\Http\Responses\Focus\overtimerate\EditResponse
+     * @param App\Models\overtimepay\overtimepay $overtimepay
+     * @param EditovertimepayRequestNamespace $request
+     * @return \App\Http\Responses\Focus\overtimepay\EditResponse
      */
-    public function edit(OvertimeRate $overtimerate, Request $request)
+    public function edit(OvertimePay $overtimepay, Request $request)
     {
-        return new EditResponse($overtimerate);
+        return new EditResponse($overtimepay);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param UpdateovertimerateRequestNamespace $request
-     * @param App\Models\overtimerate\overtimerate $overtimerate
+     * @param UpdateovertimepayRequestNamespace $request
+     * @param App\Models\overtimepay\overtimepay $overtimepay
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function update(Request $request, OvertimeRate $overtimerate)
+    public function update(Request $request, OvertimePay $overtimepay)
     {
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
         //Update the model using repository update method
-        $this->repository->update($overtimerate, $input);
+        $this->repository->update($overtimepay, $input);
         //return with successfull message
-        return new RedirectResponse(route('biller.overtimerates.index'), ['flash_success' => 'OvertimeRate Updated Successfully']);
+        return new RedirectResponse(route('biller.overtimepay.index'), ['flash_success' => 'OvertimePay Updated Successfully']);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param DeleteovertimerateRequestNamespace $request
-     * @param App\Models\overtimerate\overtimerate $overtimerate
+     * @param DeleteovertimepayRequestNamespace $request
+     * @param App\Models\overtimepay\overtimepay $overtimepay
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(OvertimeRate $overtimerate, Request $request)
+    public function destroy(OvertimePay $overtimepay, Request $request)
     {
         //Calling the delete method on repository
-        $this->repository->delete($overtimerate);
+        $this->repository->delete($overtimepay);
         //returning with successfull message
-        return new RedirectResponse(route('biller.overtimerates.index'), ['flash_success' => trans('alerts.backend.overtimerates.deleted')]);
+        return new RedirectResponse(route('biller.overtimepay.index'), ['flash_success' => 'OverTimePay Deleted Successfully!!']);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param DeleteovertimerateRequestNamespace $request
-     * @param App\Models\overtimerate\overtimerate $overtimerate
+     * @param DeleteovertimepayRequestNamespace $request
+     * @param App\Models\overtimepay\overtimepay $overtimepay
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(OvertimeRate $overtimerate, Request $request)
+    public function show(OvertimePay $overtimepay, Request $request)
     {
         //returning with successfull message
-        return new ViewResponse('focus.overtimerate.view', compact('overtimerate'));
+        return new ViewResponse('focus.overtimepay.view', compact('overtimepay'));
     }
     public function select(Request $request)
     {

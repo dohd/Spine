@@ -18,6 +18,10 @@ use App\Models\salary\Salary;
 use App\Models\hrm\Attendance;
 use App\Models\workshift\Workshift;
 use App\Models\advance_payment\AdvancePayment;
+use App\Models\loan\Loan;
+use App\Models\loan\LoanItem;
+use App\Models\surcharge\Surcharge;
+use App\Models\surcharge\SurchargeItems;
 
 /**
  * Class HrmRelationship
@@ -113,5 +117,18 @@ trait HrmRelationship
     public function advance_payment()
     {
         return $this->hasOne(AdvancePayment::class, 'employee_id');
+    }
+    public function loan()
+    {
+        return $this->hasOne(Loan::class, 'employee_id');
+    }
+
+    public function loan_items()
+    {
+        return $this->hasManyThrough(LoanItem::class, Loan::class, 'employee_id', 'loan_id', 'id', 'id')->withoutGlobalScopes();
+    }
+    public function surcharge_item()
+    {
+        return $this->hasManyThrough(SurchargeItems::class, Surcharge::class, 'employee_id', 'surcharge_id', 'id', 'id')->withoutGlobalScopes();
     }
 }

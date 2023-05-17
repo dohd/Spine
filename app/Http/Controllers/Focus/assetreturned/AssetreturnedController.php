@@ -206,7 +206,7 @@ class AssetreturnedController extends Controller
     }
     public function send(Request $request)
     {
-        //dd($request->all());
+        dd($request->all());
         if ($request->ajax()) {
             //return response()->json($request->lost_item_id);
             $purchase_price = ProductVariation::where('id',$request->product_id)->first();

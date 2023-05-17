@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Asset Returns Management</h4>
+            <h4 class="content-header-title">View</h4>
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
@@ -53,13 +53,14 @@
                 <table class="table table-xs table-bordered" id="myTable">
                     <thead>
                         <tr class="item_header bg-gradient-directional-blue white">
-                            <th width="6%" class="text-center">#</th>
-                            <th width="38%" class="text-center">Product Name</th>
-                            <th width="10%" class="text-center">Issued Qty</th> 
-                            <th width="10%" class="text-center">Returned</th> 
-                            <th width="10%" class="text-center">Lost</th> 
-                            <th width="10%" class="text-center">Broken</th>  
-                            <th width="10%" class="text-center">Return Date</th>                                                            
+                            <th></th>
+                            <th width="6%">#</th>
+                            <th width="38%">Product Name</th>
+                            <th width="10%">Issued Qty</th> 
+                            <th width="10%">Returned</th> 
+                            <th width="10%">Lost</th> 
+                            <th width="10%">Broken</th>  
+                            <th width="10%">Return Date</th>                                                            
                         </tr>
                     </thead>
                     <tbody class="tb">
@@ -70,35 +71,22 @@
                                      
                                        
                                 <tr class="tr">
+                                    <td><input type="checkbox" class="status" name="" id="status" data-id="{{$item->id}}"></td>
                                     <input type="hidden" name="" id="qtyIssued" value="{{$item->qty_issued}}">
-                                    <td class="text-center">{{ $item->id }}</td>
-                                    <td class="text-center">{{ $item->name }}</td>
+                                    <td>{{ $item->id }}</td>
+                                    <td>{{ $item->name }}</td>
                                     <input type="hidden" name="" value="{{ $item->asset_returned_id }}" id="">
-                                    <td class="text-center">{{ $item->qty_issued }}</td>
-                                    <td class="text-center">{{ $item->returned_item }}</td>
-                                    <td class="text-center">{{ $item->lost_items }}</td>
-                                    {{-- <td class="text-center">
-                                       
-                                        @if ($item->qty_issued > 0) 
-                                    <input type="hidden" name="" value="{{ $asset = \App\Models\assetreturned\AssetreturnedItems::where('item_id',$item->item_id)->where('asset_returned_id', $record->id)->first() }}" id="">
-                                    <input type="hidden" name="" value="{{ $assetReturns = \App\Models\assetreturned\AssetreturnedItems::where('item_id',$item->item_id)->where('qty_issued', '=', '0')->get() }}" id="">
-                                    
-                                    
-                                        @if ($assetReturns )
-                                        <input type="hidden" name="" id="qtyIssued" value="{{$ans = $asset->lost_items - $assetReturns->sum('returned_item')}}">
-                                        <input type="hidden" name="" value="{{$total_returned = $asset->returned_item + $assetReturns->sum('returned_item')}}">  
-                                        {{ $ans }}
-                                        @else
-                                        @endif
-                                     @endif
-                                    </td> --}}
-                                    
-                                     
-                                    
-                                    <td class="text-center">{{ $item->broken }}</td> 
-                                    <td class="text-center">{{ $item->actual_return_date }}</td>     
+                                    <td>{{ $item->qty_issued }}</td>
+                                    <td>{{ $item->returned_item }}</td>
+                                    <td>{{ $item->lost_items }}</td>
+                                    <td>{{ $item->broken }}</td> 
+                                    <td>{{ $item->actual_return_date }}</td>     
+                                    <input type="hidden" name="" id="product_name" value="{{$item->name}}">
+                                    <input type="hidden" name="" id="quantity_issued" value="{{$item->qty_issued}}">
+                                    <input type="hidden" name="" id="returned_item" value="{{$item->returned_item}}">
                                     <input type="hidden" name="" id="lost" value="{{$item->lost_items}}">
-                                    <input type="hidden" name="" id="item_id" value="{{$item->item_id}}">  
+                                    <input type="hidden" name="" id="broken" value="{{$item->broken}}">
+                                    <input type="hidden" name="" id="item_id" data-item="{{$item->item_id}}" value="{{$item->item_id}}">  
                                     <input type="hidden" name="prod_id" id="productId" value="{{ $item->item_id }}">                             
                                 </tr>
                                     @php ($i++)
@@ -118,7 +106,6 @@
                             <th class="text-center">Product Name</th>
                             <th class="text-center">Issued Qty</th>
                             <th  class="text-center">Returned Qty</th> 
-                            {{-- <th class="text-center">Remaining Items</th> --}}
                             <th class="text-center">Lost</th>
                             <th class="text-center">Total Broken</th>
                             <th class="text-center">Items to Pay</th>                                                       
@@ -132,6 +119,7 @@
                                      
                                        
                                 <tr>
+                                    
                                     <td class="text-center">{{ $item->name }}</td>
                                     <td class="text-center">{{ $item->qty_issued }}</td>
                                     
@@ -142,7 +130,6 @@
                                         @endif
                                         {{$total}}
                                     </td> 
-                                    {{-- <td class="text-center">{{ $item->qty_issued - $total - $item->lost_items -$item->broken  }}</td> --}}
                                     <td class="text-center">{{ $item->lost_items }}</td>
                                     <td class="text-center">
                                        
@@ -163,6 +150,7 @@
         </div>
     </div>
 </div>
+@include('focus.assetreturned.partials.add-return-modal')
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog mw-100" role="document">
             <div class="modal-content">
@@ -232,16 +220,12 @@
             </div>
           </div>
 @endsection
+
 @section('extra-scripts')
-<script>
+{{-- <script>
     checkLost();
-    // $('.row1').click(function () { 
-    //     var rows = $('tr', '.tbody');
-    //     rows.eq(0).addClass('my_class');
-    //     console.log($('#id').val());
     $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
         
-    // });
     $('#productbox').keyup(function () { 
         var value = $(this).val();
         table_search($('#productbox').val(),$('#table tbody tr'),'012');
@@ -249,18 +233,15 @@
     function checkLost() { 
         $('#myTable tbody tr').each(function() {
             var qtyIssued = $(this).find('#qtyIssued').val();   
-            //console.log(qtyIssued); 
             if (qtyIssued > 0) {
                 var lost = $(this).find('#lost').val();
             }
         });
      }
     $('table tbody tr').one('click',function(){
-       // console.log($(this).first().text());
        
         var $tr    = $(this).closest('.row1');
         var $clone = $tr.clone().removeClass('row').attr('id','clone1');
-        //.append(`<input type="text" id="itemid" value="{{ $item->id }}">`);;
         $clone.find(':text').val('').prop( "disabled", false );
         $tr.after($clone);
         const lost_item_url = "{{ route('biller.assetreturned.send') }}";
@@ -288,14 +269,12 @@
                 serial_number: serial_number,
                 broken: broken,
            }
-            // console.log($('#clone1').find('.date input').val());
             
             $.ajax({
             method: "POST",
             url: lost_item_url,
             data: data,
             success: function(response) {
-                //console.log(response);
                 window.location.reload();
             }
             
@@ -329,5 +308,20 @@
         }
     }
 }
+</script> --}}
+<script>
+    $('#myTable tbody tr').on('click', function (e) {
+        var id = e.target.getAttribute('data-id');
+        const el = $(this);
+        var product_name = el.find('#product_name').val();
+        var quantity_issued = el.find('#quantity_issued').val();
+        var returned_item = el.find('#returned_item').val();
+        $('#returnItem').modal('show');
+        $('#product-name').val(product_name);
+        $('#quantity-issued').val(quantity_issued);
+        $('#qty-return').val(returned_item);
+        
+    });
+   
 </script>
 @endsection

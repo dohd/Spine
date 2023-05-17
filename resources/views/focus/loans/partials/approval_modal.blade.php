@@ -7,7 +7,6 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            {{browserlog($loan)}}
             {{ Form::model($loan, ['route' => ['biller.loans.update', $loan], 'method' => 'PATCH']) }}
                 <div class="modal-body">
                     <div class="form-group">

@@ -110,7 +110,7 @@ class AssetissuanceController extends Controller
         
         $result = $this->repository->create(compact('assetissuance', 'assetissuance_items'));
 
-        return new RedirectResponse(route('biller.assetissuance.index'), ['flash_success' => 'Assetissuance Assetissuance created successfully']);
+        return new RedirectResponse(route('biller.assetissuance.index'), ['flash_success' => 'Assetissuance created successfully']);
     }
 
     /**
@@ -126,12 +126,8 @@ class AssetissuanceController extends Controller
 
     public function shows(Request $request)
     {
-        // $assetissuance = Assetissuance::find($id);
-        // $budget = AssetissuanceItems::where('asset_issuance_id', $assetissuance->id)->first();
-        //dd($assetissuance);
-        // if ($budget) return redirect(route('biller.assetissuance.edit_asset_return', [$assetissuance, $budget]));
+
         return new UpdateResponse($assetissuance);
-        //return new ViewResponse('focus.assetissuance.edit_asset_return', compact('assetissuance'));
     }
     /**
      * Show the form for editing the specified resource.
@@ -147,11 +143,6 @@ class AssetissuanceController extends Controller
     {
         $assetissuance = Assetissuance::find($id);
         $budget = AssetissuanceItems::find($item_id);
-        //$budget = AssetissuanceItems::where('asset_issuance_id', $assetissuance->id)->get();
-        //dd($budget);
-        //if ($budget) return redirect(route('biller.assetissuance.edit_asset_return', [$assetissuance, $budget]));
-        
-        //$budget_items = $budget->items()->orderBy('row_index')->get();
 
         return view('focus.assetissuance.edit_asset_return', compact('assetissuance', 'budget'));
     }

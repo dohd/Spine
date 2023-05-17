@@ -196,6 +196,12 @@ Route::group(['namespace' => 'overtimerate'], function () {
     //For Datatable
     Route::post('overtimerates/get', 'OvertimeRateTableController')->name('overtimerates.get');
 });
+Route::group(['namespace' => 'overtimepay'], function () {
+    Route::post('overtimepay/select', 'OvertimePayController@select')->name('overtimepay.select');
+    Route::resource('overtimepay', 'OvertimePayController');
+    //For Datatable
+    Route::post('overtimepay/get', 'OvertimePayTableController')->name('overtimepay.get');
+});
 
 Route::group(['namespace' => 'deptor'], function () {
     Route::resource('deptors', 'DeptorsController');
