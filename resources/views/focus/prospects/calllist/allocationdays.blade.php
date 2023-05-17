@@ -19,9 +19,9 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::open() }}
+                  
                         @include('focus.prospects.calllist.allocationform')
-                    {{ Form::close() }}
+                    
                 </div>
             </div>
         </div>

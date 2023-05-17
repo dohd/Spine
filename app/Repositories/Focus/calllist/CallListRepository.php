@@ -99,9 +99,10 @@ class CallListRepository extends BaseRepository
     {
        
         $id = $calllist->id;
+        $calllistdeleted = $calllist->delete();
         $childrendeleted = ProspectCallList::where('call_id',$id)->delete();
         if ( $childrendeleted){
-            $calllistdeleted = $calllist->delete();
+           
             if( $calllistdeleted) return true;
         } 
 

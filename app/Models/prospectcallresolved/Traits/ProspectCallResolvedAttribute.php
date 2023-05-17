@@ -17,7 +17,8 @@ trait ProspectCallResolvedAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("manage-lead", "biller.prospects.show") . ' ' 
+        return 
+        $this->getViewButtonAttribute("manage-lead", "biller.prospects.show") . ' ' 
             . $this->getEditButtonAttribute("edit-lead", "biller.prospects.edit") . ' ' 
             . $this->getDeleteButtonAttribute("delete-lead", "biller.prospects.destroy");
     }

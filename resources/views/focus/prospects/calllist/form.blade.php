@@ -29,7 +29,9 @@
                 <div id="directprospectcount" class=" h6 prospect-count">0</div>
             </div>
         </div>
-       
+        @php
+        $date = date("Y-m-d");
+        @endphp
         <div class="form-group row">
             <div class="col-sm-4"><label for="group_title" class="caption">Group Title</label>
                 <div class="input-group">
@@ -37,7 +39,7 @@
                     <select id="title" name="title" class="form-control" data-placeholder="Choose Title" disabled
                         required>
                         @foreach ($excel as $row)
-                            <option value="{{ $row->title }}" count="{{ $row->count }}">
+                            <option value="{{ $row->title }} -({{ $date }})" count="{{ $row->count }}">
                                 {{ $row->title }} - Total {{ $row->count }}
                             </option>
                         @endforeach

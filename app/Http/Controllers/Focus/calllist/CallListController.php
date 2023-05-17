@@ -94,15 +94,18 @@ class CallListController extends Controller
         $data = $request->except(['_token', 'ins', 'files']);
        
        $res = $this->repository->create($data);
-
+    
+       $restitle = $res['title'];
+       $restitle = strstr($restitle, ' ', true);
+       
         //get call id
         $callid = $res['id'];
         //get prospects based on title
-        $prospects = Prospect::where('call_status','notcalled')->where('title',$res['title'])->get([
+        $prospects = Prospect::where('call_status','notcalled')->where('title',$restitle)->get([
             "id"
         ])->toArray();
 
-       // dd($prospects);
+        //dd($prospects);
         //start and end date  
         $start = $res['start_date'];
         $end = $res['end_date'];
@@ -141,7 +144,7 @@ class CallListController extends Controller
             $dateIndex = ($dateIndex + 1) % $dateCount;
         }
     
-       // dd($prospectcalllist);
+        //dd($prospectcalllist);
         // //send data to prospectcalllisttable
          ProspectCallList::insert($prospectcalllist);
         

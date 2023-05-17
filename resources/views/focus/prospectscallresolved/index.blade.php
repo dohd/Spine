@@ -104,7 +104,7 @@
                                         <th>CallStatus</th>
                                         <th>Status</th>
                                         <th>Reason</th>
-                                        <th>{{ trans('labels.general.actions') }}</th>
+                                        {{-- <th>{{ trans('labels.general.actions') }}</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -463,12 +463,12 @@
                             name: 'reason'
                         },
 
-                        {
-                            data: 'actions',
-                            name: 'actions',
-                            searchable: false,
-                            sortable: false
-                        }
+                        // {
+                        //     data: 'actions',
+                        //     name: 'actions',
+                        //     searchable: false,
+                        //     sortable: false
+                        // }
                     ],
                     columnDefs: [{
                         type: "custom-date-sort",

@@ -89,7 +89,7 @@
        
     </div>
 </div>
-
+@include('focus.prospects.partials.add_prospect_modal')
 @section('extra-scripts')
     {{ Html::script('focus/js/select2.min.js') }}
     <script type="text/javascript">
@@ -126,7 +126,8 @@
             },
 
             addProspectBtnClick() {
-                    alert('clicked');
+                  //show modal
+                $('#addProspectModal').modal('show');
                 },
 
             dayBtnClick() {
