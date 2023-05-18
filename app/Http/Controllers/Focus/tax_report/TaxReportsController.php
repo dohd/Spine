@@ -183,26 +183,32 @@ class TaxReportsController extends Controller
             ->where('tid', '>', 0)
             ->where(function ($q) {
                 $q->doesntHave('invoice_tax_reports');
-                $q->orWhereHas('invoice_tax_reports', function ($q) {
-                    $q->where('is_filed', 0);
-                });
+                $q->orWhereHas('invoice_tax_reports', fn($q) =>  $q->where('is_filed', 0));
             })
-            ->get()->map(fn($v) => [
-                'id' => $v->id,
-                'invoice_tid' => $v->tid,
-                'invoice_date' => $v->invoicedate,
-                'tax_pin' => isset($v->customer->taxid) ? $v->customer->taxid : '',
-                'customer' => isset($v->customer->company) ? $v->customer->company : '',
-                'note' => $v->notes,
-                'subtotal' => $v->subtotal,
-                'total' => $v->total,
-                'tax' => $v->tax,
-                'tax_rate' => $v->tax_id,
-                'type' => 'invoice',
-                'credit_note_date' => '',
-                'credit_note_tid' => '',
-                'is_tax_exempt' => isset($v->customer->is_tax_exempt)? $v->customer->is_tax_exempt : 0,
-            ]);
+            ->get()
+            ->map(function ($v) {
+                $v_mod = clone $v;
+                $attr = [
+                    'id' => $v->id,
+                    'invoice_tid' => $v->tid,
+                    'invoice_date' => $v->invoicedate,
+                    'tax_pin' => @$v->customer->taxid ?: '',
+                    'customer' => @$v->customer->company ?: '',
+                    'note' => $v->notes,
+                    'subtotal' => $v->subtotal,
+                    'total' => $v->total,
+                    'tax' => $v->tax,
+                    'tax_rate' => $v->tax_id,
+                    'type' => 'invoice',
+                    'credit_note_date' => '',
+                    'credit_note_tid' => '',
+                    'is_tax_exempt' => @$v->customer->is_tax_exempt ?: 0,
+                ];
+                foreach ($attr as $key => $value) {
+                    $v_mod[$key] = $value;
+                }
+                return $v_mod;
+            });
 
         $credit_notes = CreditNote::when($month, fn($q) => $q->whereMonth('date', $month)->whereYear('date', $year))
         ->whereHas('invoice')
@@ -212,22 +218,30 @@ class TaxReportsController extends Controller
                 $q->where('is_filed', 0);
             });
         })
-        ->whereNull('supplier_id')->get()->map(fn($v) => [
-            'id' => $v->id,
-            'credit_note_tid' => $v->tid,
-            'invoice_date' => $v->date,
-            'tax_pin' => isset($v->customer->taxid) ? $v->customer->taxid : '',
-            'customer' => isset($v->customer->company) ? $v->customer->company : '',
-            'note' => 'Credit Note',
-            'subtotal' => -1 * $v->subtotal,
-            'total' => -1 * $v->total,
-            'tax' =>  -1 * $v->tax,
-            'tax_rate' => ($v->tax/$v->subtotal * 100),
-            'type' => 'credit_note',
-            'credit_note_date' => $v->invoice->invoicedate,
-            'invoice_tid' => $v->invoice->tid,
-            'is_tax_exempt' => isset($v->customer->is_tax_exempt)? $v->customer->is_tax_exempt : 0,
-        ]);
+        ->whereNull('supplier_id')->get()
+        ->map(function($v) {
+            $v_mod = clone $v;
+            $attr = [
+                'id' => $v->id,
+                'credit_note_tid' => $v->tid,
+                'invoice_date' => $v->date,
+                'tax_pin' => @$v->customer->taxid ?: '',
+                'customer' => @$v->customer->company ?: '',
+                'note' => 'Credit Note',
+                'subtotal' => -1 * $v->subtotal,
+                'total' => -1 * $v->total,
+                'tax' =>  -1 * $v->tax,
+                'tax_rate' => $v->subtotal > 0? round($v->tax/$v->subtotal * 100) : 0,
+                'type' => 'credit_note',
+                'credit_note_date' => $v->invoice->invoicedate,
+                'invoice_tid' => $v->invoice->tid,
+                'is_tax_exempt' => @$v->customer->is_tax_exempt ?: 0,
+            ];
+            foreach ($attr as $key => $value) {
+                $v_mod[$key] = $value;
+            }
+            return $v_mod;
+        }); 
             
         $sales = $invoices->merge($credit_notes);
 
@@ -248,12 +262,12 @@ class TaxReportsController extends Controller
             ->whereIn('document_type', ['direct_purchase', 'goods_receive_note'])
             ->where(function ($q) {
                 $q->doesntHave('purchase_tax_reports');
-                $q->orWhereHas('purchase_tax_reports', function ($q) {
-                    $q->where('is_filed', 0);
-                });
+                $q->orWhereHas('purchase_tax_reports', fn($q) => $q->where('is_filed', 0));
             })
             ->get()
             ->map(function ($v) {
+                $v_mod = clone $v;
+
                 $note = '';
                 $suppliername = '';
                 $supplier_taxid = '';
@@ -272,16 +286,16 @@ class TaxReportsController extends Controller
                         if ($v->tax_rate == 8) {
                             $note .= gen4tid('Grn-', $grn->tid) . ' Fuel';
                         } else $note .= gen4tid('Grn-', $grn->tid) . ' Goods';
-                        $suppliername .= $grn->supplier->name ?? '';
-                        $supplier_taxid .= $grn->supplier->taxid ?? '';
+                        $suppliername .= @$grn->supplier->name ?: '';
+                        $supplier_taxid .= @$grn->supplier->taxid ?: '';
                     } 
                 }
                 
-                return [
+                $attr = [
                     'id' => $v->id,
                     'purchase_date' => $v->date,
-                    'tax_pin' => isset($supplier_taxid) ? $supplier_taxid : $v->supplier->taxid,
-                    'supplier' => isset($suppliername) ? $suppliername : $v->supplier->name,
+                    'tax_pin' => @$supplier_taxid ?: $v->supplier->taxid,
+                    'supplier' => @$suppliername ?: $v->supplier->name,
                     'invoice_no' => $v->reference,
                     'note' => $note,
                     'subtotal' => $v->subtotal,
@@ -291,30 +305,40 @@ class TaxReportsController extends Controller
                     'type' => 'purchase',
                     'debit_note_date' => '',
                 ];
+                foreach ($attr as $key => $value) {
+                    $v_mod[$key] = $value;
+                }
+                return $v_mod;
             });
 
         $debit_notes = CreditNote::when($month, fn($q) => $q->whereMonth('date', $month)->whereYear('date', $year))
         ->whereHas('supplier')
         ->where(function ($q) {
             $q->doesntHave('debit_note_tax_reports');
-            $q->orWhereHas('debit_note_tax_reports', function ($q) {
-                $q->where('is_filed', 0);
-            });
+            $q->orWhereHas('debit_note_tax_reports', fn($q) => $q->where('is_filed', 0));
         })
-        ->whereNull('customer_id')->get()->map(fn($v) => [
-            'id' => $v->id,
-            'debit_note_date' => $v->date,
-            'tax_pin' => isset($v->supplier->taxid) ? $v->supplier->taxid : '',
-            'supplier' => isset($v->suppliername) ? $v->suppliername : $v->supplier->name,
-            'note' => 'Debit Note',
-            'subtotal' => $v->subtotal,
-            'total' => $v->total,
-            'tax' => $v->tax,
-            'tax_rate' => ($v->tax/$v->subtotal * 100),
-            'type' => 'debit_note',
-            'purchase_date' => $v->date,
-            'invoice_no' => '',
-        ]);
+        ->whereNull('customer_id')->get()
+        ->map(function($v) {
+            $v_mod = clone $v;
+            $attr = [
+                'id' => $v->id,
+                'debit_note_date' => $v->date,
+                'tax_pin' => @$v->supplier->taxid ?: '',
+                'supplier' => @$v->suppliername ?: $v->supplier->name,
+                'note' => 'Debit Note',
+                'subtotal' => $v->subtotal,
+                'total' => $v->total,
+                'tax' => $v->tax,
+                'tax_rate' => $v->subtotal > 0? round($v->tax/$v->subtotal * 100) : 0,
+                'type' => 'debit_note',
+                'purchase_date' => $v->date,
+                'invoice_no' => '',
+            ];
+            foreach ($attr as $key => $value) {
+                $v_mod[$key] = $value;
+            }
+            return $v_mod;
+        });
            
         $purchases = $bills->merge($debit_notes);
 

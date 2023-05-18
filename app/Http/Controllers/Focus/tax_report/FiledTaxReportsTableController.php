@@ -119,7 +119,7 @@ class FiledTaxReportsTableController extends Controller
             })
             ->addColumn('subtotal', function ($item) {
                 $subtotal = 0;
-                if ($this->credit_note) $subtotal = $this->credit_note->subtotal;
+                if ($this->credit_note) $subtotal = -1* $this->credit_note->subtotal;
                 elseif ($this->invoice) $subtotal = $this->invoice->subtotal;
 
                 return numberFormat($subtotal);
