@@ -81,11 +81,17 @@ class SalaryController extends Controller
     {
         // dd($request->all());
         //Input received from the request
-        $input = $request->except(['_token']);
+        $input = $request->except(['_token','allowance_id','amount']);
+       // dd($request->all());
         $input['ins'] = auth()->user()->ins;
         $input['user_id'] = auth()->user()->id;
+        $employee_allowance = $request->only(['allowance_id','amount']);
+       
+        $employee_allowance = modify_array($employee_allowance);
+        $employee_allowance = array_filter($employee_allowance, function ($v) { return $v['allowance_id']; });
+        
         //Create the model using repository create method
-        $this->repository->create($input);
+        $this->repository->create(compact('input', 'employee_allowance'));
         //return with successfull messagetrans
         return new RedirectResponse(route('biller.salary.index'), ['flash_success' => 'Salary Created Successfully']);
     }

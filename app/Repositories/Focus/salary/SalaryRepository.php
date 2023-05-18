@@ -6,6 +6,8 @@ use DB;
 use Carbon\Carbon;
 use App\Models\salary\Salary;
 use App\Exceptions\GeneralException;
+
+use App\Models\allowance_employee\AllowanceEmployee;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Model;
 
@@ -39,20 +41,24 @@ class SalaryRepository extends BaseRepository
      * @throws GeneralException
      * @return bool
      */
-    public function create(array $input)
+    public function create( $input)
     {
-        //dd($input);
-        $salary = $input;
-        foreach ($salary as $key => $val) {
-            // $rate_keys = [
-            //     'employee_id','employee_name','issue_date','return_date','note','total_cost'
-            // ];
-            if (in_array($key, ['month'], 1))
-                $salary[$key] = date_for_database($val);
+       
+        $createsalary = Salary::create($input['input']);
+        
+        $allarr= $input['employee_allowance'];
+        $allarr = array_map(function ($v) use($createsalary) {
             
-        }
-        $input = array_map( 'strip_tags', $salary);
-        if (Salary::create($input)) {
+            return array_replace($v, [
+                'contract_id' => $createsalary->id,
+                'user_id'=> auth()->user()->id,
+                'ins'=> auth()->user()->ins,
+            ]);
+        }, $allarr);
+        
+        if ($createsalary) {
+            AllowanceEmployee::insert($allarr);
+            
             return true;
         }
         throw new GeneralException(trans('exceptions.backend.salarys.create_error'));

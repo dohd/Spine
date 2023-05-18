@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Models\allowance;
+namespace App\Models\allowance_employee;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\allowance\Traits\AllowanceAttribute;
 use App\Models\allowance\Traits\AllowanceRelationship;
 
-class Allowance extends Model
+class AllowanceEmployee extends Model
 {
     use ModelTrait,
         AllowanceAttribute,
@@ -24,7 +24,7 @@ class Allowance extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'allowances';
+    protected $table = 'employee_allowances';
 
     /**
      * Mass Assignable fields of model

@@ -40,11 +40,8 @@
                                     <div class="form-group">
                                         {{-- Including Form blade file --}}
                                         @include("focus.salary.form")
-                                        <div class="edit-form-btn float-right mb-2">
-                                            {{ link_to_route('biller.salary.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
-                                            {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md']) }}
-                                            <div class="clearfix"></div>
-                                        </div><!--edit-form-btn-->
+                                        
+                                      
                                     </div><!-- form-group -->
 
                                     {{ Form::close() }}
@@ -92,5 +89,37 @@ function select2Config(url, callback) {
         }
     }
 }
+
+let tableRow = $('#productsTbl tbody tr:first').html();
+    $('#productsTbl tbody tr:first').remove();
+    let rowIds = 1;
+    $('#addstock').click(function() {
+        rowIds++;
+        let i = rowIds;
+        const html = tableRow.replace(/-0/g, '-'+i);
+        $('#productsTbl tbody').append('<tr>' + html + '</tr>');
+        $('#productsTbl').on('change','.deduct', deduct);
+    });
+    $('#productsTbl').on('click', '.remove', removeRow);
+    function removeRow() {
+        const $tr = $(this).parents('tr:first');
+        $tr.next().remove();
+        $tr.remove();
+    }
+    let rowId = 0;
+    
+    function deduct() {
+        const name = $('#deductname option:selected').val();
+        let i = rowId;
+        if (name == "NHIF") {
+            $('#deduction_id-'+i).val('1').change();
+        }
+        else if (name == 'NSSF') {
+            $('#deduction_id-'+i).val('2').change();
+        } else {
+            $('#deduction_id-'+i).val('3').change();
+        }
+        
+    }
     </script>
 @endsection
