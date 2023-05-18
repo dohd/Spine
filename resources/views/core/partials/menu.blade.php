@@ -895,10 +895,10 @@
                     </li>
 
                     {{-- Tax PRN --}}
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-check-square-o"></i> Tax PRNs</a>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-check-square-o"></i> Return Acknowledgement</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.tax_prns.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Tax PRN</a></li>
-                            <li><a class="dropdown-item" href="{{ route('biller.tax_prns.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tax PRN</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.tax_prns.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Return Acknowledgement</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.tax_prns.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Return Acknowledgement</a></li>
                         </ul>
                     </li>
                     @endauth

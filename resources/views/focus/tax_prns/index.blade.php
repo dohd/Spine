@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Tax PRN Management')
+@section('title', 'Return Acknowledgement Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Tax PRN Management</h4>
+            <h4 class="content-header-title">Return Acknowledgement Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
@@ -77,7 +77,7 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['period_from', 'period_to', 'code', 'payment_mode', 'amount', 'date'].map(v => ({data: v, name: v})),
+                    ...['period_from', 'period_to', 'return_no', 'payment_mode', 'amount', 'ackn_date'].map(v => ({data: v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],

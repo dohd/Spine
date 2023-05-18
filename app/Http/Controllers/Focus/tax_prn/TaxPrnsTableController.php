@@ -52,14 +52,17 @@ class TaxPrnsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
-            ->addColumn('amount', function ($tax_prn) {
+            ->editColumn('amount', function ($tax_prn) {
                 return numberFormat($tax_prn->amount);
             })
-            ->addColumn('period_from', function ($tax_prn) {
+            ->editColumn('period_from', function ($tax_prn) {
                 return dateFormat($tax_prn->period_from);
             })
-            ->addColumn('period_to', function ($tax_prn) {
+            ->editColumn('period_to', function ($tax_prn) {
                 return dateFormat($tax_prn->period_to);
+            })
+            ->editColumn('ackn_date', function ($tax_prn) {
+                return dateFormat($tax_prn->ackn_date);
             })
             ->addColumn('actions', function ($tax_prn) {
                 return $tax_prn->action_buttons;
