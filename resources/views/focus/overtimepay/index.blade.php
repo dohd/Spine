@@ -88,7 +88,7 @@
                     @lang('datatable.strings')
                 },
                 ajax: {
-                    url: '{{ route("biller.overtimepays.get") }}',
+                    url: '{{ route("biller.overtimepay.get") }}',
                     type: 'post'
                 },
                 columns: [

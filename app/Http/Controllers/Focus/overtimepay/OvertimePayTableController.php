@@ -57,8 +57,8 @@ class OvertimePayTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('employee_id', function ($overtimepay) {
-                  return $overtimepay->employee_id;
+            ->addColumn('employee_name', function ($overtimepay) {
+                  return $overtimepay->employee->first_name;
             })
             ->addColumn('date', function ($overtimepay) {
                 return dateFormat($overtimepay->date);

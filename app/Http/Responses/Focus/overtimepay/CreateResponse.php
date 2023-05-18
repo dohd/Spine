@@ -3,6 +3,7 @@
 namespace App\Http\Responses\Focus\overtimepay;
 
 use Illuminate\Contracts\Support\Responsable;
+use App\Models\overtimerate\OvertimeRate;
 
 class CreateResponse implements Responsable
 {
@@ -15,6 +16,7 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        return view('focus.overtimepay.create');
+        $overtimerates = OvertimeRate::all(['id','name']);
+        return view('focus.overtimepay.create', compact('overtimerates'));
     }
 }

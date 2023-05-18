@@ -3,6 +3,7 @@
 namespace App\Http\Responses\Focus\overtimepay;
 
 use Illuminate\Contracts\Support\Responsable;
+use App\Models\overtimerate\OvertimeRate;
 
 class EditResponse implements Responsable
 {
@@ -28,8 +29,10 @@ class EditResponse implements Responsable
      */
     public function toResponse($request)
     {
+        $overtimerates = OvertimeRate::all(['id','name']);
         return view('focus.overtimepay.edit')->with([
-            'overtimepays' => $this->overtimepay
+            'overtimepay' => $this->overtimepay,
+            'overtimerates' => $overtimerates
         ]);
     }
 }

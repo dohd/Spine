@@ -5,7 +5,7 @@
 @section('page-header')
     <h1>
         {{ 'OverTime Pay Management'}}
-        <small>{{ 'Create' }}</small>
+        <small>{{ 'Create Overtime Pay' }}</small>
     </h1>
 @endsection
 
@@ -53,4 +53,41 @@
             </div>
         </div>
     </div>
+@endsection
+@section('extra-scripts')
+{{ Html::script('focus/js/select2.min.js') }}
+<script>
+    $.ajaxSetup({ headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}});
+    $('.datepicker').datepicker({autoHide: true})
+    $('#date').datepicker('setDate', new Date());
+
+    // On searching supplier
+    $('#employeebox').change(function() {
+        const name = $('#employeebox option:selected').text().split(' : ')[0];
+        const [id, taxId] = $(this).val().split('-');
+        $('#employeeid').val(id);
+        $('#employee').val(name);
+        $('#issue_type').prop("disabled", false);
+    });
+
+    // load employees
+    const employeeUrl = "{{ route('biller.surcharge.select') }}";
+    function employeeData(data) {
+        return {results: data.map(v => ({id: v.id, text: v.first_name+' : '+v.email}))};
+    }
+    $('#employeebox').select2(select2Config(employeeUrl, employeeData));
+    // select2 config
+    function select2Config(url, callback) {
+        return {
+            ajax: {
+                url,
+                dataType: 'json',
+                type: 'POST',
+                quietMillis: 50,
+                data: ({term}) => ({q: term, keyword: term}),
+                processResults: callback
+            }
+        }
+    }
+</script>
 @endsection

@@ -10,5 +10,8 @@ use App\Models\hrm\HrmMeta;
  */
 trait OvertimePayRelationship
 {
-     
+     public function employee()
+     {
+        return $this->belongsTo(Hrm::class, 'employee_id');
+     }
 }

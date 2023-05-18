@@ -41,6 +41,7 @@ class OvertimePayRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        //dd($input);
         $input = array_map( 'strip_tags', $input);
         if (OvertimePay::create($input)) {
             return true;
