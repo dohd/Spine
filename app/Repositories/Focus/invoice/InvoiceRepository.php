@@ -199,7 +199,7 @@ class InvoiceRepository extends BaseRepository
 
             return [
                 'id' => $v['id'],
-                'reference' => $v['reference'] ?? '', 
+                'reference' => $v['reference'] ?: '', 
                 'description' => $v['description']
             ];
         }, $bill_items);

@@ -260,7 +260,7 @@
 				@if ($item->product_price > 0 || $item->product_subtotal > 0)
 					<!-- Item Row -->
 					<tr>
-						<td>{{ $item->numbering ?? $i+1 }}</td>
+						<td>{{ $item->numbering ?: $i+1 }}</td>
 
 						@if (
 							(@$resource['products'][0]['reference'] == @$resource['products'][1]['reference']) ||
@@ -286,7 +286,7 @@
 				@else
 					<!-- Title Row -->
 					<tr>
-						<td>{{ $item->numbering ?? $i+1 }}</td>
+						<td>{{ $item->numbering ?: $i+1 }}</td>
 						@if (
 							(@$resource['products'][0]['reference'] == @$resource['products'][1]['reference']) ||
 							(!@$resource->products->first()->reference)

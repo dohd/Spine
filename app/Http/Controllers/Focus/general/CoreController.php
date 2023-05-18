@@ -31,7 +31,7 @@ class CoreController extends Controller
 
     public function redirectPath()
     {
-        return session()->get('url_intended') ?? route('biller.dashboard');
+        return session()->get('url_intended') ?: route('biller.dashboard');
     }
 
     public function showLoginForm()

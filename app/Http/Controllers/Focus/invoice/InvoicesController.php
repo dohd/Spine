@@ -227,7 +227,7 @@ class InvoicesController extends Controller
                 ->get();
         }
 
-        $customer = Customer::find($customer_id) ?? new Customer;
+        $customer = Customer::find($customer_id) ?: new Customer;
         $accounts = Account::whereHas('accountType', fn($q) => $q->whereIn('name', ['Income', 'Other Income']))->get();
         $terms = Term::where('type', 1)->get();  // invoice term type is 1
         $banks = Bank::all();

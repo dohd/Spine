@@ -104,7 +104,7 @@ class VerificationsController extends Controller
      */
     public function edit(Verification $verification)
     {
-        $quote = $verification->quote ?? new Quote;
+        $quote = $verification->quote ?: new Quote;
         if ($quote->tax_id > 0) {
             $additionals = Additional::where('value', 0)->orWhere('value', $quote->tax_id)->get();
         } else {

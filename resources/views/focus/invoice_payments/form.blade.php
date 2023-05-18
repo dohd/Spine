@@ -14,7 +14,7 @@
     <div class="col-2">
         <label for="reference" class="caption">Payment No.</label>
         <div class="input-group">
-            {{ Form::text('tid', @$invoice_payment->tid ?? @$tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
+            {{ Form::text('tid', @$invoice_payment->tid ?: @$tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
         </div>
     </div> 
 

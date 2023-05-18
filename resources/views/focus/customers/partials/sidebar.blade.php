@@ -12,7 +12,7 @@
                     </div>
                     <div class="ml-1">
                         <h5 class="info">Customer</h5>
-                        <h5 class="media-heading">{{ $customer->company ?? $customer->name  }}</h5>
+                        <h5 class="media-heading">{{ $customer->company ?: $customer->name  }}</h5>
                         <h5>Balance: <span class="text-danger">{{ numberFormat($account_balance) }}</span></h5>
                     </div>
                 </div>
