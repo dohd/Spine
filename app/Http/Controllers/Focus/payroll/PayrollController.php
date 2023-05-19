@@ -82,9 +82,10 @@ class PayrollController extends Controller
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
         //Create the model using repository create method
-        $this->repository->create($input);
+        $result = $this->repository->create($input);
+        //dd($result);
         //return with successfull message
-        return new RedirectResponse(route('biller.payroll.index'), ['flash_success' => 'Payroll Processed Successfully!!']);
+        return new RedirectResponse(route('biller.payroll.page', $result), ['flash_success' => 'Payroll Processed Successfully!!']);
     }
 
     /**
@@ -181,6 +182,41 @@ class PayrollController extends Controller
                 return $payroll->actions_buttons;
             })
             ->make(true);
+    }
+    public function page($id)
+    {
+        //dd($id);
+        $payroll = Payroll::find($id);
+        $payroll->reference = gen4tid('PYRL-',$payroll->tid);
+        $employees = Hrm::with(['employees_salary' => function ($q){
+            $q->where('contract_type', 'permanent');
+        }])->get();
+        return view('focus.payroll.pages.create', compact('payroll', 'employees'));
+    }
+
+    public function store_basic(Request $request)
+    {
+        $data = $request->only([
+            'payroll_id','salary_total'
+        ]);
+        $data_items = $request->only([
+            'present_days', 'absent_days','rate_per_day','rate_per_month','basic_pay', 'employee_id'
+        ]);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+        //dd($data_items);
+        // modify and filter items without item_id
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($v) { return $v['absent_days']; });
+
+        
+        try {
+            $result = $this->repository->create_basic(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error creating Basic Salary', $th);
+        }
+        return redirect()->back();
     }
 
 }

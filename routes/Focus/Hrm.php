@@ -72,6 +72,8 @@ Route::group(['namespace' => 'salary'], function () {
 
 Route::group(['namespace' => 'payroll'], function () {
     Route::post('payroll/get_employee', 'PayrollController@get_employee')->name('payroll.get_employee');
+    Route::get('page/{id}', 'PayrollController@page')->name('payroll.page');
+    Route::post('page/store_basic', 'PayrollController@store_basic')->name('payroll.store_basic');
     Route::resource('payroll', 'PayrollController');
     //For Datatable
     Route::post('payroll/get', 'PayrollTableController')->name('payroll.get');

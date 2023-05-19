@@ -11,10 +11,14 @@ use App\Models\payroll\PayrollItem;
 /**
  * Class PayrollRelationship
  */
-trait PayrollRelationship
+trait PayrollItemRelationship
 {
-     public function payroll_items()
+     public function payroll()
      {
-        return $this->hasMany(PayrollItem::class, 'payroll_id');
+        return $this->belongsTo(Payroll::class);
+     }
+     public function employee()
+     {
+         return $this->hasOne(Hrm::class, 'employee_id');
      }
 }

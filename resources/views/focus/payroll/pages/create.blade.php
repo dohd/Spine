@@ -34,20 +34,20 @@
                             <div class="card-content">
 
                                 <div class="card-body">
-                                    {{ Form::open(['route' => 'biller.payroll.store', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'create-department']) }}
+                                    {{-- {{ Form::open(['route' => 'biller.payroll.store_basic', 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'post', 'id' => 'create-department']) }} --}}
 
 
                                     <div class="form-group">
                                         {{-- Including Form blade file --}}
-                                        @include("focus.payroll.form")
+                                        @include("focus.payroll.pages.form")
                                         <div class="edit-form-btn">
-                                            {{ link_to_route('biller.payroll.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
-                                            {{ Form::submit('Load Payroll', ['class' => 'btn btn-primary btn-md']) }}
+                                            {{-- {{ link_to_route('biller.payroll.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }} --}}
+                                            {{-- {{ Form::submit('Save Basic Pay', ['class' => 'btn btn-primary float-end']) }} --}}
                                             <div class="clearfix"></div>
                                         </div><!--edit-form-btn-->
                                     </div><!-- form-group -->
 
-                                    {{ Form::close() }}
+                                    {{-- {{ Form::close() }} --}}
                                 </div>
 
 
