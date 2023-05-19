@@ -4,14 +4,13 @@ namespace App\Models\payroll;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\payroll\Traits\PayrollAttribute;
-use App\Models\payroll\Traits\PayrollRelationship;
+//use App\Models\payroll\Traits\PayrollItemAttribute;
+use App\Models\payroll\Traits\PayrollItemRelationship;
 
-class Payroll extends Model
+class PayrollItem extends Model
 {
     use ModelTrait,
-        PayrollAttribute,
-    	PayrollRelationship {
+    	PayrollItemRelationship {
             // payrollAttribute::getEditButtonAttribute insteadof ModelTrait;
         }
 
@@ -24,7 +23,7 @@ class Payroll extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'payroll';
+    protected $table = 'payroll_items';
 
     /**
      * Mass Assignable fields of model
@@ -70,13 +69,7 @@ class Payroll extends Model
     protected static function boot()
     {
             parent::boot();
-            static::creating(function ($instance) {
-                 $instance->user_id = auth()->user()->id;
-                // $instance->ins = auth()->user()->ins;
-                $instance->tid = Payroll::max('tid') + 1;
-                return $instance;
-            });
-                static::addGlobalScope('ins', function($builder){
+            static::addGlobalScope('ins', function($builder){
             $builder->where('ins', '=', auth()->user()->ins);
     });
     }

@@ -5,6 +5,7 @@ namespace App\Repositories\Focus\payroll;
 use DB;
 use Carbon\Carbon;
 use App\Models\payroll\Payroll;
+use App\Models\payroll\PayrollItem;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Model;
@@ -41,9 +42,24 @@ class PayrollRepository extends BaseRepository
      */
     public function create(array $input)
     {
+        $year = Carbon::createFromFormat('Y-m', $input['payroll_month'])->format('Y');
+        $month = Carbon::createFromFormat('Y-m', $input['payroll_month'])->format('m');
+        $startDate = Carbon::createFromDate($year, $month, 1);
+        $endDate = Carbon::createFromDate($year, $month, $startDate->daysInMonth);
+        //$working_days = $startDate->diffInWeekdays($endDate);
+        $working_days = $startDate->diffInDaysFiltered(function (Carbon $date) {
+            return $date->isWeekday() || $date->isSaturday();
+        }, $endDate);
+        $total_month_days = $startDate->daysInMonth;
+        //dd();
+        $input['working_days'] = $working_days;
+        $input['total_month_days'] = $total_month_days;
+        $input['total_month_days'] = $total_month_days;
+        //dd($input);
         $input = array_map( 'strip_tags', $input);
-        if (Payroll::create($input)) {
-            return true;
+        $res = Payroll::create($input);
+        if ($res) {
+            return $res->id;
         }
         throw new GeneralException(trans('exceptions.backend.payrolls.create_error'));
     }
@@ -79,5 +95,41 @@ class PayrollRepository extends BaseRepository
         }
 
         throw new GeneralException(trans('exceptions.backend.payrolls.delete_error'));
+    }
+    public function create_basic(array $input)
+    {
+         
+        DB::beginTransaction();
+       // dd($input);
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            $rate_keys = [
+                'salary_total'
+            ];
+        }
+        $result = Payroll::find($data['payroll_id']);
+        $result->salary_total = $data['salary_total'];
+        $result->update();
+
+        //dd($result);
+        $data_items = $input['data_items'];
+        $data_items = array_map(function ($v) use($result) {
+            return array_replace($v, [
+                'ins' => auth()->user()->ins,
+                'user_id' => auth()->user()->id,
+                'payroll_id' => $result->id,
+            ]);
+        }, $data_items);
+        //dd($data_items);
+        PayrollItem::insert($data_items);
+        
+        
+        if ($result) {
+            DB::commit();
+            return $result;   
+        }
+
+        DB::rollBack();
+        throw new GeneralException(trans('exceptions.backend.purchasedatas.create_error'));
     }
 }
