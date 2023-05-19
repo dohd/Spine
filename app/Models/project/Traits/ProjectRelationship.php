@@ -103,7 +103,7 @@ trait ProjectRelationship
 
     public function milestones()
     {
-        return $this->hasMany(ProjectMileStone::class, 'project_id', 'id')->orderBy('due_date', 'desc');
+        return $this->hasMany(ProjectMileStone::class, 'project_id', 'id')->orderBy('due_date', 'desc')->withoutGlobalScopes();;
     }
 
     public function history()
