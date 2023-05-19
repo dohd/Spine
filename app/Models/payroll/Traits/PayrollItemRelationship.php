@@ -19,6 +19,6 @@ trait PayrollItemRelationship
      }
      public function employee()
      {
-         return $this->hasOne(Hrm::class, 'employee_id');
+         return $this->belongsTo(Hrm::class, 'employee_id', 'id');
      }
 }

@@ -100,8 +100,8 @@ class CreateResponse implements Responsable
          //Get PAYE brackets
          $tax = 0;
          $paye_brackets = Deduction::where('deduction_id','3')->get();
-         
-         if($gross_pay > 24000){
+         $first_bracket = Deduction::where('deduction_id','3')->first();
+         if($gross_pay > $first_bracket->amount_from){
             foreach ($paye_brackets as $i => $bracket) {
                 if ($i > 0) {
                     if ($gross_pay > $bracket->amount_from) {
