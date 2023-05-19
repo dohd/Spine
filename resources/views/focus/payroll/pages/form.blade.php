@@ -24,6 +24,22 @@
                    <i class="text-success fa fa-check float-right tick" aria-hidden="true"></i> --}}
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" id="base-tab4" data-toggle="tab" aria-controls="tab4" href="#tab4" role="tab"
+                   aria-selected="false">
+                   <span>Other Benefits and Deductions</span>
+                   {{-- <i class="text-danger fa fa-times float-right cancel" aria-hidden="true"></i>
+                   <i class="text-success fa fa-check float-right tick" aria-hidden="true"></i> --}}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="base-tab5" data-toggle="tab" aria-controls="tab5" href="#tab5" role="tab"
+                   aria-selected="false">
+                   <span>Summary</span>
+                   {{-- <i class="text-danger fa fa-times float-right cancel" aria-hidden="true"></i>
+                   <i class="text-success fa fa-check float-right tick" aria-hidden="true"></i> --}}
+                </a>
+            </li>
         </ul>
         <div class="tab-content px-1 pt-1">
             <div class="tab-pane active" id="tab1" role="tabpanel" aria-labelledby="base-tab1">
@@ -112,6 +128,16 @@
     
                 </div>
             </div>
+            <div class="tab-pane" id="tab4" role="tabpanel" aria-labelledby="base-tab4">
+                <div class="card-content">
+                    @include('focus.payroll.pages.tabs.otherbenefitsanddeductions')
+                </div>
+            </div>
+            <div class="tab-pane" id="tab5" role="tabpanel" aria-labelledby="base-tab5">
+                <div class="card-content">
+                    @include('focus.payroll.pages.tabs.summary')
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -163,7 +189,10 @@
                 // $('.tick_allowance').addClass('d-none');
                 // $('.cancel_allowance').removeClass('d-none');
             }
+           
+            
             Index.calTotal();
+            Index.calTotalNetPay();
         },
 
         dateFromChange() {
@@ -210,8 +239,18 @@
             const total_basic_salary = basic_pay - absent_amount;
             grandTotal += total_basic_salary;
         });
-        console.log(grandTotal);
+        //console.log(grandTotal);
         $('#salary_total').val(accounting.unformat(grandTotal));
+    },
+     calTotalNetPay() {
+        let grandTotal = 0;
+        $('#summaryTable tbody tr').each(function() {
+           
+            const net = accounting.unformat($(this).find('.netpay').text());
+            grandTotal += net;
+        });
+       
+        $('#salary_total_summary').val(accounting.unformat(grandTotal));
     },
     employeeRow(v,i) {
         return `
