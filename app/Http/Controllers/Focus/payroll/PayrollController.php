@@ -142,6 +142,9 @@ class PayrollController extends Controller
      */
     public function show(Payroll $payroll, Request $request)
     {
+        foreach ($payroll->payroll_items as $item) {
+            $item->employee_name = $item->employee->first_name;
+        }
 
         //returning with successfull message
         return new ViewResponse('focus.payroll.view', compact('payroll'));
@@ -193,6 +196,7 @@ class PayrollController extends Controller
             $q->where('contract_type', 'permanent');
         }])->get();
         $total_gross = 0;
+        $total_paye = 0;
         foreach ($payroll->payroll_items as $item) {
             $item->employee_name = $item->employee->first_name;
             if($item->total_basic_allowance){
@@ -201,15 +205,16 @@ class PayrollController extends Controller
                 $item->gross_pay = $item->total_basic_allowance - ($item->nssf + $item->nhif);
                 $total_gross += $item->gross_pay;
                 $item->paye = $this->calculate_paye($item->gross_pay);
+                $total_paye += $item->paye;
             }
         }
-        return view('focus.payroll.pages.create', compact('payroll', 'employees','total_gross'));
+        return view('focus.payroll.pages.create', compact('payroll', 'employees','total_gross','total_paye'));
     }
 
     public function store_basic(Request $request)
     {
         $data = $request->only([
-            'payroll_id','salary_total'
+            'payroll_id','salary_total','processing_date'
         ]);
         $data_items = $request->only([
             'present_days', 'absent_days','rate_per_day','rate_per_month','basic_pay', 'employee_id'
@@ -276,6 +281,32 @@ class PayrollController extends Controller
         
         try {
             $result = $this->repository->create_deduction(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error creating Taxable Deductions', $th);
+        }
+        return redirect()->back();
+    }
+
+    public function store_paye(Request $request)
+    {
+        //dd($request->all());
+        $data = $request->only([
+            'payroll_id','paye_total'
+        ]);
+        $data_items = $request->only([
+            'id', 'paye'
+        ]);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+        //dd($data_items);
+        // modify and filter items without item_id
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($v) { return $v['id']; });
+
+        
+        try {
+            $result = $this->repository->create_paye(compact('data', 'data_items'));
         } catch (\Throwable $th) {
             return errorHandler('Error creating Taxable Deductions', $th);
         }

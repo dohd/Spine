@@ -55,6 +55,7 @@ class PayrollRepository extends BaseRepository
         $input['working_days'] = $working_days;
         $input['total_month_days'] = $total_month_days;
         $input['total_month_days'] = $total_month_days;
+        $input['payroll_month'] = Carbon::createFromFormat('Y-m', $input['payroll_month'])->format('Y-m-d');
         //dd($input);
         $input = array_map( 'strip_tags', $input);
         $res = Payroll::create($input);
@@ -185,6 +186,47 @@ class PayrollRepository extends BaseRepository
         }
         $result = Payroll::find($data['payroll_id']);
         $result->deduction_total = $data['deduction_total'];
+        $result->update();
+
+        //dd($result);
+        $data_items = $input['data_items'];
+        foreach ($data_items as $item) {
+            $item = array_replace($item, [
+                'ins' => $result->ins,
+                'user_id' => $result->id,
+            ]);
+           // dd($item);
+            $data_item = PayrollItem::firstOrNew(['id'=> $item['id']]);
+            $data_item->fill($item);
+            if (!$data_item->id) unset($data_item->id);
+            $data_item->save();
+        }
+        
+        
+        
+        
+        if ($result) {
+            DB::commit();
+            return $result;   
+        }
+
+        DB::rollBack();
+        throw new GeneralException(trans('exceptions.backend.payroll.create_error'));
+    }
+
+    public function create_paye(array $input)
+    {
+         
+        DB::beginTransaction();
+       // dd($input);
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            $rate_keys = [
+                'paye_total'
+            ];
+        }
+        $result = Payroll::find($data['payroll_id']);
+        $result->paye_total = $data['paye_total'];
         $result->update();
 
         //dd($result);

@@ -37,9 +37,9 @@
                                         <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>{{ trans('general.title') }}</th>
-                                            <th>{{ trans('general.employee') }}</th>
-                                            <th>{{ trans('general.createdat') }}</th>
+                                            <th>Payroll No</th>
+                                            <th>Processing Date</th>
+                                            <th>Payroll Month</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                         </thead>
@@ -94,9 +94,9 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    {data: 'name', name: 'name'},
-                    {data: 'employee', name: 'employee'},
-                    {data: 'created_at', name: 'created_at'},
+                    {data: 'tid', name: 'tid'},
+                    {data: 'processing_date', name: 'processing_date'},
+                    {data: 'payroll_month', name: 'payroll_month'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "asc"]],
