@@ -19,7 +19,6 @@ namespace App\Http\Controllers\Focus\term;
 
 use App\Http\Requests\Focus\general\ManageCompanyRequest;
 use App\Models\term\Term;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -77,16 +76,12 @@ class TermsController extends Controller
      */
     public function store(ManageCompanyRequest $request)
     {
-        //Input received from the request
         $input = $request->except(['_token', 'ins']);
-        $input['ins'] = auth()->user()->ins;
         try {
-            //Create the model using repository create method
             $this->repository->create($input);
         } catch (\Throwable $th) {
             return errorHandler('Error Creating Terms', $th);
         }
-        //return with successfull message
         return new RedirectResponse(route('biller.terms.index'), ['flash_success' => trans('alerts.backend.terms.created')]);
     }
 
@@ -111,15 +106,12 @@ class TermsController extends Controller
      */
     public function update(ManageCompanyRequest $request, Term $term)
     {
-        //Input received from the request
         $input = $request->except(['_token', 'ins']);
         try {
-            //Update the model using repository update method
             $this->repository->update($term, $input);
         } catch (\Throwable $th) {
             return errorHandler('Error Updating Terms', $th);
         }
-        //return with successfull message
         return new RedirectResponse(route('biller.terms.index'), ['flash_success' => trans('alerts.backend.terms.updated')]);
     }
 
@@ -133,14 +125,11 @@ class TermsController extends Controller
     public function destroy(Term $term, ManageCompanyRequest $request)
     {
         try {
-            //Calling the delete method on repository
-            $result = $this->repository->delete($term);
+            $this->repository->delete($term);
         } catch (\Throwable $th) {
             return errorHandler('Error Deleting Terms', $th);
         }
-        //returning with successfull message
-        if ($result) return new RedirectResponse(route('biller.terms.index'), ['flash_success' => trans('alerts.backend.terms.deleted')]);
-        return new RedirectResponse(route('biller.terms.index'), ['flash_error' => trans('exceptions.backend.terms.delete_error')]);
+        return new RedirectResponse(route('biller.terms.index'), ['flash_success' => trans('alerts.backend.terms.deleted')]);
     }
 
     /**

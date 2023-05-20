@@ -2,12 +2,9 @@
 
 namespace App\Repositories\Focus\term;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\term\Term;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class TermRepository.
@@ -27,9 +24,7 @@ class TermRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-
-        return $this->query()
-            ->get();
+        return $this->query()->get();
     }
 
     /**
@@ -41,12 +36,10 @@ class TermRepository extends BaseRepository
      */
     public function create(array $input)
     {
-          $input['title'] = strip_tags( $input['title']);
-            $input['terms'] = clean($input['terms']);
-        if (Term::create($input)) {
-            return true;
-        }
-        throw new GeneralException(trans('exceptions.backend.terms.create_error'));
+        $input['title'] = strip_tags($input['title']);
+        $input['terms'] = clean($input['terms']);
+        $term = Term::create($input);
+        return $term;
     }
 
     /**
@@ -59,14 +52,9 @@ class TermRepository extends BaseRepository
      */
     public function update(Term $term, array $input)
     {
-         $input['title'] = strip_tags( $input['title']);
-            $input['terms'] = clean($input['terms']);
-
-        unset($input['files']);
-        if ($term->update($input))
-            return true;
-
-        throw new GeneralException(trans('exceptions.backend.terms.update_error'));
+        $input['title'] = strip_tags($input['title']);
+        $input['terms'] = clean($input['terms']);
+        if ($term->update($input)) return true;   
     }
 
     /**
@@ -80,18 +68,11 @@ class TermRepository extends BaseRepository
     {
         $flag = true;
         if (!$term->type) {
-            $available = Term::whereType(0)->get(['id'])->count('*');
-            if ($available < 2) {
-                $flag = false;
-            }
+            $available = Term::where('type', 0)->count();
+            if ($available < 2) $flag = false;
         }
 
-        if ($flag) {
-            if ($term->delete()) {
-                return true;
-            }
-        }
+        if ($flag && $term->delete()) return true;
         return false;
-
     }
 }

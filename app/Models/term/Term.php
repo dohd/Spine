@@ -9,17 +9,8 @@ use App\Models\term\Traits\TermRelationship;
 
 class Term extends Model
 {
-    use ModelTrait,
-        TermAttribute,
-    	TermRelationship {
-            // TermAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
-
-    /**
-     * NOTE : If you want to implement Soft Deletes in this model,
-     * then follow the steps here : https://laravel.com/docs/5.4/eloquent#soft-deleting
-     */
-
+    use ModelTrait, TermAttribute, TermRelationship;
+       
     /**
      * The database table used by the model.
      * @var string
@@ -30,17 +21,13 @@ class Term extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = ['title', 'type', 'terms', 'ins'];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -67,11 +54,18 @@ class Term extends Model
     {
         parent::__construct($attributes);
     }
+
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
     }
 }
