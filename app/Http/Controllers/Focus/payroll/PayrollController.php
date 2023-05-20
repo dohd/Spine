@@ -27,6 +27,7 @@ use App\Http\Responses\Focus\payroll\EditResponse;
 use App\Repositories\Focus\payroll\PayrollRepository;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\hrm\Hrm;
+use App\Models\deduction\Deduction;
 
 /**
  * payrollsController
@@ -191,7 +192,18 @@ class PayrollController extends Controller
         $employees = Hrm::with(['employees_salary' => function ($q){
             $q->where('contract_type', 'permanent');
         }])->get();
-        return view('focus.payroll.pages.create', compact('payroll', 'employees'));
+        $total_gross = 0;
+        foreach ($payroll->payroll_items as $item) {
+            $item->employee_name = $item->employee->first_name;
+            if($item->total_basic_allowance){
+                $item->nssf = $this->calculate_nssf($item->total_basic_allowance);
+                $item->nhif = $this->calculate_nhif($item->total_basic_allowance);
+                $item->gross_pay = $item->total_basic_allowance - ($item->nssf + $item->nhif);
+                $total_gross += $item->gross_pay;
+                $item->paye = $this->calculate_paye($item->gross_pay);
+            }
+        }
+        return view('focus.payroll.pages.create', compact('payroll', 'employees','total_gross'));
     }
 
     public function store_basic(Request $request)
@@ -217,6 +229,108 @@ class PayrollController extends Controller
             return errorHandler('Error creating Basic Salary', $th);
         }
         return redirect()->back();
+    }
+
+    public function store_allowance(Request $request)
+    {
+        //dd($request->all());
+        $data = $request->only([
+            'payroll_id','allowance_total'
+        ]);
+        $data_items = $request->only([
+            'id', 'house_allowance','transport_allowance','other_allowance','total_allowance','total_basic_allowance'
+        ]);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+        //dd($data_items);
+        // modify and filter items without item_id
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($v) { return $v['id']; });
+
+        
+        try {
+            $result = $this->repository->create_allowance(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error creating Taxable Allowances', $th);
+        }
+        return redirect()->back();
+    }
+    public function store_deduction(Request $request)
+    {
+        //dd($request->all());
+        $data = $request->only([
+            'payroll_id','deduction_total'
+        ]);
+        $data_items = $request->only([
+            'id', 'nssf','nhif','gross_pay'
+        ]);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+        //dd($data_items);
+        // modify and filter items without item_id
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($v) { return $v['id']; });
+
+        
+        try {
+            $result = $this->repository->create_deduction(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error creating Taxable Deductions', $th);
+        }
+        return redirect()->back();
+    }
+    public function calculate_nssf($gross_pay)
+    {
+        $nssf_brackets = Deduction::where('deduction_id','2')->get();
+        $nssf = 0;
+        foreach ($nssf_brackets as $i => $bracket) {
+            if($i > 0){
+                if($gross_pay > $bracket->amount_from){
+                    $nssf = $bracket->rate;
+                }
+            }else{
+                $nssf = $bracket->rate/100 * $gross_pay;
+            }
+        }
+        return $nssf;
+    }
+    public function calculate_nhif($gross_pay)
+    {
+        $nhif_brackets = Deduction::where('deduction_id','1')->get();
+        $nhif = 0;
+        foreach ($nhif_brackets as $i => $bracket) {
+                if($gross_pay > $bracket->amount_from && $gross_pay <= $bracket->amount_to){
+                    $nhif = $bracket->rate;
+                }
+        }
+        return $nhif;
+    }
+
+    public function calculate_paye($gross_pay)
+    {
+         //Get PAYE brackets
+         $tax = 0;
+         $paye_brackets = Deduction::where('deduction_id','3')->get();
+         $first_bracket = Deduction::where('deduction_id','3')->first();
+         if($gross_pay > $first_bracket->amount_from){
+            foreach ($paye_brackets as $i => $bracket) {
+                if ($i > 0) {
+                    if ($gross_pay > $bracket->amount_from) {
+                        $tax += $bracket->rate / 100 * ($gross_pay - $bracket->amount_from);
+                        
+                    }
+                }else {
+                    if($gross_pay > $bracket->amount_to){
+                        $tax += 25/100 * ($bracket->amount_to - $bracket->amount_from);
+                    }
+                    $tax += $bracket->rate / 100 * ($bracket->amount_from);
+                }
+             }
+         }
+         if($tax > 0)
+            return $tax - 2655;
     }
 
 }
