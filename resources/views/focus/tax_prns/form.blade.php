@@ -1,15 +1,15 @@
 <div class="form-group row">
     <div class="col-3">
         <label for="period_from">Return Period From</label>
-        {{ Form::text('period_from', null, ['class' => 'form-control datepicker', 'id' => 'period_from', 'required']) }}
+        {{ Form::text('period_from', dateFormat(@$dates[0]), ['class' => 'form-control datepicker', 'id' => 'period_from', 'required']) }}
     </div> 
     <div class="col-3">
         <label for="period_to">Return Period To</label>
-        {{ Form::text('period_to', null, ['class' => 'form-control datepicker', 'id' => 'period_to', 'required']) }}
+        {{ Form::text('period_to', dateFormat(@$dates[1]), ['class' => 'form-control datepicker', 'id' => 'period_to', 'required']) }}
     </div> 
     <div class="col-2">
         <label for="ackn_date">Acknowledgement Date</label>
-        {{ Form::text('ackn_date', null, ['class' => 'form-control datepicker', 'id' => 'ackn_date', 'required']) }}
+        {{ Form::text('ackn_date', dateFormat(), ['class' => 'form-control datepicker', 'id' => 'ackn_date', 'required']) }}
     </div> 
     <div class="col-2">
         <label for="return_no">Return Number</label>
@@ -40,11 +40,11 @@
     </div> 
     <div class="col-2">
         <label for="prn_code">Payment Reference</label>
-        {{ Form::text('payment_ref', null, ['class' => 'form-control', 'id' => 'ref', 'required']) }}
+        {{ Form::text('payment_ref', null, ['class' => 'form-control', 'id' => 'ref']) }}
     </div> 
     <div class="col-2">
         <label for="amount">Payment Amount</label>
-        {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required']) }}
+        {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount']) }}
     </div> 
 </div>
 <div class="form-group row">
@@ -76,7 +76,7 @@
 
         init() {
             $.ajaxSetup(config.ajax);
-            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+            $('.datepicker').datepicker(config.date);
 
             if (this.taxPrn) {
                 const prn = this.taxPrn;
