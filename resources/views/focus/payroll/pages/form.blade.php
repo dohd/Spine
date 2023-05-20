@@ -13,7 +13,7 @@
                 <a class="nav-link" id="base-tab2" data-toggle="tab" aria-controls="tab2" href="#tab2" role="tab"
                    aria-selected="false"><span>Tx Monthly Allowances</span>
                    <i class="text-danger fa fa-times float-right cancel_allowance" aria-hidden="true"></i>
-                   <i class="text-success fa fa-check float-right tick_allowance" aria-hidden="true"></i>
+                   <i class="text-success fa fa-check float-right d-none tick_allowance" aria-hidden="true"></i>
                 </a>
             </li>
             <li class="nav-item">
@@ -21,15 +21,15 @@
                    aria-selected="false">
                    <span>Tx Monthly Deductions</span>
                    <i class="text-danger fa fa-times float-right cancel_deduction" aria-hidden="true"></i>
-                   <i class="text-success fa fa-check float-right tick_deduction" aria-hidden="true"></i>
+                   <i class="text-success fa fa-check float-right d-none tick_deduction" aria-hidden="true"></i>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" id="base-tab4" data-toggle="tab" aria-controls="tab4" href="#tab4" role="tab"
                    aria-selected="false">
                    <span>PAYE</span>
-                   {{-- <i class="text-danger fa fa-times float-right cancel" aria-hidden="true"></i>
-                   <i class="text-success fa fa-check float-right tick" aria-hidden="true"></i> --}}
+                   <i class="text-danger fa fa-times float-right cancel_paye" aria-hidden="true"></i>
+                   <i class="text-success fa fa-check float-right d-none tick_paye" aria-hidden="true"></i>
                 </a>
             </li>
         </ul>
@@ -50,7 +50,7 @@
                                 <tbody>
                                     <tr>
                                         <td><input type="text" class="form-control" value="{{ $payroll->reference }}" readonly></td>
-                                        <td><input type="date" class="form-control" value=""></td>
+                                        <td><input type="text" name="processing_date" class="form-control datepicker" value=""></td>
                                         <td><input type="text" class="form-control month_days" value="{{ $payroll->total_month_days }}" readonly></td>
                                         <td><input type="text" class="form-control working_days" value="{{ $payroll->working_days }}" readonly></td>
                                     </tr>
@@ -233,7 +233,7 @@
             <div class="tab-pane" id="tab4" role="tabpanel" aria-labelledby="base-tab4">
                 <div class="card-content">
 
-                    <form action="{{ route('biller.payroll.store_allowance')}}" method="post">
+                    <form action="{{ route('biller.payroll.store_paye')}}" method="post">
                         @csrf
                         <div class="card-content">
                             <div class="card-body">
@@ -261,6 +261,9 @@
                                                 <td>{{ amountFormat($item->nssf) }}</td>
                                                 <td>{{ amountFormat($item->nhif) }}</td>
                                                 <td>{{ amountFormat($item->paye) }}</td>
+                                                <input type="hidden" name="id[]" value="{{ $item->id }}">
+                                                <input type="hidden" name="payroll_id" value="{{ $item->payroll_id }}">
+                                                <input type="hidden" name="paye[]" value="{{$item->paye}}" id="">
                                             </tr>
                                         @endforeach
                                        
@@ -270,7 +273,8 @@
                             <div class="form-group">
                                 <div class="col-3">
                                     <label for="total">Total PAYE</label>
-                                    <input type="text" name="paye_total" class="form-control" id="paye_total" readonly>
+                                    <input type="text" value="{{amountFormat($total_paye)}}" class="form-control" id="" readonly>
+                                    <input type="hidden" name="paye_total" value="{{$total_paye}}" class="form-control" id="paye_total" readonly>
                                 </div>
                             </div>
                             <div class="float-right">
@@ -289,7 +293,8 @@
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
     const config = {
-        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}" }}
+        ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}" }},
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true},
     };
 
     const Index = {
@@ -297,33 +302,15 @@
         salary_total: @json($payroll->salary_total),
         allowance_total: @json($payroll->allowance_total),
         deduction_total: @json($payroll->deduction_total),
+        paye_total: @json($payroll->paye_total),
         init() {
+            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
             $('#employeeTbl').on('keyup', '.absent, .present, .rate, .rate-month, .total', this.employeeChange);
             $('#allowanceTbl').on('keyup', '.house, .house_allowance, .transport, .transport_allowance, .other, .other_allowance', this.allowanceChange);
-            // $('#basicSalary').submit(function (e) {
-            //     e.preventDefault();
-            //     const formData = $(this).serializeArray();
-            //     //{{ route('biller.payroll.store_basic')}}
-            //     var formDataObject = {};
-            //     $.each(formData, function(index, field) {
-            //     formDataObject[field.name] = field.value;
-            //     });
-            //     $.post("{{ route('biller.payroll.store_basic')}}", 
-            //     { formDataObject }, function (response) {
-            //         //console.log(response);    
-            //     }).done(response => {
-            //         console.log(response);
-            //             // $('#monthTbl tbody').html('');
-            //             // response.forEach((v,i) => $('#monthTbl tbody').append(monthRow(v,i)));
-            //         });
-            //     //console.log(formData);
-            // })
-            //console.log(this.payroll_items);
+            
             if (this.payroll_items && this.payroll_items.length) {
                 $('.cancel').addClass('d-none');
                 $('.tick').removeClass('d-none');
-                // $('.cancel_allowance').addClass('d-none');
-                // $('.tick_allowance').removeClass('d-none');
                 $('.cancel_allowance').removeClass('d-none');
                 $('.tick_allowance').addClass('d-none');
                 $('#employeeTbl tbody').html('');
@@ -338,13 +325,12 @@
                     if (this.deduction_total && this.deduction_total.length) {
                         $('.cancel_deduction').addClass('d-none');
                         $('.tick_deduction').removeClass('d-none');
-                    }else{
-                        $('.tick_deduction').addClass('d-none');
-                        $('.cancel_deduction').removeClass('d-none');
+                        if (this.paye_total && this.paye_total.length) {
+                            $('.cancel_paye').addClass('d-none');
+                            $('.tick_paye').removeClass('d-none');
+                        }
+                        
                     }
-                }else{
-                    $('.tick_allowance').addClass('d-none');
-                    $('.cancel_allowance').removeClass('d-none');
                 }
             }else{
                 $('.tick').addClass('d-none');
@@ -381,7 +367,6 @@
             row.find('.transport_allowance').val(accounting.unformat(cal_transport_allowance));
             row.find('.total_allowance').val(accounting.unformat(cal_total_allowance));
             row.find('.total_basic_allowance').val(accounting.unformat(total_basic_allowance));
-            console.log(total_basic_allowance);
 
             Index.calallowanceTotal();
         },
@@ -470,10 +455,10 @@
                         <td>${i+1}</td>    
                         <td>${v.employee_name}</td>   
                         <td>${v.absent_days}</td>  
-                        <td><input type="text" name="house_allowance[]" value="${v.house_allowance}" class="form-control house_allowance"  id="house_allowance-${i}" readonly></td>      
-                        <td><input type="text" name="transport_allowance[]" value="${v.transport_allowance}" class="form-control transport_allowance"  id="transport_allowance-${i}" readonly></td>    
-                        <td><input type="text" name="other_allowance[]" value="${v.other_allowance}" class="form-control other_allowance"  id="other_allowance-${i}" readonly></td>    
-                        <td><input type="text" name="total_allowance[]" value="${v.total_allowance}" class="form-control total_allowance"  id="total_allowance-${i}" readonly></td> 
+                        <td><input type="text" name="house_allowance[]" value="${accounting.formatNumber(v.house_allowance)}" class="form-control house_allowance"  id="house_allowance-${i}" readonly></td>      
+                        <td><input type="text" name="transport_allowance[]" value="${accounting.formatNumber(v.transport_allowance)}" class="form-control transport_allowance"  id="transport_allowance-${i}" readonly></td>    
+                        <td><input type="text" name="other_allowance[]" value="${accounting.formatNumber(v.other_allowance)}" class="form-control other_allowance"  id="other_allowance-${i}" readonly></td>    
+                        <td><input type="text" name="total_allowance[]" value="${accounting.formatNumber(v.total_all)}" class="form-control total_allowance"  id="total_allowance-${i}" readonly></td> 
                         <input type="hidden" name="absent_days[]" value="${v.absent_days}" class="form-control absent"  id="absent_days-${i}"> 
                         <input type="hidden" name="present_days[]" value="${v.present_days}" class="form-control present"  id="present_days-${i}"> 
                         <input type="hidden" name="rate_per_day[]" value="${v.rate_per_day} class="form-control rate"  id="rate-days-${i}">

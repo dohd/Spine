@@ -19,6 +19,7 @@ namespace App\Http\Controllers\Focus\payroll;
 
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\payroll\PayrollRepository;
 
@@ -55,14 +56,14 @@ class PayrollTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('name', function ($payroll) {
-               return $payroll->name;
+            ->addColumn('tid', function ($payroll) {
+               return gen4tid('PYRLL-', $payroll->tid);
             })
-            ->addColumn('employee', function ($payroll) {
-                return $payroll->employee;
+            ->addColumn('processing_date', function ($payroll) {
+                return dateFormat($payroll->processing_date);
             })
-            ->addColumn('created_at', function ($payroll) {
-                return Carbon::parse($payroll->created_at)->toDateString();
+            ->addColumn('payroll_month', function ($payroll) {
+                return dateFormat($payroll->payroll_month);
             })
             ->addColumn('actions', function ($payroll) {
                 return $payroll->actions_buttons;
