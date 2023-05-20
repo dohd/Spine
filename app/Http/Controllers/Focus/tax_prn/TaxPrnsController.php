@@ -24,6 +24,7 @@ use App\Http\Responses\ViewResponse;
 use App\Models\tax_prn\TaxPrn;
 use App\Repositories\Focus\tax_prn\TaxPrnRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class TaxPrnsController extends Controller
@@ -58,7 +59,9 @@ class TaxPrnsController extends Controller
      */
     public function create()
     {
-        return view('focus.tax_prns.create');
+        $dates = [new Carbon('first day of this month'), new Carbon('last day of this month')];
+
+        return view('focus.tax_prns.create', compact('dates'));
     }
 
     /**
