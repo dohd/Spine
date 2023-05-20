@@ -7,7 +7,7 @@
                 <thead>
                     <tr>
                         <th>Employee Id</th>
-                        {{-- <th>Employee Name</th> --}}
+                        <th>Employee Name</th>
                         <th>Total Basic Salary</th>
                         <th>Total Taxable Allowances</th>
                         <th>Total Monthly Deductions</th>
@@ -40,7 +40,7 @@
                             @endphp
                         <tr>
                             <td>{{ $i++ }}</td>
-                            {{-- <td>{{ $employee->employees_salary->employee_name }}</td> --}}
+                            <td>{{ $item->employee_name }}</td>
                             {{-- <input type="hidden" id="employee_id-{{$i}}" name="employee_id[]" value="{{ $employee->employees_salary->employee_id}}"> --}}
                             {{-- <input type="hidden" class="basic_salary" id="basic_salary-{{$i}}" value="{{ $employee->employees_salary->basic_pay }}"> --}}
                             <td>{{ amountFormat($salary) }}</td>

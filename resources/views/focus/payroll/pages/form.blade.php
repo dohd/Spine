@@ -32,6 +32,22 @@
                    <i class="text-success fa fa-check float-right d-none tick_paye" aria-hidden="true"></i>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" id="base-tab5" data-toggle="tab" aria-controls="tab5" href="#tab5" role="tab"
+                   aria-selected="false">
+                   <span>Other Deductions and Benefits</span>
+                   <i class="text-danger fa fa-times float-right cancel_paye" aria-hidden="true"></i>
+                   <i class="text-success fa fa-check float-right d-none tick_paye" aria-hidden="true"></i>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="base-tab6" data-toggle="tab" aria-controls="tab6" href="#tab6" role="tab"
+                   aria-selected="false">
+                   <span>Summary</span>
+                   <i class="text-danger fa fa-times float-right cancel_paye" aria-hidden="true"></i>
+                   <i class="text-success fa fa-check float-right d-none tick_paye" aria-hidden="true"></i>
+                </a>
+            </li>
         </ul>
         <div class="tab-content px-1 pt-1">
             <div class="tab-pane active" id="tab1" role="tabpanel" aria-labelledby="base-tab1">
@@ -284,12 +300,12 @@
                     </form>
                 </div>
             </div>
-            <div class="tab-pane" id="tab4" role="tabpanel" aria-labelledby="base-tab4">
+            <div class="tab-pane" id="tab5" role="tabpanel" aria-labelledby="base-tab5">
                 <div class="card-content">
                     @include('focus.payroll.pages.tabs.otherbenefitsanddeductions')
                 </div>
             </div>
-            <div class="tab-pane" id="tab5" role="tabpanel" aria-labelledby="base-tab5">
+            <div class="tab-pane" id="tab6" role="tabpanel" aria-labelledby="base-tab6">
                 <div class="card-content">
                     @include('focus.payroll.pages.tabs.summary')
                 </div>
