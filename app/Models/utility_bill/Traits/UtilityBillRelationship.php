@@ -5,6 +5,7 @@ namespace App\Models\utility_bill\Traits;
 use App\Models\advance_payment\AdvancePayment;
 use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\items\BillpaymentItem;
+use App\Models\items\GoodsreceivenoteItem;
 use App\Models\items\TaxReportItem;
 use App\Models\items\UtilityBillItem;
 use App\Models\purchase\Purchase;
@@ -41,6 +42,11 @@ trait UtilityBillRelationship
     public function grn()
     {
         return $this->belongsTo(Goodsreceivenote::class, 'ref_id');
+    }
+
+    public function grn_items()
+    {
+        return $this->hasManyThrough(GoodsreceivenoteItem::class, UtilityBillItem::class, 'bill_id', 'id', 'id', 'ref_id');
     }
 
     public function items()

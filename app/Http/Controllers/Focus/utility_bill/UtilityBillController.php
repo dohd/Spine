@@ -174,7 +174,7 @@ class UtilityBillController extends Controller
     public function goods_receive_note(Request $request)
     {
         $grn_items = GoodsreceivenoteItem::whereHas('goodsreceivenote', function ($q) {
-            $q->whereNull('invoice_no')->whereHas('purchaseorder', fn ($q) =>$q->where('supplier_id', request('supplier_id')));
+            $q->whereNull('invoice_no')->whereHas('purchaseorder', fn($q) =>$q->where('supplier_id', request('supplier_id')));
         })->with([
             'purchaseorder_item' => fn($q) => $q->select(['id', 'description', 'uom']),
             'goodsreceivenote' => fn($q) => $q->select(['id', 'dnote', 'date']),
