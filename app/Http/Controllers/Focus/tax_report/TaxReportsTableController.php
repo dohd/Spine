@@ -71,10 +71,13 @@ class TaxReportsTableController extends Controller
             ->addColumn('purchase_tax', function ($report) {
                 return numberFormat($report->purchase_tax);
             })
-            ->addColumn('date', function ($report) {
+            ->editColumn('created_at', function ($report) {
                 return dateFormat($report->created_at);
             })
-            ->orderColumn('date', '-date $1')
+            ->orderColumn('created_at', '-created_at $1')
+            ->addColumn('return_no', function ($report) {
+                return @$report->tax_prn->return_no;
+            })
             ->addColumn('actions', function ($report) {
                 return $report->action_buttons;
             })

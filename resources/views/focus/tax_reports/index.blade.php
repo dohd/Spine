@@ -60,6 +60,7 @@
                                         <th>Purchase Tax</th>
                                         <th>Note</th>
                                         <th>Created At</th>
+                                        <th>Return No.</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -139,7 +140,8 @@
                     {data: 'sale_tax', name: 'sale_tax'},
                     {data: 'purchase_tax', name: 'purchase_tax'},
                     {data: 'note', name: 'note'},
-                    {data: 'date', name: 'date'},                    
+                    {data: 'created_at', name: 'created_at'},
+                    {data: 'return_no', name: 'return_no'},                    
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 columnDefs: [
