@@ -55,11 +55,8 @@ class TaxPrnsTableController extends Controller
             ->editColumn('amount', function ($tax_prn) {
                 return numberFormat($tax_prn->amount);
             })
-            ->editColumn('period_from', function ($tax_prn) {
-                return dateFormat($tax_prn->period_from);
-            })
-            ->editColumn('period_to', function ($tax_prn) {
-                return dateFormat($tax_prn->period_to);
+            ->editColumn('return_month', function ($tax_prn) {
+                return $tax_prn->return_month;
             })
             ->editColumn('ackn_date', function ($tax_prn) {
                 return dateFormat($tax_prn->ackn_date);
