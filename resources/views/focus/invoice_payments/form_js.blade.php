@@ -37,8 +37,7 @@
                 .focus(this.amountFocus);
 
             $('form').submit(this.formSubmit);
-            this.loadUnallocatedPayments();
-
+            
             // edit mode
             if (this.invoicePayment) {
                 const pmt = this.invoicePayment;
@@ -50,34 +49,35 @@
                 $('#payment_mode').val(pmt.payment_mode);
                 $('#reference').val(pmt.reference);
                 $('#rel_payment').attr('disabled', true);
+                this.calcTotal();
+            } else {
+                this.loadUnallocatedPayments();
             }
         },
 
         formSubmit() {
             // filter unallocated inputs
             $('#invoiceTbl tbody tr').each(function() {
-                let paymentInp = $(this).find('.paid');
-                if (accounting.unformat(paymentInp.val()) == 0) {
+                let allocatedAmount = $(this).find('.paid').val();
+                if (accounting.unformat(allocatedAmount) == 0) {
                     $(this).remove();
                 } 
             });
             if (Form.invoicePayment && $('#payment_type').val() == 'per_invoice' && !$('#invoiceTbl tbody tr').length) {
-                if (!confirm('Unallocating all line items destroys this instance! Are you sure?')) {
+                if (!confirm('Allocating zero line items will reset this payment! Are you sure?')) {
                     event.preventDefault();
                     location.reload();
                 }
             }
             // check if payment amount >= allocated amount
-            const pmtAmount = accounting.unformat($('#amount').val());
-            const allocatedAmount = accounting.unformat($('#allocate_ttl').val());
-            if (allocatedAmount > pmtAmount) {
+            let amount = accounting.unformat($('#amount').val());
+            let allocatedTotal = accounting.unformat($('#allocate_ttl').val());
+            if (allocatedTotal > amount) {
                 event.preventDefault();
                 alert('Total Allocated Amount must be less or equal to payment Amount!');
             }
             // enable all disabled elements
-            if ($(this).find('select:disabled').length) {
-                $(this).find('select:disabled').attr('disabled', false);
-            }
+            $(this).find('select:disabled').attr('disabled', false);
         },
 
         invoiceRow(v, i) {
