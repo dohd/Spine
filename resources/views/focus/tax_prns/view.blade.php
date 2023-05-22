@@ -22,6 +22,7 @@
                     <table class="table table-bordered table-sm">
                         @php
                             $details = [
+                                'Return Month' => $tax_prn->return_month,
                                 'Return Number' => $tax_prn->return_no,
                                 'Return Period' => dateFormat($tax_prn->period_from) . ' || ' . dateFormat($tax_prn->period_to),
                                 'Acknowledgement Date' => date('d-M-Y', strtotime($tax_prn->ackn_date)),
@@ -37,9 +38,9 @@
                             <tr>
                                 <th width="30%">{{ $key }}</th>
                                 <td>
-                                    @if ($key == 'Return Number')
+                                    @if ($key == 'Return Month' && $val)
                                         <span class="mr-1">{{ $val }}</span>
-                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', ['return_month' => substr(dateFormat($tax_prn->period_from), 3)]) }}" title="Tax Returns">
+                                        <a class="btn btn-purple btn-sm" href="{{ route('biller.tax_reports.filed_report', ['return_month' => @$tax_prn->return_month ?: '#']) }}" title="Filed Returns">
                                             <i class="fa fa-list"></i> List
                                         </a>  
                                     @else
