@@ -1,4 +1,5 @@
 <div class="card-content">
+    
     <div class="card-body">
             
         <ul class="nav nav-tabs" role="tablist">
@@ -65,7 +66,6 @@
                                         <th>Employee Name</th>
                                         <th>Basic Pay</th>
                                         <th>Absent Days</th>
-                                        <th>Present Days</th>
                                         <th>Rate Per Day</th>
                                         <th>Total Basic Pay</th>
                                     </tr>
@@ -83,7 +83,8 @@
                                             <input type="hidden" class="basic_salary" id="basic_salary-{{$i}}" value="{{ $employee->employees_salary->basic_pay }}">
                                             <td>{{ amountFormat($employee->employees_salary->basic_pay) }}</td>
                                             <td><input type="text" name="absent_days[]" class="form-control absent"  id="absent_days-{{$i}}"></td>
-                                            <td><input type="text" name="present_days[]" class="form-control present"  id="present_days-{{$i}}"></td>
+                                            <input type="hidden" name="present_days[]" class="form-control present"  id="present_days-{{$i}}">
+                                            {{-- <td><input type="text" name="present_days[]" class="form-control present"  id="present_days-{{$i}}"></td> --}}
                                             <td>
                                                 <input type="text" name="rate_per_day[]" class="form-control rate"  id="rate-days-{{$i}}">
                                                 <input type="hidden" name="rate_per_month[]" class="form-control rate-month"  id="rate-month-{{$i}}">
@@ -287,7 +288,6 @@
         </div>
     </div>
 </div>
-
 @section("after-scripts")
 {{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('focus/js/select2.min.js') }}
@@ -305,6 +305,8 @@
         paye_total: @json($payroll->paye_total),
         init() {
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+            $('.editable-cell').hover(this.hoverChange);
+            $('#saveButton').click(this.valueChange);
             $('#employeeTbl').on('keyup', '.absent, .present, .rate, .rate-month, .total', this.employeeChange);
             $('#allowanceTbl').on('keyup', '.house, .house_allowance, .transport, .transport_allowance, .other, .other_allowance', this.allowanceChange);
             
@@ -340,7 +342,26 @@
             }
             //Index.calTotal();
         },
+        hoverChange() {
+            // Show the modal when hovering over the editable cell
+            $('#hover-modal').modal('show');
 
+            // Get the current value of the editable cell
+            var currentValue = $(this).text();
+
+            // Set the input field value to the current value
+            $('#editInput').val(currentValue);
+        },
+        valueChange() {
+            // Get the updated value from the input field
+            var updatedValue = $('#editInput').val();
+
+            // Update the content of the editable cell with the updated value
+            $('.editable-cell:hover').text(updatedValue);
+
+            // Hide the modal
+            $('#hover-modal').modal('hide');
+        },
         allowanceChange() {
             const el = $(this);
             const row = el.parents('tr:first');
@@ -437,9 +458,8 @@
                     <tr>
                         <td>${i+1}</td>    
                         <td>${v.employee_name}</td>    
-                        <td>${accounting.formatNumber(v.basic_pay)}</td>    
-                        <td>${v.absent_days}</td>    
-                        <td>${v.present_days}</td>    
+                        <td class="editable-cell">${accounting.formatNumber(v.basic_pay)}</td>    
+                        <td>${v.absent_days}</td>      
                         <td>${accounting.formatNumber(v.rate_per_day)}</td>    
                         <td>${accounting.formatNumber(v.basic_pay)}</td> 
                         <input type="hidden" name="absent_days[]" value="${v.absent_days}" class="form-control absent"  id="absent_days-${i}"> 
@@ -472,3 +492,4 @@
 
 </script>
 @endsection
+@include('focus.payroll.partials.hover-modal')

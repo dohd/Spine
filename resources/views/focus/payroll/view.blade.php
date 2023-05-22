@@ -27,6 +27,11 @@
                 </div>
             </div>
             <div class="card">
+                <div class="card-header">
+                    <a href="#" class="btn btn-info btn-sm mr-1" data-toggle="modal" data-target="#statusModal">
+                        <i class="fa fa-pencil" aria-hidden="true"></i> Approve
+                    </a>
+                </div>
                 <div class="card-body">
                     <ul class="nav nav-tabs" role="tablist">
                         <li class="nav-item">
@@ -248,4 +253,21 @@
             </div>
         </div>
     </div>
+@endsection
+@include('focus.payroll.partials.approval')
+@section('after-scripts')
+<script>
+    config = {
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+    }
+
+    $('#statusModal').on('shown.bs.modal', function() {
+        $('.datepicker').datepicker({
+            container: '#statusModal',
+            ...config.date
+        }).datepicker('setDate', new Date());
+    });
+
+
+</script>
 @endsection

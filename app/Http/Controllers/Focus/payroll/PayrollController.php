@@ -17,7 +17,7 @@
  */
 namespace App\Http\Controllers\Focus\payroll;
 
-use App\Models\payroll\payroll;
+use App\Models\payroll\Payroll;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
@@ -202,13 +202,25 @@ class PayrollController extends Controller
             if($item->total_basic_allowance){
                 $item->nssf = $this->calculate_nssf($item->total_basic_allowance);
                 $item->nhif = $this->calculate_nhif($item->total_basic_allowance);
-                $item->gross_pay = $item->total_basic_allowance - ($item->nssf + $item->nhif);
+                $nhif_relief = 15/100 * $item->nhif;
+                $item->gross_pay = $item->total_basic_allowance - ($item->nssf);
                 $total_gross += $item->gross_pay;
-                $item->paye = $this->calculate_paye($item->gross_pay);
+                $item->paye = $this->calculate_paye($item->gross_pay) - $nhif_relief;
                 $total_paye += $item->paye;
             }
         }
         return view('focus.payroll.pages.create', compact('payroll', 'employees','total_gross','total_paye'));
+    }
+
+    public function approve_payroll(Request $request)
+    {
+        //dd($request->all());
+        $payroll = Payroll::find($request->id);
+        $payroll->approval_note = $request->approval_note;
+        $payroll->approval_date = date_for_database($request->approval_date);
+        $payroll->status = $request->status;
+        $payroll->update();
+        return redirect()->back();
     }
 
     public function store_basic(Request $request)
@@ -345,23 +357,52 @@ class PayrollController extends Controller
          $tax = 0;
          $paye_brackets = Deduction::where('deduction_id','3')->get();
          $first_bracket = Deduction::where('deduction_id','3')->first();
-         if($gross_pay > $first_bracket->amount_from){
+         $personal_relief = $first_bracket->rate/100 * $first_bracket->amount_to;
+         $count = count($paye_brackets);
+         //dd($count);
             foreach ($paye_brackets as $i => $bracket) {
-                if ($i > 0) {
+                if ($i == $count-1) {
+                    //dd($bracket->rate);
                     if ($gross_pay > $bracket->amount_from) {
                         $tax += $bracket->rate / 100 * ($gross_pay - $bracket->amount_from);
-                        
+                       //dd($gross_pay);
                     }
-                }else {
-                    if($gross_pay > $bracket->amount_to){
-                        $tax += 25/100 * ($bracket->amount_to - $bracket->amount_from);
-                    }
-                    $tax += $bracket->rate / 100 * ($bracket->amount_from);
+                    //dd($tax);
                 }
+                else {
+                    //dd($gross_pay);
+                    if($i == 0){
+                        
+                        if($gross_pay > $bracket->amount_from){
+                            $tax += $bracket->rate/100 * $bracket->amount_to;
+                            //dd($tax);
+                        }
+                        
+                        // else{
+                        //     $tax += $bracket->rate/100 *$bracket->amount_to;
+                        // }
+                    }else{
+                        
+                        if($gross_pay >= $bracket->amount_from){
+                            $tax += $bracket->rate/100 * ($bracket->amount_to - $bracket->amount_from);
+                            //dd($tax);
+                        }
+                        //dd($bracket->amount_from);
+                        elseif ($i != $count - 1) {
+                            $tax += $bracket->rate/100 * $bracket->amount_to;
+                        }
+                    }
+                    //$tax = $bracket->rate / 100 * ($bracket->amount_to);
+                }
+                // dd($tax);
              }
-         }
-         if($tax > 0)
-            return $tax - 2655;
+             if($gross_pay > $first_bracket->amount_to){
+                $tax = $tax - $personal_relief;
+             }else{
+                $tax = $tax - ($first_bracket->rate/100 * $gross_pay);
+             }
+         //dd($tax);
+        return $tax;
     }
 
 }

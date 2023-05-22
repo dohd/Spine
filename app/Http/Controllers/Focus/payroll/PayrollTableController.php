@@ -65,6 +65,9 @@ class PayrollTableController extends Controller
             ->addColumn('payroll_month', function ($payroll) {
                 return dateFormat($payroll->payroll_month);
             })
+            ->addColumn('status', function ($payroll) {
+                return ucfirst($payroll->status);
+            })
             ->addColumn('actions', function ($payroll) {
                 return $payroll->actions_buttons;
             })

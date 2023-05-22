@@ -40,6 +40,7 @@
                                             <th>Payroll No</th>
                                             <th>Processing Date</th>
                                             <th>Payroll Month</th>
+                                            <th>Status</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                         </thead>
@@ -97,6 +98,7 @@
                     {data: 'tid', name: 'tid'},
                     {data: 'processing_date', name: 'processing_date'},
                     {data: 'payroll_month', name: 'payroll_month'},
+                    {data: 'status', name: 'status'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "asc"]],
