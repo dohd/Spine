@@ -116,13 +116,25 @@ class UtilityBillTableController extends Controller
                         $prefix = "({$tid})";
                     }
                 } elseif ($doc_type == 'goods_receive_note' && $utility_bill->ref_id) {
-                    $prefix = '(GRN)';
+                    $grn = $utility_bill->grn;
+                    if ($grn) {
+                        $tid = gen4tid('GRN-', $grn->tid);
+                        $prefix = "({$tid})"; 
+                    }
+                } elseif ($doc_type == 'goods_receive_note') {
+                    $tids = [];
+                    foreach ($utility_bill->grn_items as $grn_item) {
+                        $grn = $grn_item->goodsreceivenote;
+                        if ($grn) $tids[] = $grn->tid;
+                    }
+                    $tids = array_map(fn($v) => gen4tid('GRN-', $v), array_unique($tids));
+                    $prefix = '(' . implode(', ', $tids) . ')';
                 } elseif ($doc_type == 'kra_bill') {
                     $prefix = '(KRA)';
                 } elseif ($doc_type == 'advance_payment') {
                     $prefix = '(Advance PMT)';
-                }             
-
+                }   
+                          
                 return "{$prefix} {$reference} - {$note}";
             })
             ->addColumn('total', function ($utility_bill) {
