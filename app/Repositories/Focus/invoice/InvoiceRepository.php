@@ -118,7 +118,7 @@ class InvoiceRepository extends BaseRepository
      */
     public function create_project_invoice(array $input)
     {
-        dd($input);
+        // dd($input);
         DB::beginTransaction();
 
         $bill = $input['bill'];
@@ -199,7 +199,7 @@ class InvoiceRepository extends BaseRepository
 
             return [
                 'id' => $v['id'],
-                'reference' => $v['reference'] ?? '', 
+                'reference' => @$v['reference'] ?: '', 
                 'description' => $v['description']
             ];
         }, $bill_items);
@@ -223,7 +223,6 @@ class InvoiceRepository extends BaseRepository
         }
 
         DB::rollBack();
-        throw new GeneralException(trans('exceptions.backend.invoices.update_error'));
     }
 
     /**

@@ -121,7 +121,8 @@ class QuoteRepository extends BaseRepository
         if(request('customer_id')) {
             $q->where('customer_id', request('customer_id'));
             if (request('branch_id')) $q->where('branch_id', request('branch_id'));
-        } else $q->limit(500);
+        } 
+        else $q->limit(500);
 
         // date filter
         $q->when(request('start_date') && request('end_date'), function ($q) {
@@ -144,6 +145,10 @@ class QuoteRepository extends BaseRepository
     public function getForVerifyNotInvoicedDataTable()
     {
         $q = $this->query();
+        
+        // standard quote or budget project quote
+        $q->where(fn($q) => $q->whereHas('budget')->orWhere('quote_type', 'standard'));
+
         // verified and uninvoiced quotes
         $q->where(['verified' => 'Yes', 'invoiced' => 'No'])->whereDoesntHave('invoice_product');
                 
