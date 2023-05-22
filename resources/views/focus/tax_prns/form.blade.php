@@ -48,7 +48,11 @@
     </div> 
 </div>
 <div class="form-group row">
-    <div class="col-12">
+    <div class="col-3">
+        <label for="return_month">Return Month</label>
+        {{ Form::text('return_month', @$prev_month, ['class' => 'form-control', 'id' => 'return_month', 'required']) }}
+    </div>
+    <div class="col-9">
         <label for="note">Remark</label>
         {{ Form::text('note', null, ['class' => 'form-control', 'id' => 'note']) }}
     </div> 
@@ -77,6 +81,17 @@
         init() {
             $.ajaxSetup(config.ajax);
             $('.datepicker').datepicker(config.date);
+
+            $('#return_month').datepicker({
+                autoHide: true,
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                format: 'MM-yyyy',
+                onClose: function(dateText, inst) { 
+                    $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                }
+            });
 
             if (this.taxPrn) {
                 const prn = this.taxPrn;

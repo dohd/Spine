@@ -60,8 +60,11 @@ class TaxPrnsController extends Controller
     public function create()
     {
         $dates = [new Carbon('first day of this month'), new Carbon('last day of this month')];
+        $month = date('m')-1? date('m')-1 : 12;
+        $year = date('m')-1? date('Y') : date('Y')-1;
+        $prev_month = strlen($month) == 1? "0{$month}-{$year}" : "{$month}-{$year}";
 
-        return view('focus.tax_prns.create', compact('dates'));
+        return view('focus.tax_prns.create', compact('dates', 'prev_month'));
     }
 
     /**
