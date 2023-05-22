@@ -383,8 +383,8 @@ class SupplierRepository extends BaseRepository
 
         $open_balance = $supplier->open_balance;
         $open_balance_date = $supplier->open_balance_date;
+        $journal_data = [];
         if ($open_balance > 0) {
-            $data = array();
             $user_id = auth()->user()->id;
             $note = $supplier->id .  '-supplier Account Opening Balance ' . $supplier->open_balance_note;
             $journal = Journal::where('note', 'LIKE', '%' . $supplier->id .  '-supplier Account Opening Balance ' . '%')->first();
@@ -421,7 +421,7 @@ class SupplierRepository extends BaseRepository
                     ]);
 
                     $account = Account::where('system', 'payable')->first(['id']);
-                    $data = array_replace($journal->toArray(), [
+                    $journal_data = array_replace($journal->toArray(), [
                         'open_balance' => $open_balance,
                         'account_id' => $account->id
                     ]);
@@ -430,8 +430,8 @@ class SupplierRepository extends BaseRepository
                         if ($item->debit > 0) $item->update(['debit' => $open_balance]);
                         elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
                     }
-                } else $journal->delete();
-                
+                } 
+                else $journal->delete();
             } else {
                 // unrecognised expense
                 $bill_data = [
@@ -483,15 +483,14 @@ class SupplierRepository extends BaseRepository
                         JournalItem::create($data);
                     }
 
-                    $data = array_replace($journal->toArray(), [
+                    $journal_data = array_replace($journal->toArray(), [
                         'open_balance' => $open_balance,
                         'account_id' => $creditor_account->id
                     ]);
-                }                
+                }               
             }
-
             /**accounting */
-            if ($data) $this->post_transaction((object) $data);
+            if ($journal_data) $this->post_transaction((object) $journal_data);
         }
 
         if ($result) {
@@ -507,7 +506,7 @@ class SupplierRepository extends BaseRepository
      * @param object $result
      */
     public function post_transaction($result)
-    {
+    {   
         // credit Accounts Payable (Creditor)
         $tr_category = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
         $cr_data = [
