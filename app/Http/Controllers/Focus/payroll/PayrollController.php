@@ -17,7 +17,7 @@
  */
 namespace App\Http\Controllers\Focus\payroll;
 
-use App\Models\payroll\payroll;
+use App\Models\payroll\Payroll;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
@@ -285,6 +285,31 @@ class PayrollController extends Controller
             return errorHandler('Error creating Taxable Deductions', $th);
         }
         return redirect()->back();
+    }
+    public function store_otherdeduction(Request $request)
+    {
+        
+        $data = $request->only([
+            'payroll_id','benefits_deductions_total'
+        ]);
+        $data_items = $request->only([
+            'id', 'benefits_total','total_sat_deduction','other_deductions','loan','advance'
+        ]);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+        
+        // modify and filter items without item_id
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($v) { return $v['id']; });
+        dd($data_items);
+        
+        // try {
+        //     $result = $this->repository->create_deduction(compact('data', 'data_items'));
+        // } catch (\Throwable $th) {
+        //     return errorHandler('Error creating Taxable Deductions', $th);
+        // }
+        // return redirect()->back();
     }
 
     public function store_paye(Request $request)

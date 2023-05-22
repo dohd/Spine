@@ -1,15 +1,15 @@
-<div class="card-content">
+<div class="card-content" >
     <form id="basicSalary" action="{{ route('biller.payroll.store_basic')}}" method="post">
         @csrf
         <input type="hidden" name="payroll_id" value="{{ $payroll->id }}" id="">
         <div class="card-body">
-            <table id="summaryTable" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+            <table id="summaryTable" class="table table-striped table-responsive table-bordered zero-configuration" cellspacing="0" width="100%">
                 <thead>
                     <tr>
                         <th>Employee Id</th>
                         <th>Employee Name</th>
                         <th>Total Basic Salary</th>
-                        <th>Total Taxable Allowances</th>
+                        <th>Total Allowances</th>
                         <th>Total Monthly Deductions</th>
                         <th>Total PAYE</th>
                         <th>Other Benefits</th>
