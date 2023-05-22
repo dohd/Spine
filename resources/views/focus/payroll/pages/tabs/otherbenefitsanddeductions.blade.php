@@ -13,6 +13,7 @@
                         <th>Benefits Totals</th>
                         <th>Deductions</th>
                         <th>Other Deductions Totals</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -25,37 +26,39 @@
                                 <td>{{ $item->employee_id }}</td>
                                 <td>{{ $item->employee_name }}</td>
                                 <input type="hidden" name="id[]" value="{{ $item->id }}">
-                                            <input type="hidden" name="payroll_id" value="{{ $item->payroll_id }}">
-                                <td><input type="text" name="benefits_total[]" class="form-control benefits"
-                                        id="benefits_total-{{ $i }}"></td>
+                                <input type="hidden" name="payroll_id" value="{{ $item->payroll_id }}">
+                                <td><input type="text" name="total_benefits[]" class="form-control benefits"
+                                        id="total_benefits-{{ $i }}"></td>
                                 <td>
                                     <table class="table" style="width: 100%;">
+                                        <thead>
                                             <tr>
-                                                <td>Loan</td>
-                                                <td>Advance</td>
+                                                <th>Loan</th>
+                                                <th>Advance</th>
                                             </tr>
+                                           
+                                        </thead>
+                                        <tbody>
                                             <tr>
                                                 <td>
-                                                    <input type="text" name="loan[]"
-                                                        class="form-control loan"
+                                                    <input type="text" name="loan[]" class="form-control loan"
                                                         id="loan-{{ $i }}">
                                                 </td>
                                                 <td>
-                                                    <input type="text" name="advance[]"
-                                                        class="form-control advance"
+                                                    <input type="text" name="advance[]" class="form-control advance"
                                                         id="advance-{{ $i }}">
                                                 </td>
                                             </tr>
+                                        </tbody>
                                        
+
                                     </table>
                                 </td>
-                               
-                                <input type="hidden" name="total_sat_deduction[]">
-                                
 
+                                <td><input type="text" name="total_other_deduction[]"
+                                        class="form-control other-deductions" id="total_other_deduction-{{ $i }}">
+                                </td>
 
-                                <td><input type="text" name="other_deductions[]" class="form-control other-deductions"
-                                        id="other_deductions-{{ $i }}"></td>
 
                             </tr>
                         @endif
@@ -64,14 +67,21 @@
                 </tbody>
             </table>
         </div>
-        <div class="form-group">
+        <div class="form-group row">
             <div class="col-3">
-                <label for="grand_total">Total Deductions and Benefits</label>
-                <input type="text" name="benefits_deductions_total" class="form-control" id="benefits_deductions_total" readonly>
+                <label for="grand_total">Total Other Benefits</label>
+                <input type="text" name="other_benefits_total" class="form-control" id="other_benefits_total"
+                    readonly>
+            </div>
+            <div class="col-3">
+                <label for="grand_total">Total Other Deductions</label>
+                <input type="text" name="other_deductions_total" class="form-control" id="other_deductions_total"
+                    readonly>
             </div>
         </div>
         <div class="float-right">
-            <button type="submit" class="btn btn-primary submit-otherbenefits">Save Other Benefits and Deductions</button>
+            <button type="submit" class="btn btn-primary submit-otherbenefits">Save Other Benefits and
+                Deductions</button>
         </div>
     </form>
 

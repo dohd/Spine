@@ -213,7 +213,7 @@ class PayrollRepository extends BaseRepository
         DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.payroll.create_error'));
     }
-
+   
     public function create_paye(array $input)
     {
          
@@ -254,4 +254,88 @@ class PayrollRepository extends BaseRepository
         DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.payroll.create_error'));
     }
+    public function create_other_deduction(array $input)
+    {
+         
+        DB::beginTransaction();
+       // dd($input);
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            $rate_keys = [
+                'other_benefits_total',
+                'other_deductions_total'
+            ];
+        }
+        $result = Payroll::find($data['payroll_id']);
+        $result->other_benefits_total = $data['other_benefits_total'];
+        $result->other_deductions_total = $data['other_deductions_total'];
+        $result->update();
+
+        //dd($result);
+        $data_items = $input['data_items'];
+        foreach ($data_items as $item) {
+            $item = array_replace($item, [
+                'ins' => $result->ins,
+                'user_id' => $result->id,
+            ]);
+           // dd($item);
+            $data_item = PayrollItem::firstOrNew(['id'=> $item['id']]);
+            $data_item->fill($item);
+            if (!$data_item->id) unset($data_item->id);
+            $data_item->save();
+        }
+        
+        
+        
+        
+        if ($result) {
+            DB::commit();
+            return $result;   
+        }
+
+        DB::rollBack();
+        throw new GeneralException(trans('exceptions.backend.payroll.create_error'));
+    }
+    public function create_summary(array $input)
+    {
+         
+        DB::beginTransaction();
+       // dd($input);
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            $rate_keys = [
+                'total_netpay',
+                
+            ];
+        }
+        $result = Payroll::find($data['payroll_id']);
+        $result->total_netpay = $data['total_netpay'];
+        $result->update();
+
+        //dd($result);
+        $data_items = $input['data_items'];
+        foreach ($data_items as $item) {
+            $item = array_replace($item, [
+                'ins' => $result->ins,
+                'user_id' => $result->id,
+            ]);
+           // dd($item);
+            $data_item = PayrollItem::firstOrNew(['id'=> $item['id']]);
+            $data_item->fill($item);
+            if (!$data_item->id) unset($data_item->id);
+            $data_item->save();
+        }
+        
+        
+        
+        
+        if ($result) {
+            DB::commit();
+            return $result;   
+        }
+
+        DB::rollBack();
+        throw new GeneralException(trans('exceptions.backend.payroll.create_error'));
+    }
+
 }

@@ -36,16 +36,16 @@
                 <a class="nav-link" id="base-tab5" data-toggle="tab" aria-controls="tab5" href="#tab5" role="tab"
                     aria-selected="false">
                     <span>Other Deductions and Benefits</span>
-                    <i class="text-danger fa fa-times float-right cancel_deductions" aria-hidden="true"></i>
-                    <i class="text-success fa fa-check float-right d-none tick_deductions" aria-hidden="true"></i>
+                    <i class="text-danger fa fa-times float-right cancel_other_deductions" aria-hidden="true"></i>
+                    <i class="text-success fa fa-check float-right d-none tick_other_deductions" aria-hidden="true"></i>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" id="base-tab6" data-toggle="tab" aria-controls="tab6" href="#tab6" role="tab"
                     aria-selected="false">
                     <span>Summary</span>
-                    <i class="text-danger fa fa-times float-right cancel_summary" aria-hidden="true"></i>
-                    <i class="text-success fa fa-check float-right d-none tick_summary" aria-hidden="true"></i>
+                    <i class="text-danger fa fa-times float-right cancel_salary_total" aria-hidden="true"></i>
+                    <i class="text-success fa fa-check float-right d-none tick_salary_total" aria-hidden="true"></i>
                 </a>
             </li>
         </ul>
@@ -381,18 +381,29 @@
             allowance_total: @json($payroll->allowance_total),
             deduction_total: @json($payroll->deduction_total),
             paye_total: @json($payroll->paye_total),
+            other_deductions_total: @json($payroll->other_deductions_total),
+            other_benefits_total: @json($payroll->other_benefits_total),
+            salary_total: @json($payroll->salary_total),
             init() {
                 $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
                 $('#employeeTbl').on('keyup', '.absent, .present, .rate, .rate-month, .total', this.employeeChange);
+
                 $('#allowanceTbl').on('keyup',
                     '.house, .house_allowance, .transport, .transport_allowance, .other, .other_allowance', this
                     .allowanceChange);
+                $('#otherBenefitsTbl').on('keyup',
+                    '.loan, .advance, .benefits, .other-deductions', this
+                    .otherBNDChange);
 
                 if (this.payroll_items && this.payroll_items.length) {
                     $('.cancel').addClass('d-none');
                     $('.tick').removeClass('d-none');
                     $('.cancel_allowance').removeClass('d-none');
                     $('.tick_allowance').addClass('d-none');
+                    $('.cancel_other_deductions').removeClass('d-none');
+                    $('.tick_other_deductions').addClass('d-none');
+                    $('.cancel_salary_total').removeClass('d-none');
+                                    $('.tick_salary_total').addClass('d-none');
                     $('#employeeTbl tbody').html('');
                     this.payroll_items.forEach((v, i) => $('#employeeTbl tbody').append(Index.employeeRow(v, i)));
                     $('#salary_total').val(accounting.formatNumber(this.salary_total));
@@ -408,6 +419,21 @@
                             if (this.paye_total && this.paye_total.length) {
                                 $('.cancel_paye').addClass('d-none');
                                 $('.tick_paye').removeClass('d-none');
+
+                                if (this.other_benefits_total && this.other_benefits_total.length) {
+                                    $('#otherBenefitsTbl tbody').html('');
+                                    this.payroll_items.forEach((v, i) => $('#otherBenefitsTbl tbody:first').append(Index.deductionRow(v, i)));
+                                    $('#other_benefits_total').val(accounting.formatNumber(this.other_benefits_total));
+                                    $('#other_deductions_total').val(accounting.formatNumber(this
+                                        .other_deductions_total));
+                                    $('.cancel_other_deductions').addClass('d-none');
+                                    $('.tick_other_deductions').removeClass('d-none');
+                                    if(this.salary_total && this.salary_total.length){
+                                        $('.cancel_salary_total').addClass('d-none');
+                                    $('.tick_salary_total').removeClass('d-none');
+                                    }
+                                }
+
                             }
 
                         }
@@ -422,6 +448,8 @@
 
                 Index.calTotal();
                 Index.calTotalNetPay();
+                Index.calTotalBenefitsAndDeductions();
+
             },
 
             allowanceChange() {
@@ -499,29 +527,43 @@
                     grandTotal += net;
                 });
 
-                $('#salary_total_summary').val(accounting.unformat(grandTotal));
+                $('#total_net').val(accounting.format(grandTotal));
+                $('#total_netpay_summary').val(accounting.unformat(grandTotal));
             },
-            calTotalSatDeductions() {
-                let satTotal = 0;
-                $('#summaryTable tbody tr').each(function() {
+            otherBNDChange() {
+                const el = $(this);
+                const row = el.parents('tr:first');
 
-                    const loan = accounting.unformat($(this).find('.loan').val());
-                    const advance = accounting.unformat($(this).find('.advance').val());
-                    
-                    satTotal = loan + advance;
-                });
+                const benefits = accounting.unformat(row.find('.benefits').val());
+                const loan = accounting.unformat(row.find('.loan').val());
+                const advance = accounting.unformat(row.find('.advance').val());
+                const others = accounting.unformat(row.find('.other-deductions').val());
 
-                $('#salary_total_summary').val(accounting.unformat(grandTotal));
+                row.find('.benefits').val(accounting.unformat(benefits));
+                row.find('.loan').val(accounting.unformat(loan));
+                row.find('.advance').val(accounting.unformat(advance));
+                row.find('.other-deductions').val(accounting.unformat(others));
+
+                Index.calTotalBenefitsAndDeductions();
             },
+
             calTotalBenefitsAndDeductions() {
-                let grandTotal = 0;
-                $('#summaryTable tbody tr').each(function() {
+                let benefitsTotal = 0;
+                let deductionsTotal = 0;
+                $('#otherBenefitsTbl tbody tr').each(function() {
 
-                    const net = accounting.unformat($(this).find('.netpay').text());
-                    grandTotal += net;
+                    const benefits = accounting.unformat($(this).find('.benefits').val());
+                    const loans = accounting.unformat($(this).find('.loan').val());
+                    const advance = accounting.unformat($(this).find('.advance').val());
+                    const others = accounting.unformat($(this).find('.other-deductions').val());
+                    const net = benefits;
+                    const dedu = loans + advance + others;
+                    benefitsTotal += net;
+                    deductionsTotal += dedu;
                 });
 
-                $('#salary_total_summary').val(accounting.unformat(grandTotal));
+                $('#other_benefits_total').val(accounting.unformat(benefitsTotal));
+                $('#other_deductions_total').val(accounting.unformat(deductionsTotal));
             },
             calallowanceTotal() {
                 let grandTotal = 0;
@@ -564,6 +606,7 @@
                     </tr>
                 `;
             },
+
             allowanceRow(v, i) {
                 return `
                     <tr>
@@ -579,6 +622,48 @@
                         <input type="hidden" name="rate_per_day[]" value="${v.rate_per_day} class="form-control rate"  id="rate-days-${i}">
                         <input type="hidden" name="rate_per_month[]" value="${v.basic_pay} class="form-control rate-month"  id="rate-month-${i}"> 
                     </tr>
+                `;
+            },
+            deductionRow(v, i) {
+               
+                return `
+                <tr>
+                                <td> ${v.employee_id }</td>
+                                <td>${v.employee_name }</td>
+                                <input type="hidden" name="id[]" value="${ v.id }">
+                                <input type="hidden" name="payroll_id" value="${v.payroll_id }">
+                                <td><input type="text" name="total_benefits[]" class="form-control benefits"
+                                        id="total_benefits-${i}" value="${v.total_benefits }" ></td>
+                                <td>
+                                    <table>
+                                        
+                                        <thead>
+                                            <tr>
+                                            <th>Loan</th>
+                                            <th>Advance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <input type="text" name="loan[]" class="form-control loan"
+                                                        id="loan-${i}" value="${v.loan }">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="advance[]" class="form-control advance"
+                                                        id="advance-${i}" value="${v.advance }">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+
+                                <td><input type="text" name="total_other_deduction[]"
+                                        class="form-control other-deductions" id="total_other_deduction-${i}" value="${v.total_other_deduction }">
+                                </td>
+
+
+                </tr>
                 `;
             },
 

@@ -1,5 +1,5 @@
 <div class="card-content" >
-    <form id="basicSalary" action="{{ route('biller.payroll.store_basic')}}" method="post">
+    <form id="basicSalary" action="{{ route('biller.payroll.store_summary')}}" method="post">
         @csrf
         <input type="hidden" name="payroll_id" value="{{ $payroll->id }}" id="">
         <div class="card-body">
@@ -41,14 +41,16 @@
                         <tr>
                             <td>{{ $i++ }}</td>
                             <td>{{ $item->employee_name }}</td>
-                            {{-- <input type="hidden" id="employee_id-{{$i}}" name="employee_id[]" value="{{ $employee->employees_salary->employee_id}}"> --}}
-                            {{-- <input type="hidden" class="basic_salary" id="basic_salary-{{$i}}" value="{{ $employee->employees_salary->basic_pay }}"> --}}
+                            <input type="hidden" name="id[]" value="{{ $item->id }}">
+                            <input type="hidden" name="payroll_id" value="{{ $item->payroll_id }}">
                             <td>{{ amountFormat($salary) }}</td>
                             <td>{{amountFormat($allowances) }}</td>
                             <td>{{ amountFormat($deductions) }}</td>
                             <td >{{ amountFormat($paye) }}</td>
                             <td>{{ amountFormat($benefits) }}</td>
                             <td>{{ amountFormat($otherdeductions) }}</td>
+                            <input type="hidden" name="netpay[]" value="{{ $net }}"
+                            id="">
                             <td class="netpay">{{ amountFormat($net) }} </td>   
                             
                            
@@ -62,8 +64,9 @@
         </div>
         <div class="form-group">
             <div class="col-3">
-                <label for="grand_total">Total Salary</label>
-                <input type="text" name="salary_total" class="form-control" id="salary_total_summary" readonly>
+                <label for="grand_total">Total</label>
+                <input type="text" class="form-control" id="total_net"  readonly>
+                <input type="hidden" name="total_netpay" class="form-control" id="total_netpay_summary" readonly>
             </div>
         </div>
         <div class="float-right">
