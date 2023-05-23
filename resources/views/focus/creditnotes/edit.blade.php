@@ -61,7 +61,7 @@
     // load cutomer invoices
     $('#customer').change(function() {
         $.ajax({
-            url: "{{ route('biller.invoices.client_invoices') }}?id=" + $(this).val(),
+            url: "{{ route('biller.invoices.client_invoices') }}?customer_id=" + $(this).val(),
             success: result => {
                 $('#invoice option:not(:eq(0))').remove();
                 result.forEach((v, i) => {

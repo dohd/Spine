@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Focus\creditnote;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\Company\Company;
 use App\Models\creditnote\CreditNote;
 use App\Repositories\Focus\creditnote\CreditNoteRepository;
 use DateTime;
@@ -178,7 +179,9 @@ class CreditNotesController extends Controller
    */
   public function print_creditnote(CreditNote $creditnote)
   {
-    $html = view('focus.creditnotes.print_creditnote', ['resource' => $creditnote])->render();
+    $company = Company::find(auth()->user()->ins) ?: new Company;
+
+    $html = view('focus.creditnotes.print_creditnote', ['resource' => $creditnote, 'company' => $company])->render();
     $pdf = new \Mpdf\Mpdf(config('pdf'));
     $pdf->WriteHTML($html);
     $headers = array(
