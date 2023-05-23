@@ -232,7 +232,7 @@ class CustomersController extends Controller
             $debt_amount = $invoice->debit - $invoice->credit;
             // over payment
             if ($debt_amount < 0) {
-                $customer->on_account += $debt_amount * -1;
+                // $customer->on_account += $debt_amount * -1;
                 $debt_amount = 0;
             }
             // due_date between 0 - 120 days
