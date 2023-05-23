@@ -170,6 +170,9 @@ class PurchaseRepository extends BaseRepository
         }
 
         if (@$data['supplier_taxid']) {
+            $taxid_exists = Supplier::where('taxid', $data['supplier_taxid'])->whereNotNull('taxid')->exists();
+            if ($taxid_exists && $data['supplier_type'] != 'supplier') throw ValidationException::withMessages(['Duplicate Tax Pin']);
+
             $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->exists();
             if ($is_company) throw ValidationException::withMessages(['Company Tax Pin not allowed']);
             if (strlen($data['supplier_taxid']) != 11)
@@ -183,7 +186,7 @@ class PurchaseRepository extends BaseRepository
             if (!preg_match($letter_pattern, $data['supplier_taxid'][-1])) 
                 throw ValidationException::withMessages(['Last character of Tax Pin must be a letter']);
         }
-
+        
         $tid = Purchase::where('ins', $data['ins'])->max('tid');
         if ($data['tid'] <= $tid) $data['tid'] = $tid+1; 
         $result = Purchase::create($data);
@@ -292,6 +295,9 @@ class PurchaseRepository extends BaseRepository
         }
         
         if (@$data['supplier_taxid']) {
+            $taxid_exists = Supplier::where('taxid', $data['supplier_taxid'])->whereNotNull('taxid')->exists();
+            if ($taxid_exists && $data['supplier_type'] != 'supplier') throw ValidationException::withMessages(['Duplicate Tax Pin']);
+
             $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->exists();
             if ($is_company) throw ValidationException::withMessages(['Company Tax Pin not allowed']);
             if (strlen($data['supplier_taxid']) != 11)
