@@ -81,15 +81,14 @@ class ProjectRepository extends BaseRepository
         // attach quotes
         $quotes = @$input['quotes'] ?: [];
         $quote_group = array_map(fn($v) => ['quote_id' => $v, 'project_id' => $result->id], $quotes);
-        if ($quotes) {
-            $result->update(['main_quote_id' => $quotes[0]]);
-            ProjectQuote::insert($quote_group);
-            foreach ($result->quotes as $quote) {
-                if ($quote->project_quote) 
-                    $quote->update(['project_quote_id' => $quote->project_quote->id]);
-            }
+        if (!$quotes) throw ValidationException::withMessages(['Quote or Proforma Invoice required']);
+        $result->update(['main_quote_id' => $quotes[0]]);
+        ProjectQuote::insert($quote_group);
+        foreach ($result->quotes as $quote) {
+            if ($quote->project_quote) 
+                $quote->update(['project_quote_id' => $quote->project_quote->id]);
         }
-
+        
         // project users
         $employees = @$input['employees'] ?: [];
         $employees_group = array_map(fn($v) => ['user_id' => $v, 'project_id' => $result->id], $employees);
