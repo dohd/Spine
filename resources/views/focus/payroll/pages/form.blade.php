@@ -124,8 +124,8 @@
             other_benefits_total: @json($payroll->other_benefits_total),
             total_netpay: @json($payroll->total_netpay),
             init() {
-                $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
-                $('.editable-cell').hover(this.hoverChange);
+            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+            $('.editable-cell').hover(this.hoverChange);
             $('#saveButton').click(this.valueChange);
             $('#employeeTbl').on('keyup', '.absent, .present, .rate, .rate-month, .total', this.employeeChange);
 
@@ -133,7 +133,7 @@
                     '.house, .house_allowance, .transport, .transport_allowance, .other, .other_allowance', this
                     .allowanceChange);
                 $('#otherBenefitsTbl').on('keyup',
-                    '.loan, .advance, .benefits, .other-deductions', this
+                    '.loan, .advance, .benefits, .other-deductions, .other-allow', this
                     .otherBNDChange);
 
                 if (this.payroll_items && this.payroll_items.length) {
@@ -166,6 +166,7 @@
                                     $('.tick_nhif').removeClass('d-none');
                                     if (this.other_benefits_total && this.other_benefits_total.length) {
                                     $('#otherBenefitsTbl tbody').html('');
+                                    console.log(this.payroll_items);
                                     this.payroll_items.forEach((v, i) => $('#otherBenefitsTbl tbody:first').append(Index.deductionRow(v, i)));
                                     $('#other_benefits_total').val(accounting.formatNumber(this.other_benefits_total));
                                     $('#other_deductions_total').val(accounting.formatNumber(this
@@ -298,11 +299,13 @@
                 const el = $(this);
                 const row = el.parents('tr:first');
 
+                const otherallowances = accounting.unformat(row.find('.other-allow').val());
                 const benefits = accounting.unformat(row.find('.benefits').val());
                 const loan = accounting.unformat(row.find('.loan').val());
                 const advance = accounting.unformat(row.find('.advance').val());
                 const others = accounting.unformat(row.find('.other-deductions').val());
 
+                row.find('.other-allow').val(accounting.unformat(otherallowances));
                 row.find('.benefits').val(accounting.unformat(benefits));
                 row.find('.loan').val(accounting.unformat(loan));
                 row.find('.advance').val(accounting.unformat(advance));
@@ -314,9 +317,11 @@
             calTotalBenefitsAndDeductions() {
                 let benefitsTotal = 0;
                 let deductionsTotal = 0;
+                let otherAllowancesTotal = 0;
                 $('#otherBenefitsTbl tbody tr').each(function() {
 
                     const benefits = accounting.unformat($(this).find('.benefits').val());
+                    const otherallowances = accounting.unformat($(this).find('.other-allow').val());
                     const loans = accounting.unformat($(this).find('.loan').val());
                     const advance = accounting.unformat($(this).find('.advance').val());
                     const others = accounting.unformat($(this).find('.other-deductions').val());
@@ -324,10 +329,12 @@
                     const dedu = loans + advance + others;
                     benefitsTotal += net;
                     deductionsTotal += dedu;
+                    otherAllowancesTotal += otherallowances;
                 });
 
                 $('#other_benefits_total').val(accounting.unformat(benefitsTotal));
                 $('#other_deductions_total').val(accounting.unformat(deductionsTotal));
+                $('#other_allowances_total').val(accounting.unformat(otherAllowancesTotal));
             },
             calallowanceTotal() {
                 let grandTotal = 0;
@@ -395,6 +402,8 @@
                                 <td>${v.employee_name }</td>
                                 <input type="hidden" name="id[]" value="${ v.id }">
                                 <input type="hidden" name="payroll_id" value="${v.payroll_id }">
+                                <td><input type="text" name="total_other_allowances[]" class="form-control other-allow"
+                                        id="total_other_allowances-${i}" value="${v.total_other_allowances }" ></td>
                                 <td><input type="text" name="total_benefits[]" class="form-control benefits"
                                         id="total_benefits-${i}" value="${v.total_benefits }" ></td>
                                 <td>

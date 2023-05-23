@@ -10,8 +10,12 @@
                         <th>Employee Name</th>
                         <th>Total Basic Salary</th>
                         <th>Total Tx Allowances</th>
+                        <th>NSSF</th>
                         <th>Total Tx Monthly Deductions</th>
+                        <th>Taxable Gross</th>
                         <th>Total PAYE</th>
+                        <th>NHIF</th>
+                        <th>Other Allowances</th>
                         <th>Other Benefits</th>
                         <th>Other Deductions</th>
                         <th>Net Pay</th>
@@ -34,6 +38,10 @@
                             $allowances =  $item->total_allowance;
                             $deductions =  $item->total_sat_deduction;
                             $paye =  $item->paye;
+                            $nssf =  $item->nssf;
+                            $nhif =  $item->nhif;
+                            $nhif =  $item->nhif;
+                            $total_other_allowances =  $item->total_other_allowances;
                             $taxable_gross = $item->taxable_gross;
                             $benefits =  $item->total_benefits;
                             $loan_advance = $item->loan + $item->advance;
@@ -48,8 +56,12 @@
                             <input type="hidden" name="payroll_id" value="{{ $item->payroll_id }}">
                             <td>{{ amountFormat($salary) }}</td>
                             <td>{{amountFormat($allowances) }}</td>
+                            <td>{{amountFormat($nhif) }}</td>
                             <td>{{ amountFormat($deductions) }}</td>
+                            <td>{{ amountFormat($taxable_gross) }}</td>
                             <td >{{ amountFormat($paye) }}</td>
+                            <td >{{ amountFormat($nhif) }}</td>
+                            <td >{{ amountFormat($total_other_allowances) }}</td>
                             <td>{{ amountFormat($benefits) }}</td>
                             <td>{{ amountFormat($otherdeductions) }}</td>
                             <input type="hidden" name="netpay[]" value="{{ $net }}"
