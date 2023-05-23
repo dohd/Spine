@@ -213,6 +213,31 @@ class PayrollRepository extends BaseRepository
         DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.payroll.create_error'));
     }
+
+    public function create_nhif(array $input)
+    {
+         
+        DB::beginTransaction();
+       // dd($input);
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            $rate_keys = [
+                'total_nhif'
+            ];
+        }
+        $result = Payroll::find($data['payroll_id']);
+        $result->total_nhif = $data['total_nhif'];
+        $result->update();
+
+        
+        if ($result) {
+            DB::commit();
+            return $result;   
+        }
+
+        DB::rollBack();
+        throw new GeneralException(trans('exceptions.backend.payroll.create_error'));
+    }
    
     public function create_paye(array $input)
     {

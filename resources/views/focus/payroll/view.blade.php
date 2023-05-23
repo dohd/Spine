@@ -63,6 +63,13 @@
                                <span>PAYE</span>
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" id="base-tab5" data-toggle="tab" aria-controls="tab5" href="#tab5" role="tab"
+                               aria-selected="false">
+                               <span>Other Benefits and Deductions</span>
+                            </a>
+                        </li>
                     </ul>
                     <div class="tab-content px-1 pt-1">
                         <div class="tab-pane active" id="tab0" role="tabpanel" aria-labelledby="base-tab0">
@@ -213,6 +220,42 @@
                             </div>
                         </div>
                         <div class="tab-pane" id="tab4" role="tabpanel" aria-labelledby="base-tab4">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <table id="payeTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Employee Id</th>
+                                                <th>Employee Name</th>
+                                                <th>Gross Pay</th>
+                                                <th>NSSF</th>
+                                                <th>NHIF</th>
+                                                <th>PAYE</th>
+                                            
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @php
+                                                $i = 1;
+                                            @endphp
+                                            @foreach ($payroll->payroll_items as $item)
+                                                <tr>
+                                                    <td>{{gen4tid('EMP-', $item->employee_id)}}</td>
+                                                    <td>{{ $item->employee_name}}</td>
+                                                    <td>{{ amountFormat($item->gross_pay)}}</td>
+                                                    <td>{{ amountFormat($item->nssf) }}</td>
+                                                    <td>{{ amountFormat($item->nhif) }}</td>
+                                                    <td>{{ amountFormat($item->paye) }}</td>
+                                                    
+                                                </tr>
+                                            @endforeach
+                                           
+                                        </tbody>
+                                    </table>
+                                </div>                    
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab5" role="tabpanel" aria-labelledby="base-tab5">
                             <div class="card-content">
                                 <div class="card-body">
                                     <table id="payeTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">

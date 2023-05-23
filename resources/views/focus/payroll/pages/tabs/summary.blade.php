@@ -37,7 +37,7 @@
                             $taxable_gross = $item->taxable_gross;
                             $benefits =  $item->total_benefits;
                             $loan_advance = $item->loan + $item->advance;
-                            $otherdeductions =  $item->total_other_deduction;
+                            $otherdeductions =  $item->total_other_deduction + $loan_advance;
                             $net_pay = $taxable_gross - $item->nhif;
                             $net = $net_pay + $benefits - $otherdeductions - $loan_advance;
                             @endphp

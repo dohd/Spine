@@ -197,19 +197,27 @@ class PayrollController extends Controller
         }])->get();
         $total_gross = 0;
         $total_paye = 0;
+        $total_nhif = 0;
+        $total_nssf = 0;
+        $total_tx_deduction = 0;
+
         foreach ($payroll->payroll_items as $item) {
             $item->employee_name = $item->employee->first_name;
             if($item->total_basic_allowance){
                 $item->nssf = $this->calculate_nssf($item->total_basic_allowance);
-                $item->nhif = $this->calculate_nhif($item->total_basic_allowance);
-                $nhif_relief = 15/100 * $item->nhif;
-                $item->gross_pay = $item->total_basic_allowance - ($item->nssf);
+                $item->gross_pay = $item->total_basic_allowance - ($item->nssf + $item->tx_deductions);
                 $total_gross += $item->gross_pay;
+                $item->nhif = $this->calculate_nhif($item->gross_pay);
+                $nhif_relief = 15/100 * $item->nhif;
                 $item->paye = $this->calculate_paye($item->gross_pay) - $nhif_relief;
                 $total_paye += $item->paye;
+                $total_nhif += $item->nhif;
+                $total_nssf += $item->nssf;
+                $total_tx_deduction += $item->tx_deductions;
+                //dd($nhif_relief);
             }
         }
-        return view('focus.payroll.pages.create', compact('payroll', 'employees','total_gross','total_paye'));
+        return view('focus.payroll.pages.create', compact('payroll', 'employees','total_gross','total_paye','total_nhif','total_nssf','total_tx_deduction'));
     }
 
     public function approve_payroll(Request $request)
@@ -248,6 +256,25 @@ class PayrollController extends Controller
         }
         return redirect()->back();
     }
+    public function store_nhif(Request $request)
+    {
+         //dd($request->all());
+         $data = $request->only([
+            'payroll_id','total_nhif'
+        ]);
+        
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+
+        
+        try {
+            $result = $this->repository->create_nhif(compact('data'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error creating Taxable Deductions', $th);
+        }
+        return redirect()->back();
+    }
 
     public function store_allowance(Request $request)
     {
@@ -278,10 +305,10 @@ class PayrollController extends Controller
     {
         //dd($request->all());
         $data = $request->only([
-            'payroll_id','deduction_total'
+            'payroll_id','deduction_total','total_nssf'
         ]);
         $data_items = $request->only([
-            'id', 'nssf','nhif','gross_pay','total_sat_deduction'
+            'id', 'nssf','nhif','gross_pay','total_sat_deduction','tx_deductions'
         ]);
 
         $data['ins'] = auth()->user()->ins;
@@ -435,14 +462,17 @@ class PayrollController extends Controller
                         // }
                     }else{
                         
-                        if($gross_pay >= $bracket->amount_from){
+                        if($gross_pay >= $bracket->amount_from && $gross_pay < $bracket->amount_to){
+                            $tax += $bracket->rate/100 * ($gross_pay - $bracket->amount_from);
+                           // dd($tax);
+                        }
+                        elseif($gross_pay >= $bracket->amount_from && $gross_pay > $bracket->amount_to){
                             $tax += $bracket->rate/100 * ($bracket->amount_to - $bracket->amount_from);
-                            //dd($tax);
                         }
                         //dd($bracket->amount_from);
-                        elseif ($i != $count - 1) {
-                            $tax += $bracket->rate/100 * $bracket->amount_to;
-                        }
+                        // elseif ($i != $count - 1) {
+                        //     $tax += $bracket->rate/100 * $bracket->amount_to;
+                        // }
                     }
                     //$tax = $bracket->rate / 100 * ($bracket->amount_to);
                 }
@@ -453,7 +483,7 @@ class PayrollController extends Controller
              }else{
                 $tax = $tax - ($first_bracket->rate/100 * $gross_pay);
              }
-         //dd($tax);
+        // dd($tax);
         return $tax;
     }
 

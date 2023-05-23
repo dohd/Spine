@@ -27,7 +27,7 @@
                     </div>
                     <div class="form-group">
                         <label for="amount">Total NetPay</label>
-                        {{ Form::text('amount', amountFormat(@$payroll->paye_total), ['class' => 'form-control', 'id' => 'amount', 'readonly']) }}
+                        {{ Form::text('amount', amountFormat(@$payroll->total_netpay), ['class' => 'form-control', 'id' => 'amount', 'readonly']) }}
                     </div>
                     <div class="form-group">
                         <label for="note">Note</label>
