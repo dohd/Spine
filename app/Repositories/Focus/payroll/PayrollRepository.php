@@ -263,12 +263,14 @@ class PayrollRepository extends BaseRepository
         foreach ($data as $key => $val) {
             $rate_keys = [
                 'other_benefits_total',
-                'other_deductions_total'
+                'other_deductions_total',
+                'other_allowances_total'
             ];
         }
         $result = Payroll::find($data['payroll_id']);
         $result->other_benefits_total = $data['other_benefits_total'];
         $result->other_deductions_total = $data['other_deductions_total'];
+        $result->other_allowances_total = $data['other_allowances_total'];
         $result->update();
 
         //dd($result);

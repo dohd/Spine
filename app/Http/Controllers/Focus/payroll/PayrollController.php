@@ -303,10 +303,10 @@ class PayrollController extends Controller
     {
         
         $data = $request->only([
-            'payroll_id','other_benefits_total','other_deductions_total'
+            'payroll_id','other_benefits_total','other_deductions_total','other_allowances_total'
         ]);
         $data_items = $request->only([
-            'id', 'total_benefits','total_other_deduction','loan','advance'
+            'id', 'total_benefits','total_other_deduction','loan','advance','total_other_allowances'
         ]);
 
         $data['ins'] = auth()->user()->ins;

@@ -10,6 +10,7 @@
                     <tr>
                         <th>Employee Id</th>
                         <th>Employee Name</th>
+                        <th>Other Allowances Totals</th>
                         <th>Benefits Totals</th>
                         <th>Deductions</th>
                         <th>Other Deductions Totals</th>
@@ -27,8 +28,14 @@
                                 <td>{{ $item->employee_name }}</td>
                                 <input type="hidden" name="id[]" value="{{ $item->id }}">
                                 <input type="hidden" name="payroll_id" value="{{ $item->payroll_id }}">
+                                <td><input type="text" name="total_other_allowances[]" class="form-control other-allow"
+                                        id="total_other_allowances-{{ $i }}">
+                                </td>
                                 <td><input type="text" name="total_benefits[]" class="form-control benefits"
-                                        id="total_benefits-{{ $i }}"></td>
+                                        id="total_benefits-{{ $i }}">
+                                </td>
+
+
                                 <td>
                                     <table class="table" style="width: 100%;">
                                         <thead>
@@ -36,7 +43,7 @@
                                                 <th>Loan</th>
                                                 <th>Advance</th>
                                             </tr>
-                                           
+
                                         </thead>
                                         <tbody>
                                             <tr>
@@ -50,13 +57,14 @@
                                                 </td>
                                             </tr>
                                         </tbody>
-                                       
+
 
                                     </table>
                                 </td>
 
                                 <td><input type="text" name="total_other_deduction[]"
-                                        class="form-control other-deductions" id="total_other_deduction-{{ $i }}">
+                                        class="form-control other-deductions"
+                                        id="total_other_deduction-{{ $i }}">
                                 </td>
 
 
@@ -76,6 +84,11 @@
             <div class="col-3">
                 <label for="grand_total">Total Other Deductions</label>
                 <input type="text" name="other_deductions_total" class="form-control" id="other_deductions_total"
+                    readonly>
+            </div>
+            <div class="col-3">
+                <label for="grand_total">Total Other Allowances</label>
+                <input type="text" name="other_allowances_total" class="form-control" id="other_allowances_total"
                     readonly>
             </div>
         </div>
