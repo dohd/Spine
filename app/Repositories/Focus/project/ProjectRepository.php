@@ -8,9 +8,11 @@ use App\Models\Access\User\User;
 use App\Models\event\Event;
 use App\Models\event\EventRelation;
 use App\Models\project\ProjectLog;
+use App\Models\project\ProjectQuote;
 use App\Models\project\ProjectRelations;
 use App\Notifications\Rose;
 use App\Repositories\BaseRepository;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -56,7 +58,7 @@ class ProjectRepository extends BaseRepository
         DB::beginTransaction();
         
         // project
-        $project_input = array_diff_key($input, array_flip(['tags', 'employees', 'link_to_calender', 'color']));
+        $project_input = Arr::only($input, ['customer_id', 'branch_id', 'name', 'status', 'priority', 'short_desc', 'note', 'start_date', 'end_date', 'time_from', 'time_to', 'worth', 'project_share', 'tid']);
         $project_input = array_replace($project_input, [
             'worth' => numberClean($project_input['worth']),
             'start_date' => datetime_for_database("{$project_input['start_date']} {$project_input['time_from']}"),
@@ -66,7 +68,7 @@ class ProjectRepository extends BaseRepository
         $tid = Project::max('tid');
         if (@$project_input['tid'] <= $tid) $project_input['tid'] = $tid+1;
         $result = Project::create($project_input);
-
+        
         // log
         $data = ['project_id' => $result->id, 'value' => '[' . trans('general.create') . '] ' . $result->name, 'user_id' => $result->user_id];
         ProjectLog::create($data);
@@ -75,7 +77,19 @@ class ProjectRepository extends BaseRepository
         $tags = @$input['tags'] ?: [];
         $tag_group = array_map(fn($v) => ['misc_id' => $v, 'project_id' => $result->id], $tags);
         ProjectRelations::insert($tag_group);
-        
+
+        // attach quotes
+        $quotes = @$input['quotes'] ?: [];
+        $quote_group = array_map(fn($v) => ['quote_id' => $v, 'project_id' => $result->id], $quotes);
+        if ($quotes) {
+            $result->update(['main_quote_id' => $quotes[0]]);
+            ProjectQuote::insert($quote_group);
+            foreach ($result->quotes as $quote) {
+                if ($quote->project_quote) 
+                    $quote->update(['project_quote_id' => $quote->project_quote->id]);
+            }
+        }
+
         // project users
         $employees = @$input['employees'] ?: [];
         $employees_group = array_map(fn($v) => ['user_id' => $v, 'project_id' => $result->id], $employees);
@@ -98,7 +112,6 @@ class ProjectRepository extends BaseRepository
         
         if ($result) {
             DB::commit();
-
             // employee notifiation
             $message = ['title' => trans('projects.project') . ' - ' . $result->name, 'icon' => 'fa-bullhorn', 'background' => 'bg-success', 'data' => $input['short_desc']];
             if ($employees) {

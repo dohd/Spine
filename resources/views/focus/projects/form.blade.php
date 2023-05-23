@@ -1,6 +1,44 @@
 <div class="row">
+    <fieldset class="form-group position-relative has-icon-left  col-md-6">
+        <select id="person" name="customer_id" class="form-control required select-box"  data-placeholder="{{trans('customers.customer')}}">
+            <option value=""></option>
+            @if(@$project->customer)
+                <option value="{{ $project->customer->id }}" selected>
+                    {{ $project->customer->company}}
+                </option>
+            @else
+                @foreach ($customers as $customer)
+                    <option value="{{ $customer->id }}">
+                        {{ $customer->company}}
+                    </option>
+                @endforeach
+            @endif
+        </select>
+    </fieldset>
+
+    <fieldset class="form-group position-relative has-icon-left  col-md-6">
+        <select id="branch_id" name="branch_id" class="form-control required select-box"  data-placeholder="Choose Branch">
+            <option value=""></option>
+            @isset($project->branch)
+                <option value="{{ $project->branch->id }}" selected>
+                    {{ $project->branch->name}}
+                </option>
+            @endisset
+        </select>
+    </fieldset>
+</div>
+
+<div class="row">
+    <fieldset class="form-group position-relative has-icon-left  col-md-12">
+        <select id="quotes" name="quotes[]" class="form-control select-box"  data-placeholder="Choose Quote / PI" multiple>
+            <option value=""></option>
+        </select>
+    </fieldset>
+</div>
+
+<div class="row">
     <fieldset class="form-group col-12"> 
-        {{ Form::text('name', null, ['class' => 'new-todo-item form-control required', 'placeholder' => trans('projects.name')]) }}
+        {{ Form::text('name', null, ['class' => 'new-todo-item form-control required proj_title', 'placeholder' => trans('projects.name')]) }}
     </fieldset>
 </div>
 <div class="row">
@@ -39,7 +77,7 @@
 </div>
 <fieldset class="form-group position-relative has-icon-left col-12">
     <div class="form-control-position"><i class="icon-emoticon-smile"></i></div>
-    {{ Form::text('short_desc', null, ['class' => 'new-todo-desc form-control required', 'placeholder' => trans('tasks.short_desc'), 'id' => 'new-todo-desc']) }}
+    {{ Form::text('short_desc', null, ['class' => 'new-todo-desc form-control required proj_short_descr', 'placeholder' => trans('tasks.short_desc'), 'id' => 'new-todo-desc']) }}
 </fieldset>
 <fieldset class="form-group col-12">
     {{ Form::textarea('note', null, ['class' => 'new-todo-item form-control required', 'placeholder' => trans('tasks.description'), 'rows' => '5']) }}
@@ -117,36 +155,6 @@
                     {{ $employee->fullname }}
                 </option>
             @endforeach
-        </select>
-    </fieldset>
-</div>
-
-<div class="row">
-    <fieldset class="form-group position-relative has-icon-left  col-md-4">
-        <select id="person" name="customer_id" class="form-control required select-box"  data-placeholder="{{trans('customers.customer')}}">
-            <option value=""></option>
-            @if(@$project->customer)
-                <option value="{{ $project->customer->id }}" selected>
-                    {{ $project->customer->company}}
-                </option>
-            @else
-                @foreach ($customers as $customer)
-                    <option value="{{ $customer->id }}">
-                        {{ $customer->company}}
-                    </option>
-                @endforeach
-            @endif
-        </select>
-    </fieldset>
-
-    <fieldset class="form-group position-relative has-icon-left  col-md-4">
-        <select id="branch_id" name="branch_id" class="form-control required select-box"  data-placeholder="Choose Branch">
-            <option value=""></option>
-            @isset($project->branch)
-                <option value="{{ $project->branch->id }}" selected>
-                    {{ $project->branch->name}}
-                </option>
-            @endisset
         </select>
     </fieldset>
 </div>

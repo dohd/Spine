@@ -103,8 +103,20 @@
                 dataType: 'json',
                 type: 'POST',
                 data: ({term}) => ({search: term, customer_id: $("#customerFilter").val()}),
-                processResults: (data) => {
-                    return { results: data.map(v => ({text: v.name, id: v.id})) };
+                processResults: data => {
+                    return { results: data.map(v => ({text: v.name, id: v.id})) }
+                },
+            }
+        },
+        quoteSelect: {
+            allowClear: true,
+            ajax: {
+                url: "{{ route('biller.projects.quotes_select') }}",
+                dataType: 'json',
+                type: 'POST',
+                data: ({term}) => ({search: term, customer_id: $("#person").val(), branch_id: $("#branch_id").val() }),
+                processResults: data => {
+                    return { results: data.map(v => ({text: v.name, id: v.id})) }
                 },
             }
         }
@@ -112,9 +124,7 @@
 
     // form submit callback
     function trigger(res) {
-        // $(data.row).prependTo("table > tbody");
-        // $("#data_form_project").trigger('reset');
-        $('#projects-table').DataTable().destroy();
+        $('#projectsTbl').DataTable().destroy();
         Index.drawDataTable();
     }
 
@@ -153,34 +163,31 @@
         onShownModal() {
             $('[data-toggle="datepicker"]').datepicker({
                 autoHide: true,
-                format: '{{config('core.user_date_format')}}'
+                format: "{{ config('core.user_date_format') }}"
             });
-            
             $('.from_date').datepicker(config.date).datepicker('setDate', new Date());
             $('.to_date').datepicker(config.date).datepicker('setDate', '{{dateFormat(date('Y-m-d', strtotime('+30 days', strtotime(date('Y-m-d')))))}}');
             $('#color').colorpicker();
             $("#tags").select2();
             $("#employee").select2();
-            $("#person").select2({allowClear: true, dropdownParent: $('#AddProjectModal .modal-body')});
-            $("#branch_id").select2({
-                allowClear: true,
-                dropdownParent: $('#AddProjectModal .modal-body'),
-                ajax: {
-                    url: "{{ route('biller.branches.select') }}",
-                    dataType: 'json',
-                    type: 'POST',
-                    quietMillis: 50,
-                    data: ({term}) => ({search:term, customer_id: $('#person').val()}),
-                    processResults: function (data) {
-                        return {
-                            results: data.map(v => ({text: v.name, id: v.id})), 
-                        };
-                    },
-                }
-            });
 
-            $("#person").change(function() {
-                $("#branch_id").val('').trigger('change');
+            const branchConfig = {...config.branchSelect};
+            branchConfig.ajax.data = ({term}) => ({search:term, customer_id: $('#person').val()});
+            $("#branch_id").select2(branchConfig);
+
+            $("#person").select2({allowClear: true, dropdownParent: $('#AddProjectModal .modal-body')})
+            .change(function() { $("#branch_id").val('') });
+            
+            // attach primary quote
+            $("#quotes").select2(config.quoteSelect).change(function() {
+                $('.proj_title').val('');
+                $('.proj_short_descr').val('');
+                let text = $("#quotes option:eq(1)").text();
+                if (text) {
+                    text = text.split('-')[2];
+                    $('.proj_title').val(text);
+                    $('.proj_short_descr').val(text);
+                }
             });
         },
 
