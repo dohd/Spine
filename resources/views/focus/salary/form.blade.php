@@ -10,20 +10,6 @@
             {{ Form::label( 'basic_pay', 'Basic Pay',['class' => 'control-label']) }}
             {{ Form::number('basic_pay', null, ['class' => 'form-control round', 'placeholder' => '0.00', 'required']) }}
         </div>
-        <div class='col-4'>
-            {{ Form::label( 'house_allowance', 'House Allowance',['class' => 'control-label']) }}
-            {{ Form::number('house_allowance', null, ['class' => 'form-control round', 'placeholder' => '0.00']) }}
-        </div>
-    </div>
-    <div class='form-group row'>
-        <div class='col-4'>
-            {{ Form::label( 'transport_allowance', 'Transport Allowance',['class' => 'control-label']) }}
-            {{ Form::number('transport_allowance', null, ['class' => 'form-control round', 'placeholder' => '0.00']) }}
-        </div>
-        <div class='col-4'>
-            {{ Form::label( 'directors_fee', 'Directors Fees',['class' => 'control-label']) }}
-            {{ Form::number('directors_fee', null, ['class' => 'form-control round', 'placeholder' => '0.00']) }}
-        </div>
         <div class="col-4">
             {{ Form::label( 'contract_type', 'Contract Type',['class' => 'control-label']) }}
             <select class="form-control round" name="contract_type" id="employeebox" data-placeholder="Search Contract">
@@ -33,6 +19,21 @@
                 <option value="intern">Intern</option>
             </select>
         </div>
+        {{-- <div class='col-4'>
+            {{ Form::label( 'house_allowance', 'House Allowance',['class' => 'control-label']) }}
+            {{ Form::number('house_allowance', null, ['class' => 'form-control round', 'placeholder' => '0.00']) }}
+        </div> --}}
+    </div>
+    <div class='form-group row'>
+        {{-- <div class='col-4'>
+            {{ Form::label( 'transport_allowance', 'Transport Allowance',['class' => 'control-label']) }}
+            {{ Form::number('transport_allowance', null, ['class' => 'form-control round', 'placeholder' => '0.00']) }}
+        </div>
+        <div class='col-4'>
+            {{ Form::label( 'directors_fee', 'Directors Fees',['class' => 'control-label']) }}
+            {{ Form::number('directors_fee', null, ['class' => 'form-control round', 'placeholder' => '0.00']) }}
+        </div> --}}
+       
     </div>
     <div class="form-group row">
         <div class="col-4">
@@ -53,5 +54,12 @@
         </div>
         
     </div>
+    <div class="edit-form-btn text-right mb-2">
+        {{ link_to_route('biller.salary.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md px-5']) }}
+        {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md px-5']) }}
+        <div class="clearfix"></div>
+    </div>
+    <p>Add Allowances</p>
+    @include('focus.salary.partials.allowance_form')   
 
 

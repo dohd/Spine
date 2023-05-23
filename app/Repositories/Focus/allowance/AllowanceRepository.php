@@ -29,7 +29,7 @@ class AllowanceRepository extends BaseRepository
     {
 
         return $this->query()
-            ->get(['id','name','type','is_taxable','created_at']);
+            ->get(['id','type','is_taxable','created_at']);
     }
 
     /**

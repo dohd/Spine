@@ -225,6 +225,7 @@ class PayrollController extends Controller
 
     public function store_basic(Request $request)
     {
+        //dd($request->all());
         $data = $request->only([
             'payroll_id','salary_total','processing_date'
         ]);
@@ -237,7 +238,7 @@ class PayrollController extends Controller
         //dd($data_items);
         // modify and filter items without item_id
         $data_items = modify_array($data_items);
-        $data_items = array_filter($data_items, function ($v) { return $v['absent_days']; });
+        $data_items = array_filter($data_items, function ($v) { return $v['employee_id']; });
 
         
         try {
@@ -280,7 +281,7 @@ class PayrollController extends Controller
             'payroll_id','deduction_total'
         ]);
         $data_items = $request->only([
-            'id', 'nssf','nhif','gross_pay'
+            'id', 'nssf','nhif','gross_pay','total_sat_deduction'
         ]);
 
         $data['ins'] = auth()->user()->ins;
@@ -298,6 +299,57 @@ class PayrollController extends Controller
         }
         return redirect()->back();
     }
+    public function store_otherdeduction(Request $request)
+    {
+        
+        $data = $request->only([
+            'payroll_id','other_benefits_total','other_deductions_total'
+        ]);
+        $data_items = $request->only([
+            'id', 'total_benefits','total_other_deduction','loan','advance'
+        ]);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+        
+        // modify and filter items without item_id
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($v) { return $v['id']; });
+        
+       
+        try {
+            $result = $this->repository->create_other_deduction(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error creating Taxable Deductions', $th);
+        }
+        return redirect()->back();
+    }
+    public function store_summary(Request $request)
+    {
+        
+        $data = $request->only([
+            'payroll_id','total_netpay'
+        ]);
+        $data_items = $request->only([
+            'id', 'netpay'
+        ]);
+
+        $data['ins'] = auth()->user()->ins;
+        $data['user_id'] = auth()->user()->id;
+        
+        // modify and filter items without item_id
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($v) { return $v['id']; });
+        
+       
+       
+        try {
+            $result = $this->repository->create_summary(compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error creating Taxable Deductions', $th);
+        }
+        return redirect()->back();
+    }
 
     public function store_paye(Request $request)
     {
@@ -306,7 +358,7 @@ class PayrollController extends Controller
             'payroll_id','paye_total'
         ]);
         $data_items = $request->only([
-            'id', 'paye'
+            'id', 'paye','taxable_gross'
         ]);
 
         $data['ins'] = auth()->user()->ins;
