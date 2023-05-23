@@ -24,13 +24,14 @@
                             $pmt = $billpayment;
                             $details = [
                                 'Payment No' => $pmt->tid,
-                                'Supplier' => $pmt->supplier ? $pmt->supplier->name : '',
+                                'Supplier' => @$pmt->supplier->name,
                                 'Date' => dateFormat($pmt->date),
                                 'Amount' => numberFormat($pmt->amount),
                                 'Allocated Amount' => numberFormat($pmt->allocate_ttl),
                                 'Payment Mode' => $pmt->payment_mode,
                                 'Reference' => $pmt->reference,
-                                'Payment Account' => $pmt->account? $pmt->account->holder : '',
+                                'Payment From Account' => @$pmt->account->holder,
+                                'Payment Type' =>  ucfirst(str_replace('_', ' ', $pmt->payment_type)),
                             ];
                         @endphp
                         @foreach ($details as $key => $val)
