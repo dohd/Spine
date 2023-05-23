@@ -25,14 +25,12 @@
                             <div class="card-body">
                                 {{ Form::model($project, ['route' => ['biller.projects.update', $project], 'method' => 'PATCH', 'id' => 'edit-project']) }}
                                 <div class="form-group">
-                                    {{-- Including Form blade file --}}
                                     @include("focus.projects.form")
                                     <div class="edit-form-btn float-right mb-2">
                                         {{ link_to_route('biller.projects.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
                                         {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
-                                        {{-- <div class="clearfix"></div> --}}
-                                    </div><!--edit-form-btn-->
-                                </div><!--form-group-->
+                                    </div>
+                                </div>
                                 {{ Form::close() }}
                             </div>
                         </div>
@@ -74,44 +72,26 @@
                 dataType: 'json',
                 type: 'POST',
                 data: person => ({person}),
-                processResults: function (data) {
-                    return {
-                        results: $.map(data, function (item) {
-                            return {
-                                text: item.company,
-                                id: item.id
-                            }
-                        })
-                    };
+                processResults: (data) => {
+                    return { results: data.map(v => ({text: v.company, id: v.id})) }
                 },
             }
         });
 
         $("#person").change(function() {
             $("#branch_id").val('').trigger('change');
-            const tips = $('#person').val();
-
             $("#branch_id").select2({
                 ajax: {
                     url: "{{ route('biller.branches.select') }}",
                     dataType: 'json',
                     type: 'POST',
                     quietMillis: 50,
-                    params: {'cat_id': tips},
-                    data: (person) => ({person, customer_id: tips}),
-                    processResults: function (data) {
-                        return {
-                            results: $.map(data, function (item) {
-                                return {
-                                    text: item.name,
-                                    id: item.id
-                                }
-                            })
-                        };
+                    data: (person) => ({person, customer_id: $('#person').val()}),
+                    processResults: (data) => {
+                        return { results: data.map(v => ({text: v.name, id: v.id})) }
                     },
                 }
             });
-        });
-        
+        });        
     </script>
 @endsection

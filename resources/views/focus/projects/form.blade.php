@@ -28,7 +28,7 @@
     </fieldset>
 </div>
 
-<div class="row">
+<div class="row {{ @$project && $project->quotes->count()? 'd-none' : '' }}">
     <fieldset class="form-group position-relative has-icon-left  col-md-12">
         <select id="quotes" name="quotes[]" class="form-control select-box"  data-placeholder="Choose Quote / PI" multiple>
             <option value=""></option>
