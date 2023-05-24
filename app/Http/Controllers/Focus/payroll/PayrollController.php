@@ -210,6 +210,10 @@ class PayrollController extends Controller
                 $item->nhif = $this->calculate_nhif($item->gross_pay);
                 $nhif_relief = 15/100 * $item->nhif;
                 $item->paye = $this->calculate_paye($item->gross_pay) - $nhif_relief;
+                //dd($item->nhif);
+                if($item->paye < 0){
+                    $item->paye = 0;
+                }
                 $total_paye += $item->paye;
                 $total_nhif += $item->nhif;
                 $total_nssf += $item->nssf;
@@ -481,9 +485,9 @@ class PayrollController extends Controller
              if($gross_pay > $first_bracket->amount_to){
                 $tax = $tax - $personal_relief;
              }else{
-                $tax = $tax - ($first_bracket->rate/100 * $gross_pay);
+                $tax = $tax - ($first_bracket->rate/100 * $first_bracket->amount_to);
              }
-        // dd($tax);
+         //dd($tax);
         return $tax;
     }
 

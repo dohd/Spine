@@ -100,6 +100,22 @@
 @section('after-scripts')
     {{ Html::script(mix('js/dataTable.js')) }}
     {{ Html::script('focus/js/select2.min.js') }}
+    <style>
+        .editable-input {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            z-index: 1;
+        }
+        
+
+    </style>
+    <!-- jQuery -->
+    @include('focus.payroll.partials.hover-modal')
     <script>
         const config = {
             ajax: {
@@ -125,9 +141,8 @@
             total_netpay: @json($payroll->total_netpay),
             init() {
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
-            $('.editable-cell').hover(this.hoverChange);
-            $('#saveButton').click(this.valueChange);
             $('#employeeTbl').on('keyup', '.absent, .present, .rate, .rate-month, .total', this.employeeChange);
+            $('#deductionTbl').on('keyup', '.deduction', this.deductionChange);
 
                 $('#allowanceTbl').on('keyup',
                     '.house, .house_allowance, .transport, .transport_allowance, .other, .other_allowance', this
@@ -148,6 +163,36 @@
                     $('#employeeTbl tbody').html('');
                     this.payroll_items.forEach((v, i) => $('#employeeTbl tbody').append(Index.employeeRow(v, i)));
                     $('#salary_total').val(accounting.formatNumber(this.salary_total));
+                    //$('#employeeTbl tbody tr').find('.editable-cell').hover(this.hoverChange);
+                   
+                    // $("td").hover(
+                    //     function() {
+                    //     var position = $(this).position();
+                    //     var cellText = $(this).text();
+                    //     var inputHtml = '<input type="text" class="edit-input form-control" value="' + cellText + '">';
+                    //     var saveBtn = '<button type="button" class="btn btn-primary save-btn">Save</button>';
+                        
+                    //     $(this).append(inputHtml, saveBtn);
+                        
+                    //     $("input.edit-input")
+                    //         .css({
+                    //         top: position.top,
+                    //         left: position.left,
+                    //         width: $(this).width('10%')
+                    //         })
+                    //         .fadeIn();
+                    //     },
+                    //     function() {
+                    //     $("input.edit-input").fadeOut(function() {
+                    //         $(this).remove();
+                    //         $('.save-btn').remove();
+                    //     });
+                    //     }
+                        
+                    // );
+                    // Append the editable input element to the document body
+                   // $('body').append($editableInput);
+                    $('#saveButton').click(this.valueChange);
                     if (this.allowance_total && this.allowance_total.length) {
                         $('#allowanceTbl tbody').html('');
                         this.payroll_items.forEach((v, i) => $('#allowanceTbl tbody').append(Index.allowanceRow(v, i)));
@@ -198,24 +243,24 @@
 
             },
         hoverChange() {
-            // Show the modal when hovering over the editable cell
-            $('#hover-modal').modal('show');
+            var cellValue = $(this).text();
 
-            // Get the current value of the editable cell
-            var currentValue = $(this).text();
-
-            // Set the input field value to the current value
-            $('#editInput').val(currentValue);
-        },
+            // Set the cell value in the input field of the modal
+            $('#cellValueInput').val(cellValue);
+            $('#editModal').modal('show');
+            }, hoverChange() {
+                // Hide the modal
+                $('#editModal').modal('hide');
+            },
         valueChange() {
-            // Get the updated value from the input field
-            var updatedValue = $('#editInput').val();
+            // Get the updated cell value from the input field
+                var updatedValue = $('#cellValueInput').val();
 
-            // Update the content of the editable cell with the updated value
-            $('.editable-cell:hover').text(updatedValue);
+            // Update the cell value in the table
+            $('.editable-cell').text(updatedValue);
 
             // Hide the modal
-            $('#hover-modal').modal('hide');
+            $('#editModal').modal('hide');
         },
         allowanceChange() {
             const el = $(this);
@@ -269,6 +314,12 @@
                 Index.calTotal();
 
             },
+            deductionChange() {
+                const el = $(this);
+                const row = el.parents('tr:first');
+                Index.calTxDeductions();
+
+            },
             calTotal() {
                 let grandTotal = 0;
                 $('#employeeTbl tbody tr').each(function() {
@@ -283,6 +334,19 @@
                 });
                 //
                 $('#salary_total').val(accounting.unformat(grandTotal));
+            },
+            calTxDeductions() {
+                let grandTotal = 0;
+                $('#deductionTbl tbody tr').each(function() {
+                    if (!$(this).find('.deduction').val()) return;
+                    const deduction = accounting.unformat($(this).find('.deduction').val());
+                    
+                    grandTotal += deduction;
+                   // console.log(grandTotal);
+                });
+                //
+                $('#deduct_total').val(accounting.formatNumber(grandTotal));
+                $('#deduction_total').val(accounting.unformat(grandTotal));
             },
             calTotalNetPay() {
                 let grandTotal = 0;
@@ -366,7 +430,7 @@
                         <td>${i+1}</td>    
                         <td>${v.employee_name}</td>    
                         <td class="editable-cell">${accounting.formatNumber(v.basic_pay)}</td>    
-                        <td>${v.absent_days}</td>      
+                        <td class="editable-cell">${v.absent_days}</td>      
                         <td>${accounting.formatNumber(v.rate_per_day)}</td>    
                         <td>${accounting.formatNumber(v.basic_pay)}</td> 
                         <input type="hidden" name="absent_days[]" value="${v.absent_days}" class="form-control absent"  id="absent_days-${i}"> 
@@ -443,4 +507,3 @@
         $(() => Index.init());
     </script>
 @endsection
-@include('focus.payroll.partials.hover-modal')

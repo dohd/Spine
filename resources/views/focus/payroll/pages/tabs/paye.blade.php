@@ -27,7 +27,7 @@
                             {{-- <td>{{ amountFormat($item->nssf) }}</td>
                             <td>{{ amountFormat($item->nhif) }}</td> --}}
                             <td>{{ amountFormat($item->paye) }}</td>
-                            <td>{{ amountFormat($item->gross_pay - $item->paye) }}</td>
+                            <td>{{ amountFormat($item->gross_pay) }}</td>
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                             <input type="hidden" name="payroll_id"
                                 value="{{ $item->payroll_id }}">

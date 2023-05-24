@@ -22,7 +22,7 @@
                         <tr>
                             <td>{{ gen4tid('EMP-', $item->employee_id) }}</td>
                             <td>{{ $item->employee_name }}</td>
-                            <td>{{ amountFormat($item->total_basic_allowance) }}</td>
+                            <td class="editable-cell">{{ amountFormat($item->total_basic_allowance) }}</td>
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                             <input type="hidden" name="payroll_id"
                                 value="{{ $item->payroll_id }}">
@@ -33,7 +33,7 @@
                                 id="">
                             <input type="hidden" name="total_sat_deduction[]" value="{{ $item->nhif + $item->nhif }}"
                                 id="">
-                            <td><input type="text" class="form-control" value="{{ $item->tx_deductions }}" name="tx_deductions[]"></td>
+                            <td><input type="text" class="form-control deduction" value="{{ $item->tx_deductions }}" name="tx_deductions[]"></td>
                             <input type="hidden" name="gross_pay[]"
                                 value="{{ $item->gross_pay }}" id="">
                             <td>{{ amountFormat($item->gross_pay) }}</td>
@@ -54,7 +54,7 @@
             <div class="col-3">
                 <label for="total">Total Deductions</label>
                 <input type="text" value="{{ amountFormat($total_tx_deduction) }}"
-                    class="form-control" readonly>
+                    class="form-control" id="deduct_total" readonly>
                 <input type="hidden" name="deduction_total" value="{{ $total_tx_deduction }}"
                     class="form-control" id="deduction_total" readonly>
             </div>

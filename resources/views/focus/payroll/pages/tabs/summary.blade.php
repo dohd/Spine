@@ -36,18 +36,17 @@
                             $salary =  $item->basic_pay;
                            
                             $allowances =  $item->total_allowance;
-                            $deductions =  $item->total_sat_deduction;
+                            $deductions =  $item->tx_deductions;
                             $paye =  $item->paye;
                             $nssf =  $item->nssf;
                             $nhif =  $item->nhif;
-                            $nhif =  $item->nhif;
                             $total_other_allowances =  $item->total_other_allowances;
-                            $taxable_gross = $item->taxable_gross;
+                            $taxable_gross = $item->gross_pay;
                             $benefits =  $item->total_benefits;
                             $loan_advance = $item->loan + $item->advance;
                             $otherdeductions =  $item->total_other_deduction + $loan_advance;
-                            $net_pay = $taxable_gross - $item->nhif;
-                            $net = $net_pay + $benefits - $otherdeductions - $loan_advance;
+                            $net_pay = $taxable_gross - ($item->paye + $item->nhif);
+                            $net = $net_pay + $total_other_allowances + $benefits - ($otherdeductions);
                             @endphp
                         <tr>
                             <td>{{ gen4tid('EMP-', $item->employee_id) }}</td>
@@ -56,7 +55,7 @@
                             <input type="hidden" name="payroll_id" value="{{ $item->payroll_id }}">
                             <td>{{ amountFormat($salary) }}</td>
                             <td>{{amountFormat($allowances) }}</td>
-                            <td>{{amountFormat($nhif) }}</td>
+                            <td>{{amountFormat($nssf) }}</td>
                             <td>{{ amountFormat($deductions) }}</td>
                             <td>{{ amountFormat($taxable_gross) }}</td>
                             <td >{{ amountFormat($paye) }}</td>

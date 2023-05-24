@@ -181,11 +181,12 @@ class PayrollRepository extends BaseRepository
         $data = $input['data'];
         foreach ($data as $key => $val) {
             $rate_keys = [
-                'deduction_total'
+                'deduction_total','total_nssf'
             ];
         }
         $result = Payroll::find($data['payroll_id']);
         $result->deduction_total = $data['deduction_total'];
+        $result->total_nssf = $data['total_nssf'];
         $result->update();
 
         //dd($result);
