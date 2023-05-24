@@ -38,7 +38,7 @@
 
     $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
     .datepicker('setDate', new Date())
-    
+
     // Load customers
     $('#customer').select2({
         ajax: {
@@ -48,56 +48,59 @@
             quietMillis: 50,
             data: ({term}) => ({search: term}),
             processResults: result => {
-                return { results: result.map(v => ({text: `${v.name} - ${v.company}`, id: v.id }))};
+                return { results: result.map(v => ({text: v.company, id: v.id }))};
             }      
         }
     });
 
-    // load cutomer invoices
-    $('#customer').change(function() {
-        $.ajax({
-            url: "{{ route('biller.invoices.client_invoices') }}?customer_id=" + $(this).val(),
-            success: result => {
-                $('#invoice option:not(:eq(0))').remove();
-                result.forEach((v, i) => {
-                    const txt = 'Inv-' + v.tid + ' ' + v.notes;
-                    $('#invoice').append(new Option(txt, v.id));
-                });
-            }
-        });
+    // customer invoices
+    $('#invoice').select2({
+        allowClear: true, 
+        ajax: {
+            url: "{{ route('biller.invoices.client_invoices') }}",
+            dataType: 'json',
+            type: 'GET',
+            data: ({term}) => ({search: term, customer_id: $("#customer").val()}),
+            processResults: data => {
+                return { 
+                    results: data.map(v => {
+                        let tid = v.tid + '';
+                        if (tid.length < 4) tid = '0000'.slice(0, 4 - tid.length) + tid;
+                        return {text: `Inv-${tid} - ${v.notes}`, id: v.id}
+                    })
+                }
+            },
+        }
     });
 
     // On amount change
     $('#amount').change(function() {
-        const amount = $(this).val().replace(/,/g, '') * 1;
-        $(this).val(parseFloat(amount.toFixed(2)).toLocaleString());
-        calcTotals();
-    });
-    // On Tax change
-    $('#tax_id').change(function() {
-        calcTotals();
-    });
-    // on VAT on Amount Change
-    $('#is_tax_exc').change(function() {
+        const amount = accounting.unformat($(this).val());
+        this.value = accounting.formatNumber(amount);
         calcTotals();
     });
 
+    // on change tax and vat on amount
+    $('form').on('change', '#tax_id, #is_tax_exc', function() {
+        calcTotals();
+    });
+
+    // compute totals
     function calcTotals() {
-        const amount = $('#amount').val().replace(/,/g, '') * 1;
-        const tax = $('#tax_id').val()/100;
-        const isTaxExc = $('#is_tax_exc').val();
         let subtotal = 0;
         let total = 0;
-        if (isTaxExc == 1) {
+        const amount = accounting.unformat($('#amount').val());
+        const tax = $('#tax_id').val()/100;
+        if ($('#is_tax_exc').val() == 1) {
             subtotal = amount;
             total = amount * (1 + tax);
         } else {
             subtotal = amount / (1 + tax);
             total = amount;
         }
-        $('#subtotal').val(parseFloat(subtotal.toFixed(2)).toLocaleString());
-        $('#total').val(parseFloat(total.toFixed(2)).toLocaleString());
-        $('#tax').val(parseFloat((total - subtotal).toFixed(2)).toLocaleString());
+        $('#subtotal').val(accounting.formatNumber(subtotal));
+        $('#total').val(accounting.formatNumber(total));
+        $('#tax').val(accounting.formatNumber(total-subtotal));
     }
 </script>
 @endsection

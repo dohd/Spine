@@ -453,11 +453,15 @@ class InvoicesController extends Controller
      */
     public function client_invoices(Request $request)
     {
-        $invoices = Invoice::where('customer_id', $request->customer_id)
-            ->where('currency_id', 1)
-            ->whereIn('status', ['due', 'partial'])
-            ->orderBy('invoiceduedate', 'desc')
-            ->get();
+        $w = $request->search;
+        $query = Invoice::where('customer_id', $request->customer_id)
+            ->where('currency_id', 1)->whereIn('status', ['due', 'partial']);
+            
+        if ($w) {
+            $invoices = $query->where('notes', 'LIKE', "%{$w}%")->orderBy('invoiceduedate', 'desc')->limit(6)->get();
+        } else {
+            $invoices = $query->orderBy('invoiceduedate', 'desc')->get();
+        }
 
         return response()->json($invoices);
     }
