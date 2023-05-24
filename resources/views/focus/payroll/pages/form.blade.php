@@ -34,6 +34,14 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" id="base-tab7" data-toggle="tab" aria-controls="tab7" href="#tab7" role="tab"
+                    aria-selected="false">
+                    <span>NHIF</span>
+                    <i class="text-danger fa fa-times float-right cancel_nhif" aria-hidden="true"></i>
+                    <i class="text-success fa fa-check float-right d-none tick_nhif" aria-hidden="true"></i>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" id="base-tab5" data-toggle="tab" aria-controls="tab5" href="#tab5" role="tab"
                     aria-selected="false">
                     <span>Other Deductions and Benefits</span>
@@ -53,289 +61,26 @@
         <div class="tab-content px-1 pt-1">
             <div class="tab-pane active" id="tab1" role="tabpanel" aria-labelledby="base-tab1">
                 <div class="card-content">
-                    <form id="basicSalary" action="{{ route('biller.payroll.store_basic') }}" method="post">
-                        @csrf
-                        <input type="hidden" name="payroll_id" value="{{ $payroll->id }}" id="">
-                        <div class="card-body">
-                            <table class="table">
-                                <thead>
-                                    <th>Payroll Reference</th>
-                                    <th>Payroll Date</th>
-                                    <th>Month Days</th>
-                                    <th>Working Days</th>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><input type="text" class="form-control" value="{{ $payroll->reference }}"
-                                                readonly></td>
-                                        <td><input type="text" name="processing_date" class="form-control datepicker"
-                                                value=""></td>
-                                        <td><input type="text" class="form-control month_days"
-                                                value="{{ $payroll->total_month_days }}" readonly></td>
-                                        <td><input type="text" class="form-control working_days"
-                                                value="{{ $payroll->working_days }}" readonly></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="card-body">
-                            <table id="employeeTbl" class="table table-striped table-bordered zero-configuration"
-                                cellspacing="0" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>Employee Id</th>
-                                        <th>Employee Name</th>
-                                        <th>Basic Pay</th>
-                                        <th>Absent Days</th>
-                                        <th>Rate Per Day</th>
-                                        <th>Total Payable</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @php
-                                        $i = 1;
-                                    @endphp
-                                    @foreach ($employees as $employee)
-                                        @if ($employee->employees_salary)
-                                        <tr>
-                                            <td>{{ gen4tid('EMP-', $employee->employees_salary->employee_id) }}</td>
-                                            <td>{{ $employee->employees_salary->employee_name }}</td>
-                                            <input type="hidden" id="employee_id-{{$i}}" name="employee_id[]" value="{{ $employee->employees_salary->employee_id}}">
-                                            <input type="hidden" class="basic_salary" id="basic_salary-{{$i}}" value="{{ $employee->employees_salary->basic_pay }}">
-                                            <td>{{ amountFormat($employee->employees_salary->basic_pay) }}</td>
-                                            <td><input type="text" name="absent_days[]" class="form-control absent" value="0"  id="absent_days-{{$i}}"></td>
-                                            <input type="hidden" name="present_days[]" class="form-control present"  id="present_days-{{$i}}">
-                                            {{-- <td><input type="text" name="present_days[]" class="form-control present"  id="present_days-{{$i}}"></td> --}}
-                                            <td>
-                                                <input type="text" name="rate_per_day[]" class="form-control rate"  id="rate-days-{{$i}}">
-                                                <input type="hidden" name="rate_per_month[]" class="form-control rate-month"  id="rate-month-{{$i}}">
-                                            </td>
-                                            <td><input type="text" name="basic_pay[]" class="form-control total"  id="total_basic_pay-{{$i}}"></td>
-                                        </tr>
-                                        @endif
-                                    @endforeach
-
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-3">
-                                <label for="grand_total">Total Salary</label>
-                                <input type="text" name="salary_total" class="form-control" id="salary_total"
-                                    readonly>
-                            </div>
-                        </div>
-                        <div class="float-right">
-                            <button type="submit" class="btn btn-primary submit-salary">Save Basic Pay</button>
-                        </div>
-                    </form>
-
-
+                    @include('focus.payroll.pages.tabs.basic-salary')
                 </div>
             </div>
             <div class="tab-pane" id="tab2" role="tabpanel" aria-labelledby="base-tab2">
-                <form action="{{ route('biller.payroll.store_allowance') }}" method="post">
-                    @csrf
-                    <div class="card-content">
-                        <div class="card-body">
-                            <table id="allowanceTbl" class="table table-striped table-bordered zero-configuration"
-                                cellspacing="0" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>Employee Id</th>
-                                        <th>Employee Name</th>
-                                        <th>Absent Days</th>
-                                        <th>Housing Allowance</th>
-                                        <th>Transport</th>
-                                        <th>Other Allowances</th>
-                                        <th>Total Allowance</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @php
-                                        $i = 1;
-                                    @endphp
-                                    @foreach ($payroll->payroll_items as $item)
-                                        <tr>
-                                            <td>{{ gen4tid('EMP-', $item->employee_id) }}</td>
-                                            <td>{{ $item->employee_name }}</td>
-                                            <td>{{ $item->absent_days }}</td>
-                                            <input type="hidden" name="id[]" value="{{ $item->id }}">
-                                            <input type="hidden" name="payroll_id" value="{{ $item->payroll_id }}">
-                                            <input type="hidden" class="basic" value="{{ $item->basic_pay }}">
-                                            <input type="hidden" name="total_basic_allowance[]"
-                                                class="total_basic_allowance">
-                                            <input type="hidden" class="form-control absent_day"
-                                                value="{{ $item->absent_days }}"
-                                                id="absent_day-{{ $i }}">
-                                            <td>
-                                                <input type="text" class="form-control house"
-                                                    id="house-{{ $i }}">
-                                                <input type="text" name="house_allowance[]"
-                                                    class="form-control house_allowance"
-                                                    id="house_allowance-{{ $i }}" readonly>
-                                            </td>
-                                            <td>
-                                                <input type="text" class="form-control transport"
-                                                    id="transport-{{ $i }}">
-                                                <input type="text" name="transport_allowance[]"
-                                                    class="form-control transport_allowance"
-                                                    id="transport_allowance-{{ $i }}" readonly>
-                                            </td>
-                                            <td>
-                                                <input type="text" name="other_allowance[]"
-                                                    class="form-control other_allowance"
-                                                    id="other_allowance-{{ $i }}">
-                                            </td>
-                                            <td>
-                                                <input type="text" name="total_allowance[]"
-                                                    class="form-control total_allowance"
-                                                    id="total_allowance-{{ $i }}" readonly>
-                                            </td>
-
-                                        </tr>
-                                    @endforeach
-
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-3">
-                                <label for="total">Total Allowances</label>
-                                <input type="text" name="allowance_total" class="form-control"
-                                    id="allowance_total" readonly>
-                            </div>
-                        </div>
-                        <div class="float-right">
-                            <button type="submit" class="btn btn-primary">Save Allowances</button>
-                        </div>
-                    </div>
-                </form>
+                @include('focus.payroll.pages.tabs.tx-month-allowances')
             </div>
             <div class="tab-pane" id="tab3" role="tabpanel" aria-labelledby="base-tab3">
                 <div class="card-content">
 
-                    <form action="{{ route('biller.payroll.store_deduction') }}" method="post">
-                        @csrf
-                        <div class="card-content">
-                            <div class="card-body">
-                                <table id="deductionTbl" class="table table-striped table-bordered zero-configuration"
-                                    cellspacing="0" width="100%">
-                                    <thead>
-                                        <tr>
-                                            <th>Employee Id</th>
-                                            <th>Employee Name</th>
-                                            <th>Basic + Allowances</th>
-                                            <th>NSSF</th>
-                                            <th>NHIF</th>
-                                            <th>Taxable Pay</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @php
-                                            $i = 1;
-                                        @endphp
-                                        @foreach ($payroll->payroll_items as $item)
-                                            <tr>
-                                                <td>{{ gen4tid('EMP-', $item->employee_id) }}</td>
-                                                <td>{{ $item->employee_name }}</td>
-                                                <td>{{ amountFormat($item->total_basic_allowance) }}</td>
-                                                <input type="hidden" name="id[]" value="{{ $item->id }}">
-                                                <input type="hidden" name="payroll_id"
-                                                    value="{{ $item->payroll_id }}">
-                                                <input type="hidden" name="nssf[]" value="{{ $item->nssf }}"
-                                                    id="">
-                                                <td>{{ amountFormat($item->nssf) }}</td>
-                                                <input type="hidden" name="nhif[]" value="{{ $item->nhif }}"
-                                                    id="">
-                                                <input type="hidden" name="total_sat_deduction[]" value="{{ $item->nhif + $item->nhif }}"
-                                                    id="">
-                                                <td>{{ amountFormat($item->nhif) }}</td>
-                                                <input type="hidden" name="gross_pay[]"
-                                                    value="{{ $item->gross_pay }}" id="">
-                                                <td>{{ amountFormat($item->gross_pay) }}</td>
-                                            </tr>
-                                        @endforeach
-
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-3">
-                                    <label for="total">Total Deductions</label>
-                                    <input type="text" value="{{ amountFormat($total_gross) }}"
-                                        class="form-control" readonly>
-                                    <input type="hidden" name="deduction_total" value="{{ $total_gross }}"
-                                        class="form-control" id="deduction_total" readonly>
-                                </div>
-                            </div>
-                            <div class="float-right">
-                                <button type="submit" class="btn btn-primary">Save Deductions</button>
-                            </div>
-                        </div>
-                    </form>
+                    @include('focus.payroll.pages.tabs.tx-month-deductions')
                 </div>
             </div>
             <div class="tab-pane" id="tab4" role="tabpanel" aria-labelledby="base-tab4">
                 <div class="card-content">
-
-                    <form action="{{ route('biller.payroll.store_paye') }}" method="post">
-                        @csrf
-                        <div class="card-content">
-                            <div class="card-body">
-                                <table id="payeTbl" class="table table-striped table-bordered zero-configuration"
-                                    cellspacing="0" width="100%">
-                                    <thead>
-                                        <tr>
-                                            <th>Employee Id</th>
-                                            <th>Employee Name</th>
-                                            <th>Taxable Pay</th>
-                                            <th>NSSF</th>
-                                            <th>NHIF</th>
-                                            <th>PAYE</th>
-                                            <th>Gross Pay After Tax</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @php
-                                            $i = 1;
-                                        @endphp
-                                        @foreach ($payroll->payroll_items as $item)
-                                            <tr>
-                                                <td>{{ gen4tid('EMP-', $item->employee_id) }}</td>
-                                                <td>{{ $item->employee_name }}</td>
-                                                <td>{{ amountFormat($item->gross_pay) }}</td>
-                                                <td>{{ amountFormat($item->nssf) }}</td>
-                                                <td>{{ amountFormat($item->nhif) }}</td>
-                                                <td>{{ amountFormat($item->paye) }}</td>
-                                                <td>{{ amountFormat($item->gross_pay - $item->paye) }}</td>
-                                                <input type="hidden" name="id[]" value="{{ $item->id }}">
-                                                <input type="hidden" name="payroll_id"
-                                                    value="{{ $item->payroll_id }}">
-                                                <input type="hidden" name="paye[]" value="{{ $item->paye }}"
-                                                    id="">
-                                                <input type="hidden" name="taxable_gross[]" value="{{ $item->gross_pay - $item->paye }}"
-                                                    id="">
-                                            </tr>
-                                        @endforeach
-
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-3">
-                                    <label for="total">Total PAYE</label>
-                                    <input type="text" value="{{ amountFormat($total_paye) }}"
-                                        class="form-control" id="" readonly>
-                                    <input type="hidden" name="paye_total" value="{{ $total_paye }}"
-                                        class="form-control" id="paye_total" readonly>
-                                </div>
-                            </div>
-                            <div class="float-right">
-                                <button type="submit" class="btn btn-primary">Save PAYE</button>
-                            </div>
-                        </div>
-                    </form>
+                    @include('focus.payroll.pages.tabs.paye')
+                </div>
+            </div>
+            <div class="tab-pane" id="tab7" role="tabpanel" aria-labelledby="base-tab7">
+                <div class="card-content">
+                    @include('focus.payroll.pages.tabs.nhif')
                 </div>
             </div>
             <div class="tab-pane" id="tab5" role="tabpanel" aria-labelledby="base-tab5">
@@ -355,6 +100,22 @@
 @section('after-scripts')
     {{ Html::script(mix('js/dataTable.js')) }}
     {{ Html::script('focus/js/select2.min.js') }}
+    <style>
+        .editable-input {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            z-index: 1;
+        }
+        
+
+    </style>
+    <!-- jQuery -->
+    @include('focus.payroll.partials.hover-modal')
     <script>
         const config = {
             ajax: {
@@ -374,14 +135,14 @@
             allowance_total: @json($payroll->allowance_total),
             deduction_total: @json($payroll->deduction_total),
             paye_total: @json($payroll->paye_total),
+            total_nhif: @json($payroll->total_nhif),
             other_deductions_total: @json($payroll->other_deductions_total),
             other_benefits_total: @json($payroll->other_benefits_total),
             total_netpay: @json($payroll->total_netpay),
             init() {
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
-            $('.editable-cell').hover(this.hoverChange);
-            $('#saveButton').click(this.valueChange);
             $('#employeeTbl').on('keyup', '.absent, .present, .rate, .rate-month, .total', this.employeeChange);
+            $('#deductionTbl').on('keyup', '.deduction', this.deductionChange);
 
                 $('#allowanceTbl').on('keyup',
                     '.house, .house_allowance, .transport, .transport_allowance, .other, .other_allowance', this
@@ -402,6 +163,36 @@
                     $('#employeeTbl tbody').html('');
                     this.payroll_items.forEach((v, i) => $('#employeeTbl tbody').append(Index.employeeRow(v, i)));
                     $('#salary_total').val(accounting.formatNumber(this.salary_total));
+                    //$('#employeeTbl tbody tr').find('.editable-cell').hover(this.hoverChange);
+                   
+                    // $("td").hover(
+                    //     function() {
+                    //     var position = $(this).position();
+                    //     var cellText = $(this).text();
+                    //     var inputHtml = '<input type="text" class="edit-input form-control" value="' + cellText + '">';
+                    //     var saveBtn = '<button type="button" class="btn btn-primary save-btn">Save</button>';
+                        
+                    //     $(this).append(inputHtml, saveBtn);
+                        
+                    //     $("input.edit-input")
+                    //         .css({
+                    //         top: position.top,
+                    //         left: position.left,
+                    //         width: $(this).width('10%')
+                    //         })
+                    //         .fadeIn();
+                    //     },
+                    //     function() {
+                    //     $("input.edit-input").fadeOut(function() {
+                    //         $(this).remove();
+                    //         $('.save-btn').remove();
+                    //     });
+                    //     }
+                        
+                    // );
+                    // Append the editable input element to the document body
+                   // $('body').append($editableInput);
+                    $('#saveButton').click(this.valueChange);
                     if (this.allowance_total && this.allowance_total.length) {
                         $('#allowanceTbl tbody').html('');
                         this.payroll_items.forEach((v, i) => $('#allowanceTbl tbody').append(Index.allowanceRow(v, i)));
@@ -415,7 +206,10 @@
                                 $('.cancel_paye').addClass('d-none');
                                 $('.tick_paye').removeClass('d-none');
 
-                                if (this.other_benefits_total && this.other_benefits_total.length) {
+                                if (this.total_nhif && this.total_nhif.length) {
+                                    $('.cancel_nhif').addClass('d-none');
+                                    $('.tick_nhif').removeClass('d-none');
+                                    if (this.other_benefits_total && this.other_benefits_total.length) {
                                     $('#otherBenefitsTbl tbody').html('');
                                     console.log(this.payroll_items);
                                     this.payroll_items.forEach((v, i) => $('#otherBenefitsTbl tbody:first').append(Index.deductionRow(v, i)));
@@ -428,6 +222,7 @@
                                         $('.cancel_total_netpay').addClass('d-none');
                                         $('.tick_total_netpay').removeClass('d-none');
                                     }
+                                }
                                 }
 
                             }
@@ -448,24 +243,24 @@
 
             },
         hoverChange() {
-            // Show the modal when hovering over the editable cell
-            $('#hover-modal').modal('show');
+            var cellValue = $(this).text();
 
-            // Get the current value of the editable cell
-            var currentValue = $(this).text();
-
-            // Set the input field value to the current value
-            $('#editInput').val(currentValue);
-        },
+            // Set the cell value in the input field of the modal
+            $('#cellValueInput').val(cellValue);
+            $('#editModal').modal('show');
+            }, hoverChange() {
+                // Hide the modal
+                $('#editModal').modal('hide');
+            },
         valueChange() {
-            // Get the updated value from the input field
-            var updatedValue = $('#editInput').val();
+            // Get the updated cell value from the input field
+                var updatedValue = $('#cellValueInput').val();
 
-            // Update the content of the editable cell with the updated value
-            $('.editable-cell:hover').text(updatedValue);
+            // Update the cell value in the table
+            $('.editable-cell').text(updatedValue);
 
             // Hide the modal
-            $('#hover-modal').modal('hide');
+            $('#editModal').modal('hide');
         },
         allowanceChange() {
             const el = $(this);
@@ -519,6 +314,12 @@
                 Index.calTotal();
 
             },
+            deductionChange() {
+                const el = $(this);
+                const row = el.parents('tr:first');
+                Index.calTxDeductions();
+
+            },
             calTotal() {
                 let grandTotal = 0;
                 $('#employeeTbl tbody tr').each(function() {
@@ -533,6 +334,19 @@
                 });
                 //
                 $('#salary_total').val(accounting.unformat(grandTotal));
+            },
+            calTxDeductions() {
+                let grandTotal = 0;
+                $('#deductionTbl tbody tr').each(function() {
+                    if (!$(this).find('.deduction').val()) return;
+                    const deduction = accounting.unformat($(this).find('.deduction').val());
+                    
+                    grandTotal += deduction;
+                   // console.log(grandTotal);
+                });
+                //
+                $('#deduct_total').val(accounting.formatNumber(grandTotal));
+                $('#deduction_total').val(accounting.unformat(grandTotal));
             },
             calTotalNetPay() {
                 let grandTotal = 0;
@@ -616,7 +430,7 @@
                         <td>${i+1}</td>    
                         <td>${v.employee_name}</td>    
                         <td class="editable-cell">${accounting.formatNumber(v.basic_pay)}</td>    
-                        <td>${v.absent_days}</td>      
+                        <td class="editable-cell">${v.absent_days}</td>      
                         <td>${accounting.formatNumber(v.rate_per_day)}</td>    
                         <td>${accounting.formatNumber(v.basic_pay)}</td> 
                         <input type="hidden" name="absent_days[]" value="${v.absent_days}" class="form-control absent"  id="absent_days-${i}"> 
@@ -693,4 +507,3 @@
         $(() => Index.init());
     </script>
 @endsection
-@include('focus.payroll.partials.hover-modal')

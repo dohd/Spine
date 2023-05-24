@@ -65,11 +65,38 @@ class PayrollTableController extends Controller
             ->addColumn('payroll_month', function ($payroll) {
                 return dateFormat($payroll->payroll_month);
             })
+            ->addColumn('salary_total', function ($payroll) {
+                return amountFormat($payroll->salary_total);
+            })
+            ->addColumn('allowance_total', function ($payroll) {
+                return amountFormat($payroll->allowance_total);
+            })
+            ->addColumn('deduction_total', function ($payroll) {
+                return amountFormat($payroll->deduction_total);
+            })
+            ->addColumn('total_other_allowances', function ($payroll) {
+                return amountFormat($payroll->total_other_allowances);
+            })
+            ->addColumn('total_other_deductions', function ($payroll) {
+                return amountFormat($payroll->total_other_deductions);
+            })
+            ->addColumn('total_netpay', function ($payroll) {
+                return amountFormat($payroll->total_netpay);
+            })
+            ->addColumn('paye_total', function ($payroll) {
+                return amountFormat($payroll->paye_total);
+            })
+            ->addColumn('total_nssf', function ($payroll) {
+                return amountFormat($payroll->total_nssf);
+            })
+            ->addColumn('total_nhif', function ($payroll) {
+                return amountFormat($payroll->total_nhif);
+            })
             ->addColumn('status', function ($payroll) {
                 return ucfirst($payroll->status);
             })
             ->addColumn('actions', function ($payroll) {
-                return $payroll->actions_buttons;
+                return $payroll->action_buttons;
             })
             ->make(true);
     }

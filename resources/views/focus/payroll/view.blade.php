@@ -63,6 +63,25 @@
                                <span>PAYE</span>
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" id="base-tab5" data-toggle="tab" aria-controls="tab5" href="#tab5" role="tab"
+                               aria-selected="false">
+                               <span>NHIF</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="base-tab6" data-toggle="tab" aria-controls="tab6" href="#tab6" role="tab"
+                               aria-selected="false">
+                               <span>Other Deductions and Benefits</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="base-tab7" data-toggle="tab" aria-controls="tab7" href="#tab7" role="tab"
+                               aria-selected="false">
+                               <span>Summary</span>
+                            </a>
+                        </li>
                     </ul>
                     <div class="tab-content px-1 pt-1">
                         <div class="tab-pane active" id="tab0" role="tabpanel" aria-labelledby="base-tab0">
@@ -241,6 +260,181 @@
                                                     <td>{{ amountFormat($item->paye) }}</td>
                                                     
                                                 </tr>
+                                            @endforeach
+                                           
+                                        </tbody>
+                                    </table>
+                                </div>                    
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab5" role="tabpanel" aria-labelledby="base-tab5">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <table id="nhifTbl" class="table table-striped table-bordered zero-configuration"
+                                        cellspacing="0" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Employee Id</th>
+                                                <th>Employee Name</th>
+                                                <th>Taxable Pay</th>
+                                                <th>NHIF</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @php
+                                                $i = 1;
+                                            @endphp
+                                            @foreach ($payroll->payroll_items as $item)
+                                                <tr>
+                                                    <td>{{ gen4tid('EMP-', $item->employee_id) }}</td>
+                                                    <td>{{ $item->employee_name }}</td>
+                                                    <td>{{ amountFormat($item->taxable_gross) }}</td>
+                                                    <td>{{ amountFormat($item->nhif) }}</td>   
+                                                    <input type="hidden" name="payroll_id"
+                                                        value="{{ $item->payroll_id }}">     
+                                                </tr>
+                                            @endforeach
+
+                                        </tbody>
+                                    </table>
+                                </div>                    
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab6" role="tabpanel" aria-labelledby="base-tab6">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <table id="otherBenefitsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0"
+                            width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Employee Id</th>
+                                    <th>Employee Name</th>
+                                    <th>Other Allowances Totals</th>
+                                    <th>Benefits Totals</th>
+                                    <th>Deductions</th>
+                                    <th>Other Deductions Totals</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $i = 1;
+                                @endphp
+                                @foreach ($payroll->payroll_items as $item)
+                                    @if ($item)
+                                        <tr>
+                                            <td>{{ gen4tid('EMP-', $item->employee_id) }}</td>
+                                            <td>{{ $item->employee_name }}</td>
+                                            <td>{{ amountFormat($item->total_other_allowances) }}
+                                            </td>
+                                            <td>{{ amountFormat($item->total_benefits) }}
+                                            </td>
+
+
+                                            <td>
+                                                <table class="table" style="width: 100%;">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Loan</th>
+                                                            <th>Advance</th>
+                                                        </tr>
+
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>{{ amountFormat($item->loan) }}
+                                                                
+                                                            </td>
+                                                            <td>{{ amountFormat($item->advance) }}
+                                                                
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+
+
+                                                </table>
+                                            </td>
+
+                                            <td>{{ amountFormat($item->total_other_deduction) }}
+                                            </td>
+
+
+                                        </tr>
+                                    @endif
+                                @endforeach
+
+                            </tbody>
+                        </table>
+                                </div>                    
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab7" role="tabpanel" aria-labelledby="base-tab7">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <table id="summaryTable" class="table table-striped table-responsive table-bordered zero-configuration" cellspacing="0" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Employee Id</th>
+                                                <th>Employee Name</th>
+                                                <th>Total Basic Salary</th>
+                                                <th>Total Tx Allowances</th>
+                                                <th>NSSF</th>
+                                                <th>Total Tx Monthly Deductions</th>
+                                                <th>Taxable Gross</th>
+                                                <th>Total PAYE</th>
+                                                <th>NHIF</th>
+                                                <th>Other Allowances</th>
+                                                <th>Other Benefits</th>
+                                                <th>Other Deductions</th>
+                                                <th>Net Pay</th>
+                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @php
+                                                $i = 1;
+                                                
+                                            @endphp
+                                            @foreach ($payroll->payroll_items as $item)
+                                                @if ($item)
+                                              
+                        
+                                                @php
+                                               
+                                                    $salary =  $item->basic_pay;
+                                                   
+                                                    $allowances =  $item->total_allowance;
+                                                    $deductions =  $item->tx_deductions;
+                                                    $paye =  $item->paye;
+                                                    $nssf =  $item->nssf;
+                                                    $nhif =  $item->nhif;
+                                                    $total_other_allowances =  $item->total_other_allowances;
+                                                    $taxable_gross = $item->taxable_gross;
+                                                    $benefits =  $item->total_benefits;
+                                                    $loan_advance = $item->loan + $item->advance;
+                                                    $otherdeductions =  $item->total_other_deduction + $loan_advance;
+                                                    $net_pay = $item->gross_pay - ($item->paye + $item->nhif);
+                                                    $net = $net_pay + $total_other_allowances + $benefits - ($otherdeductions);
+                                                    @endphp
+                                                <tr>
+                                                    <td>{{ gen4tid('EMP-', $item->employee_id) }}</td>
+                                                    <td>{{ $item->employee_name }}</td>
+                                                    <td>{{ amountFormat($salary) }}</td>
+                                                    <td>{{amountFormat($allowances) }}</td>
+                                                    <td>{{amountFormat($nssf) }}</td>
+                                                    <td>{{ amountFormat($deductions) }}</td>
+                                                    <td>{{ amountFormat($taxable_gross) }}</td>
+                                                    <td >{{ amountFormat($paye) }}</td>
+                                                    <td >{{ amountFormat($nhif) }}</td>
+                                                    <td >{{ amountFormat($total_other_allowances) }}</td>
+                                                    <td>{{ amountFormat($benefits) }}</td>
+                                                    <td>{{ amountFormat($otherdeductions) }}</td>
+                                                    <td class="netpay">{{ amountFormat($item->netpay) }} </td>   
+                                                    
+                                                   
+                                                </tr>
+                                                
+                                                @endif
                                             @endforeach
                                            
                                         </tbody>

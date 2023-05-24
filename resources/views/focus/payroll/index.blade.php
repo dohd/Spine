@@ -39,8 +39,14 @@
                                             <th>#</th>
                                             <th>Payroll No</th>
                                             <th>Processing Date</th>
-                                            <th>Payroll Month</th>
+                                            <th>Basic Salary</th>
+                                            <th>Tx Allowance</th>
+                                            <th>Tx Deductions</th>
+                                            <th>Total NSSF</th>
+                                            <th>Total PAYE</th>
+                                            <th>Total NHIF</th>
                                             <th>Status</th>
+                                            <th>Total NETPAY</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
                                         </thead>
@@ -97,8 +103,14 @@
                     {data: 'DT_Row_Index', name: 'id'},
                     {data: 'tid', name: 'tid'},
                     {data: 'processing_date', name: 'processing_date'},
-                    {data: 'payroll_month', name: 'payroll_month'},
+                    {data: 'salary_total', name: 'salary_total'},
+                    {data: 'allowance_total', name: 'allowance_total'},
+                    {data: 'deduction_total', name: 'deduction_total'},
+                    {data: 'total_nssf', name: 'total_nssf'},
+                    {data: 'paye_total', name: 'paye_total'},
+                    {data: 'total_nhif', name: 'total_nhif'},
                     {data: 'status', name: 'status'},
+                    {data: 'total_netpay', name: 'total_netpay'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "asc"]],
