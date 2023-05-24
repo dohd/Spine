@@ -54,7 +54,7 @@
             $('#purchaseorder').change(this.purchaseorderChange);
             $('#tax_rate').change(() => Form.columnTotals());
             $('#invoice_status').change(this.invoiceStatusChange);
-            $('#productTbl').on('keyup', '.qty', () => Form.columnTotals());
+            $('#productTbl').on('change', '.qty', this.onQtyChange);
             this.columnTotals();
         },
 
@@ -95,24 +95,53 @@
         },
 
         productRow(v,i) {
-            const qty = accounting.formatNumber(v.qty);
-            const received = accounting.formatNumber(v.qty_received);
-            const due = v.qty - v.qty_received;
-            const balance = accounting.formatNumber(due > 0? due : 0);
+            let received = accounting.formatNumber(v.qty_received);
+            let due = v.qty - v.qty_received;
+            let balance = accounting.formatNumber(due > 0? due : 0);
             return `
                 <tr>
                     <td>${i+1}</td>    
                     <td>${v.description}</td>    
                     <td>${v.uom}</td>    
-                    <td>${qty}</td>    
-                    <td>${received}</td>    
-                    <td>${balance}</td>    
+                    <td class="qty_ordered">${accounting.formatNumber(v.qty)}</td>    
+                    <td class="qty_received">${received}</td>    
+                    <td class="qty_due">${balance}</td>    
                     <td><input name="qty[]" id="qty" class="form-control qty"></td>    
                     <input type="hidden" name="purchaseorder_item_id[]" value="${v.id}">
                     <input type="hidden" name="rate[]" value="${parseFloat(v.rate)}" class="rate">
                     <input type="hidden" name="item_id[]" value="${v.item_id}">
                 </tr>
             `;
+        },
+
+        onQtyChange() {
+            let qty = accounting.unformat(this.value);
+
+            // limit qty on goods received
+            // let row = $(this).parents('tr');
+            // let qtyDue = accounting.unformat(row.find('.qty_due').text());
+            // let qtyOrdered = accounting.unformat(row.find('.qty_ordered').text());
+            // let qtyReceived = accounting.unformat(row.find('.qty_received').text());
+            // if (!Form.grn) {
+            //     if (qty > qtyDue) qty = qtyDue;
+            // } else {
+            //     let limit = qty;
+            //     let originQty = accounting.unformat($(this).attr('origin'));
+            //     if (qtyDue && qtyReceived < qtyOrdered) {
+            //         limit = originQty + qtyDue;
+            //     } else {
+            //         if (qtyReceived > qtyOrdered) {
+            //             if (originQty < qtyReceived) limit = originQty - (qtyOrdered - qtyReceived);
+            //             if (originQty == qtyReceived) limit = qtyOrdered;
+            //         } else {
+            //             limit = qtyOrdered;
+            //         }
+            //     }
+            //     if (qty > limit) qty = limit;
+            // }
+
+            this.value = accounting.formatNumber(qty);
+            Form.columnTotals();
         },
 
         columnTotals() {

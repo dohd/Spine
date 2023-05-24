@@ -85,20 +85,23 @@
         </thead>
         <tbody>
             @isset($goodsreceivenote)
-                @php $grn = $goodsreceivenote @endphp
+                @php 
+                    $grn = $goodsreceivenote 
+                @endphp
                 @foreach ($grn->items as $i => $item)
                     @php 
                         $po_item = $item->purchaseorder_item;
                         $qty_due = $po_item->qty - $po_item->qty_received;
+                        $qty_due = $qty_due > 0? +$qty_due : 0
                     @endphp
                     <tr>
                         <td>{{ $i+1 }}</td>
                         <td>{{ $po_item->description }}</td>
                         <td>{{ $po_item->uom }}</td>
-                        <td>{{ +$po_item->qty }}</td>
-                        <td>{{ +$po_item->qty_received }}</td>
-                        <td>{{ $qty_due > 0? +$qty_due : 0 }}</td>
-                        <td><input name="qty[]" value="{{ +$item->qty }}" id="qty" class="form-control qty"></td>
+                        <td class="qty_ordered">{{ +$po_item->qty }}</td>
+                        <td class="qty_received">{{ +$po_item->qty_received }}</td>
+                        <td class="qty_due">{{ $qty_due }}</td>
+                        <td><input name="qty[]" value="{{ +$item->qty }}" origin="{{ +$item->qty }}" class="form-control qty" id="qty"></td>
                         <input type="hidden" name="rate[]" value="{{ +$po_item->rate }}" class="rate">
                         <input type="hidden" name="id[]" value="{{ $item->id }}">
                     </tr>
