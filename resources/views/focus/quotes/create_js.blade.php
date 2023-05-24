@@ -105,15 +105,15 @@
     $('#name-p0').autocomplete(autoComp('p0'));
     $('#addProduct').click(function() {
         $('#quoteTbl tbody tr.invisible').remove();
-
         const i = 'p' + rowId;
         const newRowHtml = '<tr>' + rowHtml.replace(/p0/g, i) + '</tr>';
         $("#quoteTbl tbody").append(newRowHtml);
         $('#name-'+i).autocomplete(autoComp(i));
-        updateLineTax($("#quoteTbl tbody tr:last").find('.tax_rate'));
+        let row = $("#quoteTbl tbody tr:last");
+        updateLineTax(row.find('.tax_rate'));
+
         // trigger lead change to reset client pricelist 
         $('#lead_id').change(); 
-
         adjustTbodyHeight();
         calcTotal();
         rowId++;
@@ -362,7 +362,7 @@
             minLength: 0,
             select: function(event, ui) {
                 const {data} = ui.item;
-
+                
                 $('#productid-'+i).val(data.id);
                 $('#name-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
