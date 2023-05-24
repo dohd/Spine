@@ -13,6 +13,7 @@ use App\Models\quote\Quote;
 use App\Models\djc\Djc;
 use App\Models\invoice\Invoice;
 use App\Models\items\VerifiedItem;
+use App\Models\payroll\PayrollItem;
 use App\Models\rjc\Rjc;
 
 trait BillDetailsTrait
@@ -191,6 +192,14 @@ trait BillDetailsTrait
                     'ltr', 9, false
                 );
                 $valid_token = token_validator('', 'd' . $resource->id, true);
+                break;
+            case 12:
+                //payroll
+
+                $resource = PayrollItem::find($request->id);
+                
+                $valid_token = token_validator('', 'q' . $resource->id, true);
+               
                 break;
 
         }

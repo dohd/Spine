@@ -3,12 +3,12 @@
 <head>
     <title>
         @php
-            $prefixes = prefixesArray(['quote', 'proforma_invoice'], $company->id);
-            $tid = $resource->tid;
-            $doc_type = $resource->bank_id ? 'pi' : 'quote';
-            $tid = gen4tid($doc_type == 'pi' ? "{$prefixes[1]}-" : "{$prefixes[0]}-", $tid);
+            
+            $tid = $resource->employee_id;
+           
+            $tid = gen4tid('EMP', $tid);
         @endphp
-        {{ $resource->bank_id ? 'Proforma Invoice' : 'Quotation' }}
+        PaySlip
     </title>
     <style>
         body {
