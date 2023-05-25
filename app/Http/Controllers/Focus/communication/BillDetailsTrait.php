@@ -197,7 +197,7 @@ trait BillDetailsTrait
                 //payroll
 
                 $resource = PayrollItem::find($request->id);
-                
+               
                 $valid_token = token_validator('', 'q' . $resource->id, true);
                
                 break;

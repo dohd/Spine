@@ -140,18 +140,16 @@ class BillsController extends Controller
     }
     public function print_payroll_pdf(Request $request)
     {
-        dd($request->all());
+       
         $data = $this->bill_details($request);
-//  dd($data);
         $html = view('focus.bill.print_payroll', $data)->render();
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
-        //dd($data);
         $eid = $data['resource']['employee_id'];
         
         $name = gen4tid('EMP-', $eid);
         $name .= '.pdf';
-
+       
         return Response::stream($pdf->Output($name, 'I'), 200, $this->headers);
     }
 
