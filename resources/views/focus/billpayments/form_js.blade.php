@@ -27,6 +27,7 @@
             // edit mode
             const editBill = this.billPayment;
             if (editBill) {
+                $('#date').datepicker('setDate', new Date(editBill.date));
                 if (editBill.supplier_id) {
                     $('#employee').val('').change().attr({'disabled': true, 'required':false});
                 } else if (editBill.employee_id) {

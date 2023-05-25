@@ -213,7 +213,7 @@ class SuppliersController extends Controller
             $debt_amount = $bill->credit - $bill->debit;
             // over payment
             if ($debt_amount < 0) {
-                $supplier->on_account += $debt_amount * -1;
+                // $supplier->on_account += $debt_amount * -1;
                 $debt_amount = 0;
             }
             // due_date between 0 - 120 days
