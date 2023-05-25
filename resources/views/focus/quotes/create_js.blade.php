@@ -189,7 +189,7 @@
     });
 
     // on change qty and rate
-    $("#quoteTbl").on("change", ".qty, .rate, .buyprice, .estqty, .tax_rate", function() {
+    $("#quoteTbl").on("change", ".qty, .rate, .buyprice, .estqty, .tax_rate, .unit", function() {
         const id = $(this).attr('id').split('-')[1];
 
         const qty = accounting.unformat($('#qty-'+id).val());
@@ -197,6 +197,12 @@
         let buyprice = accounting.unformat($('#buyprice-'+id).val());
         let estqty = accounting.unformat($('#estqty-'+id).val() || '1');
         let rate = accounting.unformat($('#rate-'+id).val());
+
+        // uom rate conversion
+        if ($(this).is('.unit')) {
+            rate = accounting.unformat($('#unit-'+id+' option:selected').attr('product_rate'));
+            buyprice = accounting.unformat($('#unit-'+id+' option:selected').attr('purchase_price'));
+        }
 
         // row item % profit
         let price = rate * (taxrate/100 + 1);
@@ -367,26 +373,31 @@
                 $('#name-'+i).val(data.name);
                 $('#unit-'+i).val(data.unit);                
                 $('#qty-'+i).val(1); 
-                
+
+                // currency conversion
                 const currencyRate = $('#currency option:selected').attr('currency_rate');
                 if (currencyRate > 1) {
                     data.purchase_price = parseFloat(data.purchase_price) / currencyRate;
                     data.price = parseFloat(data.price) / currencyRate;
                 }
-
                 $('#buyprice-'+i).val(accounting.formatNumber(data.purchase_price)); 
                 $('#estqty-'+i).val(1);
-
                 const rate = parseFloat(data.price);
                 let price = rate * ($('#tax_id').val()/100 + 1);
                 $('#price-'+i).val(accounting.formatNumber(price));                
                 $('#amount-'+i).text(accounting.formatNumber(price));
-                $('#rate-'+i).val(accounting.formatNumber(rate)).change();
+                $('#rate-'+i).val(accounting.formatNumber(rate));
 
+                // product units 
                 if (data.units) {
-                    let units = data.units.filter(v => v.unit_type == 'base');
-                    if (units.length) $('#unit-'+i).val(units[0].code);
+                    $('#unit-'+i).html('');
+                    data.units.forEach(v => {
+                        let product_rate = rate * parseFloat(v.base_ratio);
+                        let purchase_price = parseFloat(data.purchase_price); * parseFloat(v.base_ratio);
+                        $('#unit-'+i).append(`<option value="${v.code}" purchase_price="${purchase_price}" product_rate="${product_rate}">${v.code}</option>`);
+                    });
                 }
+                $('#rate-'+i).change();
             }
         };
     }    

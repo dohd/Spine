@@ -20,7 +20,8 @@
             <td>
                 <textarea name="product_name[]" id="name-p0" cols="35" rows="2" class="form-control" placeholder="{{trans('general.enter_product')}}" required></textarea>
             </td>
-            <td><input type="text" name="unit[]" id="unit-p0" class="form-control"></td>
+            {{-- <td><input type="text" name="unit[]" id="unit-p0" class="form-control"></td> --}}
+            <td><select name="unit[]" id="unit-p0" class="form-control unit"></select></td>
             <td><input type="number" class="form-control estqty" name="estimate_qty[]" id="estqty-p0" step="0.1" required></td>  
             <td><input type="text" class="form-control buyprice" name="buy_price[]" id="buyprice-p0" readonly></td>  
             <td><input type="number" class="form-control qty" name="product_qty[]" id="qty-p0" step="0.1" required></td>
@@ -88,10 +89,25 @@
                         <td>
                             <textarea name="product_name[]" id="name-p{{ $k }}" cols="35" rows="2" class="form-control pname" placeholder="{{trans('general.enter_product')}}" required>{{ $item->product_name }}</textarea>
                         </td>
-                        <td><input type="text" name="unit[]" id="unit-p{{ $k }}" value="{{ $item->unit }}" class="form-control"></td>
+                        {{-- <td><input type="text" name="unit[]" id="unit-p{{ $k }}" value="{{ $item->unit }}" class="form-control"></td> --}}
+                        <td>
+                            @php
+                                $units = @$item->variation->product->units ?: [];
+                                $variation = @$item->variation;
+                            @endphp
+                            <select name="unit[]" id="unit-p{{ $k }}" class="form-control unit">
+                                @if ($variation)
+                                    @foreach ($units as $unit)
+                                        <option value="{{ $unit->code }}" purchase_price="{{ $unit->base_ratio * $variation->purchase_price }}" product_rate="{{ $unit->base_ratio * $variation->price }}" {{ $unit->code == $item->unit? 'selected' : '' }}>
+                                            {{ $unit->code }}
+                                        </option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </td>
                         <td><input type="number" class="form-control estqty" name="estimate_qty[]" value="{{ number_format($item->estimate_qty, 1) }}" id="estqty-p{{$k}}" step="0.1" required></td>  
                         <td><input type="text" class="form-control buyprice" name="buy_price[]" value="{{ number_format($item->buy_price, 4) }}" id="buyprice-p{{$k}}" readonly></td>          
-                        <td><input type="number" class="form-control qty {{ !$item->misc ?: 'invisible' }}" name="product_qty[]" value="{{ number_format($item->product_qty, 1) }}" id="qty-p{{$k}}" step="0.1" required></td>
+                        <td><input type="number" class="form-control qty {{ !$item->misc ?: 'invisible' }}" name="product_qty[]" value="{{ number_format($item->product_qty, 1) }}" id="qty-p{{$k}}" required></td>
                         <td>
                             <input type="text" class="form-control rate {{ !$item->misc ?: 'invisible' }}" name="product_subtotal[]" value="{{ number_format($item->product_subtotal, 4) }}" id="rate-p{{$k}}" required>
                         </td>

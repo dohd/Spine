@@ -207,6 +207,7 @@ class QuoteRepository extends BaseRepository
                 'product_price' =>  floatval(str_replace(',', '', $v['product_price'])),
                 'product_subtotal' => floatval(str_replace(',', '', $v['product_subtotal'])),
                 'buy_price' => floatval(str_replace(',', '', $v['buy_price'])),
+                'estimate_qty' => floatval(str_replace(',', '', $v['estimate_qty'])),
             ]);
         }, $data_items);
         QuoteItem::insert($data_items);
@@ -262,7 +263,7 @@ class QuoteRepository extends BaseRepository
         // create or update items
         foreach($data_items as $item) {
             foreach ($item as $key => $val) {
-                if (in_array($key, ['product_price', 'product_subtotal', 'buy_price']))
+                if (in_array($key, ['product_price', 'product_subtotal', 'buy_price', 'estimate_qty']))
                     $item[$key] = floatval(str_replace(',', '', $val));
             }
             $quote_item = QuoteItem::firstOrNew(['id' => $item['id']]);
