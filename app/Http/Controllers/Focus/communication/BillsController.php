@@ -140,8 +140,8 @@ class BillsController extends Controller
     }
     public function print_payroll_pdf(Request $request)
     {
-       
         $data = $this->bill_details($request);
+        
         $html = view('focus.bill.print_payroll', $data)->render();
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);

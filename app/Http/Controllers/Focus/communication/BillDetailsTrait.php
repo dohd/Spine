@@ -197,7 +197,20 @@ trait BillDetailsTrait
                 //payroll
 
                 $resource = PayrollItem::find($request->id);
+                $attributes = $getAttr(12, 'payslip', 12, 1, $resource->employee_id, route('biller.payroll.show', $resource->id));
+                foreach($attributes as $key => $val) {
+                    $resource[$key] = $val;
+                }
                
+                $flag = token_validator($request->token, 'q' . $resource->id);
+                $general = $getGeneral(
+                    trans('payrolls.payroll'),
+                    trans('payrolls.payroll'),
+                    trans('payrolls.invoicedate'),
+                    trans('payrolls.invoiceduedate'), 
+                    trans('suppliers.supplier'),
+                    'ltr', 12, false
+                );
                 $valid_token = token_validator('', 'q' . $resource->id, true);
                
                 break;

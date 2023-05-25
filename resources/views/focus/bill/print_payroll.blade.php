@@ -195,29 +195,33 @@
     <table class="customer-dt" cellpadding="10">
         if($resource->employee){
             @php
-                $employee = $resource->employee
+                $employee = $resource->employee;
+                $totalnontaxableallowances = $resource->total_benefits +$resource->total_other_allowances;
+                $gross_taxable_allowance = ($resource->total_allowance)-($resource->tx_deductions);
+                $totalnontaxdeductions = $resource->total_other_deduction + $resource->nhif + $resource->advance + $resource->loan;;
+                $gross_non_taxable_allowance = $totalnontaxableallowances-$totalnontaxdeductions;
             @endphp
             <tr>
                 <td width="50%">
                     <span class="customer-dt-title">EMPLOYEE DETAILS:</span><br><br>
                    
-                    <b>Employee No :</b> $employee->id<br>
+                    <b>Employee No :</b> {{$employee->id}}<br>
                     <b>KRA PIN :</b> A0WADAD2154<br>
                     <b>Contract Expiry Date :</b> 24/05/2023<br>
-                    <b>Employee Name :</b> $employee->first_name $employee->last_name<br>
+                    <b>Employee Name :</b> {{$employee->first_name}} {{ $employee->last_name}}<br>
                     <b>Job Title :</b> Developer<br>
                     <b>Department :</b> Technical<br>
                 </td>
                 <td width="5%">&nbsp;</td>
                 <td width="45%">
                     <span class="customer-dt-title">PAYSLIP DETAILS:</span><br><br>
-                    <b>Basic Pay :</b> $resource->basic_pay<br><br>
-                    <b>Taxable Gross Allowances :</b>{{ ($resource->total_allowance)-($resource->tx_deductions) }}<br>
-                    <b>NSSF :</b> $resource->nssf <br>
-                    <b>NHIF :</b> $resource->nhif <br>
-                    <b>PAYE :</b> $resource->paye <br>
-                    <b>Non-Taxable Gross Allowances :</b>  {{ $totalnontaxableallowances-$totalnontaxdeductions }} <br>
-                    <b>Net Pay :</b> $resource->netpay <br>
+                    <b>Basic Pay :</b> {{$resource->basic_pay}}<br><br>
+                    <b>Taxable Gross Allowances :</b>{{ $gross_taxable_allowance }}<br>
+                    <b>NSSF :</b> {{$resource->nssf}} <br>
+                    <b>NHIF :</b> {{$resource->nhif}} <br>
+                    <b>PAYE :</b> {{$resource->paye}} <br>
+                    <b>Non-Taxable Gross Allowances :</b>  {{  $gross_non_taxable_allowance }} <br>
+                    <b>Net Pay :</b> {{$resource->netpay}} <br>
                 </td>
             </tr>
         }
@@ -252,7 +256,7 @@
                                     Transport
                                 </td>
                                 <td class="border">
-                                    $resource->transport_allowance
+                                    {{$resource->transport_allowance}}
                                 </td>
                             </tr>
                             <tr>
@@ -260,7 +264,7 @@
                                     Housing
                                 </td>
                                 <td class="border">
-                                    $resource->house_allowance
+                                    {{$resource->house_allowance}}
                                 </td>
                             </tr>
                             <tr>
@@ -268,7 +272,7 @@
                                     Other
                                 </td>
                                 <td class="border">
-                                    $resource->other_allowance
+                                    {{$resource->other_allowance}}
                                 </td>
                             </tr>
                             <tr>
@@ -276,7 +280,7 @@
                                     <b>Total</b>
                                 </td>
                                 <td class="border">
-                                    $resource->total_allowance
+                                   {{ $resource->total_allowance}}
                                 </td>
                             </tr>
                         </tbody>
@@ -296,7 +300,7 @@
                                     NSSF
                                 </td>
                                 <td class="border">
-                                    $resource->nhif
+                                    {{$resource->nhif}}
                                 </td>
                             </tr>
 
@@ -305,7 +309,7 @@
                                     Other
                                 </td>
                                 <td class="border">
-                                    $resource->total_other_deduction
+                                    {{$resource->total_other_deduction}}
                                 </td>
                             </tr>
                             <tr>
@@ -313,7 +317,7 @@
                                     <b>Total</b>
                                 </td>
                                 <td class="border">
-                                    $resource->tx_deductions
+                                    {{$resource->tx_deductions}}
                                 </td>
                             </tr>
                         </tbody>
@@ -324,7 +328,7 @@
         </tbody>
     </table>
     <hr>
-    <h3>Gross Taxable Allowance : <b> {{ ($resource->total_allowance)-($resource->tx_deductions) }} </b></h3>
+    <h3>Gross Taxable Allowance : <b> {{ $gross_taxable_allowance }} </b></h3>
     <hr>
     <p><b>Non-Taxable Allowances and Deductions</b></p>
     <table class="border" style="width:100%">
@@ -355,7 +359,7 @@
                                     Benefits
                                 </td>
                                 <td class="border">
-                                    $resource->total_benefits
+                                    {{$resource->total_benefits}}
                                 </td>
                             </tr>
                            
@@ -364,18 +368,16 @@
                                     Other Allowances
                                 </td>
                                 <td class="border">
-                                    $resource->total_other_allowances
+                                    {{$resource->total_other_allowances}}
                                 </td>
                             </tr>
                             <tr>
                                 <td class="border">
                                     <b>Total</b>
                                 </td>
-                                @php
-                                    $totalnontaxableallowances = $resource->total_benefits +$resource->total_other_allowances
-                                @endphp
+                                
                                 <td class="border">
-                                   $totalnontaxableallowances
+                                   {{$totalnontaxableallowances}}
                                 </td>
                             </tr>
                         </tbody>
@@ -395,7 +397,7 @@
                                     Loan
                                 </td>
                                 <td class="border">
-                                    $resource->loan
+                                    {{$resource->loan}}
                                 </td>
                             </tr>
                             <tr>
@@ -403,7 +405,7 @@
                                     Advance
                                 </td>
                                 <td class="border">
-                                    $resource-advance
+                                    {{$resource->advance}}
                                 </td>
                             </tr>
                             <tr>
@@ -411,7 +413,7 @@
                                     NHIF
                                 </td>
                                 <td class="border">
-                                    $resource->nhif
+                                    {{$resource->nhif}}
                                 </td>
                             </tr>
 
@@ -420,18 +422,16 @@
                                     Other
                                 </td>
                                 <td class="border">
-                                    $resource->total_other_deduction
+                                    {{$resource->total_other_deduction}}
                                 </td>
                             </tr>
                             <tr>
                                 <td class="border">
                                     <b>Total</b>
                                 </td>
-                                @php
-                                    $totalnontaxdeductions = $resource->total_other_deduction + $resource->nhif + $resource-advance + $resource->loan
-                                @endphp
+                                
                                 <td class="border">
-                                    $totalnontaxdeductions
+                                    {{$totalnontaxdeductions}}
                                 </td>
                             </tr>
                         </tbody>
@@ -442,7 +442,7 @@
         </tbody>
     </table>
     <hr>
-    <h3>Gross Non-Taxable Allowance : <b> {{ $totalnontaxableallowances-$totalnontaxdeductions }}</b></h3>
+    <h3>Gross Non-Taxable Allowance : <b> {{  $gross_non_taxable_allowance }}</b></h3>
     <hr>
 
 
