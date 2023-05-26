@@ -335,16 +335,14 @@ class GoodsreceivenoteRepository extends BaseRepository
         
         $bill = UtilityBill::where(['ref_id' => $grn->id, 'document_type' => 'goods_receive_note'])->first();
         if ($bill) {
+            Transaction::where(['tr_type' => 'bill', 'tr_ref' => $bill->id, 'note' => $bill->note])->delete();
             // update bill
             $bill->update($bill_data);
             foreach ($grn_items as $item) {
                 $new_item = UtilityBillItem::firstOrNew(['bill_id' => $bill->id,'ref_id' => $item['ref_id']]);
                 $new_item->fill($item);
                 $new_item->save();
-            }
-
-            // accounting
-            Transaction::where(['tr_type' => 'bill', 'tr_ref' => $bill->id, 'note' => $bill->prev_note])->delete();
+            }            
         } else {
             // create bill
             $bill_data['tid'] = UtilityBill::where('ins', auth()->user()->ins)->max('tid') + 1;
