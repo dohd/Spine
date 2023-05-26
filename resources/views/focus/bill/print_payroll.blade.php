@@ -165,6 +165,7 @@
             border: 1px solid black;
             border-collapse: collapse;
         }
+       
     </style>
 </head>
 
@@ -193,10 +194,10 @@
         </tr>
     </table><br>
     <table class="customer-dt" cellpadding="10">
-        if($resource->employee){
+        {{-- if($resource->employee){ --}}
         @php
             $employee = $resource->employee;
-            $hrmmeta = $resource->hrmmeta;
+            $hrmmeta = $resource->hrmmetas;
             $totalnontaxableallowances = $resource->total_benefits + $resource->total_other_allowances;
             $gross_taxable_allowance = $resource->total_allowance - $resource->tx_deductions;
             $totalnontaxdeductions = $resource->total_other_deduction + $resource->nhif + $resource->advance + $resource->loan;
@@ -209,7 +210,7 @@
                 <b>Employee No :</b> {{ gen4tid('EMP-',$employee->id) }}<br>
                 <b>Employee Name :</b> {{ $employee->first_name }} {{ $employee->last_name }}<br>
                 <b>KRA PIN :</b>{{ $hrmmeta->kra_pin }}<br>
-                <b>Contract Expiry Date :</b> {{ $salary->end_date }}<br>
+                <b>Contract Expiry Date :</b> {{ $resource->salary->end_date }}<br>
                
                 <b>Job Title :</b> {{ $hrmmeta->jobtitle->name }}  <br>
                 <b>Department :</b> {{ $hrmmeta->department->name }} <br>
@@ -226,20 +227,20 @@
                 <b>Net Pay :</b> {{ $resource->netpay }} <br>
             </td>
         </tr>
-        }
+        {{-- } --}}
 
     </table><br>
-    <div class="row" >
-        <div class="col-3" >
-            Date: 22/05/23
+    <div>
+        <div  >
+          Date: 22/05/23
         </div>
-        <div class="col-3">
+        <div >
             Amount: KSH 40000
         </div>
-        <div class="col-3">
+        <div >
            Acc.No : {{ $hrmmeta->account_number }} 
         </div>
-        <div class="col-3">
+        <div >
            Payment Method: MPESA
         </div>
     </div><br>
