@@ -255,29 +255,20 @@
                 <div class='form-group'>
                     {{ Form::label( 'department', trans('departments.department'),['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
-                        {!! Form::select('department_id', @$departments, null, [
-                            'placeholder' => '-- Select Department --',
-                            'class' => ' form-control round',
-                            'id' => 'department',
-                            'required' => 'required',
-                        ]) !!}
-
+                        <select id="department" name="department_id" class="form-control" data-placeholder="Select Department">
+                            <option value=""></option>
+                            @foreach ($departments as $row)
+                                <option value="{{ $row->id }}">
+                                    {{ $row->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
-                <div class='form-group'>
-                    {{ Form::label( 'position', 'Position',['class' => 'col-lg-2 control-label']) }}
-                    <div class='col-lg-10'>
-                        {{ Form::text('position', null, ['class' => 'form-control box-size', 'placeholder' => 'Position']) }}
-                    </div>
-                </div>
-                <div class="col-4">
-                    <label for="purchaseorder" class="caption">Position</label>
-                    <select name="purchaseorder_id" id="purchaseorder" class="custom-select">
-                        @isset($goodsreceivenote)
-                            <option value="{{ $goodsreceivenote->purchaserder_id }}">
-                                {{ $goodsreceivenote->purchaseorder? $goodsreceivenote->purchaseorder->note : '' }}
-                            </option>
-                        @endisset
+               
+                <div class="col-lg-10 mb-2">
+                    <label for="position" class="caption">Position</label>
+                    <select name="position" id="position" class="custom-select" data-placeholder="Select Position" disabled>
                     </select>
                 </div> 
 
@@ -446,6 +437,7 @@
 
 @section('after-scripts')
 {{ Html::script('focus/js/jquery.password-validation.js') }}
+{{ Html::script('focus/js/select2.min.js') }}
 <script>
     // check all roles
     $('#check_all').change(function() {
@@ -459,7 +451,26 @@
             })
         }
     });
-
+    $('#department').select2({allowClear: true});
+    $('#position').select2({allowClear: true});
+    $(document.body).on('change', '#department', function (e) {
+        var did = $(this).val();
+        department_change(did);
+    });
+    function department_change(did) {
+            $('#position option').remove();
+            var positions = @json($positions);
+            var listpositions = Object.values(positions);
+            
+            if (did) {
+                const jobTitles = listpositions.filter(v => v.department_id == did);
+                
+                jobTitles.forEach(v => $('#position').append(`<option value="${v.id}">${v.name}</option>`));
+                $('#position').attr('disabled', false).val('');
+            } else {
+                $('#position').attr('disabled', true);
+            }
+        }
     $(document).ready(function () {
         $("#u_password").passwordValidation({
             minLength: 6,

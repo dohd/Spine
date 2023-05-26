@@ -109,7 +109,7 @@ class HrmsController extends Controller
                 if (isset($val['id_back'])) $request->validate(['id_front' => 'required|mimes:jpeg,png']);
             }
         }
-
+       
         $input['employee']['ins'] = auth()->user()->ins;
 
         try {
