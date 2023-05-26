@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Verification Management')
+@section ('title', 'Partial Verification Management')
 
 @section('content')
 <div class="content-wrapper">
@@ -48,7 +48,8 @@
                                         <th>{{ trans('customers.customer') }}</th>
                                         <th>Title</th>                                            
                                         <th>{{ trans('general.amount') }}</th>
-                                        <th>Verified Amount</th>
+                                        <th>Verified</th>
+                                        <th>Balance</th>
                                         <th>Project No</th>
                                         <th>LPO No</th>
                                     </tr>
@@ -155,7 +156,7 @@
                 columns: [
                     {data: 'checkbox',  searchable: false,  sortable: false},
                     ...[
-                        'tid', 'customer', 'notes', 'total', 'verified_total', 'project_tid', 'lpo_number'
+                        'tid', 'customer', 'notes', 'total', 'verified_total', 'balance', 'project_tid', 'lpo_number'
                     ].map(v => ({data: v, name: v})),
                 ],
                 columnDefs: [
