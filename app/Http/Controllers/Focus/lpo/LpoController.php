@@ -141,7 +141,7 @@ class LpoController extends Controller
         try {
             $lpo->delete(); 
         } catch (\Throwable $th) {
-            return errorHander('Error Deleting LPO', $th);
+            return errorHandler('Error Deleting LPO', $th);
         }       
         return response()->noContent();
     }

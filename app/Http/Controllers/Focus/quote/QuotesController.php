@@ -256,8 +256,8 @@ class QuotesController extends Controller
     public function verify_quote(Quote $quote)
     {
         $products = VerifiedItem::where('quote_id', $quote->id)->get();
+        if (!$products->count()) $products = $quote->products()->where('misc', 0)->get();
         $jobcards = VerifiedJc::where('quote_id', $quote->id)->with('equipment')->get();
-        if (!$products->count()) $products = $quote->products;
 
         return new ViewResponse('focus.quotesverify.create', compact('quote', 'products', 'jobcards') + bill_helper(2, 4));
     }
