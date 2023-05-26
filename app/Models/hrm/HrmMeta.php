@@ -5,11 +5,12 @@ namespace App\Models\hrm;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\ModelTrait;
 use App\Models\hrm\Traits\HrmMetaAttribute;
+use App\Models\hrm\Traits\HrmMetaRelationship;
 
 class HrmMeta extends Model
 {
     use ModelTrait,
-        HrmMetaAttribute {
+        HrmMetaAttribute, HrmMetaRelationship {
 
     }
 

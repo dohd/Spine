@@ -5,7 +5,7 @@
         @php
             
             $tid = $resource->employee_id;
-           
+            
             $tid = gen4tid('EMP', $tid);
         @endphp
         PaySlip
@@ -194,44 +194,60 @@
     </table><br>
     <table class="customer-dt" cellpadding="10">
         if($resource->employee){
-            @php
-                $employee = $resource->employee;
-                $totalnontaxableallowances = $resource->total_benefits +$resource->total_other_allowances;
-                $gross_taxable_allowance = ($resource->total_allowance)-($resource->tx_deductions);
-                $totalnontaxdeductions = $resource->total_other_deduction + $resource->nhif + $resource->advance + $resource->loan;;
-                $gross_non_taxable_allowance = $totalnontaxableallowances-$totalnontaxdeductions;
-            @endphp
-            <tr>
-                <td width="50%">
-                    <span class="customer-dt-title">EMPLOYEE DETAILS:</span><br><br>
-                   
-                    <b>Employee No :</b> {{$employee->id}}<br>
-                    <b>KRA PIN :</b> A0WADAD2154<br>
-                    <b>Contract Expiry Date :</b> 24/05/2023<br>
-                    <b>Employee Name :</b> {{$employee->first_name}} {{ $employee->last_name}}<br>
-                    <b>Job Title :</b> Developer<br>
-                    <b>Department :</b> Technical<br>
-                </td>
-                <td width="5%">&nbsp;</td>
-                <td width="45%">
-                    <span class="customer-dt-title">PAYSLIP DETAILS:</span><br><br>
-                    <b>Basic Pay :</b> {{$resource->basic_pay}}<br><br>
-                    <b>Taxable Gross Allowances :</b>{{ $gross_taxable_allowance }}<br>
-                    <b>NSSF :</b> {{$resource->nssf}} <br>
-                    <b>NHIF :</b> {{$resource->nhif}} <br>
-                    <b>PAYE :</b> {{$resource->paye}} <br>
-                    <b>Non-Taxable Gross Allowances :</b>  {{  $gross_non_taxable_allowance }} <br>
-                    <b>Net Pay :</b> {{$resource->netpay}} <br>
-                </td>
-            </tr>
+        @php
+            $employee = $resource->employee;
+            $hrmmeta = $resource->hrmmeta;
+            $totalnontaxableallowances = $resource->total_benefits + $resource->total_other_allowances;
+            $gross_taxable_allowance = $resource->total_allowance - $resource->tx_deductions;
+            $totalnontaxdeductions = $resource->total_other_deduction + $resource->nhif + $resource->advance + $resource->loan;
+            $gross_non_taxable_allowance = $totalnontaxableallowances - $totalnontaxdeductions;
+        @endphp
+        <tr>
+            <td width="50%">
+                <span class="customer-dt-title">EMPLOYEE DETAILS:</span><br><br>
+
+                <b>Employee No :</b> {{ gen4tid('EMP-',$employee->id) }}<br>
+                <b>Employee Name :</b> {{ $employee->first_name }} {{ $employee->last_name }}<br>
+                <b>KRA PIN :</b>{{ $hrmmeta->kra_pin }}<br>
+                <b>Contract Expiry Date :</b> {{ $salary->end_date }}<br>
+               
+                <b>Job Title :</b> {{ $hrmmeta->jobtitle->name }}  <br>
+                <b>Department :</b> {{ $hrmmeta->department->name }} <br>
+            </td>
+            <td width="5%">&nbsp;</td>
+            <td width="45%">
+                <span class="customer-dt-title">PAYSLIP DETAILS:</span><br><br>
+                <b>Basic Pay :</b> {{ $resource->basic_pay }}<br><br>
+                <b>Taxable Gross Allowances :</b>{{ $gross_taxable_allowance }}<br>
+                <b>NSSF :</b> {{ $resource->nssf }} <br>
+                <b>NHIF :</b> {{ $resource->nhif }} <br>
+                <b>PAYE :</b> {{ $resource->paye }} <br>
+                <b>Non-Taxable Gross Allowances :</b> {{ $gross_non_taxable_allowance }} <br>
+                <b>Net Pay :</b> {{ $resource->netpay }} <br>
+            </td>
+        </tr>
         }
-       
+
     </table><br>
+    <div class="row" >
+        <div class="col-3" >
+            Date: 22/05/23
+        </div>
+        <div class="col-3">
+            Amount: KSH 40000
+        </div>
+        <div class="col-3">
+           Acc.No : {{ $hrmmeta->account_number }} 
+        </div>
+        <div class="col-3">
+           Payment Method: MPESA
+        </div>
+    </div><br>
     <p><b>Taxable Allowances and Deductions</b></p>
     <table class="border" style="width:100%">
         <thead>
             <tr>
-                <td class="border"  width="50%">
+                <td class="border" width="50%">
                     Allowances
                 </td>
                 <td class="border" width="50%">
@@ -242,10 +258,10 @@
 
         <tbody>
             <tr>
-                <td class="border"  width="50%">
+                <td class="border" width="50%">
                     <table class="table-taxable border" cellpadding="8">
                         <thead>
-                            <tr >
+                            <tr>
                                 <th class="border">Item</th>
                                 <th class="border">Amount</th>
                             </tr>
@@ -256,7 +272,7 @@
                                     Transport
                                 </td>
                                 <td class="border">
-                                    {{$resource->transport_allowance}}
+                                    {{ $resource->transport_allowance }}
                                 </td>
                             </tr>
                             <tr>
@@ -264,7 +280,7 @@
                                     Housing
                                 </td>
                                 <td class="border">
-                                    {{$resource->house_allowance}}
+                                    {{ $resource->house_allowance }}
                                 </td>
                             </tr>
                             <tr>
@@ -272,7 +288,7 @@
                                     Other
                                 </td>
                                 <td class="border">
-                                    {{$resource->other_allowance}}
+                                    {{ $resource->other_allowance }}
                                 </td>
                             </tr>
                             <tr>
@@ -280,7 +296,7 @@
                                     <b>Total</b>
                                 </td>
                                 <td class="border">
-                                   {{ $resource->total_allowance}}
+                                    {{ $resource->total_allowance }}
                                 </td>
                             </tr>
                         </tbody>
@@ -300,7 +316,15 @@
                                     NSSF
                                 </td>
                                 <td class="border">
-                                    {{$resource->nhif}}
+                                    {{ $resource->nhif }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border">
+                                    Absenteeism ({{ $resource->absent_days }})
+                                </td>
+                                <td class="border">
+                                    {{ $resource->absent_deduction }}
                                 </td>
                             </tr>
 
@@ -309,7 +333,7 @@
                                     Other
                                 </td>
                                 <td class="border">
-                                    {{$resource->total_other_deduction}}
+                                    {{ $resource->total_other_deduction }}
                                 </td>
                             </tr>
                             <tr>
@@ -317,24 +341,25 @@
                                     <b>Total</b>
                                 </td>
                                 <td class="border">
-                                    {{$resource->tx_deductions}}
+                                    {{ $resource->tx_deductions }}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </td>
             </tr>
-
+            <tr>
+                <td class="border"><b>Gross Taxable Allowance</b> (Allowances-Deductions) </td>
+                <td class="border"> <b> {{ $gross_taxable_allowance }}</td>
+            </tr>
         </tbody>
-    </table>
-    <hr>
-    <h3>Gross Taxable Allowance : <b> {{ $gross_taxable_allowance }} </b></h3>
-    <hr>
+    </table><br>
+
     <p><b>Non-Taxable Allowances and Deductions</b></p>
     <table class="border" style="width:100%">
         <thead>
             <tr>
-                <td class="border"  width="50%">
+                <td class="border" width="50%">
                     Allowances
                 </td>
                 <td class="border" width="50%">
@@ -345,10 +370,10 @@
 
         <tbody>
             <tr>
-                <td class="border"  width="50%">
+                <td class="border" width="50%">
                     <table class="table-taxable border" cellpadding="8">
                         <thead>
-                            <tr >
+                            <tr>
                                 <th class="border">Item</th>
                                 <th class="border">Amount</th>
                             </tr>
@@ -359,25 +384,25 @@
                                     Benefits
                                 </td>
                                 <td class="border">
-                                    {{$resource->total_benefits}}
+                                    {{ $resource->total_benefits }}
                                 </td>
                             </tr>
-                           
+
                             <tr>
                                 <td class="border">
                                     Other Allowances
                                 </td>
                                 <td class="border">
-                                    {{$resource->total_other_allowances}}
+                                    {{ $resource->total_other_allowances }}
                                 </td>
                             </tr>
                             <tr>
                                 <td class="border">
                                     <b>Total</b>
                                 </td>
-                                
+
                                 <td class="border">
-                                   {{$totalnontaxableallowances}}
+                                    {{ $totalnontaxableallowances }}
                                 </td>
                             </tr>
                         </tbody>
@@ -397,7 +422,7 @@
                                     Loan
                                 </td>
                                 <td class="border">
-                                    {{$resource->loan}}
+                                    {{ $resource->loan }}
                                 </td>
                             </tr>
                             <tr>
@@ -405,7 +430,7 @@
                                     Advance
                                 </td>
                                 <td class="border">
-                                    {{$resource->advance}}
+                                    {{ $resource->advance }}
                                 </td>
                             </tr>
                             <tr>
@@ -413,7 +438,7 @@
                                     NHIF
                                 </td>
                                 <td class="border">
-                                    {{$resource->nhif}}
+                                    {{ $resource->nhif }}
                                 </td>
                             </tr>
 
@@ -422,37 +447,36 @@
                                     Other
                                 </td>
                                 <td class="border">
-                                    {{$resource->total_other_deduction}}
+                                    {{ $resource->total_other_deduction }}
                                 </td>
                             </tr>
                             <tr>
                                 <td class="border">
                                     <b>Total</b>
                                 </td>
-                                
+
                                 <td class="border">
-                                    {{$totalnontaxdeductions}}
+                                    {{ $totalnontaxdeductions }}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </td>
             </tr>
-
+            <tr>
+                <td class="border"><b>Gross Non-Taxable Allowance</b> (Allowances-Deductions) </td>
+                <td class="border"> <b> {{ $gross_non_taxable_allowance }}</td>
+            </tr>
         </tbody>
-    </table>
-    <hr>
-    <h3>Gross Non-Taxable Allowance : <b> {{  $gross_non_taxable_allowance }}</b></h3>
-    <hr>
+    </table><br>
 
-
-
-
-
-
-
-
-
+    <div class="row">
+        <div class="col-6">
+            <p>Prepared By <span><hr> </span></p>
+        </div>
+        <div class="col-6">
+            <p>Employee Signature <span><hr> </span></p>
+        </div>
     </div>
     <br>
     <div>{!! $resource->extra_footer !!}</div>
