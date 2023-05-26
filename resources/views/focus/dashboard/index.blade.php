@@ -209,11 +209,9 @@
                                                 </span>
                                             </div>
                                             <div class="media-body w-100">
-                                                <h6 class="list-group-item-heading">{{ $customer->company ?: $customer->name }}<span
-                                                        class="  float-right st-{{ $customer['status'] }} ml-1">{{ trans('payments.' . $customer['status']) }}</span>
-                                                </h6>
-                                                <p class="list-group-item-text mb-0">
-                                                </p>
+                                                <h6 class="list-group-item-heading">
+                                                    {{ $customer->company ?: $customer->name }}
+                                                </h6>                                                
                                             </div>
                                         </a>
                                     @endforeach

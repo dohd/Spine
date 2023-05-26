@@ -18,12 +18,15 @@
 
 namespace App\Http\Controllers\Focus\general;
 
-use App\Http\Responses\RedirectResponse;
 use App\Models\invoice\Invoice;
 use App\Models\product\ProductVariation;
 use App\Models\transaction\Transaction;
-
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ViewResponse;
+use App\Models\customer\Customer;
+use App\Models\hrm\Hrm;
+use App\Models\misc\Misc;
+use App\Models\project\Project;
 use Illuminate\Support\Facades\DB;
 
 
@@ -31,29 +34,26 @@ class CoreDashboard extends Controller
 {
     public function index()
     {
-        if (!access()->allow('dashboard-owner')) {
+        if (!access()->allow('dashboard-owner')) 
             return view('focus.dashboard.common');
-        }
-            
+        
         $start_date = date('Y-m') . '-01';
         $today = date('Y-m-d');
-
+        // invoices
         $data['invoices'] = Invoice::whereBetween('invoicedate', [$start_date, $today])
-        ->with('customer')
-        ->latest()->limit(10)->get();
-        
-        $data['customers'] = [];
-        foreach ($data['invoices'] as $invoice) {
-            $data['customers'][] = $invoice->customer;
-        }
-
-        $data['stock_alert'] = ProductVariation::whereRaw('qty <= alert')->whereHas('product', function ($q) {
-            $q->where('stock_type', 'general');
-        })->orderBy('id', 'desc')->get();
-
+            ->with('customer')
+            ->latest()->limit(10)->get();
+        // customers
+        $data['customers'] = Customer::whereIn('id', $data['invoices']->pluck('customer_id')->toArray())->get();
+        // stock alerts
+        $data['stock_alert'] = ProductVariation::whereRaw('qty <= alert')
+            ->whereHas('product', fn($q) => $q->where('stock_type', 'general'))
+            ->orderBy('id', 'desc')->get();
+        // transactions
         $transactions = Transaction::whereBetween('tr_date', [$start_date, $today])
-        ->orderBy('id', 'desc')
-        ->with(['account'])->take(10)->get();
+            ->orderBy('id', 'desc')
+            ->with('account')
+            ->take(10)->get();
 
         return view('focus.dashboard.index', compact('data', 'transactions'));
     }
