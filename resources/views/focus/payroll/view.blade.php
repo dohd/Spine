@@ -5,7 +5,7 @@
 @section('page-header')
     <h1>
         Payroll Management
-        <small>Create</small>
+        <small>View</small>
     </h1>
 @endsection
 
@@ -77,9 +77,14 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="base-tab7" data-toggle="tab" aria-controls="tab7" href="#tab7"
-                                role="tab" aria-selected="false">
+                            <a class="nav-link" id="base-tab7" data-toggle="tab" aria-controls="tab7" href="#tab7" role="tab" aria-selected="false">
                                 <span>Summary</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="base-tab8" data-toggle="tab" aria-controls="tab8" href="#tab8" role="tab"
+                               aria-selected="false">
+                               <span>Print Payroll</span>
                             </a>
                         </li>
                     </ul>
@@ -454,6 +459,13 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="tab-pane" id="tab8" role="tabpanel" aria-labelledby="base-tab8">
+                            <div class="card-content">
+                                <div class="card-body">
+                                 @include('focus.payroll.partials.generate-payroll')
+                                </div>                    
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -462,19 +474,73 @@
 @endsection
 @include('focus.payroll.partials.approval')
 @section('after-scripts')
-    <script>
-        config = {
-            date: {
-                format: "{{ config('core.user_date_format') }}",
-                autoHide: true
-            }
-        }
-
-        $('#statusModal').on('shown.bs.modal', function() {
+{{ Html::script(mix('js/dataTable.js')) }}
+<script>
+    config = {
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true}
+    }
+    $('#statusModal').on('shown.bs.modal', function() {
             $('.datepicker').datepicker({
                 container: '#statusModal',
                 ...config.date
             }).datepicker('setDate', new Date());
         });
-    </script>
+
+        
+</script>
+<script>
+    $(function () {
+        setTimeout(function () {
+            draw_data()
+        }, {{config('master.delay')}});
+    });
+
+    function draw_data() {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        var dataTable = $('#payrollTbl').dataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            language: {
+                @lang('datatable.strings')
+            },
+            ajax: {
+                url: '{{ route("biller.payroll.get_employee") }}',
+                data: {payroll_id: @json(@$payroll->id)},
+                type: 'post'
+            },
+            columns: [
+                {data: 'employee_id', name: 'employee_id'},
+                {data: 'employee_name', name: 'employee_name'},
+                {data: 'basic_pay', name: 'basic_pay'},
+                {data: 'absent_days', name: 'absent_days'},
+                {data: 'house_allowance', name: 'house_allowance'},
+                {data: 'transport_allowance', name: 'transport_allowance'},
+                {data: 'other_allowance', name: 'other_allowance'},
+                {data: 'gross_pay', name: 'gross_pay'},
+                {data: 'nssf', name: 'nssf'},
+                {data: 'tx_deductions', name: 'tx_deductions'},
+                {data: 'paye', name: 'paye'},
+                {data: 'taxable_gross', name: 'taxable_gross'},
+                {data: 'total_other_allowances', name: 'total_other_allowances'},
+                {data: 'total_benefits', name: 'total_benefits'},
+                {data: 'loan', name: 'loan'},
+                {data: 'advance', name: 'advance'},
+                {data: 'total_other_deductions', name: 'total_other_deductions'},
+                {data: 'netpay', name: 'netpay', searchable: false, sortable: false}
+            ],
+            order: [[0, "asc"]],
+            searchDelay: 500,
+            dom: 'Blfrtip',
+            buttons: ['csv', 'excel', 'print']
+        });
+        //$('#payrollTbl_wrapper').removeClass('form-inline');
+
+    }
+</script>
 @endsection

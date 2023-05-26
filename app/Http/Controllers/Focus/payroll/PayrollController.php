@@ -28,6 +28,10 @@ use App\Repositories\Focus\payroll\PayrollRepository;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\hrm\Hrm;
 use App\Models\deduction\Deduction;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SendPayslipEmail;
+use Illuminate\Support\Facades\View;
+use App\Repositories\Focus\general\RosemailerRepository;
 
 /**
  * payrollsController
@@ -152,17 +156,69 @@ class PayrollController extends Controller
 
     public function get_employee(Request $request)
     {
-        //Date from and date to in request
-        $startDate = '2023-03-28';
-        $endDate = '2023-04-28';
-        $employees = Hrm::whereHas('employees_salary')->where('contract_type', 'permanent')->with(['attendance' => function ($query) use ($startDate, $endDate) {
-            $query->whereBetween('date', [$startDate, $endDate])
-                    ->where('status', 'absent');
-        }])->get();
-        
-        
-        
-        //return $absent_days;
+        //dd($request->payroll_id);
+        $payroll = Payroll::find($request->payroll_id);
+        $payroll_items = $payroll->payroll_items;
+        return Datatables::of($payroll_items)
+            ->escapeColumns(['id'])
+            ->addIndexColumn()
+            ->addColumn('employee_id', function ($payroll_items) {
+                $employee_id = gen4tid('EMP-', $payroll_items->employee_id);
+                return $employee_id;
+             })
+            ->addColumn('employee_name', function ($payroll_items) {
+                $employee_name = $payroll_items->employee->first_name;
+               return $employee_name;
+            })
+            ->addColumn('basic_pay', function ($payroll_items) {
+                return amountFormat($payroll_items->basic_pay);
+            })
+            ->addColumn('absent_days', function ($payroll_items) {
+                return $payroll_items->absent_days;
+            })
+            ->addColumn('house_allowance', function ($payroll_items) {
+                return amountFormat($payroll_items->house_allowance);
+            })
+            ->addColumn('transport_allowance', function ($payroll_items) {
+                return amountFormat($payroll_items->transport_allowance);
+            })
+            ->addColumn('other_allowance', function ($payroll_items) {
+                return amountFormat($payroll_items->other_allowance);
+            })
+            ->addColumn('gross_pay', function ($payroll_items) {
+                return amountFormat($payroll_items->gross_pay -$payroll_items->tx_deductions);
+            })
+            ->addColumn('nssf', function ($payroll_items) {
+                return amountFormat($payroll_items->nssf);
+            })
+            ->addColumn('tx_deductions', function ($payroll_items) {
+                return amountFormat($payroll_items->tx_deductions);
+            })
+            ->addColumn('paye', function ($payroll_items) {
+                return amountFormat($payroll_items->paye);
+            })
+            ->addColumn('taxable_gross', function ($payroll_items) {
+                return amountFormat($payroll_items->taxable_gross);
+            })
+            ->addColumn('total_other_allowances', function ($payroll_items) {
+                return amountFormat($payroll_items->total_other_allowances);
+            })
+            ->addColumn('total_benefits', function ($payroll_items) {
+                return amountFormat($payroll_items->total_benefits);
+            })
+            ->addColumn('loan', function ($payroll_items) {
+                return amountFormat($payroll_items->loan);
+            })
+            ->addColumn('advance', function ($payroll_items) {
+                return amountFormat($payroll_items->advance);
+            })
+            ->addColumn('total_other_deductions', function ($payroll_items) {
+                return amountFormat($payroll_items->total_other_deductions);
+            })
+            ->addColumn('netpay', function ($payroll_items) {
+                return amountFormat($payroll_items->netpay);
+            })
+            ->make(true);
     }
     public function get_deductions()
     {
@@ -232,6 +288,37 @@ class PayrollController extends Controller
         $payroll->approval_date = date_for_database($request->approval_date);
         $payroll->status = $request->status;
         $payroll->update();
+        $users = $payroll->payroll_items()->get();
+
+        foreach ($users as $user) {
+            // Generate the payslip for the user
+             //$payslip =
+             $data = [
+                'payroll_items' => $user,
+            ];
+        
+            //$pdf = \PDF::loadView('payslip', $data);
+            
+            $html = view('focus.bill.payslip', $data)->render();
+            $pdf = new \Mpdf\Mpdf(config('pdf') + ['margin_left' => 4, 'margin_right' => 4]);
+            $pdf->WriteHTML($html);
+            $pdfFilePath = 'C:\LaravelApps\Spine\storage\app\public\files\payslip.pdf';
+            $input=array();
+            $input['text']='test Message';
+            $input['subject']='Invoice';
+            $input['mail_to']='robertmwenja4@gmail.com';
+            $input['customer_name']='Robert Mwenja';
+    
+            $mailer = new RosemailerRepository;
+            $result= $mailer->send($input['text'], $input);
+           // $pdf->save($pdfFilePath);
+            // Save the payslip as a PDF file
+            // $pdfFilePath = '/path/to/payslips/' . $user->id . '_payslip.pdf';
+            // $payslip->saveAsPdf($pdfFilePath);
+
+            Mail::to($user->employee->email)
+                ->send(new SendPayslipEmail($pdfFilePath, $user->employee->first_name));
+        }
         return redirect()->back();
     }
 
