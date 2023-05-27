@@ -46,6 +46,9 @@
 </div>
 <div class="row">
     <fieldset class="form-group col-md-4">
+        @php
+            $statuses = @$statuses ?: [];
+        @endphp
         <select class="custom-select required" id="todo-select" name="status">
             <option value="">-- Select Project Status --</option>
             @foreach($statuses as $row)
@@ -68,6 +71,9 @@
     </fieldset>
 
     <fieldset class="form-group col-md-4">
+        @php
+            $tags = @$tags ?: [];
+        @endphp
         <select class="form-control select-box" name="tags[]" id="tags" data-placeholder="Choose tags" multiple>
             <option value=""></option>
             @foreach($tags as $row)
@@ -152,6 +158,9 @@
         </select>
     </fieldset>
     <fieldset class="form-group position-relative has-icon-left col-md-4">
+        @php
+            $employees = @$employees ?: [];
+        @endphp
         <select class="form-control select-box" name="employees[]" id="employee" data-placeholder="{{trans('tasks.assign')}}" multiple>
             @foreach($employees as $employee)
                 <option value="{{ $employee['id'] }}" {{ in_array($employee->id, (@$project->users->pluck('id')->toArray() ?: []))? 'selected' : '' }}>

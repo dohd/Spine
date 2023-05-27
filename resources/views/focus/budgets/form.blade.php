@@ -76,9 +76,10 @@
         </div>
     </div>                            
 </div>
+
 <div class="form-group row">
     <div class="col-8">
-        <table id="skill-item" class="table-responsive tfr my_stripe_single">
+        {{-- <table id="skill-item" class="table-responsive tfr my_stripe_single">
             <thead>
                 <tr class="item_header bg-gradient-directional-blue white">
                     <th class="text-center">#</th>
@@ -98,8 +99,8 @@
         <div class="form-group float-right mt-1">
             <div><label for="budget-total">Total Amount</label></div>
             <div><input type="text" value="0" class="form-control" id="labour-total" name="labour_total" readonly></div>
-        </div>
-    </div>  
+        </div> --}}
+    </div> 
     <div class="col-4">
         <div class="form-group">
             <div><label for="tool">Extra Note</label></div>
@@ -133,4 +134,4 @@
         @endif  
         {{ Form::submit('Generate', ['class' => 'btn btn-success btn-lg']) }}
     </div>                              
-</div>
+</div> 
