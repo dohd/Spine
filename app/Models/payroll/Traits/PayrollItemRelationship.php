@@ -21,4 +21,14 @@ trait PayrollItemRelationship
      {
          return $this->belongsTo(Hrm::class, 'employee_id', 'id');
      }
+     public function hrmmetas()
+     {
+         return $this->hasOne(HrmMeta::class, 'user_id', 'employee_id');
+     }
+     
+     public function salary()
+     {
+         return $this->hasOne(Salary::class, 'employee_id', 'employee_id');
+     }
+     
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\jobtitle\Traits\JobTitleAttribute;
 use App\Models\jobtitle\Traits\JobTitleRelationship;
 
-class jobtitle extends Model
+class JobTitle extends Model
 {
     use ModelTrait,
         JobTitleAttribute,

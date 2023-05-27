@@ -196,7 +196,8 @@ trait BillDetailsTrait
             case 12:
                 //payroll
 
-                $resource = PayrollItem::find($request->id);
+                $resource = PayrollItem::where('id',$request->id)->with('hrmmetas.jobtitle')->first();
+                
                 $attributes = $getAttr(12, 'payslip', 12, 1, $resource->employee_id, route('biller.payroll.show', $resource->id));
                 foreach($attributes as $key => $val) {
                     $resource[$key] = $val;

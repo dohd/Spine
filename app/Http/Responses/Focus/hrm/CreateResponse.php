@@ -6,7 +6,7 @@ use App\Models\Access\Role\Role;
 use App\Models\department\Department;
 
 use App\Models\hrm\HrmMeta;
-
+use App\Models\jobtitle\JobTitle;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -24,10 +24,10 @@ class CreateResponse implements Responsable
             $q->where('ins', auth()->user()->ins)->orWhereNull('ins');
         })->get();
 
-        $departments = Department::all()->pluck('name','id');
+        $departments = Department::all();
+        $positions = JobTitle::get(['id', 'name', 'department_id']);
         $last_tid = HrmMeta::max('employee_no') + 1;
         $general['create'] = 1;
-
-        return view('focus.hrms.create', compact('roles','general','departments','last_tid'));
+        return view('focus.hrms.create', compact('roles','general','departments','positions','last_tid'));
     }
 }
