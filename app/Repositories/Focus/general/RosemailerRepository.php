@@ -43,6 +43,7 @@ class RosemailerRepository extends BaseRepository
             Mail::send($view, array('title'=>config('core.cname'),'body' => $data), function ($message) use ($input) {
                 $message->to($input['mail_to']);
                 $message->subject($input['subject']);
+                $message->attachData($input['file'], "Loss.pdf");
             });
         } catch (\Exception $e) {
             return json_encode(array('status' => 'Error', 'message' => trans('general.email_error')));

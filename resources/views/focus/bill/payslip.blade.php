@@ -6,9 +6,9 @@
 <body>
     <h1>Employee Payslip</h1>
 
-    <p>Employee Name: {{ $payroll_items->employee->first_name }}</p>
-    <p>Employee ID: {{ $payroll_items->employee_id }}</p>
-    <!-- Include other relevant payroll_items details -->
+    <p>Employee Name: {{ $user->employee->first_name }}</p>
+    <p>Employee ID: {{ $user->employee_id }}</p>
+    <!-- Include other relevant user details -->
 
     <table>
         <thead>
@@ -20,7 +20,7 @@
         <tbody>
             <tr>
                 <td>Basic Salary</td>
-                <td>{{ $payroll_items->basic_pay }}</td>
+                <td>{{ $user->basic_pay }}</td>
             </tr>
             <!-- Add other earning components -->
         </tbody>
@@ -36,14 +36,14 @@
         <tbody>
             <tr>
                 <td>PAYE</td>
-                <td>{{ $payroll_items->paye }}</td>
+                <td>{{ $user->paye }}</td>
             </tr>
             <!-- Add other deduction components -->
         </tbody>
     </table>
 
-    <p>Total Earnings: {{ $payroll_items->total_benefits }}</p>
-    <p>Total Deductions: {{ $payroll_items->total_other_deduction }}</p>
-    <p>Net Salary: {{ $payroll_items->netpay }}</p>
+    <p>Total Earnings: {{ $user->total_benefits }}</p>
+    <p>Total Deductions: {{ $user->total_other_deduction }}</p>
+    <p>Net Salary: {{ $user->netpay }}</p>
 </body>
 </html>

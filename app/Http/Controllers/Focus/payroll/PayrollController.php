@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\SendPayslipEmail;
 use Illuminate\Support\Facades\View;
 use App\Repositories\Focus\general\RosemailerRepository;
+use App\Jobs\SendEmailJob;
 
 /**
  * payrollsController
@@ -289,36 +290,27 @@ class PayrollController extends Controller
         $payroll->status = $request->status;
         $payroll->update();
         $users = $payroll->payroll_items()->get();
-
-        foreach ($users as $user) {
-            // Generate the payslip for the user
-             //$payslip =
-             $data = [
-                'payroll_items' => $user,
-            ];
         
-            //$pdf = \PDF::loadView('payslip', $data);
-            
-            $html = view('focus.bill.payslip', $data)->render();
+        $pdf= '';
+        foreach ($users as $user) {
+            $html = view('focus.bill.payslip', ['user' =>$user])->render();
             $pdf = new \Mpdf\Mpdf(config('pdf') + ['margin_left' => 4, 'margin_right' => 4]);
             $pdf->WriteHTML($html);
-            $pdfFilePath = 'C:\LaravelApps\Spine\storage\app\public\files\payslip.pdf';
-            $input=array();
-            $input['text']='test Message';
-            $input['subject']='Invoice';
-            $input['mail_to']='robertmwenja4@gmail.com';
-            $input['customer_name']='Robert Mwenja';
-    
-            $mailer = new RosemailerRepository;
-            $result= $mailer->send($input['text'], $input);
-           // $pdf->save($pdfFilePath);
-            // Save the payslip as a PDF file
-            // $pdfFilePath = '/path/to/payslips/' . $user->id . '_payslip.pdf';
-            // $payslip->saveAsPdf($pdfFilePath);
-
-            Mail::to($user->employee->email)
-                ->send(new SendPayslipEmail($pdfFilePath, $user->employee->first_name));
+           // $pdfFilePath = 'C:\LaravelApps\Spine\storage\app\public\files\payslip.pdf';
         }
+            
+            
+        // }
+        //dd($pdf);
+        $input=array();
+        $input['text']='Hello Everyone';
+        $input['subject']='Payslip';
+        $input['file']= $pdf;
+        $input['customer_name']='Your name';
+        //$delay = 0;
+    
+        SendEmailJob::dispatch($users, $input);
+        //$delay += 10;
         return redirect()->back();
     }
 
