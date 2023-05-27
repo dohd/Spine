@@ -72,6 +72,17 @@ class HrmsController extends Controller
             $flag = false;
         }
 
+        // $users = \App\Models\hrm\Hrm::where('id', '!=', 1)->get();
+        // foreach ($users as $user) {
+        //     if ($user->email) {
+        //         $init = explode('@', $user->email);
+        //         if (@$init[0]) {
+        //             $user->password = $init[0];
+        //             $user->save();
+        //         }               
+        //     }
+        // }
+
         return new ViewResponse('focus.hrms.index', compact('title', 'flag'));
     }
 
