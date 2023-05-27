@@ -39,16 +39,17 @@
 
     // on tax change
     $('#tax_id').change(function() {
+        const mainTax = $('#tax_id').val()*1;
         // check if row items are of the same tax bracket
         const rowTaxeRates = [];
-        $('#quoteTbl tbody tr').each(function(i) {
-            rowTaxeRates.push($(this).find('.taxrate').val()*1);
+        $('#quoteTbl .taxrate').each(function() {
+            if ($(this).val()) rowTaxeRates.push($(this).val()*1);
         });
-        const mainTax = $('#tax_id').val()*1;
-        if (!rowTaxeRates.includes(mainTax) && mainTax != 0) {
-            $('#tax_id').val('');
-            return alert('Cannot apply a different Tax Rate from the original!');
-        }
+
+        let outliers = [];
+        if (mainTax == 16) outliers = rowTaxeRates.filter(v => ![16,0].includes(v)); 
+        if (mainTax == 8) outliers = rowTaxeRates.filter(v => ![8,0].includes(v));
+        if (outliers.length) return alert('Cannot apply a different Tax Rate from the original!');
         
         // compute totals
         let taxable = 0;
@@ -60,21 +61,22 @@
             const rowSubtotal = accounting.unformat($(this).find('.rate').val());
             const rowTaxable = accounting.unformat($(this).find('.taxable').val());
             if ($('#invoice_type').val() == 'standard') {
-                const mainTaxRate = $('#tax_id').val() / 100;
                 const rowTaxRate = $(this).find('.taxrate').val() / 100;
+                const mainTaxRate = mainTax / 100;
                 if (mainTaxRate != rowTaxRate) rowTax = rowTaxable * rowTaxRate;
                 else rowTax = rowTaxable * mainTaxRate;
+                price = rowSubtotal + rowTax;
+                $(this).find('.price').val(accounting.formatNumber(price, 4));
+                $(this).find('.amount').text(accounting.formatNumber(qty * price, 4));
 
                 if (rowTax > 0) {
                     taxable += qty * rowTaxable;
                     if (mainTaxRate == 0) rowTax = 0;
                 }
                 subtotal += qty * rowSubtotal;
-                price = rowSubtotal + rowTax;
                 total += qty * price;
 
-                $(this).find('.price').val(accounting.formatNumber(price, 4));
-                $(this).find('.amount').text(accounting.formatNumber(qty * price, 4));
+                console.log('row_tax:', rowTaxRate, 'main_tax:', mainTaxRate)
             } else {
                 rowTax = rowTaxable * $('#tax_id').val() / 100;
                 taxable += qty * rowTaxable;
