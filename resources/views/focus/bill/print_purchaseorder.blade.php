@@ -189,7 +189,7 @@
                     <td class="align-c">{{ +$item->qty }}</td>
 					<td class="align-c">{{ $item->uom }}</td>
                     <td class="align-r">{{ numberFormat($item->rate) }}</td>
-                    <td class="align-r">{{ numberFormat($item->amount) }}</td>
+                    <td class="align-r">{{ numberFormat(+$item->qty * $item->rate) }}</td>
                 </tr>
 			@endforeach
 			<!-- 20 dynamic empty rows -->

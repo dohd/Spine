@@ -269,7 +269,7 @@
 							<td colspan="2">{{ $item->description }}</td>
 						@else
 							<td>{{ $item->reference }}</td>
-							<td>{{ $item->description }}ee</td>
+							<td>{{ $item->description }}</td>
 						@endif
 				
 						<td class="align-c">{{ $item->product_qty > 0? +$item->product_qty : '' }}</td>
