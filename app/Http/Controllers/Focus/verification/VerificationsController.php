@@ -28,6 +28,7 @@ use App\Models\quote\Quote;
 use App\Models\verification\Verification;
 use App\Repositories\Focus\verification\VerificationRepository;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class VerificationsController extends Controller
 {
@@ -90,6 +91,7 @@ class VerificationsController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             errorHandler('Error Creating Partial Verification', $th);
         }
         
@@ -105,12 +107,8 @@ class VerificationsController extends Controller
     public function edit(Verification $verification)
     {
         $quote = $verification->quote ?: new Quote;
-        if ($quote->tax_id > 0) {
-            $additionals = Additional::where('value', 0)->orWhere('value', $quote->tax_id)->get();
-        } else {
-            $additionals = Additional::where('value', 0)->get();
-        }
-
+        if ($quote->tax_id > 0) $additionals = Additional::where('value', 0)->orWhere('value', $quote->tax_id)->get();
+        else $additionals = Additional::where('value', 0)->get();
         $verification['jc_items'] = $verification->jc_items()->with('equipment')->get();
         
         return view('focus.verifications.edit', compact('verification', 'quote', 'additionals'));
@@ -127,7 +125,8 @@ class VerificationsController extends Controller
     {
         try {
             $this->repository->update($verification, $request->except('_token'));
-        } catch (\Throwable $th) { dd($th);
+        } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             errorHandler('Error Updating Partial Verification', $th);
         }
 

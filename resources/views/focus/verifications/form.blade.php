@@ -105,9 +105,13 @@
                 </div>              
             </div>   
             <div class="form-group row">
-                <div class="col-12">
+                <div class="col-8">
                     <label for="note" class="caption">General Remark</label>
                     {{ Form::text('note', null, ['class' => 'form-control', 'id' => 'note']) }}
+                </div>
+                <div class="col-4">
+                    <label for="date" class="caption">Date</label>
+                    {{ Form::text('verification_date', null, ['class' => 'form-control datepicker', 'id' => 'date']) }}
                 </div>
             </div>   
         </div>

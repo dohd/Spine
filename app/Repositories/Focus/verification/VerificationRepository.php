@@ -10,6 +10,7 @@ use App\Models\verification\VerificationJc;
 use App\Repositories\BaseRepository;
 use DB;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class VerificationRepository extends BaseRepository
 {
@@ -59,6 +60,7 @@ class VerificationRepository extends BaseRepository
     {
         // dd($input);
         foreach ($input as $key => $value) {
+            if (in_array($key, ['verification_date'])) $input[$key] = date_for_database($value);
             if (in_array($key, ['taxable', 'subtotal', 'tax', 'total']))
                 $input[$key] = numberClean($value);
             if (in_array($key, ['product_subtotal', 'product_tax', 'product_total'])) {
@@ -87,32 +89,41 @@ class VerificationRepository extends BaseRepository
 
         // verification items
         $data_items = array_map(function($v) use($verification) {
-            return array_replace($v, [
-                'parent_id' => $verification->id,
-            ]);
+            return array_replace($v, ['parent_id' => $verification->id,]);            
         }, $data_items);
         VerificationItem::insert($data_items);
 
         // verification jobcards/dnotes
         $jc_data_items = array_filter($jc_data_items, fn($v) => $v['reference']);
         $jc_data_items = array_map(function($v) use($verification) {
-            return array_replace($v, [
-                'parent_id' => $verification->id,
-            ]);
+            return array_replace($v, ['parent_id' => $verification->id,]);            
         }, $jc_data_items);
         VerificationJc::insert($jc_data_items);
 
         // update quote
-        $verification->quote->update([
-            'verified' => 'Yes', 
-            'verification_date' => date('Y-m-d'),
-            'verified_by' => auth()->user()->id,
-            'gen_remark' => $verification->note,
-            'verified_amount' => numberClean($verification->subtotal),
-            'verified_tax' => numberClean($verification->tax), 
-            'verified_total' => numberClean($verification->total),
-            'verified_taxable' => numberClean($verification->taxable),
-        ]);
+        $quote = $verification->quote;
+        if ($quote) {
+            $limit = false;
+            if ($quote->taxable > 0) {
+                if (round($quote->taxable) < round($quote->verified_taxable+$verification->taxable))
+                    $limit = true;
+            } elseif ($quote->amount > 0) {
+                if (round($quote->amount) < round($quote->verified_amount+$verification->subtotal))
+                    $limit = true;
+            }
+            if ($limit) throw ValidationException::withMessages(['Cannot verify more than the quote amount']);
+
+            $quote->update([
+                'verified' => 'Yes', 
+                'verification_date' => date('Y-m-d'),
+                'verified_by' => auth()->user()->id,
+                'gen_remark' => $verification->note,
+            ]);
+            $quote->increment('verified_amount', ($verification->subtotal));
+            $quote->increment('verified_tax', ($verification->tax));
+            $quote->increment('verified_total', ($verification->total));
+            $quote->increment('verified_taxable', ($verification->taxable));
+        }
 
         if ($verification) {
             DB::commit();
@@ -132,6 +143,7 @@ class VerificationRepository extends BaseRepository
     {
         // dd($input);
         foreach ($input as $key => $value) {
+            if (in_array($key, ['verification_date'])) $input[$key] = date_for_database($value);
             if (in_array($key, ['taxable', 'subtotal', 'tax', 'total']))
                 $input[$key] = numberClean($value);
             if (in_array($key, ['product_subtotal', 'product_tax', 'product_total'])) {
@@ -156,6 +168,7 @@ class VerificationRepository extends BaseRepository
         DB::beginTransaction();
 
         // part verification
+        $prev_verification = $verification;
         $is_updated = $verification->update($data);
 
         // part verification items
@@ -191,17 +204,35 @@ class VerificationRepository extends BaseRepository
         }
 
         // update related quote
-        $verification = Verification::where('quote_id', $verification->quote_id)->latest()->first();
-        $verification->quote->update([
-            'verified' => 'Yes', 
-            'verification_date' => date('Y-m-d'),
-            'verified_by' => auth()->user()->id,
-            'gen_remark' => $verification->note,
-            'verified_amount' => numberClean($verification->subtotal),
-            'verified_tax' => numberClean($verification->tax), 
-            'verified_total' => numberClean($verification->total),
-            'verified_taxable' => numberClean($verification->taxable),
-        ]);
+        $quote = $verification->quote;
+        if ($quote) {
+            // reverse
+            $quote->decrement('verified_amount', $prev_verification->subtotal);
+            $quote->decrement('verified_tax', $prev_verification->tax);
+            $quote->decrement('verified_total', $prev_verification->total);
+            $quote->decrement('verified_taxable', $prev_verification->taxable);
+            
+            // update
+            $limit = false;
+            if ($quote->taxable > 0) {
+                if (round($quote->taxable) < round($quote->verified_taxable+$verification->taxable))
+                    $limit = true;
+            } elseif ($quote->amount > 0) {
+                if (round($quote->amount) < round($quote->verified_amount+$verification->subtotal))
+                    $limit = true;
+            }
+            if ($limit) throw ValidationException::withMessages(['Cannot verify more than the quote amount']);
+            $quote->update([
+                'verified' => 'Yes', 
+                'verification_date' => date('Y-m-d'),
+                'verified_by' => auth()->user()->id,
+                'gen_remark' => $verification->note,
+            ]);
+            $quote->increment('verified_amount', numberClean($verification->subtotal));
+            $quote->increment('verified_tax', numberClean($verification->tax));
+            $quote->increment('verified_total', numberClean($verification->total));
+            $quote->increment('verified_taxable', numberClean($verification->taxable));
+        }
 
         if ($is_updated) {
             DB::commit();
@@ -220,32 +251,37 @@ class VerificationRepository extends BaseRepository
     {   
         DB::beginTransaction();
 
-        $verification_count = Verification::where('quote_id', $verification->quote_id)->count();
-        if ($verification_count > 0) {
+        $is_exist = Verification::where('quote_id', $verification->quote_id)->exists();
+        if ($is_exist) {
             $verifications = Verification::where('quote_id', $verification->quote_id)->latest();
-            if ($verifications->first()->id == $verification->id) {
-                $verifications[1]->quote->update([
-                    'verified' => 'Yes', 
-                    'verification_date' => date('Y-m-d'),
-                    'verified_by' => auth()->user()->id,
-                    'gen_remark' => $verification->note,
-                    'verified_amount' => numberClean($verifications[1]->subtotal),
-                    'verified_tax' => numberClean($verifications[1]->tax), 
-                    'verified_total' => numberClean($verifications[1]->total),
-                    'verified_taxable' => numberClean($verifications[1]->taxable),
-                ]);
+            if (@$verifications->first()->id == $verification->id) {
+                $verification = @$verifications[0];
+                if ($verification->quote) {
+                    $verification->quote->update([
+                        'verified' => 'Yes', 
+                        'verification_date' => date('Y-m-d'),
+                        'verified_by' => auth()->user()->id,
+                        'gen_remark' => $verification->note,
+                        'verified_amount' => numberClean($verification->subtotal),
+                        'verified_tax' => numberClean($verification->tax), 
+                        'verified_total' => numberClean($verification->total),
+                        'verified_taxable' => numberClean($verification->taxable),
+                    ]);
+                }
             }
         } else {
-            $verification->quote->update([
-                'verified' => 'No', 
-                'verification_date' => '',
-                'verified_by' => '',
-                'gen_remark' => '',
-                'verified_amount' => 0,
-                'verified_tax' => 0,
-                'verified_total' => 0,
-                'verified_taxable' => 0,
-            ]);
+            if ($verification->quote) {
+                $verification->quote->update([
+                    'verified' => 'No', 
+                    'verification_date' => '',
+                    'verified_by' => '',
+                    'gen_remark' => '',
+                    'verified_amount' => 0,
+                    'verified_tax' => 0,
+                    'verified_total' => 0,
+                    'verified_taxable' => 0,
+                ]);
+            }
         }
 
         if ($verification->delete()) {
