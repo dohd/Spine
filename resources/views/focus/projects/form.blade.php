@@ -7,6 +7,9 @@
                     {{ $project->customer->company}}
                 </option>
             @else
+                @php
+                    $customers = @$customers ?: [];
+                @endphp
                 @foreach ($customers as $customer)
                     <option value="{{ $customer->id }}">
                         {{ $customer->company}}

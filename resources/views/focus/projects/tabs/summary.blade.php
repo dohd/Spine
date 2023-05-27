@@ -18,16 +18,20 @@
                     </li>
                     <li>{{ trans('customers.customer') }}: 
                         <span class="text-bold-600 primary">
+                            @if (@$project->customer)
                             <a href="{{ route('biller.customers.show', $project->customer) }}">
                                 {{ @$project->customer->company }}
                             </a>
+                            @endif
                         </span>                               
                     </li>
                     <li>Branch: 
                         <span class="text-bold-600 primary">
+                            @if (@$project->branch)
                             <a href="{{ route('biller.branches.show', $project->branch) }}">
                                 {{ @$project->branch->name }}
                             </a>
+                            @endif
                         </span>                               
                     </li>
                     @if ($project->worth > 0.0)
