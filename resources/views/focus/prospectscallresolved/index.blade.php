@@ -20,101 +20,59 @@
         <div class="content-body">
             <div class="row">
                 <div class="col-12">
+
                     <div class="card">
-                        {{-- <div class="card-body">
-                            <div class="row no-gutters">
-                                <div class="col-sm-3 col-md-2 h4">Open Prospects</div>
-                                <div class="col-sm-2 col-md-1 h4 text-primary font-weight-bold">{{ $open_prospect }}</div>
-                                <div class="col-sm-12 col-md-1 h4 text-primary font-weight-bold">
-                                    {{ numberFormat(div_num($open_prospect, $total_prospect) * 100) }}%</div>
-                            </div>
-                            <div class="row no-gutters">
-                                <div class="col-sm-3 col-md-2 h4">Closed Prospects</div>
-                                <div class="col-sm-2 col-md-1 h4 text-success font-weight-bold">{{ $closed_prospect }}</div>
-                                <div class="col-sm-12 col-md-1 h4 text-success font-weight-bold">
-                                    {{ numberFormat(div_num($closed_prospect, $total_prospect) * 100) }}%</div>
-                            </div>
-                        </div> --}}
-                        {{-- <div class="row mb-3 ml-1">
-                            <div class="col-2">
-                                <label for="client">Title</label>                             
-                                <select name="bytitle" class="custom-select" id="bytitle" data-placeholder="Choose Title">
-                                    <option value="">Choose Title</option>
-                                    @foreach ($titles as $title)
-                                        <option value="{{ $title->title }}">{{ $title->title }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-2">
-                                <label for="client">Call Status</label>                             
-                                <select name="bycallstatus" class="custom-select" id="bycallstatus" data-placeholder="Choose Call Status">
-                                    <option value="">Choose Call Status</option>
-                                    <option value="called">Called</option>
-                                    <option value="calledrescheduled">Called But Rescheduled</option>
-                                    <option value="callednotpicked">Called Not Picked</option>
-                                    <option value="callednotavailable">Called Not Available</option>
-                                    <option value="notcalled">Not Called</option>
-                                    
-                                </select>
-                            </div>
-                            
-                            <div class="col-2">
-                                <label for="client">Temperate Status</label>                             
-                                <select name="bytemperate" class="custom-select" id="bytemperate" data-placeholder="Choose Temperate Status">
-                                    <option value="">Choose Temperate Status</option>
-                                    <option value="hot">Hot</option>
-                                    <option value="warm">Warm</option>
-                                    <option value="cold">Cold</option>
-                                   
-                                </select>
-                            </div>
-                            <div class="col-2">
-                                <label for="client">Prospect Status</label>                             
-                                <select name="bystatus" class="custom-select" id="bystatus" data-placeholder="Choose Prospect Status">
-                                    <option value="">Choose Prospect Status</option>
-                                    <option value="open">Open</option>
-                                    <option value="won">Closed-Won</option>
-                                    <option value="lost">Closed-Lost</option>
-                                   
-                                   
-                                </select>
-                            </div> --}}
+                        <div class="card-content">
+                            <div class="card-body">
 
-                    </div>
+                                <div class="row">
+                                    <div class="col-2">{{ trans('general.search_date') }} </div>
+                                    <div class="col-2">
+                                        <input type="text" name="start_date" id="start_date"
+                                            class="form-control datepicker date30  form-control-sm" autocomplete="off" />
+                                    </div>
+                                    <div class="col-2">
+                                        <input type="text" name="end_date" id="end_date"
+                                            class="form-control datepicker form-control-sm" autocomplete="off" />
+                                    </div>
+                                    <div class="col-2">
+                                        <input type="button" name="search" id="search" value="Search"
+                                            class="btn btn-info btn-sm" />
+                                    </div>
+                                </div>
 
-                </div>
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            <table id="prospectscallresolved-table"
-                            class="table table-striped table-bordered zero-configuration"
-                            cellspacing="0" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Title</th>
-                                        <th>Company Name</th>
-                                        <th>Contact Person</th>
-                                        <th>Phone</th>
-                                        <th>Industry</th>
-                                        <th>Region</th>
-                                        <th>Type</th>
-                                        <th>Reminder Date</th>
-                                        <th>Follow up</th>
-                                        <th>CallStatus</th>
-                                        <th>Status</th>
-                                        <th>Reason</th>
-                                        {{-- <th>{{ trans('labels.general.actions') }}</th> --}}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td colspan="100%" class="text-center text-success font-large-1">
-                                            <i class="fa fa-spinner spinner"></i>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                <hr>
+                                <table id="prospectscallresolved-table"
+                                    class="table table-striped table-bordered zero-configuration" cellspacing="0"
+                                    width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Date</th>
+                                            <th>Title</th>
+                                            <th>Company Name</th>
+                                            <th>Contact Person</th>
+                                            <th>Phone</th>
+                                            <th>Industry</th>
+                                            <th>Region</th>
+                                            <th>Type</th>
+                                            <th>Reminder Date</th>
+                                            <th>Follow up</th>
+                                            <th>CallStatus</th>
+                                            <th>Status</th>
+                                            <th>Reason</th>
+                                            {{-- <th>{{ trans('labels.general.actions') }}</th> --}}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="100%" class="text-center text-success font-large-1">
+                                                <i class="fa fa-spinner spinner"></i>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -139,6 +97,7 @@
                 format: "{{ config('core.user_date_format') }}",
                 autoHide: true
             },
+            datepicker: {format: "{{ config('core.user_date_format') }}", autoHide: true}
         };
 
         const Index = {
@@ -148,25 +107,28 @@
             // status: @json(request('bystatus')),
             init() {
                 $.ajaxSetup(config.ajax);
+                $('.datepicker').datepicker(config.datepicker).datepicker('setDate', new Date());
                 this.draw_data();
                 this.showModal();
                 this.showCallModal();
                 //form remark
                 remark: @json(@$remark),
 
-                //filters
-                // $('#bytitle').change(this.titleChange);
-                // $('#bytemperate').change(this.temperateChange);
-                // $('#bycallstatus').change(this.callStatusChange);
-                // $('#bystatus').change(this.statusChange);
+                    //filters
+                    // $('#bytitle').change(this.titleChange);
+                    // $('#bytemperate').change(this.temperateChange);
+                    // $('#bycallstatus').change(this.callStatusChange);
+                    // $('#bystatus').change(this.statusChange);
 
-                //callModal
+                    //callModal
                 $('#callModal').find('.erp-status').change(this.erpChange);
                 $('#callModal').find('.challenges-status').change(this.challengesChange);
                 $('#callModal').find('.demo-status').change(this.demoChange);
                 $('#callModal').find('.call-status').change(this.callTypeChange);
                 this.dismissCallModal();
+                $('#search').click(this.searchDateClick);
             },
+            
             // titleChange() {
             //     Index.title = $(this).val();
             //     $('#prospects-table').DataTable().destroy();
@@ -199,9 +161,9 @@
                     let saved = false;
                     //set prospect id to form
                     $('#prospect_id').val(id);
-                    
-                     //append response to call history
-                     $.ajax({
+
+                    //append response to call history
+                    $.ajax({
                         url: "{{ route('biller.prospects.followup') }}",
                         type: 'post',
                         data: {
@@ -211,20 +173,20 @@
                             $('#tableModal').append(response);
                         }
                     });
-                     //append prospect details
-                     $.ajax({
+                    //append prospect details
+                    $.ajax({
                         url: "{{ route('biller.prospects.fetchprospect') }}",
                         type: 'post',
                         data: {
                             id: id
                         },
                         success: function(response) {
-                           
+
                             $('#prospectTableDetailsRemarks').append(response);
                         }
                     });
-                     //append prospectcall resolved details
-                     $.ajax({
+                    //append prospectcall resolved details
+                    $.ajax({
                         url: "{{ route('biller.prospectcallresolves.fetchprospectrecord') }}",
                         type: 'post',
                         data: {
@@ -243,7 +205,7 @@
                         //disable button
                         $("#save_remark").prop("disabled", true);
                         let formData = $('#save_remark').parents('form').serializeArray();
-                        
+
                         $.ajax({
                             url: "remarks",
                             type: 'POST',
@@ -283,16 +245,16 @@
                     //show modal
                     $('#callModal').modal('show');
 
-                  
+
                     //picked
                     $('#picked_prospect_id').val(id);
-                    
+
                     //notpicked
-                    
+
                     $('#notpicked_prospect_id').val(id);
 
                     //pickedbusy
-                    
+
                     $('#busyprospect_id').val(id);
 
                     //notavailable
@@ -320,7 +282,7 @@
                         }
                     });
 
-                    
+
                 });
             },
             erpChange() {
@@ -389,13 +351,24 @@
                     $("#notavailable").attr("disabled", false);
                     $('#remarks_table').remove();
                     $('#prospect_prospect_table').remove();
-                    id= "";
+                    id = "";
                     //saved?window.location.reload():null;
                 });
             },
 
+            searchDateClick() {
+                const startDate = $('#start_date').val();
+                const endDate = $('#end_date').val();
+                if (!startDate || !endDate) return alert("Date range required!");
+               
+                $('#prospectscallresolved-table').DataTable().destroy();
+                return Index.draw_data({
+                    start_date: startDate,
+                    end_date: endDate,
+                });
+            },
 
-            draw_data() {
+            draw_data(params={}) {
 
                 $('#prospectscallresolved-table').dataTable({
                     stateSave: true,
@@ -406,11 +379,19 @@
                     },
                     ajax: {
                         url: '{{ route('biller.prospectcallresolves.get') }}',
+                        data: {
+                        ...params,
+                        pi_page: location.href.includes('page=pi') ? 1 : 0
+                    },
                         type: 'post',
                     },
                     columns: [{
                             data: 'DT_Row_Index',
                             name: 'id'
+                        },
+                        {
+                            data: 'date',
+                            name: 'date'
                         },
                         {
                             data: 'title',

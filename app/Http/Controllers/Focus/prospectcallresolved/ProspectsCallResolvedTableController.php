@@ -54,6 +54,14 @@ class ProspectsCallResolvedTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('date', function ($prospectcallresolved) {
+                $date = '';
+                if ($prospectcallresolved) {
+                    $date = $prospectcallresolved->updated_at == null ? '-----' : $prospectcallresolved->updated_at;
+                }
+
+                return dateFormat($date);
+            })
             ->addColumn('title', function ($prospectcallresolved) {
                 $title = '';
                 if ($prospectcallresolved->prospect) {

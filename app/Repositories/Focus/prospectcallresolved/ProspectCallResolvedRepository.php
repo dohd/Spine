@@ -10,7 +10,7 @@ use App\Models\prospectcallresolved\ProspectCallResolved;
 use App\Models\remark\Remark;
 use App\Repositories\BaseRepository;
 use DB;
-
+use Carbon\Carbon;
 
 /**
  * Class ProductcategoryRepository.
@@ -30,7 +30,12 @@ class ProspectCallResolvedRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query();
+       $start_date = Carbon::parse(request('start_date'))->startOfDay()->toDateTimeString();
+       $end_date = Carbon::parse(request('end_date'))->endOfDay()->toDateTimeString();
+        $q = $this->query()->when(request('start_date') && request('end_date'), function ($q) use ($start_date, $end_date) {
+            $q->whereBetween('updated_at', [$start_date, $end_date]);
+        });
+       
         return $q->get();
     }
 
