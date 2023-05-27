@@ -19,6 +19,7 @@ namespace App\Http\Controllers\Focus\budget;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\Focus\budget\BudgetRepository;
+use Illuminate\Support\Facades\DB;
 use Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -72,10 +73,12 @@ class BudgetsTableController extends Controller
                 if ($budget->quote) return $budget->quote->notes;
             })
             ->addColumn('quote_total', function ($budget) {
-                return numberFormat($budget->quote_total);
+                if ($budget->quote)
+                return numberFormat($budget->quote->total);
             })
             ->addColumn('budget_total', function ($budget) {
-                return numberFormat($budget->budget_total);
+                $total = $budget->items()->sum(DB::raw('round(new_qty*price)'));
+                return numberFormat($total);
             })
             ->addColumn('actions', function ($budget) {
                 return $budget->action_buttons;

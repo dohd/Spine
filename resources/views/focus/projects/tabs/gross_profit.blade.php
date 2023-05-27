@@ -75,7 +75,7 @@
                         @php
                             $actual_amount = $quote->subtotal;
                             $estimated_amount = 0;
-                            if ($quote->budget) $estimated_amount = $quote->budget->budget_total;
+                            if ($quote->budget) $estimated_amount = $quote->budget->items()->sum(DB::raw('round(new_qty*price)'));
                             $balance = $actual_amount - $estimated_amount;
                             // aggregate
                             $total_actual += $actual_amount;
