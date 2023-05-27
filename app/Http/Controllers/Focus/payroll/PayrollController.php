@@ -157,7 +157,7 @@ class PayrollController extends Controller
 
     public function get_employee(Request $request)
     {
-        //dd($request->payroll_id);
+        
         $payroll = Payroll::find($request->payroll_id);
         $payroll_items = $payroll->payroll_items;
         return Datatables::of($payroll_items)
@@ -227,7 +227,6 @@ class PayrollController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('employee_name', function ($payroll) {
-              //  dd($payroll);
                return $payroll->employees_salary ? $payroll->employees_salary->employee_name : '';
             })
             ->addColumn('basic_pay', function ($payroll) {
@@ -246,7 +245,7 @@ class PayrollController extends Controller
     }
     public function page($id)
     {
-        //dd($id);
+        
         $payroll = Payroll::find($id);
         $payroll->reference = gen4tid('PYRL-',$payroll->tid);
         $employees = Hrm::with(['employees_salary' => function ($q){
@@ -267,7 +266,6 @@ class PayrollController extends Controller
                 $item->nhif = $this->calculate_nhif($item->gross_pay);
                 $nhif_relief = 15/100 * $item->nhif;
                 $item->paye = $this->calculate_paye($item->gross_pay) - $nhif_relief;
-                //dd($item->nhif);
                 if($item->paye < 0){
                     $item->paye = 0;
                 }
@@ -275,7 +273,7 @@ class PayrollController extends Controller
                 $total_nhif += $item->nhif;
                 $total_nssf += $item->nssf;
                 $total_tx_deduction += $item->tx_deductions;
-                //dd($nhif_relief);
+               
             }
         }
         return view('focus.payroll.pages.create', compact('payroll', 'employees','total_gross','total_paye','total_nhif','total_nssf','total_tx_deduction'));
@@ -283,7 +281,6 @@ class PayrollController extends Controller
 
     public function approve_payroll(Request $request)
     {
-        //dd($request->all());
         $payroll = Payroll::find($request->id);
         $payroll->approval_note = $request->approval_note;
         $payroll->approval_date = date_for_database($request->approval_date);
@@ -291,32 +288,16 @@ class PayrollController extends Controller
         $payroll->update();
         $users = $payroll->payroll_items()->get();
         
-        $pdf= '';
-        foreach ($users as $user) {
-            $html = view('focus.bill.payslip', ['user' =>$user])->render();
-            $pdf = new \Mpdf\Mpdf(config('pdf') + ['margin_left' => 4, 'margin_right' => 4]);
-            $pdf->WriteHTML($html);
-           // $pdfFilePath = 'C:\LaravelApps\Spine\storage\app\public\files\payslip.pdf';
-        }
-            
-            
-        // }
-        //dd($pdf);
         $input=array();
         $input['text']='Hello Everyone';
         $input['subject']='Payslip';
-        $input['file']= $pdf;
         $input['customer_name']='Your name';
-        //$delay = 0;
-    
         SendEmailJob::dispatch($users, $input);
-        //$delay += 10;
         return redirect()->back();
     }
 
     public function store_basic(Request $request)
     {
-        //dd($request->all());
         $data = $request->only([
             'payroll_id','salary_total','processing_date'
         ]);
@@ -326,7 +307,6 @@ class PayrollController extends Controller
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
-        //dd($data_items);
         // modify and filter items without item_id
         $data_items = modify_array($data_items);
         $data_items = array_filter($data_items, function ($v) { return $v['employee_id']; });
@@ -341,7 +321,6 @@ class PayrollController extends Controller
     }
     public function store_nhif(Request $request)
     {
-         //dd($request->all());
          $data = $request->only([
             'payroll_id','total_nhif'
         ]);
@@ -361,7 +340,7 @@ class PayrollController extends Controller
 
     public function store_allowance(Request $request)
     {
-        //dd($request->all());
+        
         $data = $request->only([
             'payroll_id','allowance_total'
         ]);
@@ -371,7 +350,6 @@ class PayrollController extends Controller
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
-        //dd($data_items);
         // modify and filter items without item_id
         $data_items = modify_array($data_items);
         $data_items = array_filter($data_items, function ($v) { return $v['id']; });
@@ -386,7 +364,7 @@ class PayrollController extends Controller
     }
     public function store_deduction(Request $request)
     {
-        //dd($request->all());
+        
         $data = $request->only([
             'payroll_id','deduction_total','total_nssf'
         ]);
@@ -396,7 +374,7 @@ class PayrollController extends Controller
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
-        //dd($data_items);
+        
         // modify and filter items without item_id
         $data_items = modify_array($data_items);
         $data_items = array_filter($data_items, function ($v) { return $v['id']; });
@@ -463,7 +441,7 @@ class PayrollController extends Controller
 
     public function store_paye(Request $request)
     {
-        //dd($request->all());
+        
         $data = $request->only([
             'payroll_id','paye_total'
         ]);
@@ -473,7 +451,7 @@ class PayrollController extends Controller
 
         $data['ins'] = auth()->user()->ins;
         $data['user_id'] = auth()->user()->id;
-        //dd($data_items);
+        
         // modify and filter items without item_id
         $data_items = modify_array($data_items);
         $data_items = array_filter($data_items, function ($v) { return $v['id']; });
@@ -524,25 +502,21 @@ class PayrollController extends Controller
          //dd($count);
             foreach ($paye_brackets as $i => $bracket) {
                 if ($i == $count-1) {
-                    //dd($bracket->rate);
+                    
                     if ($gross_pay > $bracket->amount_from) {
                         $tax += $bracket->rate / 100 * ($gross_pay - $bracket->amount_from);
-                       //dd($gross_pay);
+                       
                     }
-                    //dd($tax);
+                    
                 }
                 else {
-                    //dd($gross_pay);
+                    
                     if($i == 0){
                         
                         if($gross_pay > $bracket->amount_from){
                             $tax += $bracket->rate/100 * $bracket->amount_to;
-                            //dd($tax);
                         }
-                        
-                        // else{
-                        //     $tax += $bracket->rate/100 *$bracket->amount_to;
-                        // }
+                       
                     }else{
                         
                         if($gross_pay >= $bracket->amount_from && $gross_pay < $bracket->amount_to){
@@ -552,21 +526,17 @@ class PayrollController extends Controller
                         elseif($gross_pay >= $bracket->amount_from && $gross_pay > $bracket->amount_to){
                             $tax += $bracket->rate/100 * ($bracket->amount_to - $bracket->amount_from);
                         }
-                        //dd($bracket->amount_from);
-                        // elseif ($i != $count - 1) {
-                        //     $tax += $bracket->rate/100 * $bracket->amount_to;
-                        // }
+                        
                     }
-                    //$tax = $bracket->rate / 100 * ($bracket->amount_to);
+                    
                 }
-                // dd($tax);
              }
              if($gross_pay > $first_bracket->amount_to){
                 $tax = $tax - $personal_relief;
              }else{
                 $tax = $tax - ($first_bracket->rate/100 * $first_bracket->amount_to);
              }
-         //dd($tax);
+         
         return $tax;
     }
 

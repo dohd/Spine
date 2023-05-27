@@ -34,13 +34,16 @@ class SendEmailJob implements ShouldQueue
      */
     public function handle()
     {
-       // dd($this->emailData);
         $mailer = new RosemailerRepository;
         $result = [];
         foreach($this->users as $user){
-            //dd($user->employee->email);
+            $pdf = new \Mpdf\Mpdf(config('pdf') + ['margin_left' => 4, 'margin_right' => 4]);
+            $html = view('focus.bill.payslip', ['user' =>$user])->render();
+            $pdf->WriteHTML($html);
+            $pdfFilePath = storage_path('app/public/files/' . uniqid() . '.pdf');
+            $pdf->Output($pdfFilePath, 'F');
             $this->emailData['mail_to'] = $user->employee->email;
-           // $this->emailData['file'] = 'C:\LaravelApps\Spine\storage\app\public\files\1682418275ERP FLYER FA.pdf';
+            $this->emailData['file'] = $pdfFilePath;
             $result= $mailer->send($user->employee->email, $this->emailData);
         }
         dd($result);
