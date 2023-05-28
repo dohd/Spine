@@ -21,10 +21,9 @@ namespace App\Http\Controllers\Focus\project;
 use App\Http\Controllers\Controller;
 use App\Models\items\ProjectstockItem;
 use App\Models\items\PurchaseItem;
-use App\Models\items\VerifiedItem;
-use App\Models\project\BudgetSkillset;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\project\ProjectRepository;
+use App\Models\items\GoodsreceivenoteItem;
 
 /**
  * Class ProjectsTableController.
@@ -62,26 +61,36 @@ class ExpensesTableController extends Controller
             ->editColumn('exp_category', function ($item) {
                 $exp_category = '';
                 switch ($item->exp_category) {
-                    case 'dir_purchase_stock': $exp_category = 'Direct Purchase Stock'; break;
-                    case 'dir_purchase_service': $exp_category = 'Direct Purchase Service'; break;
-                    case 'purchase_order_stock': $exp_category = 'Purchase Order Stock'; break;
-                    case 'inventory_stock': $exp_category = 'Inventory Stock'; break;
-                    case 'labour_service': $exp_category = 'Labour Service'; break;
+                    case 'dir_purchase_stock':
+                        $exp_category = 'Direct Purchase Stock';
+                        break;
+                    case 'dir_purchase_service':
+                        $exp_category = 'Direct Purchase Service';
+                        break;
+                    case 'purchase_order_stock':
+                        $exp_category = 'Purchase Order Stock';
+                        break;
+                    case 'inventory_stock':
+                        $exp_category = 'Inventory Stock';
+                        break;
+                    case 'labour_service':
+                        $exp_category = 'Labour Service';
+                        break;
                 }
-                if ($item->ledger_account) 
+                if ($item->ledger_account)
                     return "{$exp_category}<br>(Account: {$item->ledger_account})";
                 return $exp_category;
             })
-            ->editColumn('qty', function($item) {
+            ->editColumn('qty', function ($item) {
                 return +$item->qty;
             })
-            ->editColumn('rate', function($item) {
+            ->editColumn('rate', function ($item) {
                 return numberFormat($item->rate);
             })
-            ->editColumn('amount', function($item) {
+            ->editColumn('amount', function ($item) {
                 return numberFormat($item->amount);
             })
-            ->addColumn('group_totals', function() use($group_totals) {
+            ->addColumn('group_totals', function () use ($group_totals) {
                 return $group_totals;
             })
             ->make(true);
@@ -96,10 +105,10 @@ class ExpensesTableController extends Controller
         $params = array_filter($params);
         if (!$params) return $expenses;
 
-        return $expenses->filter(function($item) use($params) {
+        return $expenses->filter(function ($item) use ($params) {
             $eval = 0;
             foreach ($params as $key => $value) {
-                if ($item->$key == $value) $eval += 1; 
+                if ($item->$key == $value) $eval += 1;
             }
             return count($params) == $eval;
         });
@@ -108,13 +117,13 @@ class ExpensesTableController extends Controller
     /**
      * Expense Group Totals
      */
-    public function group_totals($expenses=[])
+    public function group_totals($expenses = [])
     {
         $group_totals = [];
         foreach ($expenses as $expense) {
-            if (@$group_totals[$expense->exp_category]) 
-                $group_totals[$expense->exp_category] += $expense->amount*1;
-            else $group_totals[$expense->exp_category] = $expense->amount*1;
+            if (@$group_totals[$expense->exp_category])
+                $group_totals[$expense->exp_category] += $expense->amount * 1;
+            else $group_totals[$expense->exp_category] = $expense->amount * 1;
         }
         $group_totals['grand_total'] = collect(array_values($group_totals))->sum();
 
@@ -128,23 +137,24 @@ class ExpensesTableController extends Controller
     {
         $indx = 0;
         $expenses = collect();
+
         // direct purchase
-        $dir_purchase_items = PurchaseItem::whereHas('project', fn($q) => $q->where('projects.id', request('project_id')))
+        $dir_purchase_items = PurchaseItem::whereHas('project', fn ($q) => $q->where('projects.id', request('project_id')))
             ->with('purchase', 'account')
             ->get();
         foreach ($dir_purchase_items as $item) {
             $indx++;
             $data = (object) [
                 'id' => $indx,
-                'exp_category' => $item->type == 'Stock'? 'dir_purchase_stock' : ($item->type == 'Expense'? 'dir_purchase_service' : ''),
+                'exp_category' => $item->type == 'Stock' ? 'dir_purchase_stock' : ($item->type == 'Expense' ? 'dir_purchase_service' : ''),
                 'ledger_id' => @$item->account->id,
                 'ledger_account' => @$item->account->holder,
                 'supplier_id' => @$item->purchase->supplier->id,
-                'supplier' => @$item->purchase->suppliername ? $item->purchase->suppliername : ($item->purchase->supplier? $item->purchase->supplier->name : ''),
-                'product_name' => $item->description,
+                'supplier' => @$item->purchase->suppliername ? $item->purchase->suppliername : ($item->purchase->supplier ? $item->purchase->supplier->name : ''),
+                'product_name' => $item->purchase? '(' . gen4tid('DP-', $item->purchase->tid) . ') <br>' . $item->description : '',
                 'uom' => $item->uom,
                 'qty' => $item->qty,
-                'rate' => $item->qty > 0? ($item->amount/$item->qty) : $item->amount,
+                'rate' => $item->qty > 0 ? ($item->amount / $item->qty) : $item->amount,
                 'amount' => $item->amount,
             ];
             $expenses->add($data);
@@ -153,7 +163,7 @@ class ExpensesTableController extends Controller
         // inventory stock (issued)
         $issued_items = ProjectstockItem::whereHas('project_stock', function ($q) {
             $q->whereHas('quote', function ($q) {
-                $q->whereHas('project', fn($q) => $q->where('projects.id', request('project_id')));
+                $q->whereHas('project', fn ($q) => $q->where('projects.id', request('project_id')));
             });
         })
         ->get();
@@ -170,16 +180,36 @@ class ExpensesTableController extends Controller
                 'product_name' => @$product_variation->name,
                 'uom' => $item->unit,
                 'qty' => $item->qty,
-                'rate' => @$product_variation? $product_variation->purchase_price : 0,
-                'amount' => @$product_variation? $product_variation->purchase_price * $item->qty : 0,
+                'rate' => @$product_variation->purchase_price ?: 0,
+                'amount' => @$product_variation ? $product_variation->purchase_price * $item->qty : 0,
             ];
             $expenses->add($data);
         }
 
-        // purchase order
-        // $po_purchase_items = PurchaseorderItem::whereHas('project', fn($q) => $q->where('projects.id', request('project_id')))
-        //     ->latest()->get();
-        // $po_purchases = collect();
+        // purchase order goods received
+        $goods_receive_items = GoodsreceivenoteItem::whereHas('purchaseorder_item', function ($q) {
+            $q->where('itemproject_id', request('project_id'));
+        })->get();
+        foreach ($goods_receive_items as $item) {
+            $indx++;
+            $grn = $item->goodsreceivenote;
+            $po_item = $item->purchaseorder_item;
+            $po = @$po_item->purchaseorder;
+            $data = (object) [
+                'id' => $indx,
+                'exp_category' => 'purchase_order_stock',
+                'ledger_id' => @$item->account->id,
+                'ledger_account' => @$item->account->holder,
+                'supplier_id' => @$grn->supplier->id,
+                'supplier' => @$grn->supplier->name,
+                'product_name' => $po? '(' . gen4tid('PO-', $po->tid) . ') <br>' . @$po_item->description : '',
+                'uom' => @$po_item->uom,
+                'qty' => $item->qty,
+                'rate' => $item->rate,
+                'amount' => $item->rate * $item->qty,
+            ];
+            $expenses->add($data);
+        }
 
         return $expenses;
     }
