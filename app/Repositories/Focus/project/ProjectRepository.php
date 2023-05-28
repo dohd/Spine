@@ -187,7 +187,7 @@ class ProjectRepository extends BaseRepository
                 'ins' => $project->ins,
             ];
             $event_relation = EventRelation::where('r_id', $project->id)->first();
-            if ($event_relation->event) $event_relation->event->update($data);
+            if (@$event_relation->event) $event_relation->event->update($data);
         }
 
         if ($project) {
