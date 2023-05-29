@@ -177,11 +177,11 @@
             width: 100%;
         }
 
-        #signature .sig_row {
+        .sig_row {
             display: flex;
             flex-flow: row nowrap;
-            
-            width: 100%;
+
+            width: 50%;
         }
 
         #payment div {
@@ -221,6 +221,13 @@
                 </span>
             </td>
         </tr>
+        <tr>
+            <td class="doc-title-td">
+                <span class='doc-title'>
+                    <b>PAYSLIP</b>
+                </span>
+            </td>
+        </tr>
     </table><br>
     <table class="customer-dt" cellpadding="10">
         {{-- if($resource->employee){ --}}
@@ -247,7 +254,7 @@
             <td width="5%">&nbsp;</td>
             <td width="45%">
                 <span class="customer-dt-title">PAYSLIP DETAILS:</span><br><br>
-                <b>Basic Pay :</b> {{ $resource->basic_pay }}<br><br>
+                <b>Basic Pay :</b> {{ amountFormat($resource->salary->basic_pay) }}<br><br>
                 <b>Taxable Gross Allowances :</b>{{ amountFormat($gross_taxable_allowance) }}<br>
                 <b>NSSF :</b> {{ amountFormat($resource->nssf) }} <br>
                 <b>NHIF :</b> {{ amountFormat($resource->nhif) }} <br>
@@ -260,20 +267,24 @@
 
     </table><br>
     <p><b>Payment Details</b></p>
-    <div id="payment">
-        <div>
-           <h4>Date:</h4>  22/05/23
-        </div>
-        <div>
-            <h4>Amount:</h4> KSH 40000
-        </div>
-        <div>
-            <h4> Acc.No :</h4> {{ $hrmmeta->account_number }}
-        </div>
-        <div>
-            <h4>Payment Method:</h4>  MPESA
-        </div>
-    </div><br>
+    <table style="width:100%">
+        <tbody>
+            <tr>
+                <td>
+                    <h4>Date:</h4> 22/05/23
+                </td>
+                <td>
+                    <h4>Amount:</h4> {{ amountFormat(40000) }}
+                </td>
+                <td>
+                    <h4> Acc.No :</h4> {{ $hrmmeta->account_number }}
+                </td>
+                <td>
+                    <h4>Payment Method:</h4> MPESA
+                </td>
+            </tr>
+        </tbody>
+    </table><br>
     <p><b>Taxable Allowances and Deductions</b></p>
     <table class="border" style="width:100%">
         <thead>
@@ -501,19 +512,20 @@
         </tbody>
     </table><br><br>
 
-    <div id="signature">
-        <div class="sig_row">
-            <h3>Prepared By</h3> 
-            <div class="horizontal_dotted_line"></div>
-
-        </div>
-        <div class="sig_row">
-            <h3>Employee Signature </h3> 
-            <div class="horizontal_dotted_line"></div>
-
-        </div>
-    </div>
-    <br>
+    <table style="width:100%">
+        <tbody>
+            <tr>
+                <td class="sig_row">
+                    <p>Prepared By</p>
+                    <div class="horizontal_dotted_line"></div>
+                </td>
+                <td class="sig_row">
+                    <p>Employee Signature </p>
+                    <div class="horizontal_dotted_line"></div>
+                </td>
+            </tr>
+        </tbody>
+    </table><br>
     <div>{!! $resource->extra_footer !!}</div>
 </body>
 
