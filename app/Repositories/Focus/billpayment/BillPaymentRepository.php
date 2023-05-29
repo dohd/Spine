@@ -173,8 +173,6 @@ class BillPaymentRepository extends BaseRepository
             if (!$result->rel_payment_id) {
                 if (in_array($result->payment_type, ['on_account', 'advance_payment'])) {
                     $result->supplier->increment('on_account', $result->amount);
-                } else {
-                    $result->supplier->increment('on_account', $result->amount - $result->allocate_ttl);
                 }
             }
 
@@ -236,8 +234,6 @@ class BillPaymentRepository extends BaseRepository
             if (!$billpayment->rel_payment_id) {
                 if (in_array($billpayment->payment_type, ['on_account', 'advance_payment'])) {
                     $billpayment->supplier->decrement('on_account', $billpayment->amount);
-                } else {
-                    $billpayment->supplier->decrement('on_account', $billpayment->amount - $billpayment->allocate_ttl);
                 }
             }
 
@@ -262,8 +258,6 @@ class BillPaymentRepository extends BaseRepository
             if (!$billpayment->rel_payment_id) {
                 if (in_array($billpayment->payment_type, ['on_account', 'advance_payment'])) {
                     $billpayment->supplier->increment('on_account', $billpayment->amount);
-                } else {
-                    $billpayment->supplier->increment('on_account', $billpayment->amount - $billpayment->allocate_ttl);
                 }
             }
 

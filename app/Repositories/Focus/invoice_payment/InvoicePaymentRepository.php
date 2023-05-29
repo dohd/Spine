@@ -56,6 +56,8 @@ class InvoicePaymentRepository extends BaseRepository
         }
 
         if ($data['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
+        if ($data['payment_type'] == 'per_invoice' && $data['amount'] != $data['allocate_ttl'])
+            throw ValidationException::withMessages(['Payment Amount should be equal to Total Allocated Amount.']);
             
         // create payment
         $tid = InvoicePayment::where('ins', auth()->user()->ins)->max('tid');
@@ -136,9 +138,8 @@ class InvoicePaymentRepository extends BaseRepository
             if ($key == 'date') $data[$key] = date_for_database($val);
             if (in_array($key, ['amount', 'allocate_ttl'])) $data[$key] = numberClean($val);
         }
-        if (isset($data['amount']) && $data['amount'] == 0) 
-            throw ValidationException::withMessages(['amount is required!']);
-
+        if (@$data['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
+            
         // delete invoice_payment with no unallocated line items
         $data_items = $input['data_items'];
         if (!$data_items && $invoice_payment->payment_type == 'per_invoice') 
@@ -153,9 +154,7 @@ class InvoicePaymentRepository extends BaseRepository
             if (!$invoice_payment->rel_payment_id) {
                 if (in_array($invoice_payment->payment_type, ['on_account', 'advance_payment'])) {
                     $invoice_payment->customer->decrement('on_account', $invoice_payment->amount);
-                } else {
-                    $invoice_payment->customer->decrement('on_account', $invoice_payment->amount - $invoice_payment->allocate_ttl);
-                }
+                } 
             }
 
             // allocated payment
@@ -178,9 +177,7 @@ class InvoicePaymentRepository extends BaseRepository
             if (!$invoice_payment->rel_payment_id) {
                 if (in_array($invoice_payment->payment_type, ['on_account', 'advance_payment'])) {
                     $invoice_payment->customer->increment('on_account', $invoice_payment->amount);
-                } else {
-                    $invoice_payment->customer->increment('on_account', $invoice_payment->amount - $invoice_payment->allocate_ttl);
-                }
+                } 
             }
 
             // allocated payment
