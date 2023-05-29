@@ -64,7 +64,7 @@
                 } 
             });
             if (Form.invoicePayment && $('#payment_type').val() == 'per_invoice' && !$('#invoiceTbl tbody tr').length) {
-                if (!confirm('Allocating zero line items will reset this payment! Are you sure?')) {
+                if (!confirm('Allocating zero on line items will reset this payment! Are you sure?')) {
                     event.preventDefault();
                     location.reload();
                 }
@@ -72,9 +72,9 @@
             // check if payment amount >= allocated amount
             let amount = accounting.unformat($('#amount').val());
             let allocatedTotal = accounting.unformat($('#allocate_ttl').val());
-            if (allocatedTotal > amount) {
+            if (amount != allocatedTotal && $('#payment_type').val() == 'per_invoice') {
                 event.preventDefault();
-                alert('Total Allocated Amount must be less or equal to payment Amount!');
+                alert('Total Allocated Amount must equal to Payment Amount!');
             }
             // enable all disabled elements
             $(this).find('select:disabled').attr('disabled', false);
@@ -171,12 +171,10 @@
             let dueTotal = 0;
             let allocateTotal = 0;
             let amount = accounting.unformat($(this).val());
-            const lastCount = $('#invoiceTbl tbody tr').length - 1;
             $('#invoiceTbl tbody tr').each(function(i) {
-                if (i == lastCount) return;
                 const due = accounting.unformat($(this).find('.due').text());
                 if (due > amount) $(this).find('.paid').val(accounting.formatNumber(amount));
-                else if (amount > due) $(this).find('.paid').val(accounting.formatNumber(due));
+                else if (amount >= due) $(this).find('.paid').val(accounting.formatNumber(due));
                 else $(this).find('.paid').val(0);
                 const paid = accounting.unformat($(this).find('.paid').val());
                 amount -= paid;

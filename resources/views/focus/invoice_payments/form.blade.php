@@ -107,13 +107,7 @@
                         <input type="hidden" name="id[]" value="{{ $row->id }}">
                     </tr>
                 @endforeach
-            @endisset                             
-            <tr class="bg-white">
-                <td colspan="6"></td>
-                <td colspan="2">
-                    
-                </td>
-            </tr>
+            @endisset
         </tbody>                
     </table>
 </div>
