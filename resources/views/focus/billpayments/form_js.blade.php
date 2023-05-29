@@ -52,7 +52,7 @@
                 } 
             });
             if (Form.billPayment && $('#payment_type').val() == 'per_invoice' && !$('#billsTbl tbody tr').length) {
-                if (!confirm('Unallocating all line items destroys this instance! Are you sure?')) {
+                if (!confirm('Allocating zero on line items will reset this payment! Are you sure?')) {
                     event.preventDefault();
                     location.reload();
                 }

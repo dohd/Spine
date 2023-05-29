@@ -64,7 +64,7 @@
                 } 
             });
             if (Form.invoicePayment && $('#payment_type').val() == 'per_invoice' && !$('#invoiceTbl tbody tr').length) {
-                if (!confirm('Allocating zero line items will reset this payment! Are you sure?')) {
+                if (!confirm('Allocating zero on line items will reset this payment! Are you sure?')) {
                     event.preventDefault();
                     location.reload();
                 }
