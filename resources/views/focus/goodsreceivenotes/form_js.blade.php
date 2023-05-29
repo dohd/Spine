@@ -34,7 +34,7 @@
 
             // edit mode
             if (this.grn) {
-                $('#date').datepicker('setDate', new Date(this.grn.date));
+                if (this.grn.date) $('#date').datepicker('setDate', new Date(this.grn.date));
                 if (this.grn.invoice_date) $('#invoice_date').datepicker('setDate', new Date(this.grn.invoice_date));
                 
                 $('#supplier').attr('disabled', true).change();

@@ -7,7 +7,7 @@
                     <tr>
                         <th>Quote / PI</th>
                         <th>Quoted Amount</th>                    
-                        <th>Cost Amount</th>
+                        <th>Est. Cost Amount</th>
                         <th>Gross Profit (Quoted - Cost)</th>
                         <th>% Gross Profit</th>
                     </tr>
@@ -59,7 +59,7 @@
                     <tr>
                         <th>Quote / PI (Budget)</th>
                         <th>Quoted Amount</th>                    
-                        <th>Cost Amount</th>
+                        <th>Est. Cost Amount</th>
                         <th>Gross Profit (Quoted - Cost)</th>
                         <th>% Gross Profit</th>
                     </tr>
