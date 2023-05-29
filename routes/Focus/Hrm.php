@@ -81,6 +81,7 @@ Route::group(['namespace' => 'payroll'], function () {
     Route::post('page/store_paye', 'PayrollController@store_paye')->name('payroll.store_paye');
     Route::post('page/store_nhif', 'PayrollController@store_nhif')->name('payroll.store_nhif');
     Route::post('page/approve_payroll', 'PayrollController@approve_payroll')->name('payroll.approve_payroll');
+    Route::post('page/send_mail', 'PayrollController@send_mail')->name('payroll.send_mail');
     Route::resource('payroll', 'PayrollController');
     //For Datatable
     Route::post('payroll/get', 'PayrollTableController')->name('payroll.get');

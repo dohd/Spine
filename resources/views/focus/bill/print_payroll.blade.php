@@ -222,7 +222,7 @@
             </td>
         </tr>
     </table><br>
-    <table class="customer-dt" cellpadding="10">
+    <table class="customer-dt" cellpadding="5">
         {{-- if($resource->employee){ --}}
         @php
             $employee = $resource->employee;
@@ -247,7 +247,7 @@
             <td width="5%">&nbsp;</td>
             <td width="45%">
                 <span class="customer-dt-title">PAYSLIP DETAILS:</span><br><br>
-                <b>Basic Pay :</b> {{ $resource->basic_pay }}<br><br>
+                <b>Basic Pay :</b> {{ amountFormat($resource->basic_pay) }}<br><br>
                 <b>Taxable Gross Allowances :</b>{{ amountFormat($gross_taxable_allowance) }}<br>
                 <b>NSSF :</b> {{ amountFormat($resource->nssf) }} <br>
                 <b>NHIF :</b> {{ amountFormat($resource->nhif) }} <br>
@@ -259,7 +259,7 @@
         {{-- } --}}
 
     </table><br>
-    <p><b>Payment Details</b></p>
+    {{-- <p><b>Payment Details</b></p>
     <div id="payment">
         <div>
            <h4>Date:</h4>  22/05/23
@@ -273,7 +273,7 @@
         <div>
             <h4>Payment Method:</h4>  MPESA
         </div>
-    </div><br>
+    </div><br> --}}
     <p><b>Taxable Allowances and Deductions</b></p>
     <table class="border" style="width:100%">
         <thead>

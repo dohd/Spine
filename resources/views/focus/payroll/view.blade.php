@@ -28,9 +28,18 @@
             </div>
             <div class="card">
                 <div class="card-header">
-                    <a href="#" class="btn btn-info btn-sm mr-1" data-toggle="modal" data-target="#statusModal">
-                        <i class="fa fa-pencil" aria-hidden="true"></i> Approve
-                    </a>
+                    <div class="row">
+                        <div class="col-2">
+                            <a href="#" class="btn btn-info btn-lg my-1" data-toggle="modal" data-target="#statusModal">
+                                <i class="fa fa-pencil" aria-hidden="true"></i> Approve
+                            </a>
+                        </div>
+                        <div class="col-2">
+                            <a href="#" class="btn btn-success btn-lg my-1 send_mail">
+                                <i class="fa fa-paper-plane-o"></i> {{trans('general.send')}}
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <ul class="nav nav-tabs" role="tablist">
@@ -485,7 +494,17 @@
                 ...config.date
             }).datepicker('setDate', new Date());
         });
-
+    $('.send_mail').click(function () { 
+        var id = @json($payroll->id);
+        console.log(id);
+        $.post("{{ route('biller.payroll.send_mail')}}", {id: id},
+            function (data, textStatus, jqXHR) {
+                
+            },
+            "dataType"
+        );
+        
+    });
         
 </script>
 <script>
