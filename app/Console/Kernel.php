@@ -16,7 +16,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\TicketNotify::class,
-        Commands\ProspectNotify::class
+        Commands\ProspectNotify::class,
+       
     ];
 
     /**
@@ -28,6 +29,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('prospect:notify')
+            ->daily();
         $schedule->command('message:notify')
             ->daily();
     }

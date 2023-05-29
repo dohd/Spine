@@ -19,7 +19,7 @@ class ProspectNotify extends Command
      *
      * @var string
      */
-    protected $signature = 'message:notify';
+    protected $signature = 'prospect:notify';
 
     /**
      * The console command description.
@@ -45,8 +45,8 @@ class ProspectNotify extends Command
      */
     public function handle()
     {
-        
         $prospectcallresolved = ProspectCallResolved::whereDate('reminder_date', '=', Carbon::today())->withoutGlobalScopes()->get();
+        Log::info($prospectcallresolved);
         if (is_object($prospectcallresolved)) {
             $users = User::whereHas('user_associated_permission', function($query){
                 $query->where('name', 'create-lead');
@@ -59,6 +59,7 @@ class ProspectNotify extends Command
                
             }
         }
+        
        
     }
 }
