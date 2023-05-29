@@ -60,7 +60,7 @@
             // check if payment amount >= allocated amount
             const pmtAmount = accounting.unformat($('#amount').val());
             const allocAmount = accounting.unformat($('#allocate_ttl').val());
-            if (allocAmount > pmtAmount) {
+            if (pmtAmount != allocAmount && $('#payment_type').val() == 'per_invoice') {
                 event.preventDefault();
                 alert('Total Allocated Amount must be less or equal to payment Amount!');
             }
@@ -209,8 +209,8 @@
                 const due = accounting.unformat($(this).find('.due').text());
                 const paidInput = $(this).find('.paid');
                 if (due > amount) paidInput.val(accounting.formatNumber(amount));
-                else if (amount > due) paidInput.val(accounting.formatNumber(due));
-                else paidInput.val(accounting.formatNumber(due));
+                else if (amount >= due) paidInput.val(accounting.formatNumber(due));
+                else paidInput.val(accounting.formatNumber(0));
                 
                 const paid = accounting.unformat(paidInput.val());
                 amount -= paid;
