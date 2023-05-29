@@ -90,14 +90,11 @@ class ProjectsTableController extends Controller
                 $arr = explode('-', $budget);
                 if (strtolower($arr[0]) == strtolower($prefixes[2]) && isset($arr[1])) {
                     $query->whereHas('quotes', fn($q) => $q->where('tid', floatval($arr[1])));
-                    
-                    //fn($q) => $q->where('budget', floatval($arr[1]))
                 } 
                 elseif (strtolower($arr[0]) == strtolower($prefixes[3]) && isset($arr[1])) {
                     $query->whereHas('quotes', fn($q) => $q->where('tid', floatval($arr[1])));
                 }
                 elseif (floatval($budget)) {
-                    //$query->whereHas('quotes', fn($q) => $q->where('budget', floatval($budget)));
                     $query->whereHas('quotes',  fn($q) => $q->where('tid', floatval($budget)));
                 }
             })
@@ -112,10 +109,7 @@ class ProjectsTableController extends Controller
                 $arr = explode('-', $tid);
                 if (strtolower($arr[0]) == strtolower($prefixes[0]) && isset($arr[1])) {
                     $query->whereHas('quotes', fn($q) => $q->whereHas('lead', fn($q) => $q->where('reference', floatval($arr[1]))));
-                    
-                    //fn($q) => $q->where('tid', floatval($arr[1]))
                 } elseif (floatval($tid)) {
-                    //$query->whereHas('quotes', fn($q) => $q->where('tid', floatval($tid)));
                     $query->whereHas('quotes', fn($q) => $q->whereHas('lead', fn($q) => $q->where('reference', floatval($tid))));
                 }
             })
@@ -124,6 +118,7 @@ class ProjectsTableController extends Controller
             })
             ->orderColumn('start_date', '-start_date $1')
             ->editColumn('end_date', function ($project) {
+                if (!$project->end_date) return '';
                 return dateFormat($project->end_date);
             })
             ->orderColumn('end_date', '-end_date $1')
