@@ -20,12 +20,18 @@ use App\Models\project\ProjectRelations;
 use App\Models\project\Task;
 use App\Models\quote\Quote;
 use App\Models\rjc\Rjc;
+use App\Models\items\GoodsreceivenoteItem;
 
 /**
  * Class ProjectRelationship
  */
 trait ProjectRelationship
 {
+    public function grn_items()
+    {
+        return $this->hasMany(GoodsreceivenoteItem::class, 'itemproject_id');
+    }
+
     public function misc()
     {
         return $this->belongsTo(Misc::class, 'status');
@@ -35,7 +41,7 @@ trait ProjectRelationship
     {
         return $this->belongsTo(User::class, 'ended_by');
     }
-    
+
     public function purchase_items()
     {
         return $this->hasMany(PurchaseItem::class, 'itemproject_id');
@@ -85,7 +91,7 @@ trait ProjectRelationship
     {
         return $this->hasOneThrough(Hrm::class, ProjectRelations::class, 'project_id', 'id', 'id', 'user_id');
     }
-    
+
     public function branch()
     {
         return $this->belongsTo(Branch::class);
