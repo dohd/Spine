@@ -53,6 +53,7 @@
                                     <th>Name</th>
                                     <th>Priority</th>
                                     <th>Status</th>
+                                    <th>Start</th>
                                     <th>Deadline</th>
                                     <th>{{ trans('general.action') }}</th>
                                 </tr>
@@ -208,7 +209,7 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['tid', 'name', 'priority', 'status', 'end_date'].map(v => ({data: v, name: v})),
+                    ...['tid', 'name', 'priority', 'status', 'start_date', 'end_date'].map(v => ({data: v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
