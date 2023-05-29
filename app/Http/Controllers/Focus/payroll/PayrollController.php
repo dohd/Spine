@@ -286,13 +286,6 @@ class PayrollController extends Controller
         $payroll->approval_date = date_for_database($request->approval_date);
         $payroll->status = $request->status;
         $payroll->update();
-        // $users = $payroll->payroll_items()->get();
-        
-        // $input=array();
-        // $input['text']='Hello Everyone';
-        // $input['subject']='Payslip';
-        // $input['customer_name']='Your name';
-        // SendEmailJob::dispatch($users, $input);
         return redirect()->back();
     }
 

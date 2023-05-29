@@ -35,9 +35,9 @@
                             </a>
                         </div>
                         <div class="col-2">
-                            <a href="#" class="btn btn-success btn-lg my-1 send_mail">
+                            <button type="button" class="btn btn-success btn-lg my-1 send_mail">
                                 <i class="fa fa-paper-plane-o"></i> {{trans('general.send')}}
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
