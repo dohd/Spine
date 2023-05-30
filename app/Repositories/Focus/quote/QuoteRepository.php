@@ -116,7 +116,8 @@ class QuoteRepository extends BaseRepository
      */
     public function getForVerifyDataTable()
     {
-        $q = $this->query();
+        $q = $this->query()->where('status', 'approved');
+        
         // customer filter
         if(request('customer_id')) {
             $q->where('customer_id', request('customer_id'));
