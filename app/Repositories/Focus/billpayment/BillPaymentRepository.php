@@ -226,7 +226,9 @@ class BillPaymentRepository extends BaseRepository
             return $this->delete($billpayment);
 
         DB::beginTransaction();
+
         $prev_note = $billpayment->note;
+        $prev_reference = $billpayment->reference;
 
         // reverse supplier on_account balance
         if ($billpayment->supplier) {
@@ -318,7 +320,14 @@ class BillPaymentRepository extends BaseRepository
         
         /** accounting */
         if (!$billpayment->rel_payment_id || $billpayment->is_advance_allocation) {
-            Transaction::where(['tr_type' => 'pmt', 'note' => $prev_note, 'tr_ref' => $billpayment->id])->delete();
+            Transaction::whereIn('tr_type', ['pmt', 'supplier_adv_pmt']) 
+            ->where(['tr_ref' => $billpayment->id, 'user_type' => 'supplier'])
+            ->where(function($q) use($prev_note, $prev_reference) {
+                $q->where('note', 'LIKE', "%{$prev_note}%")
+                ->orwhere('note', 'LIKE', "%{$prev_reference}%");
+            })
+            ->delete();
+
             $this->post_transaction($billpayment);
         }
 
@@ -380,9 +389,16 @@ class BillPaymentRepository extends BaseRepository
                 }
             }
         }
-        
-        Transaction::where(['tr_type' => 'pmt', 'note' => $billpayment->note, 'tr_ref' => $billpayment->id])->delete();
+
+        Transaction::whereIn('tr_type', ['pmt', 'supplier_adv_pmt']) 
+        ->where(['tr_ref' => $billpayment->id, 'user_type' => 'supplier'])
+        ->where(function($q) use($billpayment) {
+            $q->where('note', 'LIKE', "%{$billpayment->reference}%")
+            ->orwhere('note', 'LIKE', "%{$billpayment->note}%");
+        })
+        ->delete();
         aggregate_account_transactions();
+        
         if ($billpayment->delete()) {
             DB::commit(); 
             return true;
@@ -414,7 +430,7 @@ class BillPaymentRepository extends BaseRepository
             'tr_date' => $billpayment->date,
             'due_date' => $billpayment->date,
             'user_id' => $billpayment->user_id,
-            'note' => $billpayment->note,
+            'note' => $billpayment->note ?: ($billpayment->payment_mode . ' - ' . $billpayment->reference),
             'ins' => $billpayment->ins,
             'tr_type' => $tr_category->code,
             'tr_ref' => $billpayment->id,

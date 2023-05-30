@@ -146,6 +146,7 @@ class InvoicePaymentRepository extends BaseRepository
             return $this->delete($invoice_payment);
 
         DB::beginTransaction();
+        $prev_reference = $invoice_payment->reference;
         $prev_note = $invoice_payment->note;
 
         // reverse customer on_account balance
@@ -224,8 +225,12 @@ class InvoicePaymentRepository extends BaseRepository
         /** accounting */
         if (!$invoice_payment->rel_payment_id || $invoice_payment->is_advance_allocation) {
             Transaction::whereIn('tr_type', ['pmt', 'adv_pmt'])
-                ->where(['note' => $prev_note, 'tr_ref' => $invoice_payment->id])
-                ->delete();
+            ->where(['tr_ref' => $invoice_payment->id, 'user_type' => 'customer'])
+            ->where(function($q) use($prev_reference, $prev_note) {
+                $q->where('note', 'LIKE', "%{$prev_reference}%")
+                ->orWhere('note', 'LIKE', "%{$prev_note}%");
+            })
+            ->delete();
             $this->post_transaction($invoice_payment);
         }
 
@@ -279,8 +284,12 @@ class InvoicePaymentRepository extends BaseRepository
         }
         
         Transaction::whereIn('tr_type', ['pmt', 'adv_pmt'])
-            ->where(['note' => $invoice_payment->note, 'tr_ref' => $invoice_payment->id])
-            ->delete();
+        ->where(['tr_ref' => $invoice_payment->id, 'user_type' => 'customer'])
+        ->where(function($q) use($invoice_payment) {
+            $q->where('note', 'LIKE', "%{$invoice_payment->reference}%")
+            ->orWhere('note', 'LIKE', "%{$invoice_payment->note}%");
+        })
+        ->delete();
         aggregate_account_transactions();
 
         if ($invoice_payment->delete()) {
@@ -288,7 +297,6 @@ class InvoicePaymentRepository extends BaseRepository
             return true;
         }         
     }
-
 
     /**
      * Post Invoice Payment Transaction
@@ -306,7 +314,7 @@ class InvoicePaymentRepository extends BaseRepository
             'tr_date' => $invoice_payment->date,
             'due_date' => $invoice_payment->date,
             'user_id' => $invoice_payment->user_id,
-            'note' => $invoice_payment->payment_mode . ' - ' . $invoice_payment->reference,
+            'note' => ($invoice_payment->payment_mode . ' - ' . $invoice_payment->reference),
             'ins' => $invoice_payment->ins,
             'tr_type' => $tr_category->code,
             'tr_ref' => $invoice_payment->id,
