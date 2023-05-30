@@ -13,6 +13,7 @@ use App\Models\quote\Quote;
 use App\Models\djc\Djc;
 use App\Models\invoice\Invoice;
 use App\Models\items\VerifiedItem;
+use App\Models\payroll\Payroll;
 use App\Models\payroll\PayrollItem;
 use App\Models\rjc\Rjc;
 
@@ -197,7 +198,7 @@ trait BillDetailsTrait
                 //payroll
 
                 $resource = PayrollItem::where('id',$request->id)->with('hrmmetas.jobtitle')->first();
-                
+                $payroll = Payroll::where('id',$resource['payroll_id'])->first();
                 $attributes = $getAttr(12, 'payslip', 12, 1, $resource->employee_id, route('biller.payroll.show', $resource->id));
                 foreach($attributes as $key => $val) {
                     $resource[$key] = $val;

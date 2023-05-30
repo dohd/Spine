@@ -213,18 +213,24 @@
             </td>
         </tr>
     </table>
+    @php
+        $date = $payroll->payroll_month;
+        $myDate = Carbon::createFromFormat('Y-m-d', $date);
+        $monthName = $myDate->format('F');
+        $year = $myDate->format('Y');
+    @endphp
     <table class="doc-table">
         <tr>
             <td class="doc-title-td">
                 <span class='doc-title'>
-                    <b>PAYSLIP</b>
+                    <b>PAYSLIP</b> - {{ $payroll->id }}
                 </span>
             </td>
         </tr>
         <tr>
             <td class="doc-title-td">
                 <span class='doc-title'>
-                    <b>PAYSLIP</b>
+                    <b>{{ $monthName  }} - {{ $year }}</b>
                 </span>
             </td>
         </tr>
