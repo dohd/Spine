@@ -7,6 +7,7 @@ use App\Models\hrm\HrmMeta;
 use App\Models\jobtitle\JobTitle;
 use App\Models\salary\Salary;
 use App\Models\payroll\PayrollItem;
+use App\Models\payroll\Payroll;
 
 /**
  * Class PayrollRelationship

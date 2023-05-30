@@ -177,12 +177,7 @@
             width: 100%;
         }
 
-        .sig_row {
-            display: flex;
-            flex-flow: row nowrap;
-
-            width: 50%;
-        }
+        
 
         #payment div {
             margin-right: 15px;
@@ -190,7 +185,7 @@
         }
 
         .horizontal_dotted_line {
-            margin-bottom: 15px;
+            margin-bottom: 5px;
             margin-left: 5px;
             border-bottom: 2px dotted;
             width: 80%;
@@ -214,24 +209,23 @@
         </tr>
     </table>
     @php
-        $date = $payroll->payroll_month;
-        $myDate = Carbon::createFromFormat('Y-m-d', $date);
-        $monthName = $myDate->format('F');
-        $year = $myDate->format('Y');
+        $date =  $resource->payroll->payroll_month;
+         $monthName = date("j F Y", strtotime($date));
     @endphp
     <table class="doc-table">
         <tr>
             <td class="doc-title-td">
                 <span class='doc-title'>
-                    <b>PAYSLIP</b> - {{ $payroll->id }}
+                    <b>PAYSLIP</b> 
                 </span>
             </td>
         </tr>
         <tr>
             <td class="doc-title-td">
                 <span class='doc-title'>
-                    <b>{{ $monthName  }} - {{ $year }}</b>
+                    PSL-{{ $resource->payroll->id }} ( {{ $monthName }} )  
                 </span>
+                
             </td>
         </tr>
     </table><br>
@@ -271,7 +265,7 @@
         </tr>
         {{-- } --}}
 
-    </table><br>
+    </table>
     <p><b>Payment Details</b></p>
     <table style="width:100%">
         <tbody>
@@ -290,7 +284,7 @@
                 </td>
             </tr>
         </tbody>
-    </table><br>
+    </table>
     <p><b>Taxable Allowances and Deductions</b></p>
     <table class="border" style="width:100%">
         <thead>
@@ -519,19 +513,28 @@
     </table><br><br>
 
     <table style="width:100%">
+
         <tbody>
+           
             <tr>
-                <td class="sig_row">
-                    <p>Prepared By</p>
-                    <div class="horizontal_dotted_line"></div>
+
+                <td style="width: 50%">
+                    <div class="row" style="display: inline-block" >
+                        <p>Prepared By</p>
+                        <hr >
+                    </div>
+                   
                 </td>
-                <td class="sig_row">
-                    <p>Employee Signature </p>
-                    <div class="horizontal_dotted_line"></div>
+                <td  style="width: 50%">
+                    <div class="row" style="display: inline-block" >
+                        <p>Employee Signature</p>
+                        <hr >
+                    </div>
+                   
                 </td>
             </tr>
         </tbody>
-    </table><br>
+    </table>
     <div>{!! $resource->extra_footer !!}</div>
 </body>
 
