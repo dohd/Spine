@@ -35,21 +35,21 @@
                                     {{ numberFormat(div_num($closed_prospect, $total_prospect) * 100) }}%</div>
                             </div>
                         </div>
-                        <div class="row ml-1">
+                        <div class="row ml-1 mb-3">
                             <div class="col-2">
                                 <label for="client">Title</label>  
-                                {{ Form::open(['route' => array('biller.prospects.destroy', 0), 'method' => 'DELETE']) }}                           
+                                {{-- {{ Form::open(['route' => array('biller.prospects.destroy', 0), 'method' => 'DELETE']) }}                            --}}
                                 <select name="bytitle" class="custom-select" id="bytitle" data-placeholder="Choose Title">
                                     <option value="">Choose Title</option>
                                     @foreach ($titles as $title)
                                         <option value="{{ $title->title }}">{{ $title->title }}</option>
                                     @endforeach
                                 </select>
-                                <div class="edit-form-btn mb-3">
+                                {{-- <div class="edit-form-btn mb-3">
                                     <label for="">&nbsp;</label>
                                     {{ Form::submit('Mass Delete', ['class' => 'form-control btn-danger mass-delete']) }}
-                                </div>
-                                {{ Form::close() }}
+                                </div> --}}
+                                {{-- {{ Form::close() }} --}}
                             </div>
                             <div class="col-2">
                                 <label for="client">Call Status</label>                             

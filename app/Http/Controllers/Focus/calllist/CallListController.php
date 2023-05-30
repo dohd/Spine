@@ -192,13 +192,14 @@ class CallListController extends Controller
     }
     public function allocationdays($id)
     {
+       $titles =  Prospect::select('title')->distinct('title')->get();
        $calllist = CallList::find($id);
        $daterange ="Days With Prospects ".Carbon::parse($calllist->start_date)->format('Y-m-d')." To ".Carbon::parse($calllist->end_date)->format('Y-m-d');
        $start = Carbon::parse($calllist->start_date)->format('n');
        $end =Carbon::parse($calllist->end_date)->format('n');
         $id = $calllist->id;
 
-        return view('focus.prospects.calllist.allocationdays',compact('id','start','end','daterange'));
+        return view('focus.prospects.calllist.allocationdays',compact('id','start','end','daterange','titles'));
     }
     public function prospectviacalllist(Request $request)
     {
@@ -260,5 +261,9 @@ class CallListController extends Controller
      return response()->json(['notcalled'=>$day_call,'prospectstotal'=>$total_day_call,'prospects'=>$prospects]);
     }
 
+    public function unallocatedbytitle($title){
+        
+    }
+   
 
 }

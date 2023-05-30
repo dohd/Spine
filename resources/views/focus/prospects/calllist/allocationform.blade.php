@@ -50,7 +50,7 @@
                         <th>Region</th>
                         <th>Call Status</th>
                         <th>Call Date</th>
-                        <th>Remove</th>
+                        {{-- <th>Remove</th> --}}
 
 
                     </tr>
@@ -68,7 +68,7 @@
                         <td class="region"></td>
                         <td class="status"></td>
                         <td class="calldate"></td>
-                        <td class="remove"></td>
+                        {{-- <td class="remove"></td> --}}
                     </tr>
                 </tbody>
             </table>
@@ -79,15 +79,16 @@
 
 <div class="form-group row no-gutters">
     <div class="col-1 ml-auto">
-        <a href="{{ route('biller.calllists.index') }}" class="btn btn-danger block">Cancel</a>
-    </div>
-    <div class="col-1 ml-1">
-        <button class="form-control btn btn-primary text-white" id="add_prospect">
-           Add Prospect
+        <button class="form-control btn btn-primary text-white" id="add_prospect" hidden>
+            Add Prospect
         </button>
 
-       
+
     </div>
+    <div class="col-1 ml-1">
+        <a href="{{ route('biller.calllists.index') }}" class="btn btn-danger block">Cancel</a>
+    </div>
+
 </div>
 @include('focus.prospects.partials.add_prospect_modal')
 @section('extra-scripts')
@@ -112,27 +113,42 @@
             init() {
                 $.ajaxSetup(config.ajax);
                 Index.defaultProspectRows = $('#prospectTbl tbody').html().replace(/class="hidden"/g, '');
-
+                $('.select').select2();
                 $('#weeksTbl').on('click', '.day-btn', this.dayBtnClick);
                 $('#add_prospect').on('click', this.addProspectBtnClick);
 
                 $('#month').change(this.monthChange).trigger('change');
-               
+                $('#title').change(this.titleChange).trigger('change');
+
 
                 Index.rowTemplate = $('#prospectTbl tbody').html();
                 $('#prospectTbl tbody tr:first').remove();
 
-                
+
             },
 
+            titleChange() {
+                const url = "{{ route('biller.prospects.get') }}";
+                const title = $('#title').val();
+                $.post(url, {
+                    title
+                }, data => {
+                   let res = data.data;
+                    $.each(res, function(index, value) {
+                        $("#prospects").append('<option value=' + value.id + '>' + value.company +
+                            '</option>');
+                    });
+                });
+               
+            },
             addProspectBtnClick() {
-                  //show modal
+                //show modal
                 $('#addProspectModal').modal('show');
-                },
+            },
 
             dayBtnClick() {
-              
-                if($('#month').val() === ''){
+
+                if ($('#month').val() === '') {
                     alert('Select month first');
                     return;
                 }
@@ -185,30 +201,30 @@
                 }, data => {
                     let totalprospects = data.prospectstotal;
                     let notcalled = data.notcalled;
-                    
-                    $('#weeksTbl').find('td').each(function () {
-                    const td = $(this);
-                    let count = 0;
-                    let total = 0;
-                    const monthDay = td.find('.day-btn').text();
-                    
-                    notcalled.forEach(v => {
-                       
-                        if (v.day == monthDay){
-                            count = v.count;
-                        } 
-                    });
 
-                    totalprospects.forEach(v => {
-                       
-                        if (v.day == monthDay){
-                            total = v.count;
-                        } 
+                    $('#weeksTbl').find('td').each(function() {
+                        const td = $(this);
+                        let count = 0;
+                        let total = 0;
+                        const monthDay = td.find('.day-btn').text();
+
+                        notcalled.forEach(v => {
+
+                            if (v.day == monthDay) {
+                                count = v.count;
+                            }
+                        });
+
+                        totalprospects.forEach(v => {
+
+                            if (v.day == monthDay) {
+                                total = v.count;
+                            }
+                        });
+                        if (count) td.find('.call-ratio').text(`${count}/${total}`);
+
+
                     });
-                    if (count) td.find('.call-ratio').text(`${count}/${total}`);
-                  
-        
-                });
                 });
             },
 
@@ -242,7 +258,7 @@
                     month,
                     id
                 }, data => {
-                   
+
                     let prospects = data.prospects;
                     $('#prospectTbl tbody').html('');
                     prospects.forEach((v, i) => {
@@ -256,10 +272,9 @@
                             status = 'Called Not Picked';
                         } else if (v.prospect.call_status == 'calledrescheduled') {
                             status = 'Call Rescheduled';
-                        } else if(v.prospect.call_status == 'callednotavailable') {
+                        } else if (v.prospect.call_status == 'callednotavailable') {
                             status = 'Called Not Available';
-                        }
-                        else {
+                        } else {
                             status = 'Called';
                         }
                         row.find('.index').text(i + 1);
@@ -278,12 +293,17 @@
                         var calldate = new Date(v.call_date);
                         var today = new Date();
 
-                        if (calldate.getTime() > today.getTime()) {
-                            row.find('.remove').append(v.prospect.id == null ? '---' :
-                                '<a><i  class="fa fa-trash  fa-2x text-danger "></i></a>'
-                            );
+                        // if (calldate.getTime() > today.getTime()) {
+                        //     row.find('.remove').append(v.prospect.id == null ? '---' :
+                        //         '<a><i  class="fa fa-trash  fa-2x text-danger "></i></a>'
+                        //     );
+                        // } else {
+                        //     row.find('.remove').text(v.prospect.id == null ? '---' : '---');
+                        // }
+                        if (calldate.getDay() < today.getDay()) {
+                            $('#add_prospect').attr('hidden', true);
                         } else {
-                            row.find('.remove').text(v.prospect.id == null ? '---' : '---');
+                            $('#add_prospect').attr('hidden', false);
                         }
 
                     });
