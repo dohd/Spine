@@ -37,33 +37,30 @@
             <section class="card">
                 <div id="invoice-template" class="card-body">                    
                     @include('focus.quotes.partials.view_menu')
-                    @if ($quote->verified == "Yes" || $quote->status == 'approved')
-                        @php
-                            $text = "{$quote_type} is approved";
-                            if ($quote->verified == 'Yes') $text .= ' and verified';
-                            $approved_verified = ($quote->verified == "Yes" && $quote->status == 'approved');
-                        @endphp
+                    @if ($quote->status == 'approved' && $quote->verified == "Yes")
                         <div class="badge text-center white d-block m-1">
-                            <span class="{{ $approved_verified ? 'bg-primary' : 'bg-success' }} round p-1">
-                                <b>{{ $text }}</b>
-                            </span>
+                            <span class="bg-primary round p-1"><b>{{ $quote_type }} is Approved & Verified</b></span>
                         </div>
-                    @endif                    
+                    @elseif ($quote->status == 'approved')
+                        <div class="badge text-center white d-block m-1">
+                            <span class="bg-success round p-1"><b>{{ $quote_type }} is Approved</b></span>
+                        </div>
+                    @endif  
 
                     <div id="invoice-customer-details" class="row pt-2">                        
                         <div class="col-6 text-center text-md-left">
                             @php
-                                $clientname = $quote->lead? $quote->lead->client_name : '';
+                                $clientname = @$quote->lead->client_name ?: '';
                                 $branch = '';
-                                $address = $quote->lead? $quote->lead->client_address : '';
-                                $email = $quote->lead? $quote->lead->client_email : '';
-                                $cell = $quote->lead? $quote->lead->client_contact : '';
+                                $address = @$quote->lead->client_address ?: '';
+                                $email = @$quote->lead->client_email ?: '';
+                                $cell = @$quote->lead->client_contact ?: '';
                                 if ($quote->customer) {
                                     $clientname = $quote->customer->company;						
                                     $address = $quote->customer->address;
                                     $email = $quote->customer->email;
                                     $cell = $quote->customer->phone;
-                                    $branch = $quote->branch? $quote->branch->name : '';
+                                    $branch = @$quote->branch->name ?: '';
                                 }					
                             @endphp
                             <span class="text-muted"><b>{{ trans('invoices.bill_to') }}</b></span>
