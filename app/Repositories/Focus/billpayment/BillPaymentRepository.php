@@ -183,6 +183,10 @@ class BillPaymentRepository extends BaseRepository
                 if ($rel_payment) {
                     $rel_payment->increment('allocate_ttl', $result->allocate_ttl);
                     if ($rel_payment->payment_type == 'advance_payment') $result->is_advance_allocation = true;
+                    // check over allocation
+                    $diff = round($rel_payment->amount - $rel_payment->allocate_ttl);
+                    if ($diff < 0) throw ValidationException::withMessages(['Allocation limit reached! Please reduce allocated amount by ' . numberFormat($diff*-1)]);
+                    
                 }
             }
         }
@@ -246,6 +250,9 @@ class BillPaymentRepository extends BaseRepository
                 if ($rel_payment) {
                     $rel_payment->decrement('allocate_ttl', $billpayment->allocate_ttl);
                     if ($rel_payment->payment_type == 'advance_payment') $billpayment->is_advance_allocation = true;
+                    // check over allocation
+                    $diff = round($rel_payment->amount - $rel_payment->allocate_ttl);
+                    if ($diff < 0) throw ValidationException::withMessages(['Allocation limit reached! Please reduce allocated amount by ' . numberFormat($diff*-1)]);
                 }
             }
         }

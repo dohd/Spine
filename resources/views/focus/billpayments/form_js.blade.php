@@ -62,7 +62,7 @@
             const allocAmount = accounting.unformat($('#allocate_ttl').val());
             if (pmtAmount != allocAmount && $('#payment_type').val() == 'per_invoice') {
                 event.preventDefault();
-                alert('Total Allocated Amount must be less or equal to payment Amount!');
+                alert('Total Allocated Amount must be equal to Payment Amount!');
             }
         },
 
@@ -74,7 +74,7 @@
                 $('#note').prop('readonly', true).val(data.note);
 
                 const outstanding = (data.amount*1) - (data.allocate_ttl*1);
-                $('#amount').prop('readonly', true).val(accounting.formatNumber(outstanding)).keyup();
+                $('#amount').val(accounting.formatNumber(outstanding)).keyup();
 
                 $('#payment_type').prop('disabled', true)
                     .after(`<input type="hidden" name="payment_type" value="per_invoice" class="pmt-type" />`);

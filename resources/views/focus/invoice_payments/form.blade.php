@@ -38,10 +38,6 @@
 </div> 
 
 <div class="form-group row">  
-    <div class="col-2">
-        <label for="amount" class="caption">Amount</label>
-        {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required']) }}
-    </div>     
     <div class="col-4">
         <label for="account">Receive Payment On (Ledger Account)</label>
         <select name="account_id" id="account" class="custom-select" required>
@@ -50,7 +46,8 @@
                 <option value="{{ $row->id }}">{{ $row->holder }}</option>
             @endforeach
         </select>
-    </div>  
+    </div>     
+    
     <div class="col-2">
         <label for="payment_mode">Mode</label>
         <select name="payment_mode" id="payment_mode" class="custom-select" required>
@@ -63,7 +60,11 @@
     <div class="col-2">
         <label for="reference" class="caption">Reference No.</label>
         {{ Form::text('reference', null, ['class' => 'form-control', 'id' => 'reference', 'required']) }}
-    </div>                                              
+    </div>       
+    <div class="col-2">
+        <label for="amount" class="caption">Amount</label>
+        {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'required']) }}
+    </div>                                         
 </div>
 <div class="row form-group">
     <div class="col-6">

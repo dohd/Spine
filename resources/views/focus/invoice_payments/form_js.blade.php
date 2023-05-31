@@ -74,10 +74,10 @@
             let allocatedTotal = accounting.unformat($('#allocate_ttl').val());
             if (amount != allocatedTotal && $('#payment_type').val() == 'per_invoice') {
                 event.preventDefault();
-                alert('Total Allocated Amount must equal to Payment Amount!');
+                alert('Total Allocated Amount must be equal to Payment Amount!');
             }
             // enable all disabled elements
-            $(this).find('select:disabled').attr('disabled', false);
+            // $(this).find('select:disabled').attr('disabled', false);
         },
 
         invoiceRow(v, i) {
@@ -116,13 +116,15 @@
             $('#rel_payment').attr('disabled', false).change();
             const payments = @json($unallocated_pmts);
             payments.forEach(v => {
-                const str = `
-                    ${v.date.split('-').reverse().join('-')}: 
-                    (${v.payment_type} ${accounting.formatNumber(v.amount - v.allocate_ttl)})
-                    ${v.payment_mode} - ${v.reference}
-                `;
+                let balance = parseFloat(v.amount) -  parseFloat(v.allocate_ttl);
+                balance = accounting.formatNumber(balance);
+                let paymentType = v.payment_type.split('_').join(' ');
+                paymentType = paymentType.charAt(0).toUpperCase() + paymentType.slice(1);
+                let date = v.date.split('-').reverse().join('-');
+
+                let text = `(${balance} - ${paymentType}: ${date}) - ${v.payment_mode.toUpperCase()} ${v.reference}`;
                 
-                const option = `
+                let option = `
                     <option
                         value=${v.id}
                         amount=${v.amount}
@@ -132,7 +134,7 @@
                         reference=${v.reference}
                         date=${v.date}
                         >
-                        ${str}
+                        ${text}
                     </option>
                     `;
                 $('#rel_payment').append(option);
@@ -202,9 +204,9 @@
                 $('#account').val(opt.attr('accountId')).attr('disabled', true);
                 $('#payment_mode').val(opt.attr('paymentMode')).attr('disabled', true);
 
-                
-                const unallocated = accounting.unformat(opt.attr('amount') - opt.attr('allocateTotal'));
-                $('#amount').val(unallocated).keyup().focusout().attr('readonly', true);
+                let balance = parseFloat(opt.attr('amount')) - parseFloat(opt.attr('allocateTotal'));
+                const unallocated = accounting.unformat(balance);
+                $('#amount').val(unallocated).keyup().focusout();
             } else {
                 ['amount', 'reference'].forEach(v => $('#'+v).val('').attr('readonly', false).keyup());
                 ['account', 'payment_mode'].forEach(v => $('#'+v).val('').attr('disabled', false));

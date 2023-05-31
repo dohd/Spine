@@ -8,9 +8,9 @@ use App\Http\Responses\ViewResponse;
 use App\Models\account\Account;
 use App\Models\customer\Customer;
 use App\Models\invoice_payment\InvoicePayment;
-use App\Models\supplier\Supplier;
 use App\Repositories\Focus\invoice_payment\InvoicePaymentRepository;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class InvoicePaymentsController extends Controller
 {
@@ -84,6 +84,7 @@ class InvoicePaymentsController extends Controller
         try {
             $result = $this->repository->create(compact('data', 'data_items'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Invoice Payment', $th);
         }
 
@@ -144,6 +145,7 @@ class InvoicePaymentsController extends Controller
         try {
             $result = $this->repository->update($invoice_payment, compact('data', 'data_items'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Invoice Payment', $th);
         }
 
@@ -159,7 +161,8 @@ class InvoicePaymentsController extends Controller
         try {
             $this->repository->delete($invoice_payment);
         } catch (\Throwable $th) {
-            return errorHandler('Error Deleting Payment', $th);
+            if ($th instanceof ValidationException) throw $th;
+            return errorHandler('Error Deleting Invoice Payment', $th);
         }
 
         return new RedirectResponse(route('biller.invoice_payments.index'), ['flash_success' => 'Invoice Payment deleted successfully']);

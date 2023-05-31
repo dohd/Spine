@@ -255,13 +255,15 @@
 			</tr>
 		</thead>
 		<tbody>
-			<!-- Product rows -->
 			@php $n=0; @endphp
+			<!-- Product rows -->
 			@foreach($resource->products as $i => $item)
 				@if ($item->product_price > 0 || $item->product_subtotal > 0)
+					@php $n++; @endphp
 					<!-- Item Row -->
 					<tr>
-						<td>{{ $item->numbering ?: $n+1 }}</td>
+						<td>{{ $item->numbering ?: $n }}</td>
+
 
 						@if (
 							(@$resource['products'][0]['reference'] == @$resource['products'][1]['reference']) ||
@@ -286,6 +288,7 @@
 					</tr>
 				@else
 					<!-- Title Row -->
+					@php $n=0; @endphp
 					<tr>
 						<td>{{ $item->numbering }}</td>
 						@if (

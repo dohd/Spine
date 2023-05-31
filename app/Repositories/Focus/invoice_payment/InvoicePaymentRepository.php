@@ -105,10 +105,14 @@ class InvoicePaymentRepository extends BaseRepository
                 if ($rel_payment) {
                     $rel_payment->increment('allocate_ttl', $result->allocate_ttl);
                     if ($rel_payment->payment_type == 'advance_payment') $result->is_advance_allocation = true;
+                    // check over allocation
+                    $diff = round($rel_payment->amount - $rel_payment->allocate_ttl);
+                    if ($diff < 0) throw ValidationException::withMessages(['Allocation limit reached! Please reduce allocated amount by ' . numberFormat($diff*-1)]);
+                    
                 }
             }
         }
-        
+    
         /**accounting */
         if (!$result->rel_payment_id || $result->is_advance_allocation) {
             $this->post_transaction($result);
@@ -132,20 +136,21 @@ class InvoicePaymentRepository extends BaseRepository
      */
     public function update($invoice_payment, array $input)
     {
-        // dd($input);
+        // dd($input); 
         $data = $input['data'];
         foreach ($data as $key => $val) {
             if ($key == 'date') $data[$key] = date_for_database($val);
             if (in_array($key, ['amount', 'allocate_ttl'])) $data[$key] = numberClean($val);
         }
-        if (@$data['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
+        if ($data['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
             
         // delete invoice_payment with no unallocated line items
         $data_items = $input['data_items'];
         if (!$data_items && $invoice_payment->payment_type == 'per_invoice') 
             return $this->delete($invoice_payment);
 
-        DB::beginTransaction();
+        DB::beginTransaction(); 
+
         $prev_reference = $invoice_payment->reference;
         $prev_note = $invoice_payment->note;
 
@@ -183,15 +188,18 @@ class InvoicePaymentRepository extends BaseRepository
 
             // allocated payment
             if ($invoice_payment->payment_type == 'per_invoice' && $invoice_payment->rel_payment_id) {
-                $invoice_payment->supplier->decrement('on_account', $invoice_payment->allocate_ttl);
+                $invoice_payment->customer->decrement('on_account', $invoice_payment->allocate_ttl);
                 $rel_payment = InvoicePayment::find($invoice_payment->rel_payment_id);
                 if ($rel_payment) {
                     $rel_payment->increment('allocate_ttl', $invoice_payment->allocate_ttl);
                     if ($rel_payment->payment_type == 'advance_payment') $invoice_payment->is_advance_allocation = true;
+                    // check over allocation
+                    $diff = round($rel_payment->amount - $rel_payment->allocate_ttl);
+                    if ($diff < 0) throw ValidationException::withMessages(['Allocation limit reached! Please reduce allocated amount by ' . numberFormat($diff*-1)]);
                 }
             }
         }
-
+        
         // update payment items and invoices
         foreach ($invoice_payment->items as $pmt_item) {
             $invoice = $pmt_item->invoice;
