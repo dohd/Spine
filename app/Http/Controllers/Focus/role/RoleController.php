@@ -15,7 +15,9 @@
  *  * here- http://codecanyon.net/licenses/standard/
  * ***********************************************************************
  */
+
 namespace App\Http\Controllers\Focus\role;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Focus\hrm\ManageHrmRequest;
 use App\Http\Responses\RedirectResponse;
@@ -23,6 +25,8 @@ use App\Http\Responses\ViewResponse;
 use App\Models\Access\Role\Role;
 use App\Repositories\Focus\role\PermissionRepository;
 use App\Repositories\Focus\role\RoleRepository;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class RoleController.
@@ -69,7 +73,6 @@ class RoleController extends Controller
         return view('focus.hrms.roles.create')
             ->withPermissions($this->permissions->getAll())
             ->withRoleCount($this->roles->getCount());
-
     }
 
     /**
@@ -81,7 +84,8 @@ class RoleController extends Controller
     {
         try {
             $this->roles->create($request->except('_token'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) { 
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Role', $th);
         }
 
@@ -107,18 +111,16 @@ class RoleController extends Controller
 
     /**
      * @param \App\Models\Access\Role\Role $role
-     * @param \App\Http\Requests\Backend\Access\Role\UpdateRoleRequest $request
      *
-     * @return \App\Http\Responses\RedirectResponse
      */
-    public function update(Role $role, ManageHrmRequest $request)
+    public function update(Request $request, Role $role)
     {
-       try {
-            if (auth()->user()->ins == $role->ins) 
+        try {
             $this->roles->update($role, $request->except('_token'));
-       } catch (\Throwable $th) {
-            return errorHandler('Error Updating Roles', $th);
-       }
+        } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th; 
+            errorHandler('Error Updating Role', $th);
+        }
 
         return new RedirectResponse(route('biller.role.index'), ['flash_success' => trans('alerts.backend.roles.updated')]);
     }
@@ -132,8 +134,9 @@ class RoleController extends Controller
     public function destroy(Role $role, ManageHrmRequest $request)
     {
         try {
-            if (auth()->user()->ins == $role->ins) $this->roles->delete($role);
+            $this->roles->delete($role);
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th; 
             return errorHandler('Error Deleting Roles', $th);
         }
 

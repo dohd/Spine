@@ -69,7 +69,7 @@ class Role extends BaseModel
         });
 
         static::addGlobalScope('ins', function ($builder) {
-            $builder->where('roles.ins', auth()->user()->ins)->orWhereNull('roles.ins');
+            $builder->where('roles.ins', auth()->user()->ins);
         });
     }    
 }

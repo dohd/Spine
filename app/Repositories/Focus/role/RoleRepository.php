@@ -3,9 +3,13 @@
 namespace App\Repositories\Focus\role;
 
 use App\Exceptions\GeneralException;
+use App\Models\Access\Permission\PermissionRole;
+use App\Models\Access\Permission\PermissionUser;
 use App\Models\Access\Role\Role;
+use App\Models\employee\RoleUser;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class RoleRepository.
@@ -67,47 +71,31 @@ class RoleRepository extends BaseRepository
         DB::beginTransaction();
 
         $role_exists = $this->query()->where('name', $input['name'])->first();
-        if ($role_exists) throw new GeneralException(trans('exceptions.backend.access.roles.already_exists'));
+        if ($role_exists) throw ValidationException::withMessages([trans('exceptions.backend.access.roles.already_exists')]);
 
-        if (!isset($input['permissions'])) $input['permissions'] = [];
+        $input['permissions'] = @$input['permissions'] ?: [];
+        // check if the role must contain a permission as per config
+        if (config('access.roles.role_must_contain_permission') && !$input['permissions'])
+            throw ValidationException::withMessages([trans('exceptions.backend.access.roles.needs_permission')]);
 
-        $has_all_rights = ($input['associated_permissions'] == 'all') ? true : false;
-        if (!$has_all_rights) {
-            // check if the role must contain a permission as per config
-            if (config('access.roles.role_must_contain_permission') && !$input['permissions'])
-                throw new GeneralException(trans('exceptions.backend.access.roles.needs_permission'));
-        }
-
-        $role = new Role;
-        $role->fill([
+        $role = Role::create([
             'name' => $input['name'],
             'sort' => 0,
             'all' => 0,
-            'status' => 0,
+            'status' => @$input['status'] ?: 0,
         ]);
-        if (isset($input['sort'])) {
-            $input['sort'] = numberClean($input['sort']);
-            if ($input['sort'] > 0) $role->sort = $input['sort'];
-        }
-        if ($role->save()) {
-            if ($input['permissions']) {
-                $permissions = array_filter($input['permissions'], fn ($v) => is_numeric($v));
-                $role->attachPermissions($permissions);
-            }
 
+        if ($role) {
+            $role->attachPermissions($input['permissions']);
             DB::commit();
             return $role;
         }
-
-        throw new GeneralException(trans('exceptions.backend.access.roles.create_error'));
     }
 
     /**
-     * @param Model $role
-     * @param  $input
-     *
-     * @throws GeneralException
-     *
+     * @param App\Models\Access\Role\Role $role
+     * @param array $input
+     * 
      * @return bool
      */
     public function update($role, array $input)
@@ -115,44 +103,44 @@ class RoleRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
-        if (!isset($input['permissions'])) $input['permissions'] = [];
+        $role_exists = $this->query()->where('id', '!=', $role->id)->where('name', $input['name'])->first();
+        if ($role_exists) throw ValidationException::withMessages([trans('exceptions.backend.access.roles.already_exists')]);
 
-        // cannot update system set roles
-        if (!$role->ins || in_array($role->id, [1,2])) 
-            throw new GeneralException(trans('exceptions.backend.access.roles.update_error'));
-            
-        $has_all_rights = ($input['associated_permissions'] == 'all') ? true : false;
-        if (!$has_all_rights) {
-            // check if the role must contain a permission as per config
-            if (config('access.roles.role_must_contain_permission') && !$input['permissions']) 
-                throw new GeneralException(trans('exceptions.backend.access.roles.needs_permission'));
-        }
+        // check if the role must contain a permission as per config
+        $input['permissions'] = @$input['permissions'] ?: [];
+        if (config('access.roles.role_must_contain_permission') && !$input['permissions']) 
+            throw ValidationException::withMessages([trans('exceptions.backend.access.roles.needs_permission')]);
 
-        $role->fill([
+        $role_data = [
             'name' => $input['name'],
             'sort' => 0,
             'all' => 0,
-            'status' => (isset($input['status']) && $input['status'] == 1) ? 1 : 0,
-        ]);
-        if (isset($input['sort'])) {
-            $input['sort'] = numberClean($input['sort']);
-            if ($input['sort'] > 0) $role->sort = $input['sort'];
-        }
-        if ($role->save()) {
-            // clear previous permissions
-            $role->permissions()->sync([]);
-            if (!$has_all_rights) {
-                if ($input['permissions']) {
-                    $permissions = array_filter($input['permissions'], fn ($v) => is_numeric($v));
-                    $role->attachPermissions($permissions);
-                }
-            } 
+            'status' => @$input['status'] ?: 0,
+        ];
+        
+        if ($role->update($role_data)) {
+            // delete unchecked permission from users with this role
+            $unchecked_role_permissions = PermissionRole::where('role_id', $role->id)
+                ->whereNotIn('permission_id', $input['permissions'])
+                ->pluck('permission_id')->toArray();
+            $user_ids = RoleUser::where('role_id', $role->id)->pluck('user_id')->toArray();
+            PermissionUser::whereIn('user_id', $user_ids)
+                ->whereIn('permission_id', $unchecked_role_permissions)
+                ->delete();
+
+            // create or update role permissions
+            PermissionRole::where('role_id', $role->id)
+                ->whereNotIn('permission_id', $input['permissions'])->delete();
+            foreach ($input['permissions'] as $value) {
+                PermissionRole::firstOrCreate(
+                    ['role_id' => $role->id, 'permission_id' => $value],
+                    ['role_id' => $role->id, 'permission_id' => $value],
+                );
+            }
 
             DB::commit();
             return $role;
         }
-
-        throw new GeneralException(trans('exceptions.backend.access.roles.update_error'));
     }
 
     /**
@@ -166,18 +154,22 @@ class RoleRepository extends BaseRepository
     {
         DB::beginTransaction();
 
-        // cannot delete sytem set roles
-        if (in_array($role->id, [1,2])) throw new GeneralException(trans('exceptions.backend.access.roles.cant_delete_admin'));
-        // cannot delete user associated role
-        if ($role->users()->count()) throw new GeneralException(trans('exceptions.backend.access.roles.has_users'));
+        // user attached role
+        if ($role->users()->count()) 
+            throw ValidationException::withMessages([trans('exceptions.backend.access.roles.has_users')]);
 
-        $role->permissions()->sync([]);
+        // delete permissions from users with this role
+        $role_permissions = $role->permissions->pluck('id')->toArray();
+        $user_ids = RoleUser::where('role_id', $role->id)->pluck('user_id')->toArray();
+        PermissionUser::whereIn('user_id', $user_ids)
+            ->whereIn('permission_id', $role_permissions)
+            ->delete();
+
+        $role->permissions()->detach();
         if ($role->delete()) {
             DB::commit();
             return true;
-        }
-            
-        throw new GeneralException(trans('exceptions.backend.access.roles.delete_error'));
+        }   
     }
 
     /**
