@@ -48,10 +48,10 @@
                     <table id="customer-table" class="table table-sm table-bordered zero-configuration" cellspacing="0" width="100%">
                         <tbody>   
                             @php
-                                $project = $purchase->project ? gen4tid('Prj-', $purchase->project->tid) . '; ' . $purchase->project->name : '';
+                                $project = $purchase->project ? gen4tid('Prj-', $purchase->project->tid) . '; ' . @$purchase->project->name : '';
                                 $purchase_details = [
                                     'System ID' => gen4tid('DP-', $purchase->tid),
-                                    'Supplier' => ($purchase->suppliername? $purchase->suppliername : $purchase->supplier)? $purchase->supplier->name : '',
+                                    'Supplier' => $purchase->suppliername ?: @$purchase->supplier->name,
                                     'Tax ID' => $purchase->supplier_taxid,
                                     'Order Date & Due Date' => $purchase->date . ' : ' . $purchase->due_date,
                                     'Reference' => $purchase->doc_ref_type . ' - ' . $purchase->doc_ref,
@@ -102,7 +102,7 @@
                                         <td>{{ numberFormat($item->amount) }}</td>
                                         <td>
                                             @if($item->project)
-                                                {{ gen4tid('Prj-', $item->project->tid) }} - {{ $item->project->name }}
+                                                {{ gen4tid('Prj-', $item->project->tid) }} - {{ @$item->project->name }}
                                             @endif
                                         </td>
                                     </tr>
@@ -138,7 +138,7 @@
                                         <td>{{ $item->account? $item->account->holder : '' }}</td>
                                         <td>
                                             @if($item->project)
-                                                {{ gen4tid('Prj-', $item->project->tid) }} - {{ $item->project->name }}
+                                                {{ gen4tid('Prj-', $item->project->tid) }} - {{ @$item->project->name }}
                                             @endif
                                         </td>
                                     </tr>
@@ -174,7 +174,7 @@
                                         <td>{{ $item->account? $item->account->holder : '' }}</td>
                                         <td>
                                             @if($item->project)
-                                                {{ gen4tid('Prj-', $item->project->tid) }} - {{ $item->project->name }}
+                                                {{ gen4tid('Prj-', $item->project->tid) }} - {{ @$item->project->name }}
                                             @endif
                                         </td>
                                     </tr>
