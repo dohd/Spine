@@ -23,9 +23,8 @@ class CreateResponse implements Responsable
         })->get();
 
         $departments = Department::all()->pluck('name','id');
-        $last_tid = HrmMeta::max('employee_no') + 1;
         $general['create'] = 1;
 
-        return view('focus.hrms.create', compact('roles','general','departments','last_tid'));
+        return view('focus.hrms.create', compact('roles','general','departments'));
     }
 }

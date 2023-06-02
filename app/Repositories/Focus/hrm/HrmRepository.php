@@ -106,6 +106,11 @@ class HrmRepository extends BaseRepository
             }
         }
 
+        if (@$input['meta']['employee_no']) {
+            $employee_exists = HrmMeta::where('employee_no', 'LIKE', "%{$input['meta']['employee_no']}%")->exists();
+            if ($employee_exists) throw ValidationException::withMessages(['Duplicate Employee No.']);
+        }
+
         $username = Str::random(4);
         $password = strval("123456");
         $email = @$input['employee']['email'];
@@ -205,6 +210,11 @@ class HrmRepository extends BaseRepository
             }
         }
 
+        if (@$input['meta']['employee_no']) {
+            $employee_exists = HrmMeta::where('user_id', '!=', $hrm->id)->where('employee_no', 'LIKE', "%{$input['meta']['employee_no']}%")->exists();
+            if ($employee_exists) throw ValidationException::withMessages(['Duplicate Employee No.']);
+        }
+        
         $role_id = $input['employee']['role'];
         $role = Role::find($role_id);
         if ($role && $role->status == 0) {

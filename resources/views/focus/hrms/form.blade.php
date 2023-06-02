@@ -49,7 +49,7 @@
                 <div class='form-group'>
                     {{ Form::label( 'employee_no', 'Employee Number',['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
-                        {{ Form::text('employee_no', $last_tid, ['class' => 'form-control round', 'placeholder' => 'Enter Number'.'*','required'=>'required']) }}
+                        {{ Form::text('employee_no', null, ['class' => 'form-control round', 'placeholder' => 'Enter Number'.'*','required'=>'required']) }}
                     </div>
                 </div>
                 <div class='form-group'>
@@ -201,15 +201,12 @@
                 <div class='form-group'>
                     {{ Form::label( 'kin_relationship', 'Relationship',['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
-                        {!! Form::select('kin_relationship', ['Wife'=>'Wife','Husband'=>'Husband','Father'=>'Father','Mother'=>'Mother','Brother'=>'Brother','Sister'=>'Sister'], null, [
+                        {!! Form::select('kin_relationship', ['Wife'=>'Wife','Husband'=>'Husband','Father'=>'Father','Mother'=>'Mother','Brother'=>'Brother','Sister'=>'Sister', 'Son' => 'Son', 'Daughter' => 'Daughter'], null, [
                             'placeholder' => '-- Select Relationship --',
                             'class' => ' form-control round',
                             'id' => 'kin_relationship',
                             'required' => 'required',
                         ]) !!}
-
-
-                     
                     </div>
                 </div>
 

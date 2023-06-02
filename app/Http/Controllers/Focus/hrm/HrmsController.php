@@ -35,7 +35,7 @@ use App\Http\Responses\Focus\hrm\CreateResponse;
 use App\Http\Responses\Focus\hrm\EditResponse;
 use App\Repositories\Focus\hrm\HrmRepository;
 use App\Http\Requests\Focus\hrm\ManageHrmRequest;
-
+use Illuminate\Validation\ValidationException;
 
 /**
  * HrmsController
@@ -126,6 +126,7 @@ class HrmsController extends Controller
         try {
             $this->repository->create($input);
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Employee', $th);
         }
 
@@ -174,6 +175,7 @@ class HrmsController extends Controller
         try {
             $this->repository->update($hrm, $input);
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Employee', $th);
         }
 
