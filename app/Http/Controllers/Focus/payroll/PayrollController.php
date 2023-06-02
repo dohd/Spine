@@ -148,7 +148,7 @@ class PayrollController extends Controller
     public function show(Payroll $payroll, Request $request)
     {
         foreach ($payroll->payroll_items as $item) {
-            $item->employee_name = $item->employee->first_name;
+            $item->employee_name = $item->employee ? $item->employee->first_name : '';
         }
 
         //returning with successfull message
@@ -168,7 +168,7 @@ class PayrollController extends Controller
                 return $employee_id;
              })
             ->addColumn('employee_name', function ($payroll_items) {
-                $employee_name = $payroll_items->employee->first_name;
+                $employee_name = $payroll_items->employee ? $payroll_items->employee->first_name : '';
                return $employee_name;
             })
             ->addColumn('basic_pay', function ($payroll_items) {
@@ -258,7 +258,7 @@ class PayrollController extends Controller
         $total_tx_deduction = 0;
 
         foreach ($payroll->payroll_items as $item) {
-            $item->employee_name = $item->employee->first_name;
+            $item->employee_name = $item->employee ? $item->employee->first_name : '';
             if($item->total_basic_allowance){
                 $item->nssf = $this->calculate_nssf($item->total_basic_allowance);
                 $item->gross_pay = $item->total_basic_allowance - ($item->nssf + $item->tx_deductions);

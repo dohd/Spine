@@ -137,7 +137,7 @@
                                                     <th>Employee Name</th>
                                                     <th>Basic Pay</th>
                                                     <th>Absent Days</th>
-                                                    <th>Present Days</th>
+                                                    {{-- <th>Present Days</th> --}}
                                                     <th>Rate Per Day</th>
                                                     <th>Total Basic Pay</th>
                                                     <th>Action</th>
@@ -157,7 +157,7 @@
                                                         <td>{{ $item->employee_name }}</td>
                                                         <td>{{ amountFormat($item->basic_pay) }}</td>
                                                         <td>{{ $item->absent_days }}</td>
-                                                        <td>{{ $item->present_days }}</td>
+                                                        {{-- <td>{{ $item->present_days }}</td> --}}
                                                         <td>
                                                             {{ amountFormat($item->rate_per_day) }}
                                                         </td>
