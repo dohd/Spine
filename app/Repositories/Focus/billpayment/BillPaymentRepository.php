@@ -126,9 +126,15 @@ class BillPaymentRepository extends BaseRepository
             if (in_array($key, ['paid'])) 
                 $input[$key] = array_map(fn($v) => numberClean($v), $val);
         }
-        if ($input['amount'] == 0) 
-            throw ValidationException::withMessages(['amount is required!']);
-        
+
+        if ($input['amount'] == 0) throw ValidationException::withMessages(['amount is required']);
+        if (@$input['reference']) {
+            $ref_exists = Billpayment::where('account_id', $input['account_id'])
+                ->where('reference', 'LIKE', "%{$input['reference']}%")  
+                ->whereNull('rel_payment_id')->exists();            
+            if ($ref_exists) throw ValidationException::withMessages(['Duplicate reference no.']);
+        }  
+
         // create payment
         $tid = Billpayment::where('ins', auth()->user()->ins)->max('tid');
         if ($input['tid'] <= $tid) $input['tid'] = $tid+1;
@@ -221,8 +227,15 @@ class BillPaymentRepository extends BaseRepository
             if (in_array($key, ['amount', 'allocate_ttl'])) $input[$key] = numberClean($val);
             if (in_array($key, ['paid'])) $input[$key] = array_map(fn($v) => numberClean($v), $val);
         }
-        if (isset($input['amount']) && $input['amount'] == 0) 
-            throw ValidationException::withMessages(['amount is required!']);
+
+        if (@$input['amount'] == 0) throw ValidationException::withMessages(['amount is required']);
+        if (@$input['reference']) {
+            $ref_exists = Billpayment::where('id', '!=', $billpayment->id)
+            ->where('account_id', $input['account_id'])
+                ->where('reference', 'LIKE', "%{$input['reference']}%")  
+                ->whereNull('rel_payment_id')->exists();            
+            if ($ref_exists) throw ValidationException::withMessages(['Duplicate reference no.']);
+        }  
 
         // delete billpayment with no unallocated line items
         $data_items = Arr::only($input, ['id', 'bill_id', 'paid']);

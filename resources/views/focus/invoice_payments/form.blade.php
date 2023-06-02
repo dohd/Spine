@@ -70,7 +70,7 @@
     <div class="col-6">
         <label for="payment">Allocate Payment</label>
         <select id="rel_payment" name="rel_payment_id" class="form-control" data-placeholder="Search Payment" disabled>
-            <option value="0">None</option>
+            <option value="">None</option>
         </select>
     </div>   
 </div>
@@ -112,6 +112,13 @@
         </tbody>                
     </table>
 </div>
+
+<div class="row">
+    <div class="col-2 ml-auto">
+        <label for="total_bill">Total Balance</label>
+        {{ Form::text('balance', null, ['class' => 'form-control', 'id' => 'balance', 'disabled']) }}
+    </div>
+</div>
 <div class="row">
     <div class="col-2 ml-auto">
         <label for="total_paid">Total Allocated</label>
@@ -120,8 +127,8 @@
 </div>
 <div class="row">
     <div class="col-2 ml-auto">
-        <label for="total_bill">Total Balance</label>
-        {{ Form::text('balance', null, ['class' => 'form-control', 'id' => 'balance', 'disabled']) }}
+        <label for="total_paid">Total Unallocated</label>
+        {{ Form::text('unallocate_ttl', null, ['class' => 'form-control', 'id' => 'unallocate_ttl', 'disabled']) }}
     </div>
 </div>
 <div class="form-group row mt-1">                            

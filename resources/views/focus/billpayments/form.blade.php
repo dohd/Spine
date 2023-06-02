@@ -163,6 +163,12 @@
         {{ Form::text('allocate_ttl', null, ['class' => 'form-control', 'id' => 'allocate_ttl', 'readonly']) }}
     </div>                          
 </div>
+<div class="row">
+    <div class="col-2 ml-auto">
+        <label for="total_paid">Total Unallocated</label>
+        {{ Form::text('unallocate_ttl', null, ['class' => 'form-control', 'id' => 'unallocate_ttl', 'disabled']) }}
+    </div>
+</div>
 <div class="row mt-1">                            
     <div class="col-2 ml-auto">  
         {{ Form::submit(@$billpayment? 'Update Payment' : 'Make Payment', ['class' =>'btn btn-primary btn-lg']) }}

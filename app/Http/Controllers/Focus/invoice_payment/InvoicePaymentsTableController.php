@@ -81,6 +81,10 @@ class InvoicePaymentsTableController extends Controller
             ->addColumn('unallocated', function ($payment) {
                 return numberFormat($payment->amount - $payment->allocate_ttl);
             })
+            ->addColumn('payment_mode', function ($payment) {
+                $pmt_type = ucfirst(str_replace('_', ' ', $payment->payment_type));
+                return "{$payment->payment_mode} - {$payment->reference} <br> ({$pmt_type})";
+            })
             ->addColumn('invoice_tid', function ($payment) use($prefixes) {
                 $invoice_tids = array();
                 foreach ($payment->items as $item) {

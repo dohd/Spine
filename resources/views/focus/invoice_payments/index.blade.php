@@ -56,8 +56,7 @@
                                     <th>Date</th>
                                     <th>Amount</th>
                                     <th>Unallocated</th>
-                                    <th>Mode</th>
-                                    <th>Reference</th>
+                                    <th>PMT Mode</th>
                                     <th>Inv No</th>
                                     <th>{{ trans('labels.general.actions') }}</th>
                                 </tr>
@@ -120,20 +119,12 @@
                         return data;
                     },
                 },
-                columns: [{
-                        data: 'DT_Row_Index',
-                        name: 'id'
-                    },
+                columns: [
+                    {data: 'DT_Row_Index', name: 'id'},
                     ...[
-                        'tid', 'account', 'date', 'amount', 
-                        'unallocated', 'payment_mode', 'reference', 'invoice_tid', 
+                        'tid', 'account', 'date', 'amount', 'unallocated', 'payment_mode', 'invoice_tid', 
                     ].map(v => ({data: v, name: v})),
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        searchable: false,
-                        sortable: false
-                    }
+                    {data: 'actions',name: 'actions',searchable: false,sortable: false }
                 ],
                 columnDefs: [
                     { type: "custom-number-sort", targets: [4, 5] },

@@ -58,8 +58,7 @@
                                         <th>Date</th>
                                         <th>Amount</th>
                                         <th>Unallocated</th>
-                                        <th>Mode</th>
-                                        <th>Reference</th>
+                                        <th>PMT Mode</th>
                                         <th>Bill No</th>                                
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -133,7 +132,6 @@
                     {data: 'amount', name: 'amount'},
                     {data: 'unallocated', name: 'unallocated'},
                     {data: 'payment_mode', name: 'payment_mode'},
-                    {data: 'reference', name: 'reference'},
                     {data: 'bill_no', name: 'bill_no'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],

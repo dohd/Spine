@@ -219,6 +219,8 @@
             });
             $('#allocate_ttl').val(accounting.formatNumber(allocateTotal));
             $('#balance').val(accounting.formatNumber(dueTotal - allocateTotal));
+            const amount2 = accounting.unformat($(this).val());
+            $('#unallocate_ttl').val(accounting.formatNumber(amount2 - allocateTotal));
         },
 
         columnTotals() {
@@ -234,6 +236,8 @@
             });
             $('#balance').val(accounting.formatNumber(dueTotal - allocateTotal));
             $('#allocate_ttl').val(accounting.formatNumber(allocateTotal));
+            const amount = accounting.unformat($('#amount').val());
+            $('#unallocate_ttl').val(accounting.formatNumber(amount - allocateTotal));
         },
     }
 

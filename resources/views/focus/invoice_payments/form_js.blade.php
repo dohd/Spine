@@ -32,7 +32,7 @@
             $('#rel_payment').change(this.relatedPaymentChange);
 
             $('#invoiceTbl').on('change', '.paid', this.allocationChange);
-            $('#amount').keyup(this.amountChange)
+            $('#amount').keyup(this.allocateAmount)
                 .focusout(this.amountFocusOut)
                 .focus(this.amountFocus);
 
@@ -76,8 +76,6 @@
                 event.preventDefault();
                 alert('Total Allocated Amount must be equal to Payment Amount!');
             }
-            // enable all disabled elements
-            // $(this).find('select:disabled').attr('disabled', false);
         },
 
         invoiceRow(v, i) {
@@ -169,7 +167,7 @@
             Form.calcTotal();
         },
 
-        amountChange() {
+        allocateAmount() {
             let dueTotal = 0;
             let allocateTotal = 0;
             let amount = accounting.unformat($(this).val());
@@ -185,6 +183,8 @@
             });
             $('#allocate_ttl').val(accounting.formatNumber(allocateTotal));
             $('#balance').val(accounting.formatNumber(dueTotal - allocateTotal));
+            const amount2 = accounting.unformat($(this).val());
+            $('#unallocate_ttl').val(accounting.formatNumber(amount2 - allocateTotal));
         },
 
         amountFocus() {
@@ -217,9 +217,7 @@
         calcTotal() {
             let dueTotal = 0;
             let allocateTotal = 0;
-            const lastCount = $('#invoiceTbl tbody tr').length - 1;
             $('#invoiceTbl tbody tr').each(function(i) {
-                if (i == lastCount) return;
                 const due = accounting.unformat($(this).find('.due').text());
                 const paid = accounting.unformat($(this).find('.paid').val());
                 dueTotal += due;
@@ -227,6 +225,8 @@
             });
             $('#allocate_ttl').val(accounting.formatNumber(allocateTotal));
             $('#balance').val(accounting.formatNumber(dueTotal - allocateTotal));
+            const amount = accounting.unformat($('#amount').val());
+            $('#unallocate_ttl').val(accounting.formatNumber(amount - allocateTotal));
         },
     };    
 

@@ -55,10 +55,14 @@ class InvoicePaymentRepository extends BaseRepository
                 $data[$key] = numberClean($val);
         }
 
-        if ($data['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
-        if ($data['payment_type'] == 'per_invoice' && $data['amount'] != $data['allocate_ttl'])
-            throw ValidationException::withMessages(['Payment Amount should be equal to Total Allocated Amount.']);
-            
+        if ($data['amount'] == 0) throw ValidationException::withMessages(['amount is required']);
+        if (@$data['reference']) {
+            $ref_exists = InvoicePayment::where('account_id', $data['account_id'])
+                ->where('reference', 'LIKE', "%{$data['reference']}%")  
+                ->whereNull('rel_payment_id')->exists();            
+            if ($ref_exists) throw ValidationException::withMessages(['Duplicate reference no.']);
+        }
+
         // create payment
         $tid = InvoicePayment::where('ins', auth()->user()->ins)->max('tid');
         if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
@@ -142,7 +146,15 @@ class InvoicePaymentRepository extends BaseRepository
             if ($key == 'date') $data[$key] = date_for_database($val);
             if (in_array($key, ['amount', 'allocate_ttl'])) $data[$key] = numberClean($val);
         }
-        if ($data['amount'] == 0) throw ValidationException::withMessages(['amount is required!']);
+
+        if ($data['amount'] == 0) throw ValidationException::withMessages(['amount is required']);
+        if (@$data['reference']) {
+            $ref_exists = InvoicePayment::where('id', '!=', $invoice_payment->id)
+                ->where('account_id', $data['account_id'])
+                ->where('reference', 'LIKE', "%{$data['reference']}%")  
+                ->whereNull('rel_payment_id')->exists();            
+            if ($ref_exists) throw ValidationException::withMessages(['Duplicate reference no.']);
+        }
             
         // delete invoice_payment with no unallocated line items
         $data_items = $input['data_items'];
