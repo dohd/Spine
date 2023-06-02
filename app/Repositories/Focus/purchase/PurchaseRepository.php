@@ -153,20 +153,18 @@ class PurchaseRepository extends BaseRepository
                 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
                 'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
             ];
-            if (in_array($key, ['date', 'due_date'], 1)) 
-                $data[$key] = date_for_database($val);
-            if (in_array($key, $rate_keys, 1)) 
-                $data[$key] = numberClean($val);
+            if (in_array($key, $rate_keys)) $data[$key] = numberClean($val);
+            if (in_array($key, ['date', 'due_date'])) $data[$key] = date_for_database($val);
         }
 
         if (@$data['doc_ref_type'] == 'Invoice') {
             // restrict special characters to only "/" and "-"
             $pattern = "/^[a-zA-Z0-9-\/]+$/i";
             if (!preg_match($pattern, $data['doc_ref']))
-                throw ValidationException::withMessages(['Purchase invoice contains invalid characters']);
+                throw ValidationException::withMessages(['Reference No. contains invalid characters']);
             $inv_exists = Purchase::where('doc_ref_type', 'Invoice')
                 ->where('doc_ref', $data['doc_ref'])->where('tax', $data['tax'])->exists();
-            if ($inv_exists) throw ValidationException::withMessages(['Purchase with similar invoice exists']);
+            if ($inv_exists) throw ValidationException::withMessages(['Duplicate Reference No.']);
         }
 
         if (@$data['supplier_taxid']) {
@@ -176,7 +174,7 @@ class PurchaseRepository extends BaseRepository
             $is_company = Company::where(['id' => auth()->user()->ins, 'taxid' => $data['supplier_taxid']])->exists();
             if ($is_company) throw ValidationException::withMessages(['Company Tax Pin not allowed']);
             if (strlen($data['supplier_taxid']) != 11)
-                throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters!']);
+                throw ValidationException::withMessages(['Supplier Tax Pin should contain 11 characters']);
             if (!in_array($data['supplier_taxid'][0], ['P', 'A'])) 
                 throw ValidationException::withMessages(['Initial character of Tax Pin must be letter "P" or "A"']);
             $pattern = "/^[0-9]+$/i";
@@ -288,10 +286,10 @@ class PurchaseRepository extends BaseRepository
             // restrict special characters to only "/" and "-"
             $pattern = "/^[a-zA-Z0-9-\/]+$/i";
             if (!preg_match($pattern, $data['doc_ref']))
-                throw ValidationException::withMessages(['Purchase invoice contains invalid characters']);
+                throw ValidationException::withMessages(['Reference No. contains invalid characters']);
             $inv_exists = Purchase::where('id', '!=', $purchase->id)->where('doc_ref_type', 'Invoice')
                 ->where('doc_ref', $data['doc_ref'])->where('tax', $data['tax'])->exists();
-            if ($inv_exists) throw ValidationException::withMessages(['Purchase with similar invoice exists']);
+            if ($inv_exists) throw ValidationException::withMessages(['Duplicate Reference No.']);
         }
         
         if (@$data['supplier_taxid']) {
@@ -319,9 +317,7 @@ class PurchaseRepository extends BaseRepository
         $purchase->items()->whereNotIn('id', array_map(fn($v) => $v['id'], $data_items))->delete();
         // create or update purchase item
         foreach ($data_items as $item) {  
-            if ($item['type'] == 'Expense' && empty($item['uom'])) 
-                $item['uom'] = 'Lot';      
-                
+            if ($item['type'] == 'Expense' && empty($item['uom'])) $item['uom'] = 'Lot';                  
             $purchase_item = PurchaseItem::firstOrNew(['id' => $item['id']]);
 
             // update product stock
