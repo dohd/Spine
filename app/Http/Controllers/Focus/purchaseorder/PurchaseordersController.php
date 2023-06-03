@@ -130,6 +130,12 @@ class PurchaseordersController extends Controller
      */
     public function update(StorePurchaseorderRequest $request, Purchaseorder $purchaseorder)
     {
+        // update purchase order closure status
+        if ($request->exists('closure_status')) {
+            $purchaseorder->update($request->only('closure_status', 'closure_reason'));
+            return redirect()->back()->with('flash_success', 'Closure Status Updated Successfully');
+        }
+            
         // extract input fields
         $order = $request->only([
             'supplier_id', 'tid', 'date', 'due_date', 'term_id', 'project_id', 'note', 'tax',

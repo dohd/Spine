@@ -4,9 +4,7 @@
     const config = {
         ajaxSetup: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
         date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
-        select2: {
-            allowClear: true,
-        },
+        select2: {allowClear: true},
         fetchLpo: (supplier_id) => {
             return $.ajax({
                 url: "{{ route('biller.suppliers.purchaseorders') }}",
@@ -31,13 +29,13 @@
         init() {
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
             $('#supplier').select2(config.select2);
+            $('#purchaseorder').select2(config.select2);
 
             // edit mode
             if (this.grn) {
                 if (this.grn.date) $('#date').datepicker('setDate', new Date(this.grn.date));
                 if (this.grn.invoice_date) $('#invoice_date').datepicker('setDate', new Date(this.grn.invoice_date));
-                
-                $('#supplier').attr('disabled', true).change();
+                $('#supplier').attr('disabled', true);
                 $('#purchaseorder').attr('disabled', true);
                 if (this.grn.invoice_no) {
                     $('#invoice_status option:eq(0)').remove();
@@ -46,9 +44,7 @@
                 } else {
                     $('#invoice_status option:eq(1)').remove();
                 }
-            } else {
-                $('#supplier').val('').change();
-            }
+            } 
 
             $('#supplier').change(this.supplierChange);
             $('#purchaseorder').change(this.purchaseorderChange);
@@ -71,18 +67,20 @@
         },
 
         supplierChange() {
-            const el = $(this);
-            $('#purchaseorder').html('');
+            $('#purchaseorder option:not(:eq(0))').remove();
             $('#productTbl tbody').html('');
-            if (!el.val()) return;
-            config.fetchLpo(el.val()).done(data => {
-                data.forEach(v => {
-                    $('#purchaseorder').append(`
-                        <option value="${v.id}">LPO-${v.tid} - ${v.note}</option>
-                    `);
+            const el = $(this);
+            if (el.val()) {
+                config
+                .fetchLpo(el.val())
+                .done(data => {
+                    data.forEach(v => {
+                        let tid = `${v.tid}`.length < 4? `000${v.tid}`.slice(-4) : v.tid;
+                        $('#purchaseorder').append(`<option value="${v.id}">PO-${tid} - ${v.note}</option>`);
+                    });
+                    $('#purchaseorder').change();
                 });
-                $('#purchaseorder').change();
-            });
+            }
         },
 
         purchaseorderChange() {

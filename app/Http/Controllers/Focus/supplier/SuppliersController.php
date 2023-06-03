@@ -278,9 +278,14 @@ class SuppliersController extends Controller
         $purchase_orders = [];
         $supplier = Supplier::find(request('supplier_id'));
         if ($supplier) {
+            // fetch grn purchase orders
             if (request('type') == 'grn') {
-                $purchase_orders =  $supplier->purchase_orders()->whereIn('status', ['Pending', 'Partial'])->get();
-            } else $purchase_orders =  $supplier->purchase_orders;
+                $purchase_orders =  $supplier->purchase_orders()
+                    ->whereIn('status', ['Pending', 'Partial'])
+                    ->where('closure_status', 0)
+                    ->get();
+            } 
+            else $purchase_orders =  $supplier->purchase_orders;
         }
 
         return response()->json($purchase_orders);

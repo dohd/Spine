@@ -1,7 +1,8 @@
 <div class="form-group row">
-    <div class="col-6">
-        <label for="supplier">Search Supplier</label>
+    <div class="col-4">
+        <label for="supplier">Supplier</label>
         <select id="supplier" name="supplier_id" class="form-control" data-placeholder="Choose Supplier" required>
+            <option value=""></option>
             @foreach ($suppliers as $row)
                 <option value="{{ $row->id }}" {{ @$goodsreceivenote && $goodsreceivenote->supplier_id == $row->id? 'selected' : '' }}>
                     {{ $row->name }}
@@ -9,24 +10,12 @@
             @endforeach
         </select>
     </div>
-    <div class="col-4">
-        <label for="purchaseorder" class="caption">Purchase Order</label>
-        <select name="purchaseorder_id" id="purchaseorder" class="custom-select">
-            @isset($goodsreceivenote)
-                <option value="{{ $goodsreceivenote->purchaserder_id }}">
-                    {{ $goodsreceivenote->purchaseorder? $goodsreceivenote->purchaseorder->note : '' }}
-                </option>
-            @endisset
-        </select>
-    </div> 
+
     <div class="col-2">
         <label for="tid" class="caption">GRN No.</label>
         {{ Form::text('tid', @$goodsreceivenote ? $goodsreceivenote->tid : $tid+1, ['class' => 'form-control', 'id' => 'tid', 'readonly']) }}
     </div> 
-    
-</div> 
 
-<div class="form-group row">  
     <div class="col-2">
         <label for="date" class="caption">Date</label>
         {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date', 'required']) }}
@@ -35,22 +24,7 @@
         <label for="dnote" class="caption">DNote No.</label>
         {{ Form::text('dnote', null, ['class' => 'form-control', 'id' => 'dnote', 'required']) }}
     </div>  
-    <div class="col-2">
-        <label for="receive_status" class="caption">Invoice Status</label>
-        <select name="invoice_status" id="invoice_status" class="custom-select">
-            @foreach (['without_invoice', 'with_invoice'] as $val)
-                <option value="{{ $val }}">{{ ucfirst(str_replace('_', ' ', $val)) }}</option>
-            @endforeach
-        </select>
-    </div>    
-    <div class="col-2">
-        <label for="invoice" class="caption">Invoice No.</label>
-        {{ Form::text('invoice_no', null, ['class' => 'form-control', 'id' => 'invoice_no', 'disabled']) }}
-    </div>  
-    <div class="col-2">
-        <label for="invoice_date" class="caption">Invoice Date</label>
-        {{ Form::text('invoice_date', null, ['class' => 'form-control datepicker', 'id' => 'invoice_date', 'disabled']) }}
-    </div>  
+    
     <div class="col-2">
         <label for="tax" class="caption">TAX %</label>
         <select name="tax_rate" id="tax_rate" class="custom-select">
@@ -61,10 +35,41 @@
             @endforeach
         </select>
     </div>  
+</div> 
+
+<div class="form-group row">  
+    <div class="col-6">
+        <label for="purchaseorder" class="caption">Supplier Order</label>
+        <select name="purchaseorder_id" id="purchaseorder" class="form-control" data-placeholder="Choose Order">
+            <option value=""></option>
+            @isset($goodsreceivenote)
+                <option value="{{ $goodsreceivenote->purchaseorder_id }}" selected>
+                    {{ @$goodsreceivenote->purchaseorder->note }}
+                </option>
+            @endisset
+        </select>
+    </div> 
+    
+    <div class="col-2">
+        <label for="receive_status" class="caption">Invoice Status</label>
+        <select name="invoice_status" id="invoice_status" class="custom-select">
+            @foreach (['without_invoice', 'with_invoice'] as $val)
+                <option value="{{ $val }}">{{ ucfirst(str_replace('_', ' ', $val)) }}</option>
+            @endforeach
+        </select>
+    </div>  
+    <div class="col-2">
+        <label for="invoice" class="caption">Invoice No.</label>
+        {{ Form::text('invoice_no', null, ['class' => 'form-control', 'id' => 'invoice_no', 'disabled']) }}
+    </div>  
+    <div class="col-2">
+        <label for="invoice_date" class="caption">Invoice Date</label>
+        {{ Form::text('invoice_date', null, ['class' => 'form-control datepicker', 'id' => 'invoice_date', 'disabled']) }}
+    </div>  
 </div>
 
 <div class="form-group row">
-    <div class="col-6">
+    <div class="col-12">
         <label for="note">Note</label>    
         {{ Form::text('note', null, ['class' => 'form-control', 'id' => 'note']) }}
     </div>

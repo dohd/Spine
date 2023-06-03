@@ -32,10 +32,10 @@
                                 </select>
                             </div>
                             <div class="col-2">
-                                <label for="status">Delivery Status</label>
+                                <label for="status">Order Status</label>
                                 <select name="status" id="status" class="custom-select">
                                     <option value="">-- select status --</option>
-                                    @foreach (['Pending', 'Partial', 'Complete'] as $status)
+                                    @foreach (['Pending', 'Partial', 'Complete', 'Closed'] as $status)
                                         <option value="{{ $status }}">{{ $status }}</option>
                                     @endforeach
                                 </select>
