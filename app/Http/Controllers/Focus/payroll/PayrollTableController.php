@@ -57,7 +57,8 @@ class PayrollTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($payroll) {
-               return gen4tid('PYRLL-', $payroll->tid);
+               return '<a href="'.route('biller.payroll.show', $payroll->id).'">'.gen4tid('PYRLL-', $payroll->tid).'</a> ';
+               
             })
             ->addColumn('processing_date', function ($payroll) {
                 return dateFormat($payroll->processing_date);

@@ -33,6 +33,7 @@
                     <th>Basic Pay</th>
                     <th>Absent Days</th>
                     <th>Rate Per Day</th>
+                    <th>Absent Rate</th>
                     <th>Total Payable</th>
                 </tr>
             </thead>
@@ -49,12 +50,12 @@
                         <input type="hidden" class="basic_salary" id="basic_salary-{{$i}}" value="{{ $employee->employees_salary->basic_pay }}">
                         <td>{{ amountFormat($employee->employees_salary->basic_pay) }}</td>
                         <td class="editable-cell"><input type="text" name="absent_days[]" class="form-control absent" value="0"  id="absent_days-{{$i}}"></td>
-                        <input type="hidden" name="present_days[]" class="form-control present"  id="present_days-{{$i}}">
-                        {{-- <td><input type="text" name="present_days[]" class="form-control present"  id="present_days-{{$i}}"></td> --}}
                         <td>
                             <input type="text" name="rate_per_day[]" class="form-control rate"  id="rate-days-{{$i}}">
                             <input type="hidden" name="rate_per_month[]" class="form-control rate-month"  id="rate-month-{{$i}}">
                         </td>
+                        {{-- <input type="hidden" name="absent_rate[]" class="form-control absent_rate"  id="absent_rate-{{$i}}"> --}}
+                        <td><input type="text" name="absent_rate[]" class="form-control absent_rate"  id="absent_rate-{{$i}}"></td>
                         <td><input type="text" name="basic_pay[]" class="form-control total"  id="total_basic_pay-{{$i}}"></td>
                     </tr>
                     @endif
@@ -72,5 +73,8 @@
     </div>
     <div class="float-right">
         <button type="submit" class="btn btn-primary submit-salary">Save Basic Pay</button>
+    </div>
+    <div id="tooltip" class="hide">
+        <input type="text" id="input-tooltip">
     </div>
 </form>

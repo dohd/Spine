@@ -1,7 +1,10 @@
 <div class="card-content">
     
     <div class="card-body">
+        <div class="form-group">
 
+            <h4 class="float-right">Expired Contract: <span class="text-danger">{{ $expired_contracts }}</span></h4>
+        </div>
         <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item">
                 <a class="nav-link active" id="base-tab1" data-toggle="tab" aria-controls="tab1" href="#tab1"
@@ -101,16 +104,17 @@
     {{ Html::script(mix('js/dataTable.js')) }}
     {{ Html::script('focus/js/select2.min.js') }}
     <style>
-        .editable-input {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            z-index: 1;
+        .hide {
+        display: none;
         }
+
+        #tooltip {
+        position: absolute;
+        background-color: #f1f1f1;
+        padding: 5px;
+        border: 1px solid #ccc;
+        }
+
         
 
     </style>
@@ -142,6 +146,7 @@
             init() {
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
             $('#employeeTbl').on('keyup', '.absent, .present, .rate, .rate-month, .total', this.employeeChange);
+            $('#employeeTbl').on('change', '.absent_rate', this.absentRateChange);
             $('#deductionTbl').on('keyup', '.deduction', this.deductionChange);
 
                 $('#allowanceTbl').on('keyup',
@@ -192,6 +197,25 @@
                     // );
                     // Append the editable input element to the document body
                    // $('body').append($editableInput);
+                   $("td").hover(
+                        function() {
+                        var position = $(this).position();
+                        var cellText = $(this).text();
+                        var inputTooltip = $("#input-tooltip");
+
+                        inputTooltip.val(cellText);
+
+                        $("#tooltip")
+                            .css({
+                            top: position.top,
+                            left: position.left
+                            })
+                            .removeClass("hide");
+                        },
+                        function() {
+                        $("#tooltip").addClass("hide");
+                        }
+                    );
                     $('#saveButton').click(this.valueChange);
                     if (this.allowance_total && this.allowance_total.length) {
                         $('#allowanceTbl tbody').html('');
@@ -299,6 +323,7 @@
 
                 const absent = accounting.unformat(row.find('.absent').val());
                 const rate = accounting.unformat(row.find('.rate').val());
+                const absent_rate = accounting.unformat(row.find('.absent_rate').val());
                 const basic_pay = accounting.unformat(row.find('.basic_salary').val());
                 const working_days = $('.working_days').val();
                 const month_days = $('.month_days').val();
@@ -309,10 +334,28 @@
                 const month_rate = days_to_be_paid * rate_per_day;
 
                 row.find('.rate').val(accounting.unformat(rate_per_day));
+                row.find('.absent_rate').val(accounting.unformat(absent_amount_deduct));
                 row.find('.rate-month').val(accounting.unformat(month_rate));
                 row.find('.total').val(accounting.unformat(month_rate));
                 Index.calTotal();
 
+            },
+            absentRateChange(){
+                const el = $(this);
+                const row = el.parents('tr:first');
+               // row.find('.absent_rate').val('');
+                const absent = accounting.unformat(row.find('.absent').val());
+                const rate = accounting.unformat(row.find('.rate').val());
+                const absent_rate = accounting.unformat(row.find('.absent_rate').val());
+                const basic_pay = accounting.unformat(row.find('.basic_salary').val());
+                const working_days = $('.working_days').val();
+                const month_days = $('.month_days').val();
+                const days_to_be_paid = month_days - absent;
+                const absent_amount = absent_rate;
+                const month_rate = basic_pay - absent_rate;
+                row.find('.total').val(accounting.unformat(month_rate));
+                //row.find('.absent_rate').val(row.find('.absent_rate').val());
+                Index.calTotal();
             },
             deductionChange() {
                 const el = $(this);
@@ -431,10 +474,11 @@
                         <td>${v.employee_name}</td>    
                         <td class="editable-cell">${accounting.formatNumber(v.basic_pay)}</td>    
                         <td class="editable-cell">${v.absent_days}</td>      
-                        <td>${accounting.formatNumber(v.rate_per_day)}</td>    
+                        <td>${accounting.formatNumber(v.rate_per_day)}</td> 
+                        <td>${accounting.formatNumber(v.absent_rate)}</td>    
                         <td>${accounting.formatNumber(v.basic_pay)}</td> 
                         <input type="hidden" name="absent_days[]" value="${v.absent_days}" class="form-control absent"  id="absent_days-${i}"> 
-                        <input type="hidden" name="present_days[]" value="${v.present_days}" class="form-control present"  id="present_days-${i}"> 
+                       
                         <input type="hidden" name="rate_per_day[]" value="${v.rate_per_day} class="form-control rate"  id="rate-days-${i}">
                         <input type="hidden" name="rate_per_month[]" value="${v.basic_pay} class="form-control rate-month"  id="rate-month-${i}"> 
                     </tr>
@@ -452,7 +496,6 @@
                         <td><input type="text" name="other_allowance[]" value="${accounting.formatNumber(v.other_allowance)}" class="form-control other_allowance"  id="other_allowance-${i}" readonly></td>    
                         <td><input type="text" name="total_allowance[]" value="${accounting.formatNumber(v.total_allowance)}" class="form-control total_allowance"  id="total_allowance-${i}" readonly></td> 
                         <input type="hidden" name="absent_days[]" value="${v.absent_days}" class="form-control absent"  id="absent_days-${i}"> 
-                        <input type="hidden" name="present_days[]" value="${v.present_days}" class="form-control present"  id="present_days-${i}"> 
                         <input type="hidden" name="rate_per_day[]" value="${v.rate_per_day} class="form-control rate"  id="rate-days-${i}">
                         <input type="hidden" name="rate_per_month[]" value="${v.basic_pay} class="form-control rate-month"  id="rate-month-${i}"> 
                     </tr>

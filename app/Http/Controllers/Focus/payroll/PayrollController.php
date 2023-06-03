@@ -33,7 +33,7 @@ use App\Mail\SendPayslipEmail;
 use Illuminate\Support\Facades\View;
 use App\Repositories\Focus\general\RosemailerRepository;
 use App\Jobs\SendEmailJob;
-
+use App\Models\salary\Salary;
 /**
  * payrollsController
  */
@@ -245,7 +245,7 @@ class PayrollController extends Controller
     }
     public function page($id)
     {
-        
+        $expired_contracts = Salary::where('status', 'expired')->count();
         $payroll = Payroll::find($id);
         $payroll->reference = gen4tid('PYRL-',$payroll->tid);
         $employees = Hrm::with(['employees_salary' => function ($q){
@@ -276,7 +276,7 @@ class PayrollController extends Controller
                
             }
         }
-        return view('focus.payroll.pages.create', compact('payroll', 'employees','total_gross','total_paye','total_nhif','total_nssf','total_tx_deduction'));
+        return view('focus.payroll.pages.create', compact('payroll', 'employees','total_gross','total_paye','total_nhif','total_nssf','total_tx_deduction','expired_contracts'));
     }
 
     public function approve_payroll(Request $request)
@@ -308,7 +308,7 @@ class PayrollController extends Controller
             'payroll_id','salary_total','processing_date'
         ]);
         $data_items = $request->only([
-            'present_days', 'absent_days','rate_per_day','rate_per_month','basic_pay', 'employee_id'
+            'absent_rate', 'absent_days','rate_per_day','rate_per_month','basic_pay', 'employee_id'
         ]);
 
         $data['ins'] = auth()->user()->ins;

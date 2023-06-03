@@ -223,7 +223,7 @@
         <tr>
             <td class="doc-title-td">
                 <span class='doc-title'>
-                    PSL-{{ $resource->payroll->id }} ( {{ $monthName }} )  
+                    PYRL-{{ $resource->payroll->id }} ( {{ $monthName }} )  
                 </span>
                 
             </td>
