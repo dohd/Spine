@@ -60,17 +60,12 @@
                                 </div>
                             </div>
                             <div class="row form-group">
-                                <div class="col-10">
-                                    <div class="row">
-                                        <div class="col-2">
-                                            <button class='btn btn-primary' id="loadEquip">
-                                                <i class="fa fa-refresh" aria-hidden="true"></i> Load Equipments
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="col-2">
+                                    <button class='btn btn-primary' id="loadEquip">
+                                        <i class="fa fa-refresh" aria-hidden="true"></i> Load Equipments
+                                    </button>
+                                </div>
+                                <div class="col-2 ml-auto">
                                     <label for="amount">Total Service Amount</label>
                                     {{ Form::text('amount_total', null, ['class' => 'form-control', 'id' =>'amount_total',  'readonly']) }}
                                 </div>
