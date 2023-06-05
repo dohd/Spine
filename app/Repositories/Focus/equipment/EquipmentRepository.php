@@ -105,13 +105,9 @@ class EquipmentRepository extends BaseRepository
      */
     public function delete($equipment)
     {
-        if ($equipment->contract_service) {
-            $service = $equipment->contract_service;
-            throw ValidationException::withMessages(["Equipment is attached to a report! Jobcard No. {$service->jobcard_no}"]);
-        }
-        
-        if ($equipment->delete()) return true;
+        $service = $equipment->contract_service;
+        if ($service) throw ValidationException::withMessages(["Equipment is attached to a report! Jobcard No. {$service->jobcard_no}"]);
             
-        throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
+        if ($equipment->delete()) return true;
     }
 }
