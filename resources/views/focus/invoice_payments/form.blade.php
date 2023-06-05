@@ -73,6 +73,10 @@
             <option value="">None</option>
         </select>
     </div>   
+    <div class="col-6">
+        <label for="note">Note</label>
+        {{ Form::text('note', null, ['class' => 'form-control', 'id' => 'note']) }}
+    </div>   
 </div>
 
 <div class="table-responsive">

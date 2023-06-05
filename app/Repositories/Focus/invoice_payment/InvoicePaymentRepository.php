@@ -334,7 +334,7 @@ class InvoicePaymentRepository extends BaseRepository
             'tr_date' => $invoice_payment->date,
             'due_date' => $invoice_payment->date,
             'user_id' => $invoice_payment->user_id,
-            'note' => ($invoice_payment->payment_mode . ' - ' . $invoice_payment->reference),
+            'note' => ($invoice_payment->note ?: "{$invoice_payment->payment_mode} - {$invoice_payment->reference}"),
             'ins' => $invoice_payment->ins,
             'tr_type' => $tr_category->code,
             'tr_ref' => $invoice_payment->id,

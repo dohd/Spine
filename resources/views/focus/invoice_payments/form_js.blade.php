@@ -42,6 +42,7 @@
             if (this.invoicePayment) {
                 const pmt = this.invoicePayment;
                 if (pmt.date) $('#date').datepicker('setDate', new Date(pmt.date));
+                if (pmt.note) $('#note').val(pmt.note);
                 $('#person').attr('disabled', true);
                 $('#payment_type').attr('disabled', true);
                 $('#amount').val(accounting.formatNumber(pmt.amount*1));

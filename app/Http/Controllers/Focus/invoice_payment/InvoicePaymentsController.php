@@ -73,7 +73,7 @@ class InvoicePaymentsController extends Controller
         // extract request input
         $data = $request->only([
             'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount', 'allocate_ttl',
-            'payment_mode', 'reference', 'payment_id', 'payment_type', 'rel_payment_id'
+            'payment_mode', 'reference', 'payment_id', 'payment_type', 'rel_payment_id', 'note'
         ]);
         $data_items = $request->only(['invoice_id', 'paid']); 
         $data_items = modify_array($data_items);
@@ -134,7 +134,7 @@ class InvoicePaymentsController extends Controller
         // extract request input
         $data = $request->only([
             'account_id', 'customer_id', 'date', 'tid', 'deposit', 'amount', 'allocate_ttl',
-            'payment_mode', 'reference', 'payment_id', 'payment_type', 'rel_payment_id'
+            'payment_mode', 'reference', 'payment_id', 'payment_type', 'rel_payment_id', 'note'
         ]);
         $data_items = $request->only(['id', 'invoice_id', 'paid']); 
 
