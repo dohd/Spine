@@ -25,7 +25,6 @@
                         <div class="card-body">
                             <div class="row form-group">
                                 <div class="col-4">
-                                    <label for="customer">Customer</label>
                                     <select name="customer_id" class="form-control" id="customer" data-placeholder="Choose Customer">
                                         @foreach ($customers as $row)
                                             <option value="{{ $row->id }}">
@@ -34,30 +33,24 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-4">
-                                    <label for="contract">Contract</label>
+                                <div class="col-8">
                                     <select name="contract_id" class="form-control" id="contract" data-placeholder="Choose Contract">
                                     </select>
-                                </div>
+                                </div>                                
+                            </div>
+                            <div class="row form-group">
                                 <div class="col-4">
-                                    <label for="branch">Branch</label>
                                     <select name="branch_id" class="form-control" id="branch" data-placeholder="Choose Branch">
                                     </select>
                                 </div>
-                                
-                            </div>
-                            <div class="row form-group">
-                                <div class="col-2">
-                                    <label for="schedule">Schedule</label>
+                                <div class="col-3">
                                     <select name="schedule_id" class="form-control custom-select" id="schedule">
-                                        <option value="">-- select schedule --</option>
+                                        <option value="">-- Select schedule --</option>
                                     </select>
                                 </div>
-
-                                <div class="col-2">
-                                    <label for="status">Status</label>
+                                <div class="col-3">
                                     <select name="status" class="form-control custom-select" id="status">
-                                        <option value="">-- select status --</option>
+                                        <option value="">-- Select Equipment status --</option>
                                         @foreach (['working', 'faulty', 'cannibalised', 'decommissioned'] as $val)
                                             <option value="{{ $val }}" {{ $val == $row->status? 'selected' : ''  }}>
                                                 {{ ucfirst($val) }}
@@ -65,6 +58,18 @@
                                         @endforeach
                                     </select>
                                 </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-10">
+                                    <div class="row">
+                                        <div class="col-2">
+                                            <button class='btn btn-primary' id="loadEquip">
+                                                <i class="fa fa-refresh" aria-hidden="true"></i> Load Equipments
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="col-2">
                                     <label for="amount">Total Service Amount</label>
                                     {{ Form::text('amount_total', null, ['class' => 'form-control', 'id' =>'amount_total',  'readonly']) }}
@@ -132,10 +137,11 @@
 
             this.drawDataTable();
             $('#customer').change(this.customerChange);
-            $('#branch').change(this.branchChange);
+            // $('#branch').change(this.branchChange);
             $('#contract').change(this.contractChange);
-            $('#schedule').change(this.scheduleChange);
-            $('#status').change(this.statusChange);
+            // $('#schedule').change(this.scheduleChange);
+            // $('#status').change(this.statusChange);
+            $('#loadEquip').click(this.LoadEquipClick);
         },
 
         customerChange() {
@@ -151,32 +157,21 @@
             contracts.forEach(v => $('#contract').append(`<option value="${v.id}">${v.title}</option>`));
             $('#contract').val('').change();
 
-            $('#serviceTbl').DataTable().destroy();
-            Index.drawDataTable();
-        },
-
-        branchChange() {
-            $('#serviceTbl').DataTable().destroy();
-            Index.drawDataTable();
+            if (!customer_id) 
+                return Index.LoadEquipClick();
         },
 
         contractChange() {
             $('#schedule option:not(:first)').remove();
             const schedules = Index.schedules.filter(v => v.contract_id == $(this).val());
             schedules.forEach(v => $('#schedule').append(`<option value="${v.id}">${v.title}</option>`));
-
-            $('#serviceTbl').DataTable().destroy();
-            Index.drawDataTable();
-        },
-        
-        statusChange() {
-            $('#serviceTbl').DataTable().destroy();
-            Index.drawDataTable();
         },
 
-        scheduleChange() {
-            $('#serviceTbl').DataTable().destroy();
-            Index.drawDataTable();
+        LoadEquipClick() {
+            setTimeout(() => {
+                $('#serviceTbl').DataTable().destroy();
+                Index.drawDataTable();
+            }, 1000);
         },
 
         drawDataTable() {
@@ -201,10 +196,8 @@
                         return data;
                     },
                 },
-                columns: [{
-                        data: 'DT_Row_Index',
-                        name: 'id'
-                    },
+                columns: [
+                    {data: 'DT_Row_Index',name: 'id'},
                     ...[
                         'branch', 'building', 'floor', 'location', 'category', 'make_type',
                         'model', 'capacity', 'equip_serial', 'unique_id', 'machine_gas', 'service_rate',
@@ -219,6 +212,10 @@
                 searchDelay: 500,
                 dom: 'Blfrtip',
                 buttons: ['csv', 'excel', 'print'],
+                lengthMenu: [
+                    [25, 50, 100, 200, -1],
+                    [25, 50, 100, 200, "All"]
+                ],
             });
         },
     };

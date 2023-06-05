@@ -32,6 +32,7 @@ class EquipmentsTableController extends Controller
      * @var ContractServiceRepository
      */
     protected $contractservice;
+    protected $sum_total = 0;
 
     /**
      * contructor to initialize repository object
@@ -52,7 +53,8 @@ class EquipmentsTableController extends Controller
 
         $sum_total = 0;
         foreach ($core as $item) {
-            $sum_total += $item->equipment->service_rate;
+            $equipment = $item->equipment;
+            if ($equipment) $sum_total += $equipment->service_rate;
         }
         
         return Datatables::of($core)

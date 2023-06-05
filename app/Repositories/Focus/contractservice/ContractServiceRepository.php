@@ -59,8 +59,11 @@ class ContractServiceRepository extends BaseRepository
         })->when(request('status'), function ($q) {
             $q->where('status', request('status'));
         });
+
+        $params = request()->only('customer_id', 'contract_id', 'branch_id', 'schedule_id', 'status');
+        if (!array_filter($params)) $q->limit(500);
         
-        return $q->get();
+        return $q->with('equipment')->get();
     }
 
     /**
