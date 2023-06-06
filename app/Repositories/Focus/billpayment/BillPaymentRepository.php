@@ -385,8 +385,7 @@ class BillPaymentRepository extends BaseRepository
                 $payment = Billpayment::find($billpayment->rel_payment_id);
                 if ($payment) $payment->decrement('allocate_ttl', $billpayment->allocate_ttl);
             } else {
-                $balance = $billpayment->amount - $billpayment->allocate_ttl;
-                $billpayment->supplier->decrement('on_account', $balance);
+                $billpayment->supplier->decrement('on_account', $billpayment->amount);
             }
         }
 

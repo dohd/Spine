@@ -97,12 +97,10 @@ class InvoicePaymentRepository extends BaseRepository
             if (!$result->rel_payment_id) {
                 if (in_array($result->payment_type, ['on_account', 'advance_payment'])) {
                     $result->customer->increment('on_account', $result->amount);
-                } else {
-                    $result->customer->increment('on_account', $result->amount - $result->allocate_ttl);
                 }
             }
 
-            // allocated payment
+            // allocate payment
             if ($result->payment_type == 'per_invoice' && $result->rel_payment_id) {
                 $result->customer->decrement('on_account', $result->allocate_ttl);
                 $rel_payment = InvoicePayment::find($result->rel_payment_id);
@@ -175,7 +173,7 @@ class InvoicePaymentRepository extends BaseRepository
                 } 
             }
 
-            // allocated payment
+            // allocate payment
             if ($invoice_payment->payment_type == 'per_invoice' && $invoice_payment->rel_payment_id) {
                 $invoice_payment->customer->increment('on_account', $invoice_payment->allocate_ttl);
                 $rel_payment = InvoicePayment::find($invoice_payment->rel_payment_id);
@@ -287,8 +285,7 @@ class InvoicePaymentRepository extends BaseRepository
                 $payment = InvoicePayment::find($invoice_payment->rel_payment_id);
                 if ($payment) $payment->decrement('allocate_ttl', $invoice_payment->allocate_ttl);
             } else {
-                $balance = $invoice_payment->amount - $invoice_payment->allocate_ttl;
-                $invoice_payment->customer->decrement('on_account', $balance);
+                $invoice_payment->customer->decrement('on_account', $invoice_payment->amount);
             }
         }
 

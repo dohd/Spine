@@ -55,10 +55,11 @@ class WithholdingRepository extends BaseRepository
 
         if ($data['amount'] == 0)
             throw ValidationException::withMessages(['Amount Withheld is required']);
-
-        // withholding vat (definate invoices)
-        if ($data['certificate'] == 'tax' && $data['amount'] != $data['allocate_ttl'] && $input['data_items']) 
-            throw ValidationException::withMessages(['Total Amount Withheld must be equal to Total Amount Allocated']);
+        // withholding tax allocation
+        if ($data['certificate'] == 'tax') {
+            if ($data['amount'] != $data['allocate_ttl'] && $input['data_items']) 
+                throw ValidationException::withMessages(['Total Amount Withheld must be equal to Total Amount Allocated']);
+        }
         
         $is_whtax_allocation = @$data['withholding_tax_id'];
         if ($is_whtax_allocation) {
@@ -74,7 +75,7 @@ class WithholdingRepository extends BaseRepository
         } else {
             unset($data['withholding_tax_id']);
             $result = Withholding::create($data);
-            // set on account balance for withholding tax (indefinate invoices)
+            // set on account balance for withholding tax 
             if ($data['certificate'] == 'tax') $result->customer->increment('on_account', $data['amount']);  
         }
         
@@ -135,7 +136,7 @@ class WithholdingRepository extends BaseRepository
         DB::beginTransaction();
 
         if ($withholding->certificate == 'tax') {
-            // check if is an allocation
+            // check if is allocation
             if ($withholding->items->count()) {
                 $wh_tax = Withholding::where('id', '!=', $withholding->id)
                     ->where('reference', $withholding->reference)->first();
