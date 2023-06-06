@@ -279,7 +279,11 @@ class TaxReportsController extends Controller
                         } else $note .= gen4tid('DP-', $purchase->tid) . ' Goods';
                         $suppliername .= $purchase->suppliername;
                         $supplier_taxid .= $purchase->supplier_taxid;
-                    }                    
+                    } else {
+                        if ($v->tax_rate == 8) {
+                            $note .= gen4tid('BILL-', $v->tid) . ' Fuel';
+                        } else $note .= gen4tid('BILL-', $v->tid) . ' Goods';
+                    }                   
                 } elseif ($v->document_type == 'goods_receive_note') {
                     $grn = $v->grn;
                     if ($grn) {
@@ -288,7 +292,11 @@ class TaxReportsController extends Controller
                         } else $note .= gen4tid('Grn-', $grn->tid) . ' Goods';
                         $suppliername .= @$grn->supplier->name ?: '';
                         $supplier_taxid .= @$grn->supplier->taxid ?: '';
-                    } 
+                    } else {
+                        if ($v->tax_rate == 8) {
+                            $note .= gen4tid('BILL-', $v->tid) . ' Fuel';
+                        } else $note .= gen4tid('BILL-', $v->tid) . ' Goods';
+                    }
                 }
                 
                 $attr = [
