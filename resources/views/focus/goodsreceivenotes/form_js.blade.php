@@ -57,12 +57,11 @@
         invoiceStatusChange() {
             const el = $(this);
             if (el.val() == 'with_invoice') {
-                $('#invoice_no').val('').attr('disabled', false);
-                $('#invoice_date').val('').attr('disabled', false);
-            }
-            else {
-                $('#invoice_no').val('').attr('disabled', true);
-                $('#invoice_date').val('').attr('disabled', true);
+                $('#invoice_no').val('').attr({'disabled': false, 'required': true});
+                $('#invoice_date').val('').attr({'disabled': false, 'required': true});
+            } else {
+                $('#invoice_no').val('').attr({'disabled': true, 'required': false});
+                $('#invoice_date').val('').attr({'disabled': true, 'required': false});
             }
         },
 
