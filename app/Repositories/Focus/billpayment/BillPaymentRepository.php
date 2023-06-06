@@ -450,7 +450,7 @@ class BillPaymentRepository extends BaseRepository
             'tr_date' => $billpayment->date,
             'due_date' => $billpayment->date,
             'user_id' => $billpayment->user_id,
-            'note' => $billpayment->note ?: ($billpayment->payment_mode . ' - ' . $billpayment->reference),
+            'note' => ($billpayment->note ?: "{$billpayment->payment_mode} - {$billpayment->reference}"),
             'ins' => $billpayment->ins,
             'tr_type' => $tr_category->code,
             'tr_ref' => $billpayment->id,
