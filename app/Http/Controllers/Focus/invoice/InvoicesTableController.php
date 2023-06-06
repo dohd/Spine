@@ -50,29 +50,27 @@ class InvoicesTableController extends Controller
      */
     public function __invoke(ManageInvoiceRequest $request)
     {
-        $query = $this->invoice->getForDataTable();
+        $core = $this->invoice->getForDataTable();
 
         $ins = auth()->user()->ins;
         $prefixes = prefixesArray(['invoice', 'quote', 'proforma_invoice'], $ins);
 
         // aggregate
-        $query_1 = clone $query;
-        $amount_total = $query_1->sum('total');
-        $balance_total = $amount_total - $query_1->sum('amountpaid');
+        $q = clone $core;
+        $res = $q->selectRaw('SUM(total) as total, SUM(total-amountpaid) as balance')->first();
         $aggregate = [
-            'amount_total' => numberFormat($amount_total),
-            'balance_total' => numberFormat($balance_total),
-        ];        
+            'amount_total' => numberFormat(@$res['total']),
+            'balance_total' => numberFormat(@$res['balance']),
+        ];       
 
-        return Datatables::of($query)
+        return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('customer', function ($invoice) {
                 $link = '';
-                if ($invoice->customer) {
-                    $customer_name = $invoice->customer->company ?: $invoice->customer->name; 
-                    $link = ' <a class="font-weight-bold" href="'. route('biller.customers.show', $invoice->customer) .'">'. $customer_name .'</a>'; 
-                }
+                $customer = $invoice->customer;
+                if ($customer) $link = ' <a class="font-weight-bold" href="'. route('biller.customers.show', $customer) .'">'. ($customer->company ?: $customer->name) .'</a>'; 
+                
                 return $link;             
             })
             ->addColumn('tid', function ($invoice) use($prefixes) {
@@ -83,10 +81,12 @@ class InvoicesTableController extends Controller
                 return dateFormat($invoice->invoicedate);
             })
             ->addColumn('total', function ($invoice) {
-                return $invoice->currency? amountFormat($invoice->total, $invoice->currency->id) : numberFormat($invoice->total);
+                // return $invoice->currency? amountFormat($invoice->total, $invoice->currency->id) : numberFormat($invoice->total);
+                return numberFormat($invoice->total);
             })
             ->addColumn('balance', function ($invoice) {
-                return $invoice->currency? amountFormat(($invoice->total - $invoice->amountpaid), $invoice->currency->id) : numberFormat($invoice->total - $invoice->amountpaid);
+                // return $invoice->currency? amountFormat(($invoice->total - $invoice->amountpaid), $invoice->currency->id) : numberFormat($invoice->total - $invoice->amountpaid);
+                return numberFormat($invoice->total);
             })
             ->addColumn('status', function ($invoice) {
                 return '<span class="st-' . $invoice->status . '">' . trans('payments.' . $invoice->status) . '</span>';
@@ -107,8 +107,8 @@ class InvoicesTableController extends Controller
             })
             ->addColumn('last_pmt', function ($invoice) {
                 $last_pmt = '';
-                if ($invoice->payments->count()) {
-                    $last_pmt_item = $invoice->payments()->orderBy('id', 'desc')->first();
+                if ($invoice->payments()->exists()) {
+                    $last_pmt_item = $invoice->payments()->latest()->first();
                     if (@$last_pmt_item->paid_invoice) $last_pmt .= dateFormat($last_pmt_item->paid_invoice->date);
                 } 
                 

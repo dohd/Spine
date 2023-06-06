@@ -47,18 +47,19 @@ class UtilityBillTableController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $query = $this->repository->getForDataTable();
         $prefixes = prefixesArray(['bill'], auth()->user()->ins);
-        // aggregate
-        $query_1 = clone $query;
-        $amount_total = $query_1->sum('total');
-        $balance_total = $amount_total - $query_1->sum('amount_paid');
-        $aggregate = [
-            'amount_total' => numberFormat($amount_total),
-            'balance_total' => numberFormat($balance_total),
-        ];   
 
-        return Datatables::of($query)
+        $core = $this->repository->getForDataTable();
+        
+        // aggregate
+        $q = clone $core;
+        $res = $q->selectRaw('SUM(total) as total, SUM(total-amount_paid) as balance')->first();
+        $aggregate = [
+            'amount_total' => numberFormat(@$res['total']),
+            'balance_total' => numberFormat(@$res['balance']),
+        ];   
+        
+        return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
             ->editColumn('tid', function ($utility_bill) use($prefixes) {

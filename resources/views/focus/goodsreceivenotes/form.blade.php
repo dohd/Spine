@@ -90,12 +90,11 @@
         </thead>
         <tbody>
             @isset($goodsreceivenote)
-                @php 
-                    $grn = $goodsreceivenote 
-                @endphp
+                @php $grn = $goodsreceivenote @endphp
                 @foreach ($grn->items as $i => $item)
                     @php 
                         $po_item = $item->purchaseorder_item;
+                        if (!$po_item) continue;
                         $qty_due = $po_item->qty - $po_item->qty_received;
                         $qty_due = $qty_due > 0? +$qty_due : 0
                     @endphp

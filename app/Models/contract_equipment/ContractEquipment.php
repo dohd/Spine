@@ -40,7 +40,9 @@ class ContractEquipment extends Model
      */
     protected $guarded = []; 
 
-    // relations
+    /**
+     * Contract Equipment Relationship
+     */
     public function equipment()
     {
         return $this->belongsTo(Equipment::class);
