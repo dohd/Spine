@@ -26,6 +26,7 @@ use App\Repositories\Focus\withholding\WithholdingRepository;
 use App\Http\Requests\Focus\withholding\ManageWithholdingRequest;
 use App\Http\Requests\Focus\withholding\StoreWithholdingRequest;
 use App\Models\withholding\Withholding;
+use Illuminate\Validation\ValidationException;
 
 /**
  * BanksController
@@ -93,6 +94,7 @@ class WithholdingsController extends Controller
         try {
             $this->repository->create(compact('data', 'data_items'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Withholding Certificate', $th);
         }
 
@@ -125,6 +127,7 @@ class WithholdingsController extends Controller
         try {
             $this->repository->update($withholding, $request->except('_token'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Withholding Certificate', $th);
         }
 
@@ -143,6 +146,7 @@ class WithholdingsController extends Controller
         try {
             $this->repository->delete($withholding);
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Deleting Withholding Certificate', $th);
         }
 

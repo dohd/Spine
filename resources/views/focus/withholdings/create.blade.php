@@ -40,6 +40,32 @@
     $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
     .datepicker('setDate', new Date());
 
+    $('form').submit(function() {
+        // filter unallocated inputs
+        $('#invoiceTbl tbody tr').each(function() {
+            let paidInp = $(this).find('.paid');
+            if (paidInp.length) {
+                if (accounting.unformat(paidInp.val()) == 0)
+                    $(this).remove();   
+            } 
+        });
+
+        // if (Form.billPayment && $('#payment_type').val() == 'per_invoice' && !$('#billsTbl tbody tr').length) {
+        //     if (!confirm('Allocating zero on line items will reset this payment! Are you sure?')) {
+        //         event.preventDefault();
+        //         location.reload();
+        //     }
+        // }
+
+        // check if payment amount = allocated amount
+        const pmtAmount = accounting.unformat($('#amount').val());
+        const allocAmount = accounting.unformat($('#allocate_ttl').val());
+        if (pmtAmount != allocAmount && $('#invoiceTbl tbody tr').length > 1) {
+            event.preventDefault();
+            alert('Total Allocated Amount must be equal to Payment Amount!');
+        }
+    });
+
     // customer select2 config
     $('#person').select2({
         ajax: {
@@ -55,7 +81,7 @@
         allowClear: true
     }).change(function() {
         $.ajax({
-            url: "{{ route('biller.invoices.client_invoices') }}?id=" + $(this).val(),
+            url: "{{ route('biller.invoices.client_invoices') }}?customer_id=" + $(this).val(),
             success: data => loadInvoice(data) 
         });
     });
@@ -166,17 +192,17 @@
         if (!$('#person').val()) $(this).blur();
     });
 
-    // withholding tax select2 config
+    // Allocate Withholding Tax 
     $('#withholding_cert').select2({
         data: [{id: 0, text: 'None'}], 
     }).change(function() {
         if ($(this).val() == 0) {
-            ['amount', 'reference', 'note'].forEach(v => $('#'+v).attr('readonly', false).val(''));
+            ['amount', 'reference', 'note', 'cert_date', 'tr_date'].forEach(v => $('#'+v).attr('readonly', false).val(''));
             ['cert_date', 'tr_date'].forEach(v => $('#'+v).datepicker('setDate', new Date()));
             loadInvoice();
         } else {
             $('#person').change();
-            ['cert_date', 'amount', 'reference', 'tr_date', 'note'].forEach(v => $('#'+v).attr('readonly', true));
+            ['cert_date', 'reference', 'tr_date', 'note'].forEach(v => $('#'+v).attr('readonly', true));
             const opt = $(this).find(':selected');
             $('#cert_date').datepicker('setDate', new Date(opt.attr('certDate')));
             $('#reference').val(opt.attr('reference'));
@@ -184,7 +210,7 @@
             $('#note').val(opt.attr('note'));
             // execute after ajax async call
             const balance = parseFloat(opt.attr('amount') - opt.attr('allocateTotal'));
-            setTimeout(() => $('#amount').val(balance).keyup().focusout(), 100);
+            setTimeout(() => $('#amount').val(balance).keyup().focusout(), 500);
         }
     });   
 

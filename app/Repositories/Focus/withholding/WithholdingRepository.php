@@ -10,7 +10,7 @@ use App\Models\items\WithholdingItem;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
-
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class WithholdingRepository.
@@ -53,50 +53,59 @@ class WithholdingRepository extends BaseRepository
                 $data[$key] = numberClean($val);
         }
 
-        $result = (object) array();
-        $is_payment = empty($data['withholding_tax_id']);
-        if ($is_payment) {
+        if ($data['amount'] == 0)
+            throw ValidationException::withMessages(['Amount Withheld is required']);
+
+        // withholding vat (definate invoices)
+        if ($data['certificate'] == 'tax' && $data['amount'] != $data['allocate_ttl'] && $input['data_items']) 
+            throw ValidationException::withMessages(['Total Amount Withheld must be equal to Total Amount Allocated']);
+        
+        $is_whtax_allocation = @$data['withholding_tax_id'];
+        if ($is_whtax_allocation) {
+            $wh_tax = Withholding::find($data['withholding_tax_id']);
+            $wh_tax->increment('allocate_ttl', $data['allocate_ttl']);
+            $diff = round($wh_tax->amount - $wh_tax->allocate_ttl);
+            if ($diff < 0) throw ValidationException::withMessages(['Allocation limit reached! Please reduce allocated amount by ' . numberFormat($diff*-1)]);
+            $wh_tax->customer->decrement('on_account', $data['allocate_ttl']); 
+
+            // create withholding tax allocation
             unset($data['withholding_tax_id']);
             $result = Withholding::create($data);
-
-            $unallocated = $result->amount - $result->allocate_ttl;
-            $result->customer->increment('on_account', $unallocated);    
         } else {
-            $result = Withholding::find($data['withholding_tax_id']);
-            $result->increment('allocate_ttl', $data['allocate_ttl']);
-
-            $allocated = $result->amount - $result->allocate_ttl;
-            $result->customer->decrement('on_account', $allocated);    
+            unset($data['withholding_tax_id']);
+            $result = Withholding::create($data);
+            // set on account balance for withholding tax (indefinate invoices)
+            if ($data['certificate'] == 'tax') $result->customer->increment('on_account', $data['amount']);  
         }
-
+        
         // allocated items
         $data_items = $input['data_items'];
         if ($data_items) {
             $data_items = array_map(function ($v) use($result) {
-                return array_replace($v, [
-                    'withholding_id' => $result->id,
-                    'paid' => numberClean($v['paid'])
-                ]);
+                return array_replace($v, ['withholding_id' => $result->id, 'paid' => numberClean($v['paid'])]);
             }, $data_items);
             WithholdingItem::insert($data_items);
 
             // increment invoice amount paid and update status
             foreach ($result->items as $item) {
                 $invoice = $item->invoice;
-                $invoice->increment('amountpaid', $item->paid);
-                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
-                elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
-                else $invoice->update(['status' => 'paid']);
+                if ($invoice) {
+                    $invoice->increment('amountpaid', $item->paid);
+                    if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);
+                    elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
+                    else $invoice->update(['status' => 'paid']);
+                }
             }
         }
         
         /**accounting */
-        if ($is_payment) $this->post_transaction($result);
+        if (!$is_whtax_allocation) 
+            $this->post_transaction($result);
         
-        DB::commit();
-        if ($result) return true;
-
-        throw new GeneralException(trans('exceptions.backend.withholdings.create_error'));
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
     }
 
     /**
@@ -124,32 +133,43 @@ class WithholdingRepository extends BaseRepository
     public function delete($withholding)
     {
         DB::beginTransaction();
-        
-        // reverse client unallocated amount
-        $unallocated = $withholding->amount - $withholding->allocate_ttl;
-        $withholding->customer->decrement('on_account', $unallocated);
 
+        if ($withholding->certificate == 'tax') {
+            // check if is an allocation
+            if ($withholding->items->count()) {
+                $wh_tax = Withholding::where('id', '!=', $withholding->id)
+                    ->where('reference', $withholding->reference)->first();
+                $wh_tax->decrement('allocate_ttl', $withholding->allocate_ttl);
+                // reverse client unallocated amount state before allocation
+                if ($wh_tax->customer) $wh_tax->customer->increment('on_account', $withholding->amount);
+            } else {
+                // check if it has allocations
+                $withholdings = Withholding::where('reference', $withholding->reference)->get();
+                if ($withholdings->count() > 1) throw ValidationException::withMessages(['Withholding Tax has related allocations']);
+                // reverse client unallocated amount  state before withholding tax
+                if ($withholding->customer) $withholding->customer->decrement('on_account', $withholding->amount);
+            }           
+        }
+        
         // reverse invoice amount paid and update status
         foreach ($withholding->items as $item) {
-            if ($item->invoice) {
-                $invoice = $item->invoice;
+            $invoice = $item->invoice;
+            if ($invoice) {
                 $invoice->decrement('amountpaid', $item->paid);
-                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'pending']);    
+                if ($invoice->amountpaid == 0) $invoice->update(['status' => 'due']);    
                 elseif (round($invoice->total) > round($invoice->amountpaid)) $invoice->update(['status' => 'partial']);
                 else $invoice->update(['status' => 'paid']);
             }
         }
 
+        // remove tramnsactions
         $withholding->transactions()->delete();
         aggregate_account_transactions();
 
-        $result = $withholding->delete();
-        if ($result) {
+        if ($withholding->delete()) {
             DB::commit();
             return true;
         }
-
-        throw new GeneralException(trans('exceptions.backend.withholdings.delete_error'));
     }
 
     /**

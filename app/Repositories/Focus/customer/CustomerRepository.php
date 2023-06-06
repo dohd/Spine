@@ -192,12 +192,15 @@ class CustomerRepository extends BaseRepository
             $withholdings = collect();
             foreach ($invoice->withholding_payments as $pmt) {
                 $i++;
-                $note = $pmt->withholding->reference . ' - ' . $pmt->withholding->certificate . ' ' . $pmt->withholding->note;
+                $reference = @$pmt->withholding->reference;
+                $certificate = @$pmt->withholding->certificate;
+                $note = @$pmt->withholding->note;
+                $date = @$pmt->withholding->date;
                 $record = (object) array(
                     'id' => $i,
-                    'date' => $pmt->withholding->date,
+                    'date' => $date,
                     'type' => 'withholding',
-                    'note' => '(' . $tid . ')' . ' ' . $note,
+                    'note' => "({$tid}) {$reference} - {$certificate} - {$note}",
                     'debit' => 0,
                     'credit' => $pmt->paid,
                     'invoice_id' => $invoice_id,
