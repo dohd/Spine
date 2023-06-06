@@ -29,6 +29,7 @@ use App\Models\supplier\Supplier;
 use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\supplier\SupplierRepository;
 use DateTime;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -251,7 +252,7 @@ class SuppliersController extends Controller
     /**
      * Supllier select dropdown
      */
-    public function select(ManageSupplierRequest $request)
+    public function select(Request $request)
     {
         $q = $request->keyword;
         $suppliers = Supplier::where('name', 'LIKE', '%'.$q.'%')
