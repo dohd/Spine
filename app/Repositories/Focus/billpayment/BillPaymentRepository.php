@@ -208,7 +208,6 @@ class BillPaymentRepository extends BaseRepository
         }
 
         DB::rollBack();
-        throw new GeneralException('Error Creating Lead');
     }
 
     /**
@@ -357,7 +356,6 @@ class BillPaymentRepository extends BaseRepository
         }
 
         DB::rollBack();
-        throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
     /**
@@ -380,12 +378,14 @@ class BillPaymentRepository extends BaseRepository
 
         // reverse supplier on_account balance
         if ($billpayment->supplier_id) {
-            if ($billpayment->rel_payment_id) {
+            if (!$billpayment->rel_payment_id) {
+                if (in_array($billpayment->payment_type, ['on_account', 'advance_payment'])){
+                    $billpayment->supplier->decrement('on_account', $billpayment->amount);
+                }
+            } else {
                 $billpayment->supplier->increment('on_account', $billpayment->allocate_ttl);
                 $payment = Billpayment::find($billpayment->rel_payment_id);
                 if ($payment) $payment->decrement('allocate_ttl', $billpayment->allocate_ttl);
-            } else {
-                $billpayment->supplier->decrement('on_account', $billpayment->amount);
             }
         }
 
@@ -424,7 +424,6 @@ class BillPaymentRepository extends BaseRepository
         }
     
         DB::rollBack();
-        throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 
     /**

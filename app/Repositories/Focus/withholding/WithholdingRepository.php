@@ -55,11 +55,8 @@ class WithholdingRepository extends BaseRepository
 
         if ($data['amount'] == 0)
             throw ValidationException::withMessages(['Amount Withheld is required']);
-        // withholding tax allocation
-        if ($data['certificate'] == 'tax') {
-            if ($data['amount'] != $data['allocate_ttl'] && $input['data_items']) 
-                throw ValidationException::withMessages(['Total Amount Withheld must be equal to Total Amount Allocated']);
-        }
+        if ($input['data_items'] && $data['amount'] != $data['allocate_ttl']) 
+            throw ValidationException::withMessages(['Total Amount Withheld must be equal to Total Amount Allocated']);
         
         $is_whtax_allocation = @$data['withholding_tax_id'];
         if ($is_whtax_allocation) {
@@ -148,7 +145,7 @@ class WithholdingRepository extends BaseRepository
                 $withholdings = Withholding::where('reference', $withholding->reference)->get();
                 if ($withholdings->count() > 1) throw ValidationException::withMessages(['Withholding Tax has related allocations']);
                 // reverse client unallocated amount  state before withholding tax
-                if ($withholding->customer) $withholding->customer->decrement('on_account', $withholding->amount);
+                $withholding->customer->decrement('on_account', $withholding->amount);
             }           
         }
         
@@ -167,6 +164,7 @@ class WithholdingRepository extends BaseRepository
         $withholding->transactions()->delete();
         aggregate_account_transactions();
 
+        $withholding->items()->delete();
         if ($withholding->delete()) {
             DB::commit();
             return true;

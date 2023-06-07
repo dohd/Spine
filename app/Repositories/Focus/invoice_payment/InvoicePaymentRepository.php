@@ -110,7 +110,6 @@ class InvoicePaymentRepository extends BaseRepository
                     // check over allocation
                     $diff = round($rel_payment->amount - $rel_payment->allocate_ttl);
                     if ($diff < 0) throw ValidationException::withMessages(['Allocation limit reached! Please reduce allocated amount by ' . numberFormat($diff*-1)]);
-                    
                 }
             }
         }
@@ -280,12 +279,14 @@ class InvoicePaymentRepository extends BaseRepository
 
         // reverse customer on_account balance
         if ($invoice_payment->customer_id) {
-            if ($invoice_payment->rel_payment_id) {
+            if (!$invoice_payment->rel_payment_id) {
+                if (in_array($invoice_payment->payment_type, ['on_account', 'advance_payment'])) {
+                    $invoice_payment->customer->decrement('on_account', $invoice_payment->amount);
+                }
+            } else {
                 $invoice_payment->customer->increment('on_account', $invoice_payment->allocate_ttl);
                 $payment = InvoicePayment::find($invoice_payment->rel_payment_id);
                 if ($payment) $payment->decrement('allocate_ttl', $invoice_payment->allocate_ttl);
-            } else {
-                $invoice_payment->customer->decrement('on_account', $invoice_payment->amount);
             }
         }
 
