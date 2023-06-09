@@ -46,6 +46,6 @@ class SendEmailJob implements ShouldQueue
             $this->emailData['file'] = $pdfFilePath;
             $result= $mailer->send($user->employee->email, $this->emailData);
         }
-        dd($result);
+        //dd($result);
     }
 }

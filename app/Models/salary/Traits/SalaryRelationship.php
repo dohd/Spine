@@ -4,6 +4,7 @@ namespace App\Models\salary\Traits;
 
 use App\Models\hrm\Hrm;
 use App\Models\hrm\HrmMeta;
+use App\Models\allowance_employee\AllowanceEmployee;
 
 /**
  * ClasssalaryRelationship
@@ -19,5 +20,10 @@ trait SalaryRelationship
     public function user(): BelongsTo
     {
         return $this->belongsTo(Hrm::class, 'employee_id', 'id');
+    }
+
+    public function employee_allowance()
+    {
+        return $this->hasMany(AllowanceEmployee::class, 'contract_id');
     }
 }

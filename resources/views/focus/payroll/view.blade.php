@@ -29,9 +29,14 @@
             <div class="card">
                 <div class="card-header">
                     <div class="row">
-                        <div class="col-2">
+                        <div class="col-2 approve">
                             <a href="#" class="btn btn-info btn-lg my-1" data-toggle="modal" data-target="#statusModal">
                                 <i class="fa fa-pencil" aria-hidden="true"></i> Approve
+                            </a>
+                        </div>
+                        <div class="col-2">
+                            <a href="#" class="btn btn-danger btn-lg my-1" data-toggle="modal" data-target="#generateModal">
+                                <i class="fa fa-pencil" aria-hidden="true"></i> Generate Payroll
                             </a>
                         </div>
                         <div class="col-2">
@@ -482,12 +487,14 @@
     </div>
 @endsection
 @include('focus.payroll.partials.approval')
+@include('focus.payroll.partials.payroll-generate')
 @section('after-scripts')
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
     config = {
         date: {format: "{{ config('core.user_date_format') }}", autoHide: true}
     }
+    approval();
     $('#statusModal').on('shown.bs.modal', function() {
             $('.datepicker').datepicker({
                 container: '#statusModal',
@@ -496,7 +503,6 @@
         });
     $('.send_mail').click(function () { 
         var id = @json($payroll->id);
-        console.log(id);
         $.post("{{ route('biller.payroll.send_mail')}}", {id: id},
             function (data, textStatus, jqXHR) {
                 
@@ -505,6 +511,14 @@
         );
         
     });
+    function approval() {
+        $('.send_mail').addClass('d-none');
+        var status = @json($payroll->status);
+        if(status == 'approved'){
+            $('.send_mail').removeClass('d-none');
+            $('.approve').addClass('d-none');
+        }
+    }
         
 </script>
 <script>

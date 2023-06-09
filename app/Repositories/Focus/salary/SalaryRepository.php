@@ -55,7 +55,6 @@ class SalaryRepository extends BaseRepository
                 'ins'=> auth()->user()->ins,
             ]);
         }, $allarr);
-        
         if ($createsalary) {
             AllowanceEmployee::insert($allarr);
             
@@ -72,12 +71,34 @@ class SalaryRepository extends BaseRepository
      * @throws GeneralException
      * return bool
      */
-    public function update(Salary $salary, array $input)
+    public function update($salary, array $input)
     {
-        $input = array_map( 'strip_tags', $input);
-    	if ($salary->update($input))
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            if (in_array($key, ['start_date'], 1)) 
+                $data[$key] = date_for_database($val);
+        }
+        $salary->update($data);
+        // quote line items
+        $data_items = $input['data_items'];
+        //dd($data_items);
+        foreach ($data_items as $item) {
+            $item = array_replace($item, [
+                'ins' => $data['ins'],
+                'user_id' => $data['user_id'],
+                'contract_id' => $salary->id
+            ]);
+            $data_item = AllowanceEmployee::firstOrNew(['id' => $item['id']]);
+            $data_item->fill($item);
+            if (!$data_item->id) unset($data_item->id);
+            $data_item->save();                
+        }
+        if ($salary) {
+            DB::commit();
             return true;
+        }
 
+        DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.salarys.update_error'));
     }
 
@@ -90,7 +111,7 @@ class SalaryRepository extends BaseRepository
      */
     public function delete(Salary $salary)
     {
-        if ($salary->delete()) {
+        if ($salary->delete()&& $salary->employee_allowance->each->delete()) {
             return true;
         }
 

@@ -24,35 +24,27 @@
                 <td><input type="text" class="form-control from" id="amount-0" name="amount[]"></td> 
                
                 <td><button type="button" class="btn btn-danger remove" id="remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
-
-
-                {{-- @isset ($deductions)
-                <tr>
-                    <td>
-                        
-                        <select class="form-control round deduct" name="allowance_id[]" id="deductname" data-placeholder="Select Allowance Type">
-                            <option value="">Default</option>
-                            <option value="NHIF" @isset($deductions)
-                                {{$deductions->allowance_id == 'NHIF' ? 'selected':''}}
-                            @endisset>NHIF</option>
-                            <option value="NSSF" @isset($deductions)
-                                    {{$deductions->allowance_id == 'NSSF' ? 'selected':''}}
-                             @endisset>NSSF</option>
-                            <option value="PAYE" @isset($deductions)
-                                {{$deductions->allowance_id == 'PAYE' ? 'selected':''}}
-                            @endisset>PAYE</option>
-                        </select>
-                    </td>
-                    
-                    <td><input type="text" class="form-control from" id="amount-0" value="{{ $deductions->amount}}" name="amount[]"></td> 
-                 
-                    <td><input type="text" class="form-control rate" name="rate[]" id="rate-0" value="{{$deductions->rate}}"></td> 
-                  
-                    <td><button type="button" class="btn btn-danger remove" id="remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
-                    
-                </tr>
-                @endisset --}}
             </tr>
+            @isset($salary)
+                @foreach ($salary->employee_allowance as $allowance)
+                    <tr>
+                        <input type="hidden" name="id[]" value="{{ $allowance->id }}">
+                        <td>
+                            
+                            <select class="form-control deduct" name="allowance_id[]" id="deductname" data-placeholder="Select Allowance Type">
+                                <option value="">Select Allowance Type</option>
+                                <option value="1" {{ $allowance->allowance_id == '1'? 'selected' : '' }}>House</option>
+                                <option value="2" {{ $allowance->allowance_id == '2'? 'selected' : '' }}>Medical</option>
+                                <option value="3" {{ $allowance->allowance_id == '3'? 'selected' : '' }}>Transport</option>
+                            </select>
+                        </td>
+                        
+                        <td><input type="text" class="form-control from" id="amount-0" value="{{ $allowance->amount }}" name="amount[]"></td> 
+                    
+                        <td><button type="button" class="btn btn-danger remove" id="remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
+                    </tr>
+                @endforeach
+            @endisset
         </tbody>
     </table>
 </div>

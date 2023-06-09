@@ -3,7 +3,7 @@
 namespace App\Http\Responses\Focus\salary;
 
 use Illuminate\Contracts\Support\Responsable;
-use App\models\workshift\Workshift;
+use App\Models\workshift\Workshift;
 
 class EditResponse implements Responsable
 {

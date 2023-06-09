@@ -74,7 +74,5 @@
     <div class="float-right">
         <button type="submit" class="btn btn-primary submit-salary">Save Basic Pay</button>
     </div>
-    <div id="tooltip" class="hide">
-        <input type="text" id="input-tooltip">
-    </div>
+    
 </form>

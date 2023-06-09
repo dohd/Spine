@@ -105,15 +105,19 @@
     {{ Html::script('focus/js/select2.min.js') }}
     <style>
         .hide {
-        display: none;
-        }
+            display: none;
+            }
 
-        #tooltip {
-        position: absolute;
-        background-color: #f1f1f1;
-        padding: 5px;
-        border: 1px solid #ccc;
-        }
+            #tooltip {
+            /* position: absolute; */
+            /* top: 0;
+            left: 0; */
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            z-index: 999;
+            }
+
 
         
 
@@ -202,7 +206,11 @@
                         var position = $(this).position();
                         var cellText = $(this).text();
                         var inputTooltip = $("#input-tooltip");
+                        var $tooltip = `<div id="tooltip" class="hide">
+                                <input type="text" id="input-tooltip">
+                            </div>`;
 
+                        $(this).append($tooltip);
                         inputTooltip.val(cellText);
 
                         $("#tooltip")

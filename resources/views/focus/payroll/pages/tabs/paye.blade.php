@@ -48,6 +48,8 @@
                     class="form-control" id="" readonly>
                 <input type="hidden" name="paye_total" value="{{ $total_paye }}"
                     class="form-control" id="paye_total" readonly>
+                <input type="text" name="total_gross" value="{{ $total_gross }}"
+                    class="form-control" id="paye_total" readonly>
             </div>
         </div>
         <div class="float-right">

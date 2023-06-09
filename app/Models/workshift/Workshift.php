@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\workshift\Traits\WorkshiftAttribute;
 use App\Models\workshift\Traits\WorkshiftRelationship;
 
-class workshift extends Model
+class Workshift extends Model
 {
     use ModelTrait,
         WorkshiftAttribute,

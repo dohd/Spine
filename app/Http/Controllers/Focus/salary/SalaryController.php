@@ -118,11 +118,25 @@ class SalaryController extends Controller
     public function update(Request $request, Salary $salary)
     {
         //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($salary, $input);
+       // $input = $request->except(['_token', 'ins']);
+        $data = $request->only(['employee_id', 'employee_name', 'basic_pay', 'contract_type','workshift_id','start_date','duration']);
+        //dd($input);
+        $data_items = $request->only([
+            'allowance_id','amount','id'
+        ]);
+        $data['user_id'] = auth()->user()->id;
+        $data['ins'] = auth()->user()->ins;
+
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, function ($val) { return $val['allowance_id']; });
+        try {
+            //Update the model using repository update method
+            $this->repository->update($salary, compact('data','data_items'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Contract', $th);
+        }
         //return with successfull message
-        return new RedirectResponse(route('biller.salary.index'), ['flash_success' => trans('alerts.backend.salary.updated')]);
+        return new RedirectResponse(route('biller.salary.index'), ['flash_success' => 'Contract Updated Successfully!!']);
     }
 
     /**

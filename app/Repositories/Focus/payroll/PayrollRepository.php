@@ -9,6 +9,9 @@ use App\Models\payroll\PayrollItem;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\account\Account;
+use App\Models\transaction\Transaction;
+use App\Models\transactioncategory\Transactioncategory;
 
 /**
  * Class payrollRepository.
@@ -96,6 +99,18 @@ class PayrollRepository extends BaseRepository
         }
 
         throw new GeneralException(trans('exceptions.backend.payrolls.delete_error'));
+    }
+    public function approve_payroll(array $input)
+    {
+        $payroll = $input['payroll'];
+        if($payroll->status == 'approved'){
+            $this->post_transaction($payroll);
+            
+        }
+        unset($payroll['account']);
+        $payroll->update();
+        
+        throw new GeneralException('Approval Payroll Failed');
     }
     public function create_basic(array $input)
     {
@@ -364,6 +379,112 @@ class PayrollRepository extends BaseRepository
 
         DB::rollBack();
         throw new GeneralException(trans('exceptions.backend.payroll.create_error'));
+    }
+
+    public function post_transaction($payroll)
+    {
+       // dd($payroll['account']);
+        // credit salary payable (liability)
+        $account = Account::where('system', 'salary_payable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'salaries')->first(['id', 'code']);
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
+        $cr_data = [
+            'tid' => $tid,
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $payroll->total_netpay,
+            'tr_date' => $payroll->processing_date,
+            'due_date' => $payroll->approval_date,
+            'user_id' => $payroll->user_id,
+            'note' => $payroll->approval_note,
+            'ins' => $payroll->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $payroll->id,
+            'user_type' => 'company',
+            'is_primary' => 1
+        ];
+        Transaction::create($cr_data); 
+        
+        // debit paye
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        
+        $paye_account = Account::where('system', 'paye')->first(['id']);
+        $dr_paye = array_replace($cr_data, [
+            'account_id' => $paye_account->id,
+            'debit' => $payroll->paye_total,
+        ]); 
+        Transaction::create($dr_paye);
+        //debit nhif
+        $nhif_account = Account::where('system', 'nhif')->first(['id']);
+        $dr_nhif = array_replace($cr_data, [
+            'account_id' => $nhif_account->id,
+            'debit' => $payroll->total_nhif,
+        ]);
+         Transaction::create($dr_nhif);
+         //debit nssf
+        $nssf_account = Account::where('system', 'nssf')->first(['id']);
+        $dr_nssf = array_replace($cr_data, [
+            'account_id' => $nssf_account->id,
+            'debit' => $payroll->total_nssf,
+        ]);
+         Transaction::create($dr_nssf);
+        //  //debit salary expense
+        // $gross_account = Account::where('system', 'salary')->first(['id']);
+        // $dr_gross = array_replace($cr_data, [
+        //     'account_id' => $gross_account->id,
+        //     'debit' => $payroll->salary_total,
+        // ]);
+        //  Transaction::create($dr_gross);
+          //credit payables
+        $payable_account = Account::where('system', 'payable')->first(['id']);
+        $total = $payroll->salary_total + $payroll->allowance_total + $payroll->other_allowances_total + $payroll->other_benefits_total - $payroll->other_deductions_total;
+        $cr_payable = array_replace($cr_data, [
+            'account_id' => $payable_account->id,
+            'credit' => $total,
+        ]);
+        Transaction::create($cr_payable);
+        
+        
+        aggregate_account_transactions();
+    }
+    public function generate_payroll($payroll)
+    {
+        //Debit payables
+        $payable_account = Account::where('system', 'payable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'salaries')->first(['id', 'code']);
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
+        $cr_data = [
+            'tid' => $tid,
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $payroll->total_netpay,
+            'tr_date' => $payroll->processing_date,
+            'due_date' => $payroll->approval_date,
+            'user_id' => $payroll->user_id,
+            'note' => $payroll->approval_note,
+            'ins' => $payroll->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $payroll->id,
+            'user_type' => 'company',
+            'is_primary' => 1
+        ];
+        
+        // debit paye
+        unset($cr_data['credit'], $cr_data['is_primary']);
+         $dr_payable = array_replace($cr_data, [
+             'account_id' => $payable_account->id,
+             'debit' => $payroll->total_netpay,
+         ]);
+         Transaction::create($dr_payable);
+         //credit bank
+         $gross_pay = $payroll->salary_total + $payroll->allowance_total - $payroll->deduction_total;
+         //$payable_account = Account::where('system', 'bank')->first(['id']);
+         $cr_bank = array_replace($cr_data, [
+             'account_id' => $payroll['account'],
+             'credit' => $gross_pay,
+         ]);
+         //dd($cr_bank);
+         Transaction::create($cr_bank);
     }
 
 }

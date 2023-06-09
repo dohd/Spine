@@ -4,7 +4,7 @@ namespace App\Http\Responses\Focus\salary;
 
 use Illuminate\Contracts\Support\Responsable;
 use App\Models\department\Department;
-use App\models\workshift\Workshift;
+use App\Models\workshift\Workshift;
 
 class CreateResponse implements Responsable
 {

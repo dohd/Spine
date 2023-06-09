@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\View;
 use App\Repositories\Focus\general\RosemailerRepository;
 use App\Jobs\SendEmailJob;
 use App\Models\salary\Salary;
+use App\Models\account\Account;
 /**
  * payrollsController
  */
@@ -150,9 +151,12 @@ class PayrollController extends Controller
         foreach ($payroll->payroll_items as $item) {
             $item->employee_name = $item->employee ? $item->employee->first_name : '';
         }
+        $accounts = Account::whereNull('system')
+            ->whereHas('accountType', fn($q) =>  $q->where('system', 'bank'))
+            ->get(['id', 'holder']);
 
         //returning with successfull message
-        return new ViewResponse('focus.payroll.view', compact('payroll'));
+        return new ViewResponse('focus.payroll.view', compact('payroll','accounts'));
     }
 
     public function get_employee(Request $request)
@@ -281,11 +285,14 @@ class PayrollController extends Controller
 
     public function approve_payroll(Request $request)
     {
+        //dd($request->all());
         $payroll = Payroll::find($request->id);
         $payroll->approval_note = $request->approval_note;
         $payroll->approval_date = date_for_database($request->approval_date);
         $payroll->status = $request->status;
-        $payroll->update();
+        $payroll['account'] = $request->account_id;
+       // $payroll->update();
+        $this->repository->approve_payroll(compact('payroll'));
         return redirect()->back();
     }
 

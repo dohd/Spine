@@ -5,6 +5,7 @@ namespace App\Notifications\Frontend\Auth;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Repositories\Focus\general\RosemailerRepository;
 
 /**
  * Class UserNeedsPasswordReset.
@@ -50,9 +51,20 @@ class UserNeedsPasswordReset extends Notification
      */
     public function toMail($notifiable)
     {
+        //dd($notifiable);
         $reset_password_route = route('frontend.auth.password.reset.form', $this->token);
-
-        return (new MailMessage())
-            ->view('emails.reset-password', ['reset_password_url' => $reset_password_route]);
+        $email_input = [
+            'text' => 'Password Reset',
+            'subject' => $reset_password_route,
+            'mail_to' => $notifiable['email'],
+             'customer_name' => $notifiable['first_name'],
+            'file' => 'null'
+        ];
+        
+        $mailer = new RosemailerRepository;
+        dd($email_input);
+        $result = $mailer->send($notifiable['email'], $email_input);
+        dd($result);
+        return view('emails.reset-password', ['reset_password_url' => $reset_password_route]);
     }
 }
