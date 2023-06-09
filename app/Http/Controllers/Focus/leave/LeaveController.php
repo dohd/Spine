@@ -22,6 +22,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\Access\User\User;
+use App\Models\hrm\Hrm;
 use App\Models\leave\Leave;
 use App\Models\leave_category\LeaveCategory;
 use App\Repositories\Focus\leave\LeaveRepository;
@@ -62,7 +63,7 @@ class LeaveController extends Controller
     {
         $leave_categories = LeaveCategory::get(['id', 'title', 'qty']); 
         
-        if (access()->allow('department-manage')) {
+        if (access()->allow('manage-department')) {
             $users = User::get(['id', 'first_name', 'last_name']);
         } else {
             $users = User::where('id', auth()->user()->id)->get(['id', 'first_name', 'last_name']);
