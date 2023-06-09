@@ -484,7 +484,9 @@ class InvoicesController extends Controller
      */
     public function print_payment(InvoicePayment $paidinvoice)
     {
-        $html = view('focus.invoices.print_payment', ['resource' => $paidinvoice])->render();
+        $company = Company::find(auth()->user()->ins) ?: new Company;
+        
+        $html = view('focus.invoices.print_payment', ['resource' => $paidinvoice, 'company' => $company])->render();
         $pdf = new \Mpdf\Mpdf(config('pdf'));
         $pdf->WriteHTML($html);
         $headers = array(

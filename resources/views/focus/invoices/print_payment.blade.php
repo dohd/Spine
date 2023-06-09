@@ -59,24 +59,10 @@
 		<div class="footer">Page {PAGENO} of {nb}</div>
 	</htmlpagefooter>
 	<sethtmlpagefooter name="myfooter" value="on" />
-	
-	<table width="100%" style="border-bottom: 0.8mm solid #0f4d9b;">
+	<table class="header-table">
 		<tr>
-			<td width="60%" align="left" style="color:#0f4d9b;font-size:8pt;">
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/logo.jpg') }}" style="width:350px;" /><br><span style="color:#0f4d9b;font-size:9pt;"> Supply, Installation, Maintenance & Repair of:</span><br>
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;" /> Air Conditioners & Refrigerators &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;margin-left:6px;" /> Laboratory Fume Cupboards <br>
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;" /> Coldrooms & Chillers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;margin-left:62px;" /> Steam Bath and Saunas<br>
-				<img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px;" /> Mechanical Ventilation Systems &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="{{ Storage::disk('public')->url('app/public/img/company/ico/bullets.png') }}" style="width:8px; " /> Raised Floors / Access Panels <br> <br>
-				<span style="color:#0f4d9b;font-size:9pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;and General Suppliers</span>
-			</td>
-			<td width="40%" align="right" style="color:#0f4d9b;font-size:10pt; ">
-				<br><br>
-				Lean Aircons Building, Opp NextGen Mall<br>
-				Mombasa Road, Nairobi - Kenya<br>
-				P.O Box 36082 - 00200.<br>
-				Cell : +254 732 345 393, +254 713 773 333<br>
-				info@leanventures.co.ke<br>
-				leannventures@gmail.com
+			<td>
+				<img src="{{ Storage::disk('public')->url('app/public/img/company/' . $company->logo) }}" style="object-fit:contain" width="100%"/>
 			</td>
 		</tr>
 	</table>
@@ -90,10 +76,10 @@
 	<table width="100%" style="font-family: serif;font-size:10pt;" cellpadding="10">
 		<tr>
 			<td width="50%" style="border: 0.1mm solid #888888; "><span style="font-size: 7pt; color: #555555; font-family: sans;">CUSTOMER DETAILS:</span><br><br>
-				<b>Client Name : </b>{{ $resource->customer->company }}<br>				
-				<b>Address : </b>{{ $resource->customer->address }}<br>
-				<b>Email : </b>{{ $resource->customer->email }}<br>
-				<b>Cell : </b> {{ $resource->customer->phone }}<br>
+				<b>Client Name : </b>{{ @$resource->customer->company }}<br>				
+				<b>Address : </b>{{ @$resource->customer->address }}<br>
+				<b>Email : </b>{{ @$resource->customer->email }}<br>
+				<b>Cell : </b> {{ @$resource->customer->phone }}<br>
 			<td width="5%">&nbsp;</td>
 			<td width="45%" style="border: 0.1mm solid #888888;">
 				<span style="font-size: 7pt; color: #555555; font-family: sans;">REFERENCE DETAILS:</span><br><br>
