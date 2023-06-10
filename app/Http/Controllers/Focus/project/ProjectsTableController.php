@@ -57,11 +57,10 @@ class ProjectsTableController extends Controller
             ->addIndexColumn()
             ->addColumn('customer', function($project) {
                 $name = '';
-                $customer = $project->customer_project;
-                $branch = $project->branch;
-                if ($customer && $branch) $name = "{$customer->company} - {$branch->name}";
-                elseif ($customer) $name = $customer->company;
-                
+                if ($project->customer_project) {
+                    $name = $project->customer_project->company;
+                    if ($project->branch) $name .= " - {$project->branch->name}";
+                }
                 return $name;
             })
             ->editColumn('tid', function($project) use ($prefixes) {
@@ -69,48 +68,10 @@ class ProjectsTableController extends Controller
             })
             ->filterColumn('tid', function($query, $tid) use($prefixes) {
                 $arr = explode('-', $tid);
-                if (strtolower($arr[0]) == strtolower($prefixes[1]) && isset($arr[1])) {
+                if (count($arr) > 1 && strtolower($arr[0]) == strtolower($prefixes[1])) {
                     $query->where('tid', floatval($arr[1]));
                 } elseif (floatval($tid)) {
                     $query->where('tid', floatval($tid));
-                }
-            })
-            ->addColumn('quote_budget', function($project) {
-                $links = '';
-                foreach ($project->quotes as $quote) {
-                    $tid = gen4tid($quote->bank_id ? 'PI-' : 'QT-', $quote->tid);
-                    $status = $quote->budget? 'budgeted' : 'pending';
-                    $links .= '<a href="'. route('biller.projects.create_project_budget', $quote). '" data-toggle="tooltip" title="Budget">
-                        <b>'. $tid . '</b></a> :'. $status .'<br>';
-                }
-                
-                return $links;
-            })
-            ->filterColumn('quote_budget', function($query, $budget) use($prefixes) {
-                $arr = explode('-', $budget);
-                if (strtolower($arr[0]) == strtolower($prefixes[2]) && isset($arr[1])) {
-                    $query->whereHas('quotes', fn($q) => $q->where('tid', floatval($arr[1])));
-                } 
-                elseif (strtolower($arr[0]) == strtolower($prefixes[3]) && isset($arr[1])) {
-                    $query->whereHas('quotes', fn($q) => $q->where('tid', floatval($arr[1])));
-                }
-                elseif (floatval($budget)) {
-                    $query->whereHas('quotes',  fn($q) => $q->where('tid', floatval($budget)));
-                }
-            })
-            ->addColumn('lead_tid', function($project) use ($prefixes) {
-                $tids = array();                
-                foreach ($project->quotes as $quote) {
-                    $tids[] = gen4tid("{$prefixes[0]}-", $quote->lead->reference);
-                }
-                return implode(', ', $tids);
-            })
-            ->filterColumn('lead_tid', function($query, $tid) use($prefixes) {
-                $arr = explode('-', $tid);
-                if (strtolower($arr[0]) == strtolower($prefixes[0]) && isset($arr[1])) {
-                    $query->whereHas('quotes', fn($q) => $q->whereHas('lead', fn($q) => $q->where('reference', floatval($arr[1]))));
-                } elseif (floatval($tid)) {
-                    $query->whereHas('quotes', fn($q) => $q->whereHas('lead', fn($q) => $q->where('reference', floatval($tid))));
                 }
             })
             ->editColumn('start_date', function ($project) {
@@ -126,13 +87,21 @@ class ProjectsTableController extends Controller
                 if ($project->misc)
                 return ucfirst($project->misc->name);
             })
-            ->addColumn('quotes', function ($project) {
+            ->editColumn('main_quote_id', function($project) {
                 $tids = [];
                 foreach ($project->quotes as $quote) {
                     $tid = gen4tid($quote->bank_id? 'PI-' : 'QT-', $quote->tid);
                     $tids[] = '<a href="'. route('biller.quotes.show', $quote) .'"><b>'. $tid .'</b></a>';
                 }
                 return implode(', ', $tids);
+            })
+            ->filterColumn('main_quote_id', function($query, $tid) use($prefixes) {
+                $arr = explode('-', $tid);
+                if (count($arr) > 1 && in_array($arr[0], ['QT','PI'])) {
+                    $query->whereHas('quotes', fn($q) => $q->where('tid', floatval($arr[1])));
+                } elseif (floatval($tid)) {
+                    $query->whereHas('quotes', fn($q) => $q->where('tid', floatval($tid)));
+                } 
             })
             ->addColumn('actions', function ($project) {
                 return $project->action_buttons;

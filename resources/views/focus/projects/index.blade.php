@@ -210,7 +210,7 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['tid', 'name', 'priority', 'status', 'start_date', 'end_date', 'quotes'].map(v => ({data: v, name: v})),
+                    ...['tid', 'name', 'priority', 'status', 'start_date', 'end_date', 'main_quote_id'].map(v => ({data: v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
