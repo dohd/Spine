@@ -22,7 +22,7 @@
         <!-- End Left sidebar -->
 
         <!-- Content -->
-        <div class="content-right">
+        <div class="content-right" style="width: calc(100% - 270px)">
             <div class="content-body">
                 <div class="card">
                     <div class="card-body">
@@ -55,6 +55,7 @@
                                     <th>Status</th>
                                     <th>Start</th>
                                     <th>Deadline</th>
+                                    <th>Quotes/PI</th>
                                     <th>{{ trans('general.action') }}</th>
                                 </tr>
                             </thead>
@@ -209,7 +210,7 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['tid', 'name', 'priority', 'status', 'start_date', 'end_date'].map(v => ({data: v, name: v})),
+                    ...['tid', 'name', 'priority', 'status', 'start_date', 'end_date', 'quotes'].map(v => ({data: v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],

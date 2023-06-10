@@ -126,6 +126,14 @@ class ProjectsTableController extends Controller
                 if ($project->misc)
                 return ucfirst($project->misc->name);
             })
+            ->addColumn('quotes', function ($project) {
+                $tids = [];
+                foreach ($project->quotes as $quote) {
+                    $tid = gen4tid($quote->bank_id? 'PI-' : 'QT-', $quote->tid);
+                    $tids[] = '<a href="'. route('biller.quotes.show', $quote) .'"><b>'. $tid .'</b></a>';
+                }
+                return implode(', ', $tids);
+            })
             ->addColumn('actions', function ($project) {
                 return $project->action_buttons;
             })
