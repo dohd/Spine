@@ -107,7 +107,7 @@ class PayrollRepository extends BaseRepository
             $this->post_transaction($payroll);
             
         }
-        unset($payroll['account']);
+        //unset($payroll['account']);
         $payroll->update();
         
         throw new GeneralException('Approval Payroll Failed');
@@ -125,6 +125,7 @@ class PayrollRepository extends BaseRepository
         }
         $result = Payroll::find($data['payroll_id']);
         $result->salary_total = $data['salary_total'];
+        $result->processing_date = date_for_database($data['processing_date']);
         $result->update();
 
         //dd($result);
@@ -405,36 +406,41 @@ class PayrollRepository extends BaseRepository
         ];
         Transaction::create($cr_data); 
         
-        // debit paye
+        // credit paye
         unset($cr_data['credit'], $cr_data['is_primary']);
         
-        $paye_account = Account::where('system', 'paye')->first(['id']);
+        $paye_account = Account::where('system', 'paye_payable')->first(['id']);
         $dr_paye = array_replace($cr_data, [
             'account_id' => $paye_account->id,
-            'debit' => $payroll->paye_total,
+            'credit' => $payroll->paye_total,
         ]); 
         Transaction::create($dr_paye);
-        //debit nhif
-        $nhif_account = Account::where('system', 'nhif')->first(['id']);
+        //credit nhif
+        $nhif_account = Account::where('system', 'nhif_payable')->first(['id']);
         $dr_nhif = array_replace($cr_data, [
             'account_id' => $nhif_account->id,
-            'debit' => $payroll->total_nhif,
+            'credit' => $payroll->total_nhif,
         ]);
          Transaction::create($dr_nhif);
-         //debit nssf
-        $nssf_account = Account::where('system', 'nssf')->first(['id']);
+         //credit nssf payable *2
+        $nssf_account = Account::where('system', 'nssf_payable')->first(['id']);
         $dr_nssf = array_replace($cr_data, [
             'account_id' => $nssf_account->id,
-            'debit' => $payroll->total_nssf,
+            'credit' => $payroll->total_nssf * 2,
         ]);
          Transaction::create($dr_nssf);
-        //  //debit salary expense
-        // $gross_account = Account::where('system', 'salary')->first(['id']);
-        // $dr_gross = array_replace($cr_data, [
-        //     'account_id' => $gross_account->id,
-        //     'debit' => $payroll->salary_total,
-        // ]);
-        //  Transaction::create($dr_gross);
+          //debit salary expense
+        $gross_account = Account::where('system', 'salary')->first(['id']);
+        $dr_gross = array_replace($cr_data, [
+            'account_id' => $gross_account->id,
+            'debit' => $payroll->total_netpay,
+        ]);
+         Transaction::create($dr_gross);
+        $nssf_expense = Account::where('system', 'nssf')->first(['id']);
+        $dr_nssf = array_replace($cr_data, [
+            'account_id' => $nssf_expense->id,
+            'debit' => $payroll->total_nssf,
+        ]);
           //credit payables
         $payable_account = Account::where('system', 'payable')->first(['id']);
         $total = $payroll->salary_total + $payroll->allowance_total + $payroll->other_allowances_total + $payroll->other_benefits_total - $payroll->other_deductions_total;

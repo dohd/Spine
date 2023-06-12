@@ -40,7 +40,7 @@
             </div>
         </div>
         <div class="float-right">
-            <button type="submit" class="btn btn-primary">Save NHIF</button>
+            <button type="submit" class="btn btn-primary submit-nhif">Save NHIF</button>
         </div>
     </div>
 </form>

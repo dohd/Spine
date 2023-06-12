@@ -33,7 +33,7 @@
                         <label for="note">Note</label>
                         {{ Form::textarea('approval_note', null, ['class' => 'form-control', 'rows' => '4', 'id' => 'note']) }}
                     </div>
-                    <div class="form-group">
+                    {{-- <div class="form-group">
                         <label for="account">Pay From Account</label>
                         <select name="account_id" id="account" class="custom-select" required>  
                             <option value="">-- select account --</option>                                 
@@ -43,7 +43,7 @@
                                 </option>
                             @endforeach
                         </select>
-                    </div> 
+                    </div>  --}}
                     
                 </div>
                 <div class="modal-footer">

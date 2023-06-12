@@ -223,7 +223,7 @@
         <tr>
             <td class="doc-title-td">
                 <span class='doc-title'>
-                    PYRL-{{ $resource->payroll->id }} ( {{ $monthName }} )  
+                    {{ gen4tid('PYRL-',$resource->payroll->id) }} ( {{ $monthName }} )  
                 </span>
                 
             </td>

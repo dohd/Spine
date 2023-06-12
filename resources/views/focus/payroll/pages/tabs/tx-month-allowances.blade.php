@@ -71,7 +71,7 @@
             </div>
         </div>
         <div class="float-right">
-            <button type="submit" class="btn btn-primary">Save Allowances</button>
+            <button type="submit" class="btn btn-primary submit-allowances">Save Allowances</button>
         </div>
     </div>
 </form>

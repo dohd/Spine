@@ -23,7 +23,7 @@
                             <td>{{ gen4tid('EMP-', $item->employee_id) }}</td>
                             <td>{{ $item->employee_name }}</td>
                             <td class="editable-cell">{{ amountFormat($item->total_basic_allowance) }}</td>
-                            <input type="hidden" name="id[]" value="{{ $item->id }}">
+                            <input type="hidden" name="id[]" class="id" value="{{ $item->id }}">
                             <input type="hidden" name="payroll_id"
                                 value="{{ $item->payroll_id }}">
                             <input type="hidden" name="nssf[]" value="{{ $item->nssf }}"
@@ -37,6 +37,13 @@
                             <input type="hidden" name="gross_pay[]"
                                 value="{{ $item->gross_pay }}" id="">
                             <td>{{ amountFormat($item->gross_pay) }}</td>
+                            @if ($item->tx_deductions > 0)
+                                <td>
+                                    <a href="#" class="btn btn-danger btn-sm my-1 edit-deduction" data-toggle="modal" data-target="#deductionModal">
+                                        <i class="fa fa-pencil" aria-hidden="true"></i> Edit
+                                    </a>
+                                </td>
+                            @endif
                         </tr>
                     @endforeach
 
@@ -60,7 +67,7 @@
             </div>
         </div>
         <div class="float-right">
-            <button type="submit" class="btn btn-primary">Save Deductions</button>
+            <button type="submit" class="btn btn-primary submit-deduction">Save Deductions</button>
         </div>
     </div>
 </form>

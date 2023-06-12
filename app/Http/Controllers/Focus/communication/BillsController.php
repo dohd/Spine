@@ -155,7 +155,6 @@ class BillsController extends Controller
 
     public function print_verified_quote_pdf(Request $request)
     {
-        dd($request->all());
         $data = $this->bill_details($request);
 
         $html = view('focus.bill.print_verified_quote', $data)->render();

@@ -84,7 +84,7 @@
             </div>
         </div>
         <div class="float-right">
-            <button type="submit" class="btn btn-primary submit-salary">Save Net Pay</button>
+            <button type="submit" class="btn btn-primary submit-netpay">Save Net Pay</button>
         </div>
     </form>
     

@@ -34,11 +34,11 @@
                                 <i class="fa fa-pencil" aria-hidden="true"></i> Approve
                             </a>
                         </div>
-                        <div class="col-2">
+                        {{-- <div class="col-2">
                             <a href="#" class="btn btn-danger btn-lg my-1" data-toggle="modal" data-target="#generateModal">
                                 <i class="fa fa-pencil" aria-hidden="true"></i> Generate Payroll
                             </a>
-                        </div>
+                        </div> --}}
                         <div class="col-2">
                             <button type="button" class="btn btn-success btn-lg my-1 send_mail">
                                 <i class="fa fa-paper-plane-o"></i> {{trans('general.send')}}

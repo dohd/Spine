@@ -99,7 +99,10 @@
         </div>
     </div>
 </div>
-
+@include('focus.payroll.modal.basic-pay')
+@include('focus.payroll.modal.allowance')
+@include('focus.payroll.modal.deduction')
+@include('focus.payroll.modal.other')
 @section('after-scripts')
     {{ Html::script(mix('js/dataTable.js')) }}
     {{ Html::script('focus/js/select2.min.js') }}
@@ -151,6 +154,8 @@
             $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
             $('#employeeTbl').on('keyup', '.absent, .present, .rate, .rate-month, .total', this.employeeChange);
             $('#employeeTbl').on('change', '.absent_rate', this.absentRateChange);
+            $('.ab-days').on('keyup', this.absentChange);
+            $('#allowanceModal').on('keyup', '.ha, .oa, .ta', this.houseTransportChange);
             $('#deductionTbl').on('keyup', '.deduction', this.deductionChange);
 
                 $('#allowanceTbl').on('keyup',
@@ -159,100 +164,56 @@
                 $('#otherBenefitsTbl').on('keyup',
                     '.loan, .advance, .benefits, .other-deductions, .other-allow', this
                     .otherBNDChange);
-
+                $('#employeeTbl').on('click', '.edit', this.showModal);
+                $('#allowanceTbl').on('click', '.edit-allowance', this.showAllowanceModal);
+                $('#deductionTbl').on('click', '.edit-deduction', this.showDeductionModal);
+                $('#otherBenefitsTbl').on('click', '.edit-other', this.showOtherModal);
                 if (this.payroll_items && this.payroll_items.length) {
                     $('.cancel').addClass('d-none');
+                    $('.submit-salary').addClass('d-none');
                     $('.tick').removeClass('d-none');
                     $('.cancel_allowance').removeClass('d-none');
                     $('.tick_allowance').addClass('d-none');
                     $('.cancel_other_deductions').removeClass('d-none');
                     $('.tick_other_deductions').addClass('d-none');
                     $('.cancel_salary_total').removeClass('d-none');
-                                    $('.tick_salary_total').addClass('d-none');
+                    $('.tick_salary_total').addClass('d-none');
                     $('#employeeTbl tbody').html('');
                     this.payroll_items.forEach((v, i) => $('#employeeTbl tbody').append(Index.employeeRow(v, i)));
                     $('#salary_total').val(accounting.formatNumber(this.salary_total));
-                    //$('#employeeTbl tbody tr').find('.editable-cell').hover(this.hoverChange);
-                   
-                    // $("td").hover(
-                    //     function() {
-                    //     var position = $(this).position();
-                    //     var cellText = $(this).text();
-                    //     var inputHtml = '<input type="text" class="edit-input form-control" value="' + cellText + '">';
-                    //     var saveBtn = '<button type="button" class="btn btn-primary save-btn">Save</button>';
-                        
-                    //     $(this).append(inputHtml, saveBtn);
-                        
-                    //     $("input.edit-input")
-                    //         .css({
-                    //         top: position.top,
-                    //         left: position.left,
-                    //         width: $(this).width('10%')
-                    //         })
-                    //         .fadeIn();
-                    //     },
-                    //     function() {
-                    //     $("input.edit-input").fadeOut(function() {
-                    //         $(this).remove();
-                    //         $('.save-btn').remove();
-                    //     });
-                    //     }
-                        
-                    // );
-                    // Append the editable input element to the document body
-                   // $('body').append($editableInput);
-                   $("td").hover(
-                        function() {
-                        var position = $(this).position();
-                        var cellText = $(this).text();
-                        var inputTooltip = $("#input-tooltip");
-                        var $tooltip = `<div id="tooltip" class="hide">
-                                <input type="text" id="input-tooltip">
-                            </div>`;
-
-                        $(this).append($tooltip);
-                        inputTooltip.val(cellText);
-
-                        $("#tooltip")
-                            .css({
-                            top: position.top,
-                            left: position.left
-                            })
-                            .removeClass("hide");
-                        },
-                        function() {
-                        $("#tooltip").addClass("hide");
-                        }
-                    );
-                    $('#saveButton').click(this.valueChange);
                     if (this.allowance_total && this.allowance_total.length) {
                         $('#allowanceTbl tbody').html('');
                         this.payroll_items.forEach((v, i) => $('#allowanceTbl tbody').append(Index.allowanceRow(v, i)));
                         $('#allowance_total').val(accounting.formatNumber(this.allowance_total));
                         $('.tick_allowance').removeClass('d-none');
                         $('.cancel_allowance').addClass('d-none');
+                        $('.submit-allowances').addClass('d-none');
                         if (this.deduction_total && this.deduction_total.length) {
                             $('.cancel_deduction').addClass('d-none');
                             $('.tick_deduction').removeClass('d-none');
+                            $('.submit-deduction').addClass('d-none');
                             if (this.paye_total && this.paye_total.length) {
                                 $('.cancel_paye').addClass('d-none');
                                 $('.tick_paye').removeClass('d-none');
+                                $('.submit-paye').addClass('d-none');
 
                                 if (this.total_nhif && this.total_nhif.length) {
                                     $('.cancel_nhif').addClass('d-none');
                                     $('.tick_nhif').removeClass('d-none');
+                                    $('.submit-nhif').addClass('d-none');
                                     if (this.other_benefits_total && this.other_benefits_total.length) {
                                     $('#otherBenefitsTbl tbody').html('');
-                                    console.log(this.payroll_items);
                                     this.payroll_items.forEach((v, i) => $('#otherBenefitsTbl tbody:first').append(Index.deductionRow(v, i)));
                                     $('#other_benefits_total').val(accounting.formatNumber(this.other_benefits_total));
                                     $('#other_deductions_total').val(accounting.formatNumber(this
                                         .other_deductions_total));
                                     $('.cancel_other_deductions').addClass('d-none');
                                     $('.tick_other_deductions').removeClass('d-none');
+                                    $('.submit-otherbenefits').addClass('d-none');
                                     if(this.total_netpay && this.total_netpay.length){
                                         $('.cancel_total_netpay').addClass('d-none');
                                         $('.tick_total_netpay').removeClass('d-none');
+                                        $('.submit-netpay').addClass('d-none');
                                     }
                                 }
                                 }
@@ -264,8 +225,6 @@
                 } else {
                     $('.tick').addClass('d-none');
                     $('.cancel').removeClass('d-none');
-                    // $('.tick_allowance').addClass('d-none');
-                    // $('.cancel_allowance').removeClass('d-none');
                 }
 
 
@@ -274,26 +233,7 @@
                 Index.calTotalBenefitsAndDeductions();
 
             },
-        hoverChange() {
-            var cellValue = $(this).text();
-
-            // Set the cell value in the input field of the modal
-            $('#cellValueInput').val(cellValue);
-            $('#editModal').modal('show');
-            }, hoverChange() {
-                // Hide the modal
-                $('#editModal').modal('hide');
-            },
-        valueChange() {
-            // Get the updated cell value from the input field
-                var updatedValue = $('#cellValueInput').val();
-
-            // Update the cell value in the table
-            $('.editable-cell').text(updatedValue);
-
-            // Hide the modal
-            $('#editModal').modal('hide');
-        },
+        
         allowanceChange() {
             const el = $(this);
             const row = el.parents('tr:first');
@@ -485,14 +425,128 @@
                         <td>${accounting.formatNumber(v.rate_per_day)}</td> 
                         <td>${accounting.formatNumber(v.absent_rate)}</td>    
                         <td>${accounting.formatNumber(v.basic_pay)}</td> 
-                        <input type="hidden" name="absent_days[]" value="${v.absent_days}" class="form-control absent"  id="absent_days-${i}"> 
-                       
+                        <td>
+                            <a href="#" class="btn btn-danger btn-sm my-1 edit" data-toggle="modal" data-target="#basicModal">
+                                <i class="fa fa-pencil" aria-hidden="true"></i> Edit
+                            </a>
+                        </td>
+                        <input type="hidden" name="id[]" value="${v.id}" class="form-control pid"  id="payroll_item-${i}">
+                        <input type="hidden" name="absent_days[]" value="${v.absent_days}" class="form-control absent"  id="absent_days-${i}">
+                        <input type="hidden" name="basic_salary[]" value="${v.basic_salary}" class="form-control basic_salary"  id="basic_salary-${i}">  
+                        <input type="hidden" name="absent_rate[]" value="${v.absent_rate}" class="form-control absent_rate"  id="absent_rate-${i}"> 
                         <input type="hidden" name="rate_per_day[]" value="${v.rate_per_day} class="form-control rate"  id="rate-days-${i}">
                         <input type="hidden" name="rate_per_month[]" value="${v.basic_pay} class="form-control rate-month"  id="rate-month-${i}"> 
                     </tr>
                 `;
             },
+            showDeductionModal(){
+                const el = $(this);
+                const row = el.parents('tr:first');
+                const id = accounting.unformat(row.find('.id').val());
+                const deduction = accounting.unformat(row.find('.deduction').val());
+                $('.deduction-id').val(id);
+                $('.tx-deduction').val(deduction);
+            },
+            showOtherModal(){
+                const el = $(this);
+                const row = el.parents('tr:first');
+                const id = accounting.unformat(row.find('.other-id').val());
+                const other_allow = accounting.unformat(row.find('.other-allow').val());
+                const benefits = accounting.unformat(row.find('.benefits').val());
+                const loan = accounting.unformat(row.find('.loan').val());
+                const advance = accounting.unformat(row.find('.advance').val());
+                const other_deduction = accounting.unformat(row.find('.other-deduction').val());
+                $('.o-id').val(id);
+                $('.o-allow').val(other_allow);
+                $('.benefit').val(benefits);
+                $('.loans').val(loan);
+                $('.advances').val(advance);
+                $('.o-deductions').val(other_deduction);
+            },
+            
+            showModal(){
+                const el = $(this);
+                const row = el.parents('tr:first');
+               // row.find('.absent_rate').val('');
+                const absent = accounting.unformat(row.find('.absent').val());
+                const absent_rate = accounting.unformat(row.find('.absent_rate').val());
+                const basic_salary = accounting.unformat(row.find('.basic_salary').val());
+                const id = row.find('.pid').val();
+                const month_days = $('.month_days').val();
+                const working_days = $('.working_days').val();
+                $('#ab-days').val(absent);
+                $('#ab-rate').val(absent_rate);
+                $('.salary').val(basic_salary);
+                $('#id').val(id);
+                $('#month').val(month_days);
+                //console.log(id);
+            },
+            absentChange(){
+                const el = $(this);
+                const row = el.parents('tr:first');
+               // row.find('.absent_rate').val('');
+                const ab_days = $('.ab-days').val();
+                const absent = accounting.unformat(row.find('.absent').val());
+                const absent_rate = accounting.unformat(row.find('.absent_rate').val());
+                
+                const basic_salary = $('.salary').val();
+                const month_days = $('.month_days').val();
+                const working_days = $('.working_days').val();
+                const new_absent_rate = (basic_salary / month_days) * ab_days;
+                // payable
+                const payable = basic_salary - new_absent_rate;
 
+                
+                $('.ab-rate').val(new_absent_rate).change();
+                $('#basic_pay').val(payable);
+            },
+            showAllowanceModal(){
+                const el = $(this);
+                const row = el.parents('tr:first');
+               // row.find('.absent_rate').val('');
+                const house_allowance = accounting.unformat(row.find('.house_allowance').val());
+                const absent = accounting.unformat(row.find('.absent').val());
+                const transport_allowance = accounting.unformat(row.find('.transport_allowance').val());
+                const other_allowance = accounting.unformat(row.find('.other_allowance').val());
+                const id = row.find('.payid').val();
+                const month_days = $('.month_days').val();
+                const working_days = $('.working_days').val();
+                $('.ha').val(house_allowance);
+                $('.ta').val(transport_allowance);
+                $('.oa').val(other_allowance);
+                $('.pay_id').val(id);
+                $('.month_day').val(month_days);
+                $('.absent_day').val(absent)
+                console.log(id);
+            },
+            houseTransportChange() {
+                const el = $(this);
+                const row = el.parents('tr:first');
+               // row.find('.absent_rate').val('');
+                const house = $('.ha').val();
+                const transport = $('.ta').val();
+                const other = $('.oa').val();
+                const absent_days = $('.absent_day').val();
+                
+                const month_days = $('.month_days').val();
+                const working_days = $('.working_days').val();
+                const house_allowance = (house / month_days) * absent_days;
+                const ha = house - house_allowance;
+                const transport_allowance = (transport / month_days) * absent_days;
+                const ta = transport - transport_allowance;
+                const other_allowance = (other / month_days) * absent_days;
+                const oa = other - other_allowance;
+                // payable
+                //const payable = basic_salary - new_absent_rate;
+
+                
+                $('.house').val(ha).change();
+                $('.transport').val(ta).change();
+                $('.other').val(oa).change();
+                $('.month').val(month_days);
+                console.log(month_days);
+                //$('#basic_pay').val(payable);
+            },
             allowanceRow(v, i) {
                 return `
                     <tr>
@@ -503,6 +557,12 @@
                         <td><input type="text" name="transport_allowance[]" value="${accounting.formatNumber(v.transport_allowance)}" class="form-control transport_allowance"  id="transport_allowance-${i}" readonly></td>    
                         <td><input type="text" name="other_allowance[]" value="${accounting.formatNumber(v.other_allowance)}" class="form-control other_allowance"  id="other_allowance-${i}" readonly></td>    
                         <td><input type="text" name="total_allowance[]" value="${accounting.formatNumber(v.total_allowance)}" class="form-control total_allowance"  id="total_allowance-${i}" readonly></td> 
+                        <td>
+                            <a href="#" class="btn btn-danger btn-sm my-1 edit-allowance" data-toggle="modal" data-target="#allowanceModal">
+                                <i class="fa fa-pencil" aria-hidden="true"></i> Edit
+                            </a>
+                        </td>
+                        <input type="hidden" name="id[]" value="${v.id}" class="form-control payid"  id="payroll_item-${i}">
                         <input type="hidden" name="absent_days[]" value="${v.absent_days}" class="form-control absent"  id="absent_days-${i}"> 
                         <input type="hidden" name="rate_per_day[]" value="${v.rate_per_day} class="form-control rate"  id="rate-days-${i}">
                         <input type="hidden" name="rate_per_month[]" value="${v.basic_pay} class="form-control rate-month"  id="rate-month-${i}"> 
@@ -515,7 +575,7 @@
                 <tr>
                                 <td> ${v.employee_id }</td>
                                 <td>${v.employee_name }</td>
-                                <input type="hidden" name="id[]" value="${ v.id }">
+                                <input type="hidden" name="id[]" class="other-id" value="${ v.id }">
                                 <input type="hidden" name="payroll_id" value="${v.payroll_id }">
                                 <td><input type="text" name="total_other_allowances[]" class="form-control other-allow"
                                         id="total_other_allowances-${i}" value="${v.total_other_allowances }" ></td>
@@ -547,6 +607,12 @@
 
                                 <td><input type="text" name="total_other_deduction[]"
                                         class="form-control other-deductions" id="total_other_deduction-${i}" value="${v.total_other_deduction }">
+                                </td>
+                                
+                                <td>
+                                    <a href="#" class="btn btn-danger btn-sm my-1 edit-other" data-toggle="modal" data-target="#otherModal">
+                                        <i class="fa fa-pencil" aria-hidden="true"></i> Edit
+                                    </a>
                                 </td>
 
 

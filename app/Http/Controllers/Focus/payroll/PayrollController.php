@@ -35,6 +35,7 @@ use App\Repositories\Focus\general\RosemailerRepository;
 use App\Jobs\SendEmailJob;
 use App\Models\salary\Salary;
 use App\Models\account\Account;
+use App\Models\payroll\PayrollItem;
 /**
  * payrollsController
  */
@@ -290,7 +291,7 @@ class PayrollController extends Controller
         $payroll->approval_note = $request->approval_note;
         $payroll->approval_date = date_for_database($request->approval_date);
         $payroll->status = $request->status;
-        $payroll['account'] = $request->account_id;
+       // $payroll['account'] = $request->account_id;
        // $payroll->update();
         $this->repository->approve_payroll(compact('payroll'));
         return redirect()->back();
@@ -315,7 +316,7 @@ class PayrollController extends Controller
             'payroll_id','salary_total','processing_date'
         ]);
         $data_items = $request->only([
-            'absent_rate', 'absent_days','rate_per_day','rate_per_month','basic_pay', 'employee_id'
+            'absent_rate', 'absent_days','rate_per_day','rate_per_month','basic_pay', 'employee_id','basic_salary'
         ]);
 
         $data['ins'] = auth()->user()->ins;
@@ -331,6 +332,219 @@ class PayrollController extends Controller
             return errorHandler('Error creating Basic Salary', $th);
         }
         return redirect()->back();
+    }
+
+    public function update_basic(Request $request)
+    {
+        //dd($request->all());
+        $payroll_items = PayrollItem::find($request->id);
+        $new_house_allowance = 0;
+        $new_transport_allowance = 0;
+        $new_other_allowance = 0;
+        if ($request->absent_days > 0 && $payroll_items->absent_days > 0) {
+            //New House allowance
+            $house_allowance = ($request->month * $payroll_items->house_allowance) / $payroll_items->absent_days;
+            $new_house_allowance = $house_allowance - ($request->absent_days / $request->month);
+            //New Transport allowance
+            $transport_allowance = ($request->month * $payroll_items->transport_allowance) / $payroll_items->absent_days;
+            $new_transport_allowance = $transport_allowance - ($request->absent_days / $request->month);
+            //New other allowance
+            $other_allowance = ($request->month * $payroll_items->other_allowance) / $payroll_items->absent_days;
+            $new_other_allowance = $other_allowance - ($request->absent_days / $request->month);
+           // dd($new_house_allowance, 1);
+        }
+        else if ($request->absent_days > 0 && $payroll_items->absent_days == 0) {
+            //New House allowance
+            $house_allowance = ($payroll_items->house_allowance * $request->absent_days) / $request->month;
+            $new_house_allowance = $payroll_items->house_allowance - $house_allowance;
+            //New Transport allowance
+            $transport_allowance = ($payroll_items->transport_allowance * $request->absent_days) / $request->month;
+            $new_transport_allowance = $payroll_items->transport_allowance - $transport_allowance;
+            //New other allowance
+            $other_allowance = ($payroll_items->other_allowance * $request->absent_days) / $request->month;
+            $new_other_allowance = $payroll_items->other_allowance - $other_allowance;
+            //dd($new_house_allowance, 2);
+        }
+        else if ($request->absent_days == 0 && $payroll_items->absent_days > 0) {
+            //New House allowance
+            $house_allowance = ($payroll_items->house_allowance * $request->month) / ($request->month - $payroll_items->absent_days);
+            $new_house_allowance = $house_allowance;
+            //New Transport allowance
+            $transport_allowance = ($payroll_items->transport_allowance * $request->month) / ($request->month - $payroll_items->absent_days);
+            $new_transport_allowance = $transport_allowance;
+            //New other allowance
+            $other_allowance = ($payroll_items->other_allowance * $request->month) / ($request->month - $payroll_items->absent_days);
+            $new_other_allowance = $other_allowance;
+            //dd($other_allowance);
+           // dd($new_house_allowance, 3);
+        }
+        else if ($request->absent_days == 0 && $payroll_items->absent_days == 0) {
+            //New House allowance
+            $new_house_allowance = $payroll_items->house_allowance;
+            //New Transport allowance
+            $new_transport_allowance = $payroll_items->transport_allowance;
+            //New other allowance
+            $new_other_allowance = $payroll_items->other_allowance;
+            //dd($other_allowance);
+           // dd($new_house_allowance, 4);
+        }
+        //dd($new_house_allowance);
+        //Updating Payroll Items
+        $payroll_items->absent_days = $request->absent_days;
+        $payroll_items->absent_rate = $request->absent_rate;
+        $payroll_items->basic_pay = $request->basic_pay;
+        $payroll_items->house_allowance = $new_house_allowance;
+        $payroll_items->transport_allowance = $new_transport_allowance;
+        $payroll_items->other_allowance = $new_other_allowance;
+        $allowance = $new_other_allowance + $new_transport_allowance +$new_house_allowance;
+        $total_basic_allowance = $request->basic_pay + $allowance;
+        $payroll_items->total_allowance = $allowance;
+        $payroll_items->total_basic_allowance = $total_basic_allowance;
+        if($payroll_items->total_basic_allowance){
+            $payroll_items->nssf = $this->calculate_nssf($payroll_items->total_basic_allowance);
+            $payroll_items->gross_pay = $payroll_items->total_basic_allowance - ($payroll_items->nssf + $payroll_items->tx_deductions);
+            // $total_gross += $payroll_items->gross_pay;
+            $payroll_items->nhif = $this->calculate_nhif($payroll_items->gross_pay);
+            $nhif_relief = 15/100 * $payroll_items->nhif;
+            $payroll_items->paye = $this->calculate_paye($payroll_items->gross_pay) - $nhif_relief;
+
+            if($payroll_items->paye < 0){
+                $payroll_items->paye = 0;
+            }
+            $advance_loan = $payroll_items->advance + $payroll_items->loan;
+            $payroll_items->netpay = $payroll_items->gross_pay -($payroll_items->paye + $payroll_items->nhif) + $payroll_items->total_other_allowances + $payroll_items->total_benefits 
+            - ($advance_loan + $payroll_items->total_other_deduction);
+           
+        }
+        $payroll_items->update();
+        //Get payroll and update 
+        $payroll = $payroll_items->payroll->first();
+        $total_allowance = $payroll->payroll_items()->sum('total_allowance');
+        $basic_pay = $payroll->payroll_items()->sum('basic_pay');
+        $nhif = $payroll->payroll_items()->sum('nhif');
+        $nssf = $payroll->payroll_items()->sum('nssf');
+        $paye = $payroll->payroll_items()->sum('paye');
+        $netpay = $payroll->payroll_items()->sum('netpay');
+        $payroll->allowance_total = $total_allowance;
+        $payroll->salary_total = $basic_pay;
+        $payroll->paye_total = $paye;
+        $payroll->total_nhif = $nhif;
+        $payroll->total_nssf = $nssf;
+        $payroll->total_netpay = $netpay;
+        $payroll->update();
+        // foreach ($payroll->payroll_items as $item) {
+        //     $total_allowance += $item->total_allowance;
+        // }
+        //dd($payroll->payroll_items()->sum('total_allowance'));
+        return redirect()->back()->with('flash_success', 'Basic Pay Updated Successfully');
+    }
+
+    public function update_allowance(Request $request)
+    {
+        //dd($request->all());
+        $payroll_items = PayrollItem::find($request->id);
+        //Total tx allowance
+
+        $total_allowance = $request->house_allowance + $request->transport_allowance + $request->other_allowance;
+        $payroll_items->house_allowance = $request->house_allowance;
+        $payroll_items->transport_allowance = $request->transport_allowance;
+        $payroll_items->other_allowance = $request->other_allowance;
+        $payroll_items->total_allowance = $total_allowance;
+        $total_basic_allowance = $payroll_items->basic_pay + $total_allowance;
+        $payroll_items->total_basic_allowance = $total_basic_allowance;
+        if($payroll_items->total_basic_allowance){
+            $payroll_items->nssf = $this->calculate_nssf($total_basic_allowance);
+            $payroll_items->gross_pay = $total_basic_allowance - ($payroll_items->nssf + $payroll_items->tx_deductions);
+            // $total_gross += $payroll_items->gross_pay;
+            $payroll_items->nhif = $this->calculate_nhif($payroll_items->gross_pay);
+            $nhif_relief = 15/100 * $payroll_items->nhif;
+            $payroll_items->paye = $this->calculate_paye($payroll_items->gross_pay) - $nhif_relief;
+
+            if($payroll_items->paye < 0){
+                $payroll_items->paye = 0;
+            }
+            $advance_loan = $payroll_items->advance + $payroll_items->loan;
+            $payroll_items->netpay = $payroll_items->gross_pay -($payroll_items->paye + $payroll_items->nhif) + $payroll_items->total_other_allowances + $payroll_items->total_benefits 
+            - ($advance_loan + $payroll_items->total_other_deduction);
+           
+        }
+        $payroll_items->update();
+        //Get payroll and update 
+        $payroll = $payroll_items->payroll->first();
+        $total_allowances = $payroll->payroll_items()->sum('total_allowance');
+        $nhif = $payroll->payroll_items()->sum('nhif');
+        $nssf = $payroll->payroll_items()->sum('nssf');
+        $paye = $payroll->payroll_items()->sum('paye');
+        $netpay = $payroll->payroll_items()->sum('netpay');
+        $payroll->allowance_total = $total_allowances;
+        $payroll->paye_total = $paye;
+        $payroll->total_nhif = $nhif;
+        $payroll->total_nssf = $nssf;
+        $payroll->total_netpay = $netpay;
+        $payroll->update();
+        return redirect()->back()->with('flash_success', 'Taxable Allowances Updated Successfully');
+    }
+
+    public function update_deduction(Request $request)
+    {
+        //dd($request->all());
+        $payroll_items = PayrollItem::find($request->id);
+        $payroll_items->tx_deductions = $request->tx_deductions;
+        if($payroll_items->total_basic_allowance){
+            $payroll_items->nssf = $this->calculate_nssf($payroll_items->total_basic_allowance);
+            $payroll_items->gross_pay = $payroll_items->total_basic_allowance - ($payroll_items->nssf + $request->tx_deductions);
+            // $total_gross += $payroll_items->gross_pay;
+            $payroll_items->nhif = $this->calculate_nhif($payroll_items->gross_pay);
+            $nhif_relief = 15/100 * $payroll_items->nhif;
+            $payroll_items->paye = $this->calculate_paye($payroll_items->gross_pay) - $nhif_relief;
+
+            if($payroll_items->paye < 0){
+                $payroll_items->paye = 0;
+            }
+            $advance_loan = $payroll_items->advance + $payroll_items->loan;
+            $payroll_items->netpay = $payroll_items->gross_pay -($payroll_items->paye + $payroll_items->nhif) + $payroll_items->total_other_allowances + $payroll_items->total_benefits 
+            - ($advance_loan + $payroll_items->total_other_deduction);
+           
+        }
+        $payroll_items->update();
+        //Get payroll and update 
+        $payroll = $payroll_items->payroll->first();
+        $nhif = $payroll->payroll_items()->sum('nhif');
+        $nssf = $payroll->payroll_items()->sum('nssf');
+        $paye = $payroll->payroll_items()->sum('paye');
+        $netpay = $payroll->payroll_items()->sum('netpay');
+        $payroll->paye_total = $paye;
+        $payroll->total_nhif = $nhif;
+        $payroll->total_nssf = $nssf;
+        $payroll->total_netpay = $netpay;
+        $payroll->update();
+        return redirect()->back()->with('flash_success', 'Taxable Deductions Updated Successfully');
+    }
+    public function update_other(Request $request)
+    {
+        //dd($request->all());
+        $payroll_items = PayrollItem::find($request->id);
+        $payroll_items->total_other_allowances = $request->total_other_allowances;
+        $payroll_items->total_benefits = $request->total_benefits;
+        $payroll_items->loan = $request->loan;
+        $payroll_items->advance = $request->advance;
+        $payroll_items->total_other_deduction = $request->total_other_deduction;
+        $advance_loan = $request->advance + $request->loan;
+        $payroll_items->netpay = $payroll_items->gross_pay -($payroll_items->paye + $payroll_items->nhif) + $request->total_other_allowances + $request->total_benefits 
+            - ($advance_loan + $request->total_other_deduction);
+        $payroll_items->update();
+        //Get payroll and update 
+        $payroll = $payroll_items->payroll->first();
+        $total_other_allowances = $payroll->payroll_items()->sum('total_other_allowances');
+        $total_benefits = $payroll->payroll_items()->sum('total_benefits');
+        $total_other_deduction = $payroll->payroll_items()->sum('total_other_deduction');
+        $netpay = $payroll->payroll_items()->sum('netpay');
+        $payroll->other_allowances_total = $total_other_allowances;
+        $payroll->other_deductions_total = $total_other_deduction;
+        $payroll->other_benefits_total = $total_benefits;
+        $payroll->total_netpay = $netpay;
+        $payroll->update();
+        return redirect()->back()->with('flash_success', 'Other Benefits and Deductions Updated Successfully');
     }
     public function store_nhif(Request $request)
     {
