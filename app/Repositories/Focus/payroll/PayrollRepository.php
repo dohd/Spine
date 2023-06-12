@@ -31,9 +31,15 @@ class PayrollRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-
-        return $this->query()
-            ->get();
+        $q = $this->query();
+        
+        $q->when(request('month'), function ($q) {            
+            //dd(request('month'));
+            $year = Carbon::createFromFormat('Y-m', request('month'))->format('Y');
+            $month = Carbon::createFromFormat('Y-m', request('month'))->format('m');
+             $q->whereYear('payroll_month', $year)->whereMonth('payroll_month', $month);
+        });
+        return $q->get();
     }
 
     /**

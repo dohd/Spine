@@ -37,7 +37,7 @@
                             <input type="hidden" name="gross_pay[]"
                                 value="{{ $item->gross_pay }}" id="">
                             <td>{{ amountFormat($item->gross_pay) }}</td>
-                            @if ($item->tx_deductions > 0)
+                            @if ($total_tx_deduction > 0)
                                 <td>
                                     <a href="#" class="btn btn-danger btn-sm my-1 edit-deduction" data-toggle="modal" data-target="#deductionModal">
                                         <i class="fa fa-pencil" aria-hidden="true"></i> Edit

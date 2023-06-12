@@ -36,6 +36,7 @@ use App\Jobs\SendEmailJob;
 use App\Models\salary\Salary;
 use App\Models\account\Account;
 use App\Models\payroll\PayrollItem;
+use Carbon\Carbon;
 /**
  * payrollsController
  */
@@ -105,6 +106,7 @@ class PayrollController extends Controller
      */
     public function edit(Payroll $payroll, Request $request)
     {
+        $payroll->processing_month = Carbon::parse($payroll->processing_month)->format('Y-m');
         return new EditResponse($payroll);
     }
 
@@ -122,7 +124,7 @@ class PayrollController extends Controller
         //Update the model using repository update method
         $this->repository->update($payroll, $input);
         //return with successfull message
-        return new RedirectResponse(route('biller.payroll.index'), ['flash_success' => 'Payroll Processing Updating Successfully!!']);
+        return new RedirectResponse(route('biller.payroll.page', $payroll->id), ['flash_success' => 'Payroll Processing Updating Successfully!!']);
     }
 
     /**
@@ -254,7 +256,7 @@ class PayrollController extends Controller
         $payroll = Payroll::find($id);
         $payroll->reference = gen4tid('PYRL-',$payroll->tid);
         $employees = Hrm::with(['employees_salary' => function ($q){
-            $q->where('contract_type', 'permanent');
+            $q->where('contract_type', 'permanent')->where('status', 'ongoing');
         }])->get();
         $total_gross = 0;
         $total_paye = 0;
@@ -312,6 +314,7 @@ class PayrollController extends Controller
 
     public function store_basic(Request $request)
     {
+        //dd($request->all());
         $data = $request->only([
             'payroll_id','salary_total','processing_date'
         ]);
@@ -765,6 +768,96 @@ class PayrollController extends Controller
              }
          
         return $tax;
+    }
+
+    public function reports($payroll){
+        return view('focus.payroll.pages.reports',compact('payroll'));
+    }
+
+    public function get_reports(Request $request)
+    {
+        $payroll = Payroll::find($request->payroll_id);
+        $payroll_items = $payroll->payroll_items()->get();
+        //dd($payroll_items);
+        return Datatables::of($payroll_items)
+            ->escapeColumns(['id'])
+            ->addIndexColumn()
+            ->addColumn('employee_id', function ($payroll_items) {
+                $employee_id = gen4tid('EMP-', $payroll_items->employee_id);
+                return $employee_id;
+             })
+             ->addColumn('payroll_id', function ($payroll_items) {
+                $payroll_id = gen4tid('PYRLL-', $payroll_items->payroll_id);
+                return $payroll_id;
+             })
+            ->addColumn('employee_name', function ($payroll_items) {
+                $employee_name = $payroll_items->employee ? $payroll_items->employee->first_name : '';
+               return $employee_name;
+            })
+            ->addColumn('nssf_no', function ($payroll_items) {
+                $nssf_no = $payroll_items->hrmmetas ? $payroll_items->hrmmetas->nssf : '';
+               return $nssf_no;
+            })
+            ->addColumn('kra_pin', function ($payroll_items) {
+                $kra_pin = $payroll_items->hrmmetas ? $payroll_items->hrmmetas->kra_pin : '';
+               return $kra_pin;
+            })
+            ->addColumn('nhif_no', function ($payroll_items) {
+                $nhif_no = $payroll_items->hrmmetas ? $payroll_items->hrmmetas->nhif : '';
+               return $nhif_no;
+            })
+            ->addColumn('basic_pay', function ($payroll_items) {
+                return amountFormat($payroll_items->basic_pay);
+            })
+            ->addColumn('absent_days', function ($payroll_items) {
+                return $payroll_items->absent_days;
+            })
+            ->addColumn('house_allowance', function ($payroll_items) {
+                return amountFormat($payroll_items->house_allowance);
+            })
+            ->addColumn('total_allowance', function ($payroll_items) {
+                return amountFormat($payroll_items->total_allowance);
+            })
+            ->addColumn('transport_allowance', function ($payroll_items) {
+                return amountFormat($payroll_items->transport_allowance);
+            })
+            ->addColumn('other_allowance', function ($payroll_items) {
+                return amountFormat($payroll_items->other_allowance);
+            })
+            ->addColumn('gross_pay', function ($payroll_items) {
+                return amountFormat($payroll_items->gross_pay -$payroll_items->tx_deductions);
+            })
+            ->addColumn('nssf', function ($payroll_items) {
+                return amountFormat($payroll_items->nssf);
+            })
+            ->addColumn('tx_deductions', function ($payroll_items) {
+                return amountFormat($payroll_items->tx_deductions);
+            })
+            ->addColumn('paye', function ($payroll_items) {
+                return amountFormat($payroll_items->paye);
+            })
+            ->addColumn('taxable_gross', function ($payroll_items) {
+                return amountFormat($payroll_items->taxable_gross);
+            })
+            ->addColumn('total_other_allowances', function ($payroll_items) {
+                return amountFormat($payroll_items->total_other_allowances);
+            })
+            ->addColumn('total_benefits', function ($payroll_items) {
+                return amountFormat($payroll_items->total_benefits);
+            })
+            ->addColumn('loan', function ($payroll_items) {
+                return amountFormat($payroll_items->loan);
+            })
+            ->addColumn('advance', function ($payroll_items) {
+                return amountFormat($payroll_items->advance);
+            })
+            ->addColumn('total_other_deductions', function ($payroll_items) {
+                return amountFormat($payroll_items->total_other_deductions);
+            })
+            ->addColumn('netpay', function ($payroll_items) {
+                return amountFormat($payroll_items->netpay);
+            })
+            ->make(true);
     }
 
 }

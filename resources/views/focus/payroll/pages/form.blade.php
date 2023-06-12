@@ -479,7 +479,7 @@
                 $('.salary').val(basic_salary);
                 $('#id').val(id);
                 $('#month').val(month_days);
-                //console.log(id);
+                console.log(basic_salary);
             },
             absentChange(){
                 const el = $(this);

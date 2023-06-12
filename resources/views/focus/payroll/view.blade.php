@@ -117,6 +117,7 @@
                                                 'Total Salary' => amountFormat($payroll->salary_total),
                                                 'Total Allowances' => amountFormat($payroll->allowance_total),
                                                 'Total Deductions' => amountFormat($payroll->deduction_total),
+                                                'Total Netpay' => amountFormat($payroll->total_netpay),
                                             ];
                                         @endphp
                                         @foreach ($details as $key => $val)

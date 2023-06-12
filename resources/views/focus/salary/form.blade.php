@@ -49,7 +49,7 @@
             {{ Form::date('start_date', null, ['class' => 'form-control round datepicker', 'placeholder' => '', 'required']) }}
         </div>
         <div class="col-4">
-            {{ Form::label( 'duration', 'Duration',['class' => 'control-label']) }}
+            {{ Form::label( 'duration', 'Duration (in Months)',['class' => 'control-label']) }}
             {{ Form::number('duration', null, ['class' => 'form-control round', 'placeholder' => '1', 'required']) }}
         </div>
         

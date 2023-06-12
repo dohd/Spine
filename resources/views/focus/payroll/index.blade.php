@@ -27,8 +27,13 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-
-                            <div class="card-content">
+                            <div class="form-group row px-5 mt-2">
+                                <div class="col-3">
+                                    <label for="load_payroll">Select Month</label>
+                                    {{ Form::month('month', null, ['class' => 'form-control month']) }}
+                                </div>
+                            </div>
+                            <div class="card-content mt-3">
 
                                 <div class="card-body">
                                     <table id="payroll-table"
@@ -74,7 +79,7 @@
 @section('after-scripts')
     {{-- For DataTables --}}
     {{ Html::script(mix('js/dataTable.js')) }}
-    <script>
+    {{-- <script>
         $(function () {
             setTimeout(function () {
                 draw_data()
@@ -128,5 +133,68 @@
             $('#payroll-table_wrapper').removeClass('form-inline');
 
         }
+    </script> --}}
+    <script>
+         const config = {
+            ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}" }}
+        };
+
+             const Index = {
+                month: @json(request('month')),
+
+                init() {
+                    this.draw_data();
+                    $('.month').val(this.month).change(this.monthChange);
+                },
+                monthChange() {
+                    Index.month = $(this).val();
+                    $('#payroll-table').DataTable().destroy();
+                    return Index.draw_data();
+                },
+                draw_data(){
+                    $('#payroll-table').dataTable({
+                        processing: true,
+                        serverSide: true,
+                        responsive: true,
+                        language: {
+                            @lang('datatable.strings')
+                        },
+                        ajax: {
+                            url: '{{ route("biller.payroll.get") }}',
+                            type: 'post',
+                            data: {
+                                month: this.month,
+                            },
+                        },
+                        columns: [
+                            {data: 'DT_Row_Index', name: 'id'},
+                            {data: 'tid', name: 'tid'},
+                            {data: 'processing_date', name: 'processing_date'},
+                            {data: 'salary_total', name: 'salary_total'},
+                            {data: 'allowance_total', name: 'allowance_total'},
+                            {data: 'deduction_total', name: 'deduction_total'},
+                            {data: 'total_nssf', name: 'total_nssf'},
+                            {data: 'paye_total', name: 'paye_total'},
+                            {data: 'total_nhif', name: 'total_nhif'},
+                            {data: 'status', name: 'status'},
+                            {data: 'total_netpay', name: 'total_netpay'},
+                            {data: 'actions', name: 'actions', searchable: false, sortable: false}
+                        ],
+                        order: [[0, "asc"]],
+                        searchDelay: 500,
+                        dom: 'Blfrtip',
+                        buttons: {
+                            buttons: [
+
+                                {extend: 'csv', footer: true, exportOptions: {columns: [0, 1]}},
+                                {extend: 'excel', footer: true, exportOptions: {columns: [0, 1]}},
+                                {extend: 'print', footer: true, exportOptions: {columns: [0, 1]}}
+                            ]
+                        }
+                    });
+                },
+             };
+
+            $(() => Index.init());
     </script>
 @endsection

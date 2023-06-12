@@ -47,7 +47,7 @@
                         <td>{{ gen4tid('EMP-', $employee->employees_salary->employee_id) }}</td>
                         <td>{{ $employee->employees_salary->employee_name }}</td>
                         <input type="hidden" id="employee_id-{{$i}}" name="employee_id[]" value="{{ $employee->employees_salary->employee_id}}">
-                        <input type="hidden" class="basic_salary" id="basic_salary-{{$i}}" value="{{ $employee->employees_salary->basic_pay }}">
+                        <input type="hidden" class="basic_salary" name="basic_salary[]" id="basic_salary-{{$i}}" value="{{ $employee->employees_salary->basic_pay }}">
                         <td>{{ amountFormat($employee->employees_salary->basic_pay) }}</td>
                         <td class="editable-cell"><input type="text" name="absent_days[]" class="form-control absent" value="0"  id="absent_days-{{$i}}"></td>
                         <td>

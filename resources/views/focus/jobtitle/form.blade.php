@@ -1,16 +1,16 @@
 <div class='form-group'>
-    {{ Form::label( 'name','Job Title Name',['class' => 'col-lg-2 control-label']) }}
-    <div class='col-lg-10'>
-        {{ Form::text('name', null, ['class' => 'form-control round', 'placeholder' =>'Job Title Name']) }}
-    </div>
-</div>
-<div class='form-group'>
     {{ Form::label( 'department', 'Department Name',['class' => 'col-lg-2 control-label']) }}
     <div class='col-lg-10'>
         {{-- {{ Form::text('department', null, ['class' => 'form-control round', 'placeholder' => 'Department Name']) }} --}}
         <select class="form-control round" id="departmentbox" data-placeholder="Search Department"></select>
         <input type="hidden" name="department_id" value="{{ @$jobtitles->department ?: 1 }}" id="departmentid">
          <input type="hidden" name="department" value="{{ @$jobtitles->department?: 1 }}" id="department">
+    </div>
+</div>
+<div class='form-group'>
+    {{ Form::label( 'name','Job Title Name',['class' => 'col-lg-2 control-label']) }}
+    <div class='col-lg-10'>
+        {{ Form::text('name', null, ['class' => 'form-control round', 'placeholder' =>'Job Title Name']) }}
     </div>
 </div>
 <div class='form-group'>
