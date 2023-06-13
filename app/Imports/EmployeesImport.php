@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\hrm\Hrm;
 use App\Models\hrm\HrmMeta;
 use App\Models\salary\Salary;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
@@ -53,7 +54,7 @@ class EmployeesImport implements ToCollection, WithBatchInserts, WithValidation,
                 if (empty($row[2])) trigger_error('Last Name is required on row no. $row_num');
                 if (empty($row[8])) trigger_error('Email is required on row no. $row_num');
 
-                $employee[] = [
+                $employee = [
                     'first_name' => $row[1],
                     'last_name' => $row[2],
                     'email' => $row[8],
@@ -61,7 +62,8 @@ class EmployeesImport implements ToCollection, WithBatchInserts, WithValidation,
                     'status' => '1',
                     'confirmed' => '1',
                 ];
-                $hrm[] = [
+                $dob = dateFormat($row[4]);
+                $hrm = [
                     'employee_no' => $row[0],
                     'id_number' => $row[3],
                     'primary_contact' => $row[5],
@@ -76,25 +78,29 @@ class EmployeesImport implements ToCollection, WithBatchInserts, WithValidation,
                     'kra_pin' => $row[15],
                     'nssf' => $row[16],
                     'nhif' => $row[17],
-                    'dob' => $row[4],
+                    'dob' => Carbon::createFromDate($dob)->format('Y-m-d'),
                 ];
-                $salary[] = [
+                $start_date = dateFormat($row[20]);
+                $salary = [
                     'basic_pay' => $row[18],
                     'contract_type' => $row[19],
-                    'start_date' => $row[20],
+                    'start_date' =>  Carbon::createFromDate($start_date)->format('Y-m-d'),
                     'duration' => $row[21],
                     'ins' => $this->data['ins'],
                     'user_id' => auth()->user()->id,
                 ];
+                $employees = Hrm::create($employee);
+                $hrm['user_id'] = $employees->id;
+                 HrmMeta::create($hrm);
+                 $salary['employee_id'] = $employees->id;
+                 Salary::create($salary);
                 ++$this->rows;
-            }            
+            }  
+            
+                    
         }
-        $employees = Hrm::insert($employee);
-        //dd($employees->id);
-        // $hrm['user_id'] = '1';
-        // $salary['employee_id'] = '1';
-        HrmMeta::insert($hrm);
-        Salary::insert($salary);
+    
+        
     }
 
     public function rules(): array
