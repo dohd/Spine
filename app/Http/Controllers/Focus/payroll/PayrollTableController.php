@@ -97,7 +97,7 @@ class PayrollTableController extends Controller
                 return ucfirst($payroll->status);
             })
             ->addColumn('actions', function ($payroll) {
-                return '<a href="'.route('biller.payroll.reports', $payroll->id).'" class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="List"><i class="fa fa-list"></i></a> ' . $payroll->action_buttons;
+                return '<a href="'.route('biller.payroll.reports', $payroll->id).'" class="btn btn-purple round" data-toggle="tooltip" data-placement="top" title="Reports"><i class="fa fa-list"></i></a> ' . $payroll->action_buttons;
                 //return $payroll->action_buttons;
             })
             ->make(true);

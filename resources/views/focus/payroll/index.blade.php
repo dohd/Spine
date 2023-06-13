@@ -29,7 +29,7 @@
                         <div class="card">
                             <div class="form-group row px-5 mt-2">
                                 <div class="col-3">
-                                    <label for="load_payroll">Select Month</label>
+                                    <label for="load_payroll">Search Month</label>
                                     {{ Form::month('month', null, ['class' => 'form-control month']) }}
                                 </div>
                             </div>

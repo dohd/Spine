@@ -1,8 +1,10 @@
 <div class="card-content">
     <div class="card-body">
-        <table id="payrollTable"
-            class="table table-striped table-responsive table-bordered zero-configuration"
-            cellspacing="0" width="100%">
+        <div class="row mb-1">
+            <div class="col-2 h4">Total NETPAY</div>                           
+            <div class="col-4 h4 netpay_worth">0.00</div>
+        </div>
+        <table id="payrollTable" class="table table-striped table-responsive table-bordered zero-configuration" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Payroll No.</th>

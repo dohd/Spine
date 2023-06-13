@@ -37,6 +37,7 @@ use App\Models\salary\Salary;
 use App\Models\account\Account;
 use App\Models\payroll\PayrollItem;
 use Carbon\Carbon;
+use DB;
 /**
  * payrollsController
  */
@@ -778,6 +779,17 @@ class PayrollController extends Controller
     {
         $payroll = Payroll::find($request->payroll_id);
         $payroll_items = $payroll->payroll_items()->get();
+        // aggregate
+        $nssf_total = 0;
+        $nssf_total = $payroll->payroll_items->sum(DB::raw('nssf')) * 2;
+        $nhif_total = $payroll->payroll_items->sum(DB::raw('nhif'));
+        $paye_total = $payroll->payroll_items->sum(DB::raw('paye'));
+        $netpay_total = $payroll->payroll_items->sum(DB::raw('netpay'));
+        $nssf_total = amountFormat($nssf_total);
+        $nhif_total = amountFormat($nhif_total);
+        $paye_total = amountFormat($paye_total);
+        $netpay_total = amountFormat($netpay_total);
+        $aggregate = compact('nssf_total', 'nhif_total', 'paye_total', 'netpay_total');
         //dd($payroll_items);
         return Datatables::of($payroll_items)
             ->escapeColumns(['id'])
@@ -791,7 +803,7 @@ class PayrollController extends Controller
                 return $payroll_id;
              })
             ->addColumn('employee_name', function ($payroll_items) {
-                $employee_name = $payroll_items->employee ? $payroll_items->employee->first_name : '';
+                $employee_name = $payroll_items->employee ? $payroll_items->employee->first_name. ' '.$payroll_items->employee->last_name : '';
                return $employee_name;
             })
             ->addColumn('nssf_no', function ($payroll_items) {
@@ -828,7 +840,7 @@ class PayrollController extends Controller
                 return amountFormat($payroll_items->gross_pay -$payroll_items->tx_deductions);
             })
             ->addColumn('nssf', function ($payroll_items) {
-                return amountFormat($payroll_items->nssf);
+                return amountFormat($payroll_items->nssf * 2);
             })
             ->addColumn('tx_deductions', function ($payroll_items) {
                 return amountFormat($payroll_items->tx_deductions);
@@ -856,6 +868,9 @@ class PayrollController extends Controller
             })
             ->addColumn('netpay', function ($payroll_items) {
                 return amountFormat($payroll_items->netpay);
+            })
+            ->addColumn('aggregate', function () use($aggregate) {
+                return $aggregate;
             })
             ->make(true);
     }

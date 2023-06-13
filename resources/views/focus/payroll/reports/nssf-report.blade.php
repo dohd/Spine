@@ -1,6 +1,9 @@
 <div class="card-content">
-    <div class="card-body">
         <div class="card-body">
+            <div class="row mb-1">
+                <div class="col-2 h4">Total NSSF</div>                           
+                <div class="col-4 h4 nssf_worth">0.00</div>
+            </div>
             <table id="nssfTbl"
                 class="table table-striped table-bordered zero-configuration" cellspacing="0"
                 width="100%">
@@ -19,5 +22,4 @@
                 </tbody>
             </table>
         </div>
-    </div>
 </div>

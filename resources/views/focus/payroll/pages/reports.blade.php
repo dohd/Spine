@@ -132,7 +132,15 @@
             ajax: {
                 url: '{{ route("biller.payroll.get_reports") }}',
                 data: {payroll_id: @json(@$payroll)},
-                type: 'post'
+                type: 'post',
+                dataSrc: ({data}) => {
+                    $('.netpay_worth').text('0.00');
+                    if (data.length && data[0].aggregate) {
+                        const aggr = data[0].aggregate;
+                        $('.netpay_worth').text(aggr.netpay_total);
+                    }
+                    return data;
+                },
             },
             columns: [
                 {data: 'payroll_id', name: 'payroll_id'},
@@ -166,7 +174,15 @@
             ajax: {
                 url: '{{ route("biller.payroll.get_reports") }}',
                 data: {payroll_id: @json(@$payroll)},
-                type: 'post'
+                type: 'post',
+                dataSrc: ({data}) => {
+                    $('.nssf_worth').text('0.00');
+                    if (data.length && data[0].aggregate) {
+                        const aggr = data[0].aggregate;
+                        $('.nssf_worth').text(aggr.nssf_total);
+                    }
+                    return data;
+                },
             },
             columns: [
                 {data: 'payroll_id', name: 'payroll_id'},
@@ -192,7 +208,15 @@
             ajax: {
                 url: '{{ route("biller.payroll.get_reports") }}',
                 data: {payroll_id: @json(@$payroll)},
-                type: 'post'
+                type: 'post',
+                dataSrc: ({data}) => {
+                    $('.paye_worth').text('0.00');
+                    if (data.length && data[0].aggregate) {
+                        const aggr = data[0].aggregate;
+                        $('.paye_worth').text(aggr.paye_total);
+                    }
+                    return data;
+                },
             },
             columns: [
                 {data: 'payroll_id', name: 'payroll_id'},
@@ -217,7 +241,15 @@
             ajax: {
                 url: '{{ route("biller.payroll.get_reports") }}',
                 data: {payroll_id: @json(@$payroll)},
-                type: 'post'
+                type: 'post',
+                dataSrc: ({data}) => {
+                    $('.nhif_worth').text('0.00');
+                    if (data.length && data[0].aggregate) {
+                        const aggr = data[0].aggregate;
+                        $('.nhif_worth').text(aggr.nhif_total);
+                    }
+                    return data;
+                },
             },
             columns: [
                 {data: 'payroll_id', name: 'payroll_id'},
