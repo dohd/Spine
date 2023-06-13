@@ -21,6 +21,7 @@ namespace App\Http\Controllers\Focus\lead;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\lead\LeadRepository;
+use Carbon\Carbon;
 
 /**
  * Class BranchTableController.
@@ -73,6 +74,16 @@ class LeadsTableController extends Controller
                 if ($lead->customer) $client_name = $lead->customer->company;
                 if ($client_name && $lead->branch) $client_name .= " - {$lead->branch->name}";
                 return $client_name;
+            })
+            ->addColumn('exact_date', function ($lead) {
+                $days = '';
+                if ($lead->exact_date) {
+                    $exact = Carbon::parse($lead->exact_date);
+                    $difference = $exact->diff(Carbon::now());
+                    $days = $difference->days;
+                    return $days;
+                }
+                return $days;
             })
             ->addColumn('created_at', function ($lead) {
                 return dateFormat($lead->created_at);

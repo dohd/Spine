@@ -24,7 +24,7 @@ class Allowance extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'allowance_deduction_category';
+    protected $table = 'allowances';
 
     /**
      * Mass Assignable fields of model

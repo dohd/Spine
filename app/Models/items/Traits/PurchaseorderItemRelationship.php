@@ -41,6 +41,11 @@ trait PurchaseorderItemRelationship
         return $this->belongsTo(ProductVariation::class, 'item_id');
     }
 
+    public function supplierproductgrn()
+    {
+        return $this->hasOne(ProductVariation::class, 'code', 'product_code');
+    }
+
     public function product()
     {
         return $this->belongsTo('App\Models\product\ProductVariation', 'item_id');

@@ -12,9 +12,17 @@
     $('#reference-date').datepicker('setDate', new Date("{{ $quote->reference_date }}"));
     $('#date').datepicker('setDate', new Date("{{ $quote->date }}"));
     $('#date-0').datepicker('setDate', new Date());
+    $('#project_closure_date').datepicker('setDate', new Date());
 
     // set general remark
     $('#gen_remark').val(@json($quote->gen_remark));
+   // $('#project_closure_date').val(@json($quote->project_closure_date));
+   if (@json($quote->project_closure_date)) {
+    $('#project_closure_date').datepicker('setDate', new Date("{{ $quote->project_closure_date}}"));
+   }else{
+    $('#project_closure_date').val('');
+   }
+   
 
     // reset Quote Verification 
     $('#reset-items').click(function() {

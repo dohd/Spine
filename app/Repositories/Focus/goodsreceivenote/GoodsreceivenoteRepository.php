@@ -95,7 +95,7 @@ class GoodsreceivenoteRepository extends BaseRepository
             if (!$po_item) throw ValidationException::withMessages(['Line ' . strval($i+1) . ' related purchase order item does not exist!']);
             $po_item->increment('qty_received', $item->qty);
 
-            $prod_variation = $po_item->productvariation;
+            $prod_variation = $po_item->supplierproductgrn;
             if (isset($prod_variation->product->units)) {
                 foreach ($prod_variation->product->units as $unit) {
                     if ($unit->code == $po_item['uom']) {
@@ -163,7 +163,7 @@ class GoodsreceivenoteRepository extends BaseRepository
             $po_item->decrement('qty_received', $item->qty);
 
             // apply unit conversion
-            $prod_variation = $po_item->productvariation;
+            $prod_variation = $po_item->supplierproductgrn;
             if (isset($prod_variation->product->units)) {
                 foreach ($prod_variation->product->units as $unit) {
                     if ($unit->code == $po_item['uom']) {
@@ -198,7 +198,7 @@ class GoodsreceivenoteRepository extends BaseRepository
             $po_item->increment('qty_received', $item->qty);
             
             // apply unit conversion
-            $prod_variation = $po_item->productvariation;
+            $prod_variation = $po_item->supplierproductgrn;
             if (isset($prod_variation->product->units)) {
                 foreach ($prod_variation->product->units as $unit) {
                     if ($unit->code == $po_item['uom']) {
@@ -261,7 +261,7 @@ class GoodsreceivenoteRepository extends BaseRepository
             if ($po_item) {
                 $po_item->decrement('qty_received', $item->qty);
                 // apply unit conversion
-                $prod_variation = $po_item->productvariation;
+                $prod_variation = $po_item->supplierproductgrn;
                 if (isset($prod_variation->product->units)) {
                     foreach ($prod_variation->product->units as $unit) {
                         if ($unit->code == $po_item['uom']) {

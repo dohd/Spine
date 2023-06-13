@@ -48,6 +48,7 @@
                                         <th>Source</th>
                                         <th>{{ trans('general.createdat') }}</th>
                                         <th>Client Ref</th>
+                                        <th>Days to Event</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -117,6 +118,10 @@
                 {
                     data: 'client_ref',
                     name: 'client_ref'
+                },
+                {
+                    data: 'exact_date',
+                    name: 'exact_date'
                 },
                 {
                     data: 'actions',

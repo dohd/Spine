@@ -69,7 +69,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Date</th>
+                                        <th>Verification Date</th>
                                         <th># Quote / PI</th>
                                         <th>{{ trans('customers.customer') }}</th>
                                         <th>Title</th>                                            
@@ -77,6 +77,7 @@
                                         <th>Verified</th>
                                         <th>Project No</th>
                                         <th>LPO No</th>
+                                        <th>Approval Date</th>
                                         <th>Client Ref</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -178,14 +179,60 @@
                         ...params,
                     },
                 },
-                columns: [{data: 'DT_Row_Index', name: 'id'},
-                    ...[
-                        'date', 'tid', 'customer', 'notes', 'total', 'verified_total', 'project_tid', 'lpo_number', 'client_ref',
-                    ].map(v => ({data:v, name: v})),    
-                    {data: 'actions', name: 'actions', searchable: false, sortable: false},
+                columns: [{
+                        data: 'DT_Row_Index',
+                        name: 'id'
+                    },
+                    {
+                        data: 'project_closure_date',
+                        name: 'project_closure_date'
+                    },
+                    {
+                        data: 'tid',
+                        name: 'tid'
+                    },
+                    {
+                        data: 'customer',
+                        name: 'customer'
+                    },
+                    {
+                        data: 'notes',
+                        name: 'notes'
+                    },
+                    {
+                        data: 'total',
+                        name: 'total'
+                    },
+                    {
+                        data: 'verified_total',
+                        name: 'verified_total'
+                    },
+                    {
+                        data: 'project_tid',
+                        name: 'project_tid'
+                    },
+                    {
+                        data: 'lpo_number',
+                        name: 'lpo_number'
+                    },
+                    {
+                        data: 'approved_date',
+                        name: 'approved_date'
+                    },
+                    {
+                        data: 'client_ref',
+                        name: 'client_ref'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false
+                    }
                 ],
                 columnDefs: [
                     { type: "custom-number-sort", targets: [4, 5] },
+                    { type: "custom-date-sort", targets:[2, 9] }
                 ],
                 order: [[0, "desc"]],
                 searchDelay: 500,

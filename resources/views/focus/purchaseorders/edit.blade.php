@@ -68,7 +68,7 @@
             $('#pricegroup_id option').each(function () {
                 if (id == $(this).val())
                 priceCustomer = $(this).val();
-                console.log($(this).val());
+               // 
             });
             
             $('#pricegroup_id').val(priceCustomer);
@@ -106,6 +106,7 @@
     $("#project").change(function() {
         const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
         $('#projectexptext-0').val(projectText);
+        $('#projectstocktext-0').val(projectText);
         $('#projectexpval-0').val($(this).val());
     });
     const projectName = "{{ $po->project? $po->project->name : '' }}";
@@ -165,7 +166,9 @@
     const stockHtml = [$('#stockTbl tbody tr:eq(0)').html(), $('#stockTbl tbody tr:eq(1)').html()];
     $('#stockTbl tbody tr:lt(2)').remove(); 
     const stockUrl = "{{ route('biller.products.purchase_search') }}"
+    const projectstockUrl = "{{ route('biller.projects.project_search') }}"
     $('.stockname').autocomplete(predict(stockUrl, stockSelect));
+    $('.projectstock').autocomplete(prediction(projectstockUrl,projectstockSelect));
     $('#stockTbl').on('click', '#addstock, .remove', function() {
         if ($(this).is('#addstock')) {
             stockRowId++;
@@ -177,6 +180,10 @@
 
             $('#stockTbl tbody tr:eq(-3)').before(html);
             $('.stockname').autocomplete(predict(stockUrl, stockSelect));
+            $('.projectstock').autocomplete(prediction(projectstockUrl,projectstockSelect));
+            const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
+            $('#projectstocktext-'+i).val(projectText);
+            $('#projectstockval-'+i).val($("#project option:selected").val());
             taxRule('rowtax-'+i, $('#tax').val());
 
             //Add the previous supplier data            
@@ -184,7 +191,7 @@
                 $('#pricegroup_id option').each(function () {
                     if ($('#supplierid').val() == $(this).val())
                     priceCustomer = $(this).val();
-                    console.log(priceCustomer);
+                    
                 });
                 
                 $('#pricegroup_id').val(priceCustomer);
@@ -252,6 +259,7 @@
         const i = stockNameRowId;
         $('#stockitemid-'+i).val(data.id);
         $('#stockdescr-'+i).val(data.name);
+        $('#product_code-'+i).val(data.product_code);
 
         const purchasePrice = parseFloat(data.purchase_price);
         $('#price-'+i).val(accounting.formatNumber(purchasePrice)).change();
@@ -270,7 +278,39 @@
         const id = $(this).attr('id').split('-')[1];
         if ($(this).is('.stockname')) stockNameRowId = id;
     });    
-
+    function prediction(url, callback) {
+        return {
+            source: function(request, response) {
+                $.ajax({
+                    url,
+                    dataType: "json",
+                    method: "POST",
+                    data: {keyword: request.term, projectstock: $('#projectstock').val()},
+                    success: function(data) {
+                        response(data.map(v => ({
+                            label: v.name,
+                            value: v.name,
+                            data: v
+                        })));
+                    }
+                });
+            },
+            autoFocus: true,
+            minLength: 0,
+            select: callback
+        };
+    }
+    // stock select autocomplete
+    let projectStockRowId = 0;
+    function projectstockSelect(event, ui) {
+        const {data} = ui.item;
+        const i = projectStockRowId;
+        $('#projectstockval-'+i).val(data.id);
+    }
+    $('#stockTbl').on('mouseup', '.projectstock', function() {
+        const id = $(this).attr('id').split('-')[1];
+        if ($(this).is('.projectstock')) projectStockRowId = id;
+    });
     
     /**
      * Expense Tab

@@ -138,7 +138,7 @@ class AdvancePaymentRepository extends BaseRepository
             'document_type' => $bill_data['document_type'], 
             'ref_id' => $bill_data['ref_id']
         ])->first();
-
+        
         if ($bill) {
             // update bill
             $bill->update($bill_data);
@@ -153,11 +153,11 @@ class AdvancePaymentRepository extends BaseRepository
             // create bill
             $bill_data['tid'] = UtilityBill::where('ins', auth()->user()->ins)->max('tid') + 1;
             $bill = UtilityBill::create($bill_data);
-
             $bill_items_data = array_map(function ($v) use($bill) {
                 $v['bill_id'] = $bill->id;
                 return $v;
-            }, $bill_items_data);
+            }, [$bill_items_data]);
+            //dd($bill_items_data);
             UtilityBillItem::insert($bill_items_data);
         }
     }

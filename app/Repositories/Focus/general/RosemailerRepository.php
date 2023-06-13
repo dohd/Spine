@@ -43,8 +43,9 @@ class RosemailerRepository extends BaseRepository
             Mail::send($view, array('title'=>config('core.cname'),'body' => $data), function ($message) use ($input) {
                 $message->to($input['mail_to']);
                 $message->subject($input['subject']);
+                $message->attach($input['file']);
             });
-        } catch (\Exception $e) {
+        } catch (\Exception $e) {dd($e);
             return json_encode(array('status' => 'Error', 'message' => trans('general.email_error')));
         }
         if (!$output) $output = array('status' => 'Success', 'message' => trans('general.email_sent'));

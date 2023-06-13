@@ -2,6 +2,7 @@
     <table class="table-responsive tfr my_stripe" id="assetTbl">
         <thead>
             <tr class="item_header bg-gradient-directional-success white">
+                <th width="10%">#</th>
                 <th width="30%" class="text-center">{{trans('general.item_name')}}</th>
                 <th width="8%" class="text-center">{{trans('general.quantity')}}</th>
                 <th width="7%" class="text-center">UoM</th>
@@ -15,6 +16,7 @@
         <tbody>
             <!-- layout -->
             <tr>
+                <td><input type="text" class="form-control" value="1" id="assetinc-0" disabled></td>
                 <td><input type="text" class="form-control assetname" name="name[]" placeholder="Asset Or Equipment" id="assetname-0"></td>
                 <td><input type="text" class="form-control asset_qty" name="qty[]" value="1" id="assetqty-0"></td>
                 <td><input type="text" class="form-control uom" name="uom[]" id="uom-0"></td>                    
@@ -50,6 +52,7 @@
                 @foreach ($po->products as $item)
                     @if ($item->type == 'Asset')
                         <tr>
+                            <td><input type="text" class="form-control" value="{{$i+1}}" id="assetinc-{{$i}}" disabled></td>
                             <td><input type="text" class="form-control assetname" name="name[]" value="{{ $item->asset->name }}" placeholder="Asset Or Equipment" id="assetname-{{$i}}"></td>
                             <td><input type="text" class="form-control asset_qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="assetqty-{{$i}}"></td>
                             <td><input type="text" class="form-control uom" name="uom[]" value="{{ $item->uom }}" id="uom-0"></td>                    

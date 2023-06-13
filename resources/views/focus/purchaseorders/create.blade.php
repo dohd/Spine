@@ -45,6 +45,19 @@
             }
         }
     }
+    
+    function select2Config2(url, callback) {
+        return {
+            ajax: {
+                url,
+                dataType: 'json',
+                type: 'POST',
+                quietMillis: 50,
+                data: ({term}) => ({q: term, keyword: term}),
+                processResults: callback
+            }
+        }
+    }
 
 
     // datepicker
@@ -73,12 +86,145 @@
         return {results: data.map(v => ({id: v.id+'-'+v.taxid, text: v.name+' : '+v.email}))};
     }
     $('#supplierbox').select2(select2Config(supplierUrl, supplierData));
+
+    //Select Quote From quotes
+    $('#quotebox').change(function() {
+        const name = $('#quotebox option:selected').text().split(' : ')[0];
+        const [id, quote_no] = $(this).val().split('-');
+        $('#quoteid').val(quoteid);
+        //$('#quoteid').val(id);
+        $('#quote').val(name);
+        purchaseorderChange();
+    });
+     // load suppliers
+     const quoteUrl = "{{ route('biller.queuerequisitions.select_queuerequisition') }}";
+    function quoteData(data) {
+        return {results: data.map(v => ({id: v.id+'-'+v.quote_no, text: 'Qt-'+v.quote_no+' : '+v.client_branch}))};
+    }
+    $('#quotebox').select2(select2Config2(quoteUrl, quoteData));
+
+    const config = {
+        ajaxSetup: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
+        date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
+        select2: {
+            allowClear: true,
+        },
+        fetchLpoGoods: (queuerequisition_id, pricelist) => {
+            return $.ajax({
+                url: "{{ route('biller.queuerequisitions.goods') }}",
+                type: 'POST',
+                quietMillis: 50,
+                data: {queuerequisition_id, pricelist},
+            });
+        }
+    };
+    $('#quoteselect').change(function () { 
+        const name = $('#quoteselect option:selected').val();
+        const pricelist = $('#pricegroup_id').val();
+        purchaseorderChange(name, pricelist);
+        
+    });
+
+    function purchaseorderChange(value, pricelist) {
+            const el = value;
+            $('#stockTbl tbody').html('');
+            if (!value) return;
+            config.fetchLpoGoods(value, pricelist).done(data => {
+                data.forEach((v,i) => {
+                    $('#stockTbl tbody').append(this.productRow(v,i));
+                    $('.projectstock').autocomplete(prediction(projectstockUrl,projectstockSelect));
+                });
+                if(data.length > 0){
+                    $('#stockTbl tbody').append(this.addRow());
+                    
+                }
+            });
+           
+    }
+
+    function productRow(v,i) {
+            return `
+            <tr>
+                <td><input type="text" class="form-control stockname" value="${v.queuerequisition_supplier.descr}" name="name[]" placeholder="Product Name" id='stockname-${i+1}'></td>
+                <td><input type="text" class="form-control qty" name="qty[]" id="qty-${i+1}" value="${v.qty_balance}"></td>  
+                <td><input type="text" name="uom[]" id="uom-${i+1}" value="${v.uom}" class="form-control uom" required></td> 
+                <td><input type="text" value="${v.queuerequisition_supplier.rate}" class="form-control  price" name="rate[]" id="price-${i+1}"></td>
+                <td>
+                    <select class="form-control rowtax" name="itemtax[]" id="rowtax-${i+1}">
+                        @foreach ($additionals as $tax)
+                            <option value="{{ (int) $tax->value }}" {{ $tax->is_default ? 'selected' : ''}}>
+                                {{ $tax->name }}
+                            </option>
+                        @endforeach                                                    
+                    </select>
+                </td>
+                <td><input type="text" class="form-control taxable" value="0"></td>
+                <td class="text-center">{{config('currency.symbol')}} <b><span class='amount' id="result-${i+1}">0</span></b></td> 
+                <td><button type="button" class="btn btn-danger remove"><i class="fa fa-minus-square" aria-hidden="true"></i></button></td>
+                <input type="hidden" id="stockitemid-0" value="${v.id}" name="item_id[]">
+                <input type="hidden" class="stocktaxr" name="taxrate[]">
+                <input type="hidden" class="stockamountr" name="amount[]">
+                <input type="hidden" name="type[]" value="Requisit">
+                <input type="hidden" name="id[]" value="0">
+                <input type="hidden" value="${i+1}">
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="text" id="stockdescr-0" value="${v.system_name}" class="form-control descr" name="description[]" placeholder="Product Description">
+                </td>
+                <td><input type="text" class="form-control product_code" value="${v.product_code}" name="product_code[]" id="product_code-${i+1}" readonly></td>
+                <td>
+                    <select name="warehouse_id[]" class="form-control warehouse" id="warehouseid">
+                        <option value="">-- Warehouse --</option>
+                        @foreach ($warehouses as $row)
+                            <option value="{{ $row->id }}">{{ $row->title }}</option>
+                        @endforeach
+                    </select>
+                </td>
+                <td colspan="3">
+                    <input type="text" class="form-control projectstock" value="${v.quote_no}" id="projectstocktext-${i+1}" placeholder="Search Project By Name">
+                    <input type="hidden" name="itemproject_id[]" id="projectstockval-${i+1}" >
+                </td>
+                <td colspan="6"></td>
+            </tr>
+            `;
+    }
+    function addRow(){
+        return `
+            <tr class="bg-white">
+                <td>
+                    <button type="button" class="btn btn-success" aria-label="Left Align" id="addstock">
+                        <i class="fa fa-plus-square"></i> {{trans('general.add_row')}}
+                    </button>
+                </td>
+                <td colspan="7"></td>
+            </tr>
+            <tr class="bg-white">
+                <td colspan="6" align="right"><b>{{trans('general.total_tax')}}</b></td>                   
+                <td align="left" colspan="2">
+                    {{config('currency.symbol')}} <span id="invtax" class="lightMode">0</span>
+                </td>
+            </tr>
+            <tr class="bg-white">
+                <td colspan="6" align="right">
+                    <b>Inventory Total ({{ config('currency.symbol') }})</b>
+                </td>
+                <td align="left" colspan="2">
+                    <input type="text" class="form-control" name="stock_grandttl" value="0.00" id="stock_grandttl" readonly>
+                    <input type="hidden" name="stock_subttl" value="0.00" id="stock_subttl">
+                    <input type="hidden" name="stock_tax" value="0.00" id="stock_tax">
+                </td>
+            </tr>
+        `;
+    }
+
     // load projects dropdown
     const projectUrl = "{{ route('biller.projects.project_search') }}";
     function projectData(data) {
         return {results: data.map(v => ({id: v.id, text: v.name}))};
     }
     $("#project").select2(select2Config(projectUrl, projectData));
+    
     
     // On Tax change
     let taxIndx = 0;
@@ -96,6 +242,7 @@
         const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
         $('#projectexptext-0').val(projectText);
         $('#projectexpval-0').val($(this).val());
+        $('#projectstocktext-0').val(projectText);
     });
 
     // Update transaction table
@@ -150,7 +297,9 @@
     let stockRowId = 0;
     const stockHtml = [$('#stockTbl tbody tr:eq(0)').html(), $('#stockTbl tbody tr:eq(1)').html()];
     const stockUrl = "{{ route('biller.products.purchase_search') }}"
+    const projectstockUrl = "{{ route('biller.projects.project_search') }}"
     $('.stockname').autocomplete(predict(stockUrl, stockSelect));
+    $('.projectstock').autocomplete(prediction(projectstockUrl,projectstockSelect));
     $('#rowtax-0').mousedown(function() { taxRule('rowtax-0', $('#tax').val()); });
     $('#stockTbl').on('click', '#addstock, .remove', function() {
         if ($(this).is('#addstock')) {
@@ -163,6 +312,10 @@
 
             $('#stockTbl tbody tr:eq(-3)').before(html);
             $('.stockname').autocomplete(predict(stockUrl, stockSelect));
+            $('#increment-'+i).val(i+1);
+            $('.projectstock').autocomplete(prediction(projectstockUrl,projectstockSelect));
+            const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
+            $('#projectstocktext-'+i).val(projectText);
             taxRule('rowtax-'+i, $('#tax').val());
 
             //Add the previous supplier data            
@@ -182,7 +335,7 @@
             calcStock();
         }    
     })
-    $('#stockTbl').on('change', '.qty, .price, .rowtax, .uom', function() {
+    $('#stockTbl').on('change', '.qty, .price, .rowtax, .uom, #quoteselect', function() {
         const el = $(this);
         const row = el.parents('tr:first');
 
@@ -235,6 +388,7 @@
         const i = stockNameRowId;
         $('#stockitemid-'+i).val(data.id);
         $('#stockdescr-'+i).val(data.name);
+        $('#product_code-'+i).val(data.product_code);
 
         const purchasePrice = accounting.unformat(data.purchase_price);
         $('#price-'+i).val(accounting.formatNumber(purchasePrice)).change();
@@ -252,9 +406,23 @@
         }
         
     }
+    // stock select autocomplete
+    let projectStockRowId = 0;
+    function projectstockSelect(event, ui) {
+        const {data} = ui.item;
+        const i = projectStockRowId;
+        $('#projectstockval-'+i).val(data.id);
+        // $('#stockdescr-'+i).val(data.name);
+        // $('#product_code-'+i).val(data.product_code);
+        
+    }
     $('#stockTbl').on('mouseup', '.stockname', function() {
         const id = $(this).attr('id').split('-')[1];
         if ($(this).is('.stockname')) stockNameRowId = id;
+    }); 
+    $('#stockTbl').on('mouseup', '.projectstock', function() {
+        const id = $(this).attr('id').split('-')[1];
+        if ($(this).is('.projectstock')) projectStockRowId = id;
     });    
 
     /**
@@ -277,6 +445,7 @@
 
             $('#expTbl tbody tr:eq(-3)').before(html);
             $('.accountname').autocomplete(predict(expUrl, expSelect));
+            $('#expenseinc-'+i).val(i+1);
             $('.projectexp').autocomplete(predict(projectUrl, projectExpSelect));
             const projectText = $("#project option:selected").text().replace(/\s+/g, ' ');
             $('#projectexptext-'+i).val(projectText);
@@ -369,6 +538,7 @@
 
             $('#assetTbl tbody tr:eq(-3)').before(html);
             $('.assetname').autocomplete(predict(assetUrl, assetSelect));
+            $('#assetinc-'+i).val(i+1);
             taxRule('assetvat-'+i, $('#tax').val());
         }
         if ($(this).is('.remove')) {
@@ -440,6 +610,28 @@
                     dataType: "json",
                     method: "POST",
                     data: {keyword: request.term, pricegroup_id: $('#pricegroup_id').val()},
+                    success: function(data) {
+                        response(data.map(v => ({
+                            label: v.name,
+                            value: v.name,
+                            data: v
+                        })));
+                    }
+                });
+            },
+            autoFocus: true,
+            minLength: 0,
+            select: callback
+        };
+    }
+    function prediction(url, callback) {
+        return {
+            source: function(request, response) {
+                $.ajax({
+                    url,
+                    dataType: "json",
+                    method: "POST",
+                    data: {keyword: request.term, projectstock: $('#projectstock').val()},
                     success: function(data) {
                         response(data.map(v => ({
                             label: v.name,

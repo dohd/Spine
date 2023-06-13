@@ -54,7 +54,15 @@
         <input type="number" name="month_period" class="form-control round period" id="month_period">
     </div>
 
-    <div class='form-group col-3'>
+    <div class='form-group col-3 loan-type-div'>
+        <div><label for="loan_type">Loan Type</span></label></div>
+        {!! Form::select('loan_type', ['emergency_loan' => 'Emergency Loans', 'education_loan' => 'Education Loan'], null, [
+            'placeholder' => '-- Select Loan Type --',
+            'class' => 'custom-select',
+            'id' => 'loan_type',
+        ]) !!}
+    </div>
+    <div class='form-group col-3 payment-day-div'>
         <div><label for="payment_day">Payment Day</label></div>
         {!! Form::select('payment_day', range(1, 31), null, [
             'placeholder' => '-- Pay Day --',
@@ -85,7 +93,7 @@
     </div>
 </div>
 
-<div class='row'>
+<div class='row'> 
     <div class='form-group col-8'>
         <div><label for="note">Note</label></div>
         {{ Form::text('note', null, ['class' => 'form-control round', 'required']) }}
@@ -123,6 +131,7 @@
             }
 
             $('#lending_type').change(this.lendingTypeChange).change();
+            $('#loan_type').change(this.loanTypeChange).change();
             $('form').on('focusout', '.cash, .period', this.cashChange);
         },
 
@@ -131,21 +140,35 @@
             if (type == 'borrow_from_company') {
                 $('.employee-div').removeClass('d-none');
                 $('.bank-div').addClass('d-none');
+                $('.loan-type-div').removeClass('d-none');
 
                 $('#bank').attr('disabled', true);
                 $('#employee').attr('disabled', false);
 
                 $('#payment_day').attr('disabled', true);
+                $('.payment-day-div').addClass('d-none');
                 $('#interest').attr('disabled', true);
             } else {
                 $('.bank-div').removeClass('d-none');
                 $('.employee-div').addClass('d-none');
+                $('.loan-type-div').addClass('d-none');
 
                 $('#bank').attr('disabled', false);
                 $('#employee').attr('disabled', true);
+                $('#loan_type').attr('disabled', false);
 
                 $('#payment_day').attr('disabled', false);
+                $('.payment-day-div').removeClass('d-none');
                 $('#interest').attr('disabled', false);
+            }
+            
+        },
+        loanTypeChange() {
+            const type = $(this).val();
+            if (type) {
+                $('#fee').val(0).attr('readonly', true);
+            } else{
+                $('#fee').attr('readonly', false);
             }
             
         },

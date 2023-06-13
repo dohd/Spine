@@ -6,6 +6,7 @@ use App\Models\additional\Additional;
 use App\Models\pricegroup\Pricegroup;
 use App\Models\supplier\Supplier;
 use App\Models\term\Term;
+use App\Models\warehouse\Warehouse;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -37,11 +38,12 @@ class EditResponse implements Responsable
 
         $additionals = Additional::all();
         $pricegroups = Pricegroup::all();
+        $warehouses = Warehouse::all();
         $supplier = Supplier::where('name', 'Walk-in')->first(['id', 'name']);
         $price_supplier = Supplier::whereHas('products')->get(['id', 'name']);
         // Purchase order
         $terms = Term::where('type', 4)->get();
 
-        return view('focus.purchaseorders.edit', compact('po', 'additionals', 'pricegroups','price_supplier', 'terms', 'prefixes'));
+        return view('focus.purchaseorders.edit', compact('po', 'additionals','warehouses', 'pricegroups','price_supplier', 'terms', 'prefixes'));
     }
 }

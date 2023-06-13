@@ -63,17 +63,16 @@ class TestController extends Controller
     {
         
         
-        /*$input=array();
+        $input=array();
         $input['text']='test Message';
         $input['subject']='Invoice';
-        $input['mail_to']='osurdancan@gmail.com';
-        $input['customer_name']='Duncan Osur';
-
+        $input['mail_to']='robertmwenja4@gmail.com';
+        $input['customer_name']='Robert Mwenja';
 
         $mailer = new RosemailerRepository;
-       $result= $mailer->send($input['text'], $input);*/
+        $result= $mailer->send($input['text'], $input);
 
-      $result= $this->messageUtil->sendMessage('0711292714','Test Mail');
+        $result= $this->messageUtil->sendMessage('0719189576','Test Mail');
 
         dd($result);
 

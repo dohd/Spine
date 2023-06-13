@@ -56,9 +56,13 @@ class AllowancesTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->addColumn('name', function ($allowance) {
+            ->addColumn('type', function ($allowance) {
                 //  return $department->name;
-                return '<a href="' . route('biller.allowances.index') . '?rel_type=2&rel_id=' . $allowance->id . '">' . $allowance->name . '</a>';
+                return $allowance->type;
+            })
+            ->addColumn('is_taxable', function ($allowance) {
+                //  return $department->name;
+                return $allowance->is_taxable;
             })
             ->addColumn('created_at', function ($allowance) {
                 return dateFormat($allowance->created_at);

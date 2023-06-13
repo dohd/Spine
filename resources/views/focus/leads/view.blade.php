@@ -31,11 +31,12 @@
                 </a>     
                     
                 @if (!$days)
-                    <span class="text-success float-right">Notification Not Set</span>
+                <span class="text-success float-right">Notification Not Set</span>
                 @elseif ($days > 10)
-                    <span class="text-primary float-right"><b>{{ $days }}</b>: Remaining Days</span>
+                <span class="text-primary float-right"><b>{{$days}}</b>: Days Remaining</span>
                 @elseif($days < 10)
-                    <span class="text-danger float-right"><b>{{ $days }}</b>: Remaining Days</span>
+                <span class="text-danger float-right"><b>{{$days}}</b>: Days Remaining</span>
+                
                 @endif    
             </div>
             
@@ -106,6 +107,14 @@
                     <tr>
                         <th>Created at</th>
                         <td>{{ dateFormat($lead->created_at) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Reminder Start Date</th>
+                        <td>{{ $lead->reminder_date }}</td>
+                    </tr>
+                    <tr>
+                        <th>Event Date</th>
+                        <td>{{ $lead->exact_date}}</td>
                     </tr>
                 </tbody>
             </table>

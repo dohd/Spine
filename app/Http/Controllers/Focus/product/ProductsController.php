@@ -186,7 +186,7 @@ class ProductsController extends Controller
         $productvariations = ProductVariation::where(function ($q) {
             $q->whereHas('product', function ($q) {
                 $q->where('name', 'LIKE', '%' . request('keyword') . '%');
-            })->orWhere('name', 'LIKE', '%' . request('keyword') . '%');
+            })->orWhere('name', 'LIKE', '%' . request('keyword') . '%')->orWhere('code', 'LIKE', '%' . request('keyword') . '%');
         })
         ->with(['warehouse' => fn($q) => $q->select(['id', 'title'])])
         ->with('product')->limit(6)->get()->unique('name');
@@ -209,8 +209,10 @@ class ProductsController extends Controller
 
         return response()->json($products);
     }
+
     public function purchase_search(Request $request)
     {
+       // return 'dd';
         if (!access()->allow('product_search')) return false;
 
         // fetch pricelist customer products
@@ -218,8 +220,12 @@ class ProductsController extends Controller
             $products = SupplierProduct::where('supplier_id', request('pricegroup_id'))
                 ->where('descr', 'LIKE', '%'. request('keyword') .'%')->limit(6)->get()
                 ->map(function ($v) {
+                    $item = '';
+                    if ($v->row_num) {
+                        $item = $v->row_num;
+                    }
                     return $v->fill([
-                        'name' => $v->row_num > 0? "{$v->descr} {$v->row_num}" : "{$v->descr}",
+                        'name' => "{$v->descr} - {$item}",
                         'unit' => $v->uom,
                         'price' => $v->rate,
                         'purchase_price' => $v->rate,
@@ -342,5 +348,10 @@ class ProductsController extends Controller
         }
         
         return view('focus.products.partials.pos')->withDetails($output);
+    }
+    public function view($code)
+    {
+        $supplier_pricelist = SupplierProduct::where('product_code', $code)->get();
+        return view('focus.products.view_pricelist', compact('supplier_pricelist'));
     }
 }

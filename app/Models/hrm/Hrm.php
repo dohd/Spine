@@ -6,14 +6,16 @@ use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\hrm\Traits\HrmAttribute;
 use App\Models\hrm\Traits\HrmRelationship;
+use Illuminate\Notifications\Notifiable;
 
 class Hrm extends Model
 {
     use ModelTrait,
         HrmAttribute,
-        HrmRelationship {
-        // HrmAttribute::getEditButtonAttribute insteadof ModelTrait;
-    }
+        Notifiable,
+    	HrmRelationship {
+            // HrmAttribute::getEditButtonAttribute insteadof ModelTrait;
+        }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,

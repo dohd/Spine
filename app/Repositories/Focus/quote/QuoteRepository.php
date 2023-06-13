@@ -334,6 +334,7 @@ class QuoteRepository extends BaseRepository
             'verification_date' => date('Y-m-d'),
             'verified_by' => auth()->user()->id,
             'gen_remark' => $data['gen_remark'],
+            'project_closure_date' => date_for_database($data['project_closure_date']),
             'verified_amount' => numberClean($data['subtotal']),
             'verified_total' => numberClean($data['total']),
             'verified_tax' => numberClean($data['tax']), 

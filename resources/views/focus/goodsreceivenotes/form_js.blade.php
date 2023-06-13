@@ -38,6 +38,8 @@
                 $('#supplier').attr('disabled', true);
                 $('#purchaseorder').attr('disabled', true);
                 if (this.grn.invoice_no) {
+                    $('#invoice_no').attr('disabled', false);
+                    $('#invoice_date').attr('disabled', false);
                     $('#invoice_status option:eq(0)').remove();
                     $('#invoice_no').attr('disabled', false);
                     $('#invoice_date').attr('disabled', false);

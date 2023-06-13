@@ -22,6 +22,7 @@ use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\product\ProductRepository;
 use App\Http\Requests\Focus\product\ManageProductRequest;
+use App\Models\productcategory\Productcategory;
 use DB;
 
 /**
@@ -80,8 +81,19 @@ class ProductsTableController extends Controller
             ->filterColumn('name', function($query, $name) {
                 $query->where('name', 'LIKE', "%{$name}%");
             })
+            ->addColumn('productcategory_id', function ($product) {
+                $this->standard_product = $product->standard ?: $product;
+                $name = Productcategory::where('id',$product->productcategory_id)->first();
+                return  $name->title;
+            })
             ->addColumn('code', function ($product) {
-                return  $this->standard_product->code;
+                $code = $this->standard_product->code;
+                if ($code) 
+                return '<a class="font-weight-bold" href="' . route('biller.products.view', [$code]) . '">' . $code . '</a>';
+            })
+            ->filterColumn('code', function($query, $code) {
+
+                $query->whereHas('variations', fn($q) => $q->where('code', 'LIKE', "%{$code}%"));
             })
             ->filterColumn('code', function($query, $code) {
 
@@ -91,7 +103,7 @@ class ProductsTableController extends Controller
                 return $product->variations->sum('qty');       
             })
             ->addColumn('unit', function ($product) {
-                $unit = $this->standard_product->unit;
+                $unit = $product->unit;
                 if ($unit) return $unit->code;  
             })
             ->addColumn('purchase_price', function ($product) {
@@ -108,6 +120,13 @@ class ProductsTableController extends Controller
                 return dateFormat($product->created_at);
             })
             ->orderColumn('created_at', '-created_at $1')
+            ->addColumn('expiry', function ($product) {
+                $expiry = $this->standard_product->expiry;
+                if ($expiry) {
+                    return dateFormat($expiry);
+                }
+               return '';
+            })
             ->addColumn('actions', function ($product) {
                 return $product->action_buttons;
             })

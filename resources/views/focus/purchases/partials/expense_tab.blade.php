@@ -2,6 +2,7 @@
     <table class="table-responsive tfr my_stripe" id="expTbl">
         <thead>
             <tr class="item_header bg-gradient-directional-danger white">
+                <th width="10%">#</th>
                 <th width="30%" class="text-center">Ledger Name</th>
                 <th width="8%" class="text-center">{{trans('general.quantity')}}</th>
                 <th width="8%" class="text-center">UoM</th>
@@ -15,6 +16,7 @@
         <tbody>
             <!-- layout -->
             <tr>
+                <td><input type="text" class="form-control" value="1" id="expenseinc-0" disabled></td>
                 <td>
                     <input type="text" class="form-control accountname" name="name[]" id="accountname-0" placeholder="Enter Ledger Account" autocomplete="off">
                     <input type="hidden" id="expitemid-0" name="item_id[]">
@@ -57,6 +59,7 @@
                 @foreach ($purchase->products as $item)
                     @if ($item->type == 'Expense')
                         <tr>
+                            <td><input type="text" class="form-control" value="{{$i+1}}" id="expenseinc-{{$i}}" disabled></td>
                             <td><input type="text" class="form-control accountname" name="name[]" value="{{ @$item->account->holder }}" id="accountname-{{$i}}" placeholder="Enter Ledger"></td>
                             <td><input type="text" class="form-control exp_qty" name="qty[]" value="{{ number_format($item->qty, 1) }}" id="expqty-{{$i}}"></td>
                             <td><input type="text" class="form-control exp_uom" name="uom[]" value="{{ $item->uom }}" id="expuom-{{$i}}"></td>

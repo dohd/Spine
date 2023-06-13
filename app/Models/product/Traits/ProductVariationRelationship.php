@@ -11,6 +11,7 @@ use App\Models\product\ProductMeta;
 use App\Models\warehouse\Warehouse;
 use App\Models\pricegroup\Pricegroup;
 use App\Models\pricegroup\PriceGroupVariation;
+use App\Models\supplier_product\SupplierProduct;
 
 /**
  * Class ProductRelationship
@@ -47,6 +48,16 @@ trait ProductVariationRelationship
         return $this->belongsTo(Product::class, 'parent_id')->where('stock_type', 'service');
     }
 
+    public function purchaseorder_items()
+    {
+        return $this->hasMany(PurchaseorderItem::class, 'product_code','code');
+    }
+
+    public function purchase_items()
+    {
+        return $this->belongsTo(PurchaseItem::class, 'parent_id');
+    }
+
     public function warehouse()
     {
         return $this->belongsTo(Warehouse::class);
@@ -65,5 +76,9 @@ trait ProductVariationRelationship
     public function variation_price()
     {
         return $this->hasOneThrough(Pricegroup::class, PriceGroupVariation::class, 'product_variation_id', 'pricegroup_id');
+    }
+    public function product_supplier()
+    {
+        return $this->hasOne(SupplierProduct::class, 'product_code', 'code');
     }
 }

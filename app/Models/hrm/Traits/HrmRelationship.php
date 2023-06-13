@@ -13,6 +13,14 @@ use App\Models\employeesalary\EmployeeSalary;
 use App\Models\hrm\HrmMeta;
 use App\Models\quote\Quote;
 use App\Models\transaction\Transaction;
+use App\Models\salary\Salary;
+use App\Models\hrm\Attendance;
+use App\Models\workshift\Workshift;
+use App\Models\advance_payment\AdvancePayment;
+use App\Models\loan\Loan;
+use App\Models\loan\LoanItem;
+use App\Models\surcharge\Surcharge;
+use App\Models\surcharge\SurchargeItems;
 
 /**
  * Class HrmRelationship
@@ -90,6 +98,36 @@ trait HrmRelationship
     {
         return $this->belongsTo(EmployeeSalary::class, 'id','user_id')->where('status','Active');
     }
+    public function employees_salary() {
+     
+        return $this->hasOne(Salary::class, 'employee_id')->withoutGlobalScopes();
+    }
 
+    public function attendance() {
+     
+        return $this->hasMany(Attendance::class, 'employee_id');
+    }
 
+    public function workshifts()
+    {
+        return $this->hasOneThrough(Workshift::class, Salary::class, 'workshift_id', 'id', 'id', 'employee_id')->withoutGlobalScopes();
+    }
+
+    public function advance_payment()
+    {
+        return $this->hasOne(AdvancePayment::class, 'employee_id');
+    }
+    public function loan()
+    {
+        return $this->hasOne(Loan::class, 'employee_id');
+    }
+
+    public function loan_items()
+    {
+        return $this->hasManyThrough(LoanItem::class, Loan::class, 'employee_id', 'loan_id', 'id', 'id')->withoutGlobalScopes();
+    }
+    public function surcharge_item()
+    {
+        return $this->hasManyThrough(SurchargeItems::class, Surcharge::class, 'employee_id', 'surcharge_id', 'id', 'id')->withoutGlobalScopes();
+    }
 }

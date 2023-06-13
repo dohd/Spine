@@ -61,3 +61,34 @@ Route::group(['namespace' => 'role'], function () {
     //For DataTables
     Route::post('role/get', 'RoleTableController')->name('role.get');
 });
+Route::group(['namespace' => 'salary'], function () {
+    Route::post('salary/renew_contract', 'SalaryController@renew_contract')->name('salary.renew_contract');
+    Route::post('salary/terminate_contract', 'SalaryController@terminate_contract')->name('salary.terminate_contract');
+    Route::post('salary/select', 'SalaryController@select')->name('salary.select');
+    Route::resource('salary', 'SalaryController');
+    //For Datatable
+    Route::post('salary/get', 'SalaryTableController')->name('salary.get');
+});
+
+Route::group(['namespace' => 'payroll'], function () {
+    Route::post('payroll/get_employee', 'PayrollController@get_employee')->name('payroll.get_employee');
+    Route::get('page/{id}', 'PayrollController@page')->name('payroll.page');
+    Route::post('page/store_basic', 'PayrollController@store_basic')->name('payroll.store_basic');
+    Route::post('page/store_allowance', 'PayrollController@store_allowance')->name('payroll.store_allowance');
+    Route::post('page/store_deduction', 'PayrollController@store_deduction')->name('payroll.store_deduction');
+    Route::post('page/store_otherdeduction', 'PayrollController@store_otherdeduction')->name('payroll.store_otherdeduction');
+    Route::post('page/store_summary', 'PayrollController@store_summary')->name('payroll.store_summary');
+    Route::post('page/store_paye', 'PayrollController@store_paye')->name('payroll.store_paye');
+    Route::post('page/store_nhif', 'PayrollController@store_nhif')->name('payroll.store_nhif');
+    Route::post('page/approve_payroll', 'PayrollController@approve_payroll')->name('payroll.approve_payroll');
+    Route::post('page/send_mail', 'PayrollController@send_mail')->name('payroll.send_mail');
+    Route::post('page/update_basic', 'PayrollController@update_basic')->name('payroll.update_basic');
+    Route::post('page/update_allowance', 'PayrollController@update_allowance')->name('payroll.update_allowance');
+    Route::post('page/update_deduction', 'PayrollController@update_deduction')->name('payroll.update_deduction');
+    Route::post('page/update_other', 'PayrollController@update_other')->name('payroll.update_other');
+    Route::get('page/reports/{id}', 'PayrollController@reports')->name('payroll.reports');
+    Route::post('page/get_reports', 'PayrollController@get_reports')->name('payroll.get_reports');
+    Route::resource('payroll', 'PayrollController');
+    //For Datatable
+    Route::post('payroll/get', 'PayrollTableController')->name('payroll.get');
+});

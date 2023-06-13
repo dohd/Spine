@@ -17,6 +17,7 @@ use App\Models\utility_bill\UtilityBill;
 use App\Repositories\BaseRepository;
 use Error;
 use Illuminate\Support\Facades\DB;
+use App\Models\queuerequisition\QueueRequisition;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -42,7 +43,7 @@ class PurchaseRepository extends BaseRepository
         $q->when(request('supplier_id'), function($q) {
             $q->where('supplier_id', request('supplier_id'));
         });
-
+        $q->whereNotBetween('tid', [3558, 7216]);
         return $q;
     }
 
@@ -197,6 +198,7 @@ class PurchaseRepository extends BaseRepository
                 if (isset($item['itemproject_id'])) $item['warehouse_id'] = null;
                 if (isset($item['warehouse_id'])) $item['itemproject_id'] = null;
                 if ($item['type'] == 'Expense' && empty($input['uom'])) $input['uom'] = 'Lot';
+                
             }
 
             // append modified data_items
@@ -205,21 +207,31 @@ class PurchaseRepository extends BaseRepository
                 'user_id' => $result->user_id,
                 'bill_id' => $result->id
             ]);
-
-            // increase stock
+            if ($item['type'] == 'Requisit') {
+                $queuerequisition = QueueRequisition::where('product_code', $order_item['product_code'])->where('status', '1')->update(['status'=>$order['tid']]);
+                $item['type'] = 'Stock';
+            }
+            // increase product stock
             if ($item['type'] == 'Stock' && $item['warehouse_id']) {
                 $prod_variation = ProductVariation::find($item['item_id']);
                 if ($prod_variation->warehouse_id != $item['warehouse_id']) {
-                    $similar_prod_variation = ProductVariation::where(['parent_id' => $prod_variation->parent_id, 'warehouse_id' => $item['warehouse_id']])
-                        ->where('name', 'LIKE', '%'. $prod_variation->name .'%')
-                        ->first();
-                    if (!$similar_prod_variation) {
+                    $is_similar = false;
+                    $similar_products = ProductVariation::where('id', '!=', $prod_variation->id)
+                        ->where('name', 'LIKE', '%'. $prod_variation->name .'%')->get();
+                    foreach ($similar_products as $s_product) {
+                        if ($prod_variation->warehouse_id == $item['warehouse_id']) {
+                            $is_similar = true;
+                            $prod_variation = $s_product;
+                            break;
+                        }
+                    }
+                    if (!$is_similar) {
                         // new warehouse product variation
-                        $similar_prod_variation = $prod_variation->replicate();
-                        $similar_prod_variation->warehouse_id = $item['warehouse_id'];
-                        unset($similar_prod_variation->id, $similar_prod_variation->qty);
-                        $similar_prod_variation->save();
-                        $prod_variation = $similar_prod_variation;
+                        $new_wh_product = clone $prod_variation;
+                        $new_wh_product->warehouse_id = $item['warehouse_id'];
+                        unset($new_wh_product->id, $new_wh_product->qty);
+                        $new_wh_product->save();
+                        $prod_variation = $new_wh_product;
                     }
                 }
 
@@ -234,7 +246,6 @@ class PurchaseRepository extends BaseRepository
                                 $converted_qty = $item['qty'] * $unit->base_ratio;
                                 $prod_variation->increment('qty', $converted_qty);
                             }
-                            break;
                         }
                     }    
                 } else throw ValidationException::withMessages(['Please attach units to stock items']);
@@ -267,7 +278,7 @@ class PurchaseRepository extends BaseRepository
      */
     public function update($purchase, array $input)
     {
-        // dd($input);
+         dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
@@ -323,18 +334,26 @@ class PurchaseRepository extends BaseRepository
             // update product stock
             if ($item['type'] == 'Stock' && $item['warehouse_id']) {
                 $prod_variation = $purchase_item->product;
-                if (!$prod_variation) $prod_variation = ProductVariation::find($item['item_id']);
+                if ($prod_variation) $prod_variation->decrement('qty', $purchase_item->qty);
+                else $prod_variation = ProductVariation::find($item['item_id']);
             
                 if ($prod_variation->warehouse_id != $item['warehouse_id']) {   
-                    $similar_product = ProductVariation::where(['parent_id' => $prod_variation->parent_id, 'warehouse_id' => $item['warehouse_id']])
-                        ->where('name', 'LIKE', '%'. $prod_variation->name .'%')->first();
-                    if (!$similar_product) {
-                        // new product
-                        $similar_product = $prod_variation->replicate();
-                        $similar_product->warehouse_id = $item['warehouse_id'];
-                        unset($similar_product->id, $similar_product->qty);
-                        $similar_product->save();
-                        $prod_variation = $similar_product;
+                    $is_similar = false;
+                    $similar_products = ProductVariation::where('id', '!=', $prod_variation->id)
+                        ->where('name', 'LIKE', '%'. $prod_variation->name .'%')->get();
+                    foreach ($similar_products as $s_product) {
+                        if ($prod_variation->warehouse_id == $item['warehouse_id']) {
+                            $is_similar = true;
+                            $prod_variation = $s_product;
+                            break;
+                        }
+                    }
+                    if (!$is_similar) {
+                        $new_product = clone $prod_variation;
+                        $new_product->warehouse_id = $item['warehouse_id'];
+                        unset($new_product->id, $new_product->qty);
+                        $new_product->save();
+                        $prod_variation = $new_product;
                     }
                 }
 
@@ -349,7 +368,6 @@ class PurchaseRepository extends BaseRepository
                                 $converted_qty = $item['qty'] * $unit->base_ratio;
                                 $prod_variation->increment('qty', $converted_qty);
                             }
-                            break;
                         }
                     }   
                 } else throw ValidationException::withMessages(['Please attach units to stock items']);

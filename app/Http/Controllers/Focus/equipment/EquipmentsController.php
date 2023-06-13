@@ -30,6 +30,7 @@ use App\Http\Requests\Focus\equipment\ManageEquipmentRequest;
 use App\Http\Requests\Focus\equipment\StoreEquipmentRequest;
 use App\Models\branch\Branch;
 use App\Models\customer\Customer;
+use App\Models\equipmenttoolkit\EquipmentToolKit;
 
 /**
  * ProductcategoriesController
@@ -152,6 +153,7 @@ class EquipmentsController extends Controller
      */
     public function show(Equipment $equipment)
     {
+        //dd($equipment->toolkit);
         return new ViewResponse('focus.equipments.view', compact('equipment'));
     }
 
@@ -195,5 +197,25 @@ class EquipmentsController extends Controller
             $equipments = Equipment::get();
         
         return response()->json($equipments);
+    }
+    public function attach(Request $request)
+    {
+        if(EquipmentToolKit::where('equipment_id',$request->equipment_id)->where('tool_id',$request->toolkit_id)->exists()){
+            return new RedirectResponse(route('biller.equipments.show',$request->equipment_id), ['flash_success' => 'ToolKit Already Attached']);
+        }
+        $equipment_toolkit = new EquipmentToolKit();
+        $equipment_toolkit->equipment_id = $request->equipment_id;
+        $equipment_toolkit->tool_id = $request->toolkit_id;
+        $equipment_toolkit['ins'] = auth()->user()->ins;
+        $equipment_toolkit['user_id'] = auth()->user()->id;
+        $equipment_toolkit->save();
+        return new RedirectResponse(route('biller.equipments.show',$request->equipment_id), ['flash_success' => 'ToolKit Attached Successfully']);
+    }
+    public function dettach(Request $request)
+    {
+        // dd($request->all());
+        $dettach_equipment = EquipmentToolKit::where('equipment_id',$request->equipment_id)->where('tool_id',$request->toolkit_name)->get()->first();
+        $dettach_equipment->delete();
+        return new RedirectResponse(route('biller.equipments.show',$request->equipment_id), ['flash_success' => 'ToolKit Dettached Successfully']);
     }
 }

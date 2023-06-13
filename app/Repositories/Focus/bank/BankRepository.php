@@ -29,7 +29,7 @@ class BankRepository extends BaseRepository
     {
 
         return $this->query()
-            ->get(['id','name','number','enable']);
+            ->get(['id','name','branch','number','note','enable']);
     }
 
     /**

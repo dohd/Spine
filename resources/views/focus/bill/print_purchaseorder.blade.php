@@ -169,6 +169,11 @@
 			</td>
 		</tr>
 	</table><br>
+
+	<table  class="ref" cellpadding="10">
+		<tr><td colspan="2">Subject : <b>{{ $resource->note }}</b></td></tr>
+	</table>
+	<br>
 	
 	<table class="items" cellpadding="8">
 		<thead>

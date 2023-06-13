@@ -63,7 +63,7 @@
         {{ Form::text('invoice_no', null, ['class' => 'form-control', 'id' => 'invoice_no', 'disabled']) }}
     </div>  
     <div class="col-2">
-        <label for="invoice_date" class="caption">Invoice Date</label>
+        <label for="invoice" class="caption">Invoice Date</label>
         {{ Form::text('invoice_date', null, ['class' => 'form-control datepicker', 'id' => 'invoice_date', 'disabled']) }}
     </div>  
 </div>

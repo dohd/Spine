@@ -13,6 +13,8 @@ use App\Models\quote\Quote;
 use App\Models\djc\Djc;
 use App\Models\invoice\Invoice;
 use App\Models\items\VerifiedItem;
+use App\Models\payroll\Payroll;
+use App\Models\payroll\PayrollItem;
 use App\Models\rjc\Rjc;
 
 trait BillDetailsTrait
@@ -191,6 +193,28 @@ trait BillDetailsTrait
                     'ltr', 9, false
                 );
                 $valid_token = token_validator('', 'd' . $resource->id, true);
+                break;
+            case 12:
+                //payroll
+
+                $resource = PayrollItem::where('id',$request->id)->with('hrmmetas.jobtitle')->first();
+                $payroll = Payroll::where('id',$resource['payroll_id'])->first();
+                $attributes = $getAttr(12, 'payslip', 12, 1, $resource->employee_id, route('biller.payroll.show', $resource->id));
+                foreach($attributes as $key => $val) {
+                    $resource[$key] = $val;
+                }
+               
+                $flag = token_validator($request->token, 'q' . $resource->id);
+                $general = $getGeneral(
+                    trans('payrolls.payroll'),
+                    trans('payrolls.payroll'),
+                    trans('payrolls.invoicedate'),
+                    trans('payrolls.invoiceduedate'), 
+                    trans('suppliers.supplier'),
+                    'ltr', 12, false
+                );
+                $valid_token = token_validator('', 'q' . $resource->id, true);
+               
                 break;
 
         }

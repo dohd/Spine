@@ -27,7 +27,7 @@
                     url,
                     dataType: 'json',
                     type: 'POST',
-                    data: ({term}) => ({search: term, keyword: term, ...extraData}),
+                    data: ({term}) => ({keyword: term, ...extraData}),
                     quietMillis: 50,
                     processResults: callback
                 }

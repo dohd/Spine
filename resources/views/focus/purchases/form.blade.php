@@ -173,6 +173,16 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group row">
+                <div class="col-6">
+                    <label for="payer" class="caption">Requisition Items</label>                                       
+                    <select class="form-control" id="quoteselect" data-placeholder="Search Quote">
+                        <option value="">-----Select Requisition Items-----</option>
+                        <option value="all">All Items</option>
+                    </select>
+                    <input type="hidden" name="quote_id" value="0" id="quoteid">
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -180,13 +190,13 @@
 <!-- Tab Menus -->
 <ul class="nav nav-tabs nav-top-border no-hover-bg nav-justified" role="tablist">
     <li class="nav-item bg-gradient-directional-blue">
-        <a class="nav-link" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">Inventory / Stock</a>
+        <a class="nav-link text-danger" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">Inventory / Stock</a>
     </li>
     <li class="nav-item bg-danger">
-        <a class="nav-link active" id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Expense</a>
+        <a class="nav-link active text-black" id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Expense</a>
     </li>
     <li class="nav-item bg-success">
-        <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Assets & Equipment</a>
+        <a class="nav-link text-danger" id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Assets & Equipment</a>
     </li>
 </ul>
 <div class="tab-content px-1 pt-1">

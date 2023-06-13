@@ -83,6 +83,7 @@ class PurchaseordersController extends Controller
      */
     public function store(StorePurchaseorderRequest $request)
     {
+       // dd($request->all());
         // extract input fields
         $order = $request->only([
             'supplier_id', 'tid', 'date', 'due_date', 'term_id', 'project_id', 'note', 'tax',
@@ -90,7 +91,7 @@ class PurchaseordersController extends Controller
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
         $order_items = $request->only([
-            'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type'
+            'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type','product_code','warehouse_id'
         ]);
 
         $order['ins'] = auth()->user()->ins;
@@ -143,7 +144,7 @@ class PurchaseordersController extends Controller
             'asset_tax', 'asset_subttl', 'asset_grandttl', 'grandtax', 'grandttl', 'paidttl'
         ]);
         $order_items = $request->only([
-            'id', 'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type'
+            'id', 'item_id', 'description', 'uom', 'itemproject_id', 'qty', 'rate', 'taxrate', 'itemtax', 'amount', 'type','product_code','warehouse_id'
         ]);
 
         $order['ins'] = auth()->user()->ins;

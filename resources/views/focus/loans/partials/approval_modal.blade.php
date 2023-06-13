@@ -24,9 +24,22 @@
                         {{ Form::text('approval_date', null, ['class' => 'form-control datepicker', 'id' => 'date']) }}
                     </div>
                     <div class="form-group">
+                        <label for="amount">Principal</label>
+                        {{ Form::text('amount', null, ['class' => 'form-control', 'id' => 'amount', 'readonly']) }}
+                    </div>
+                    <div class="form-group">
+                        <label for="fee">Fee</label>
+                        {{ Form::text('fee', null, ['class' => 'form-control', 'id' => 'fee', 'readonly']) }}
+                    </div>
+                    <div class="form-group">
+                        <label for="month_installment">Month Installment</label>
+                        {{ Form::text('month_installment', null, ['class' => 'form-control', 'id' => 'month_installment', 'readonly']) }}
+                    </div>
+                    <div class="form-group">
                         <label for="note">Note</label>
                         {{ Form::textarea('approval_note', null, ['class' => 'form-control', 'rows' => '4', 'id' => 'note']) }}
                     </div>
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

@@ -10,6 +10,7 @@ use App\Models\items\PurchaseorderItem;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Repositories\BaseRepository;
+use App\Models\queuerequisition\QueueRequisition;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -53,9 +54,9 @@ class PurchaseorderRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
+         
         DB::beginTransaction();
-
+       // dd($input);
         $order = $input['order'];
         foreach ($order as $key => $val) {
             $rate_keys = [
@@ -67,7 +68,6 @@ class PurchaseorderRepository extends BaseRepository
             if (in_array($key, $rate_keys, 1)) 
                 $order[$key] = numberClean($val);
         }
-        
         $tid = Purchaseorder::where('ins', $order['ins'])->max('tid');
         if ($order['tid'] <= $tid) $order['tid'] = $tid+1;
         $result = Purchaseorder::create($order);
@@ -87,7 +87,17 @@ class PurchaseorderRepository extends BaseRepository
                 'amount' => numberClean($v['amount'])
             ]);
         }, $order_items);
-        PurchaseorderItem::insert($order_items);
+        
+        foreach ($order_items as $order_item) {
+            
+            if ($order_item['type'] == 'Requisit') {
+                $queuerequisition = QueueRequisition::where('product_code', $order_item['product_code'])->where('status', '1')->update(['status'=>$order['tid']]);
+                $order_item['type'] = 'Stock';
+            }
+            //dd($order_item['type']);
+            PurchaseorderItem::insert($order_item);
+        }
+        
         
         if ($result) {
             DB::commit();
@@ -132,6 +142,7 @@ class PurchaseorderRepository extends BaseRepository
         // delete omitted items
         $item_ids = array_map(fn($v) => $v['id'], $order_items);
         $purchaseorder->products()->whereNotIn('id', $item_ids)->delete();
+        
         // update or create new items
         foreach ($order_items as $item) {
             $item = array_replace($item, [

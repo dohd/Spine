@@ -21,6 +21,7 @@ namespace App\Http\Controllers\Focus\pricelistSupplier;
 use App\Http\Controllers\Controller;
 use App\Repositories\Focus\pricelistSupplier\PriceListRepository;
 use Yajra\DataTables\Facades\DataTables;
+use App\Models\product\ProductVariation;
 
 /**
  * Class BranchTableController.
@@ -58,8 +59,10 @@ class PriceListTableController extends Controller
                 $supplier = $supplier_product->supplier;
                 if ($supplier) return $supplier->company;
             })
-            ->filterColumn('supplier', function($query, $supplier) {
-                $query->whereHas('supplier', fn($q) => $q->where('name', 'LIKE', "%{$supplier}%"));
+            ->addColumn('product_desc', function ($supplier_product) {
+                $variations = ProductVariation::where('code', $supplier_product->product_code)->first();
+               // return $variations;
+                if ($variations) return $variations->name;
             })
             ->addColumn('row', function ($supplier_product) {
                 return $supplier_product->row_num;
