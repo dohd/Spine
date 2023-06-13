@@ -1298,6 +1298,11 @@
                                 <ul class="mega-menu-sub">
                                     <li class="nav-item text-bold-600 ml-1 text-info p-1">{{trans('import.import')}}</li>
                                     <li>
+                                        <a class="dropdown-item" href="{{route('biller.import.general',['employee'])}}">
+                                            <i class="fa fa-file-excel-o"></i> Employees
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a class="dropdown-item" href="{{route('biller.import.general',['customer'])}}">
                                             <i class="fa fa-file-excel-o"></i> Customers
                                         </a>

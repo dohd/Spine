@@ -38,6 +38,7 @@ class ImportController extends Controller
             'equipments' => 'Import Equipments',
             'client_pricelist' => 'Import Client Pricelist',
             'supplier_pricelist' => 'Import Supplier Pricelist',
+            'employee' => 'Import Employees',
         ];
         $data = ['title' => $labels[$type], 'type' => $type];
 
@@ -85,6 +86,7 @@ class ImportController extends Controller
             'equipments' => new \App\Imports\EquipmentsImport($data),
             'client_pricelist' => new \App\Imports\ClientPricelistImport($data),
             'supplier_pricelist' => new \App\Imports\SupplierPricelistImport($data),
+            'employee' => new \App\Imports\EmployeesImport($data),
         ];
 
         $file_path = $path . $filename;
@@ -105,7 +107,7 @@ class ImportController extends Controller
 
             DB::commit();
             return redirect()->back()->with('flash_success', trans('import.import_process_success') . " {$row_count} rows imported successfully");
-        } catch (\Exception $e) {
+        } catch (\Exception $e) {dd($e);
             DB::rollBack();
             Storage::disk('public')->delete($file_path);
             return redirect()->back()->with('flash_error', trans('import.import_process_failed'));
