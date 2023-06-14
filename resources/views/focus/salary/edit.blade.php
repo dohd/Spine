@@ -110,7 +110,6 @@
     $('#productsTbl').on('click', '.remove', removeRow);
     function removeRow() {
         const $tr = $(this).parents('tr:first');
-        $tr.next().remove();
         $tr.remove();
     }
     let rowId = 0;
