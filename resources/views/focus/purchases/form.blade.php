@@ -144,7 +144,7 @@
                         <select class="form-control" name="doc_ref_type" id="ref_type" required>
                             <option value="">-- Select Type --</option>
                             @foreach (['Invoice', 'Receipt', 'DNote', 'Voucher'] as $val)
-                                <option value="{{ $val }}">{{ $val }}</option>
+                                <option value="{{ $val }}">{{ $val == 'Invoice'? 'Invoice/ETR Receipt' : $val }}</option>
                             @endforeach                                                        
                         </select>
                     </div>
