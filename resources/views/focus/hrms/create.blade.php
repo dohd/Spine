@@ -40,7 +40,7 @@
                                     <div class="form-group">
                                         {{-- Including Form blade file --}}
                                         @include("focus.hrms.form")
-                                        <div class="edit-form-btn">
+                                        <div class="edit-form-btn ml-3">
                                             {{ link_to_route('biller.hrms.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
                                             {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-success btn-md','id'=>'e_btn']) }}
                                             <div class="clearfix"></div>
