@@ -175,7 +175,7 @@ class ProductsController extends Controller
                         'name' => "{$v->descr} {$value}",
                         'unit' => $v->uom,
                         'price' => $v->rate,
-                        'purchase_price' => 0,
+                        'purchase_price' => $v->variation ? $v->variation->purchase_price : 0,
                     ]);
                 });
 

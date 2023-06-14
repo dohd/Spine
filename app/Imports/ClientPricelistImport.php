@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use App\Models\product\ProductVariation;
 
 class ClientPricelistImport implements ToCollection, WithBatchInserts, WithValidation, WithStartRow
 {
@@ -49,6 +50,7 @@ class ClientPricelistImport implements ToCollection, WithBatchInserts, WithValid
                 if (empty($row[2])) trigger_error('Unit is required on row no. $row_num');
                 if (empty($row[3])) trigger_error('Price is required on row no. $row_num');
 
+                $product_code = ProductVariation::where('code', $row[4])->first();
                 $product_data[] = [
                     'customer_id' => $this->data['customer_id'],
                     'contract' => $this->data['contract'],
@@ -56,9 +58,12 @@ class ClientPricelistImport implements ToCollection, WithBatchInserts, WithValid
                     'descr' => $row[1],
                     'uom' => $row[2],
                     'rate' => numberClean($row[3]),
+                    'product_code'=> $row[4],
+                    'item_id'=> $product_code->code ? $product_code->id : '',
                     'ins' => $this->data['ins'],
                     'user_id' => auth()->user()->id,
                 ];
+                //dd($product_code);
                 ++$this->rows;
             }            
         }

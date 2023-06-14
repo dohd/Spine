@@ -25,7 +25,7 @@
                         <div class="card-content">
                             <div class="card-body">
                                 {{ Form::open(['route' => 'biller.client_products.store']) }}
-                                    @include('focus.client_products.form')
+                                    @include('focus.client_products.new-form')
                                 {{ Form::close() }}
                             </div>
                         </div>

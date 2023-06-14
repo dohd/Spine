@@ -109,6 +109,7 @@ class QuotesTableController extends Controller
                     $query->whereHas('lead', fn($q) => $q->where('reference', floatval($tid)));
                 }
             })
+            
             ->addColumn('invoice_tid', function ($quote) use($prefixes) {
                 $inv_product = $quote->invoice_product;
                 if (@$inv_product->invoice) return gen4tid("{$prefixes[3]}-", $inv_product->invoice->tid);

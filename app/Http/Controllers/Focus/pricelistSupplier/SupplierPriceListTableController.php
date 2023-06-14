@@ -87,9 +87,9 @@ class SupplierPriceListTableController extends Controller
                 $variations = ProductVariation::where('code', $this->standard_product->code)->first();
                 $unit = $product->unit;
                 if ($code && $unit) 
-                 return '<a class="font-weight-bold click" data-toggle="modal" uom="'.$unit->code.'" des="'.$variations->name.'" product_code="'.$code.'" href="' . route('biller.pricelistsSupplier.list', [$code]) . '  " data-target="#exampleModal">' . $code . '</a>';
+                 return '<a class="font-weight-bold click" data-toggle="modal" item_id="'.$variations->id.'"  uom="'.$unit->code.'" des="'.$variations->name.'" product_code="'.$code.'" href="' . route('biller.pricelistsSupplier.list', [$code]) . '  " data-target="#exampleModal">' . $code . '</a>';
                  elseif ($unit && $code) {
-                    return '<a class="font-weight-bold click" data-toggle="modal" uom="'.$unit->code.'" des="'.$variations->name.'" product_code="'.$code.'" href="' . route('biller.pricelistsSupplier.list', [$code]) . '  " data-target="#exampleModal">' . $code . '</a>';
+                    return '<a class="font-weight-bold click" data-toggle="modal" item_id="'.$variations->id.' uom="'.$unit->code.'" des="'.$variations->name.'" product_code="'.$code.'" href="' . route('biller.pricelistsSupplier.list', [$code]) . '  " data-target="#exampleModal">' . $code . '</a>';
                  }
             })
             ->addColumn('qty', function ($product) {

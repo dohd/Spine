@@ -49,8 +49,10 @@ class ClientProductsController extends Controller
     public function create()
     {
         $customers = Customer::get(['id', 'company']);
+        $contracts = ClientProduct::get(['contract', 'customer_id'])->unique('contract');
+        $contracts = [...$contracts];
 
-        return new ViewResponse('focus.client_products.create', compact('customers'));
+        return new ViewResponse('focus.client_products.create', compact('customers', 'contracts'));
     }
 
     /**
@@ -61,9 +63,10 @@ class ClientProductsController extends Controller
      */
     public function store(Request $request)
     {
+       // dd($request->all());
         try {
             $this->repository->create($request->except('_token'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) {dd($th);
             return errorHandler('Error Creating Client PriceList', $th);
         }
 

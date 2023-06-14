@@ -46,6 +46,7 @@ class ClientProductRepository extends BaseRepository
     public function create(array $input)
     {
         // dd($input);
+        unset($input['description']);
         $input['rate'] = numberClean($input['rate']);
         $result = ClientProduct::create($input);
         if ($result) return $result;
