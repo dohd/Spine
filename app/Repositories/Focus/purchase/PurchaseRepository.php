@@ -149,6 +149,7 @@ class PurchaseRepository extends BaseRepository
         DB::beginTransaction();
 
         $data = $input['data'];
+       // dd($input);
         foreach ($data as $key => $val) {
             $rate_keys = [
                 'stock_subttl', 'stock_tax', 'stock_grandttl', 'expense_subttl', 'expense_tax', 'expense_grandttl',
@@ -184,6 +185,9 @@ class PurchaseRepository extends BaseRepository
             $letter_pattern = "/^[a-zA-Z]+$/i";
             if (!preg_match($letter_pattern, $data['supplier_taxid'][-1])) 
                 throw ValidationException::withMessages(['Last character of Tax Pin must be a letter']);
+        }
+        if(@$data['tax'] > 0){
+            if($data['supplier_taxid'] == '')  throw ValidationException::withMessages(['Tax Pin is Required!!']);
         }
         
         $tid = Purchase::where('ins', $data['ins'])->max('tid');
