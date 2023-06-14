@@ -78,13 +78,8 @@ class RoleRepository extends BaseRepository
         if (config('access.roles.role_must_contain_permission') && !$input['permissions'])
             throw ValidationException::withMessages([trans('exceptions.backend.access.roles.needs_permission')]);
 
-        $role = Role::create([
-            'name' => $input['name'],
-            'sort' => 0,
-            'all' => 0,
-            'status' => @$input['status'] ?: 0,
-        ]);
-
+        $role = Role::create(['name' => $input['name'], 'status' => @$input['status'] ?: 0]);
+            
         if ($role) {
             $role->attachPermissions($input['permissions']);
             DB::commit();
@@ -111,36 +106,27 @@ class RoleRepository extends BaseRepository
         if (config('access.roles.role_must_contain_permission') && !$input['permissions']) 
             throw ValidationException::withMessages([trans('exceptions.backend.access.roles.needs_permission')]);
 
-        $role_data = [
-            'name' => $input['name'],
-            'sort' => 0,
-            'all' => 0,
-            'status' => @$input['status'] ?: 0,
-        ];
-        
-        if ($role->update($role_data)) {
-            // delete unchecked permission from users with this role
-            $unchecked_role_permissions = PermissionRole::where('role_id', $role->id)
-                ->whereNotIn('permission_id', $input['permissions'])
-                ->pluck('permission_id')->toArray();
-            $user_ids = RoleUser::where('role_id', $role->id)->pluck('user_id')->toArray();
-            PermissionUser::whereIn('user_id', $user_ids)
-                ->whereIn('permission_id', $unchecked_role_permissions)
-                ->delete();
+        $role->update(['name' => $input['name'], 'status' => @$input['status'] ?: 0]);
+            
+        // delete unchecked permission from users with this role
+        $unchecked_role_permissions = PermissionRole::where('role_id', $role->id)
+        ->whereNotIn('permission_id', $input['permissions'])
+        ->pluck('permission_id')->toArray();
+        $user_ids = RoleUser::where('role_id', $role->id)->pluck('user_id')->toArray();
+        PermissionUser::whereIn('user_id', $user_ids)
+            ->whereIn('permission_id', $unchecked_role_permissions)
+            ->delete();
 
-            // create or update role permissions
-            PermissionRole::where('role_id', $role->id)
-                ->whereNotIn('permission_id', $input['permissions'])->delete();
-            foreach ($input['permissions'] as $value) {
-                PermissionRole::firstOrCreate(
-                    ['role_id' => $role->id, 'permission_id' => $value],
-                    ['role_id' => $role->id, 'permission_id' => $value],
-                );
-            }
-
-            DB::commit();
-            return $role;
+        // create or update role permissions
+        PermissionRole::where('role_id', $role->id)
+            ->whereNotIn('permission_id', $input['permissions'])->delete();
+        foreach ($input['permissions'] as $value) {
+            $data = ['role_id' => $role->id, 'permission_id' => $value];
+            PermissionRole::firstOrCreate($data, $data);
         }
+
+        DB::commit();
+        return true;
     }
 
     /**

@@ -30,8 +30,8 @@
                                             {{ Form::label('name', trans('validation.attributes.backend.access.roles.name'), ['class' => 'col-lg-2 control-label required']) }}
                                             <div class="col-md-12">
                                                 {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => trans('validation.attributes.backend.access.roles.name'), 'required' => 'required']) }}
-                                            </div><!--col-lg-10-->
-                                        </div><!--form control-->
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -39,19 +39,18 @@
                                             <div class="col-md-12">
                                                 <div class="control-group">
                                                     <label class="control control--checkbox">
-                                                        {{ Form::checkbox('status', 1, true) }}
-                                                        <div class="control__indicator"></div>
+                                                        {{ Form::checkbox('status', 1, boolval($role->status)) }}
                                                     </label>
                                                 </div>
-                                            </div><!--col-lg-3-->
-                                        </div><!--form control-->
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div class="form-group">
                                     {{ Form::label('associated_permissions', trans('validation.attributes.backend.access.roles.associated_permissions'), ['class' => 'col-lg-2 control-label']) }}
                                     <div class="col-md-8">
-                                        {{ Form::select('associated_permissions', ['custom' =>  trans('hrms.permissions')], $role->all ? 'none' : 'custom', ['class' => 'form-control select2 box-size']) }}
+                                        {{-- {{ Form::select('associated_permissions', ['custom' =>  trans('hrms.permissions')], $role->all ? 'none' : 'custom', ['class' => 'form-control select2 box-size']) }} --}}
                                         <div class="row mt-2 pl-5">
                                             @if ($permissions->count())
                                                 @foreach ($permissions as $perm)
@@ -94,8 +93,6 @@
 
 @section('after-scripts')
 <script type="text/javascript">
-    Backend.Utils.documentReady(function () {
-        Backend.Roles.init("edit")
-    });
+    
 </script>
 @endsection

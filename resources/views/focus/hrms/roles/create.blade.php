@@ -33,6 +33,7 @@
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             {{ Form::label('status', trans('validation.attributes.backend.access.roles.active'), ['class' => 'col-lg-2 control-label']) }}
@@ -48,10 +49,10 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group">
-                                    {{ Form::label('associated_permissions', trans('validation.attributes.backend.access.roles.associated_permissions'), ['class' => 'col-lg-2 control-label']) }}
+                                <div class="form-group">                                    
                                     <div class="col-md-8">
-                                        {{ Form::select('associated_permissions', array('none' => trans('meta.select'), 'custom' => trans('hrms.permissions')), 'none', ['class' => 'form-control select2 box-size']) }}
+                                        {{ Form::label('associated_permissions', trans('validation.attributes.backend.access.roles.associated_permissions'), ['class' => 'control-label']) }}
+                                        {{-- {{ Form::select('associated_permissions', array('none' => trans('meta.select'), 'custom' => trans('hrms.permissions')), 'none', ['class' => 'form-control select2 box-size']) }} --}}
                                         <div class="row mt-2 pl-3">
                                             @if (@$permissions->count())
                                                 @foreach ($permissions as $perm)
@@ -72,11 +73,11 @@
                                             @else
                                                 <p>There are no available permissions.</p>
                                             @endif
-                                        </div><!--row-->
-                                    </div><!--col-lg-3-->
-                                </div><!--form control-->
+                                        </div>
+                                    </div>
+                                </div>
 
-                                <div class="edit-form-btn">
+                                <div class="edit-form-btn ml-3">
                                     {{ link_to_route('biller.role.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
                                     {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md']) }}
                                     <div class="clearfix"></div>
@@ -89,11 +90,4 @@
         </div>
     </div>
 </div>
-@endsection
-
-@section('after-scripts')
-{{ Html::script('js/backend/access/roles/script.js') }}
-<script type="text/javascript">
-    
-</script>
 @endsection

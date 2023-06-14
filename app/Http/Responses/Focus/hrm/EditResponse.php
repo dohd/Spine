@@ -34,7 +34,7 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $departments = Department::all()->pluck('name','id');
-        $roles = Role::where('status', 0)->get();
+        $roles = Role::whereIn('status', 1)->get();
 
         $hrm_metadata = $this->hrms->meta? $this->hrms->meta->toArray() : [];
 

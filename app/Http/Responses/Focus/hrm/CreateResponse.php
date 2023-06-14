@@ -4,7 +4,6 @@ namespace App\Http\Responses\Focus\hrm;
 
 use App\Models\Access\Role\Role;
 use App\Models\department\Department;
-use App\Models\hrm\HrmMeta;
 use Illuminate\Contracts\Support\Responsable;
 
 class CreateResponse implements Responsable
@@ -18,9 +17,10 @@ class CreateResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $roles=Role::where('status','<',1)->where(function ($q) {
-            $q->where('ins', auth()->user()->ins)->orWhereNull('ins');
-        })->get();
+        $roles=Role::where('status', 1)
+            ->where(function ($q) {
+                $q->where('ins', auth()->user()->ins)->orWhereNull('ins');
+            })->get();
 
         $departments = Department::all()->pluck('name','id');
         $general['create'] = 1;

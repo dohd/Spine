@@ -134,7 +134,7 @@ class HrmRepository extends BaseRepository
 
         $role_id = $input['employee']['role'];
         $role = Role::find($role_id);
-        if ($role && $role->status == 0) {
+        if ($role && $role->status == 1) {
             $input['employee'] = array_replace($input['employee'], [
                 'created_by' => auth()->user()->id,
                 'confirmed' => 1,
@@ -217,7 +217,7 @@ class HrmRepository extends BaseRepository
         
         $role_id = $input['employee']['role'];
         $role = Role::find($role_id);
-        if ($role && $role->status == 0) {
+        if ($role && $role->status == 1) {
             $role_user = RoleUser::where('user_id', $hrm->id)->first();
             if ($role_user) $role_user->update(compact('role_id'));
 
@@ -233,8 +233,6 @@ class HrmRepository extends BaseRepository
             DB::commit();
             return true;
         }
-
-        throw new GeneralException(trans('exceptions.backend.hrms.update_error'));
     }
 
     /**
