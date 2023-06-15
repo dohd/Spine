@@ -165,8 +165,8 @@
                                             <tbody>
                                                 @foreach ($branches as $i => $branch) 
                                                     @php
-                                                        $branch_equip_ids = $branch->taskschedule_equipments->pluck('equipment_id')->toArray();
-                                                        $branch_serviced_equip_ids = $branch->service_contract_items->pluck('equipment_id')->toArray();
+                                                        $branch_equip_ids = $branch->equipments()->whereHas('contract_equipment')->pluck('equipments.id')->toArray();
+                                                        $branch_serviced_equip_ids = $branch->equipments()->whereHas('service_item')->pluck('equipments.id')->toArray();
                                                         // count
                                                         $unit_count = count($branch_equip_ids);
                                                         $serviced_count = count($branch_serviced_equip_ids);
