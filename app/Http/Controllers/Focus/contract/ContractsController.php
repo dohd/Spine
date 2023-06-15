@@ -91,7 +91,15 @@ class ContractsController extends Controller
      */
     public function show(Contract $contract)
     {
-        $branch_ids = $contract->equipments->pluck('branch_id')->unique()->toArray();
+        $contract['task_schedules'] = $contract->task_schedules()->with(['equipments' => function($q) use($contract) {
+            $q->whereHas('branch', fn($q) => $q->where('customer_id', $contract->customer_id));
+        }])->get();
+        
+        $contract['equipments'] = $contract->equipments()
+            ->whereHas('branch', fn($q) => $q->where('customer_id', $contract->customer_id))
+            ->get();
+
+        $branch_ids = $contract->equipments->pluck('branch_id')->toArray();
         $branches = Branch::whereIn('id', $branch_ids)->with([
             'contract_equipments' => fn($q) => $q->where('contract_id', $contract->id),
             'service_contract_items' => function($q) use($contract) {
@@ -110,6 +118,10 @@ class ContractsController extends Controller
      */
     public function edit(Contract $contract)
     {
+        $contract['equipments'] = $contract->equipments()
+            ->whereHas('branch', fn($q) => $q->where('customer_id', $contract->customer_id))
+            ->get();
+            
         return new ViewResponse('focus.contracts.edit', compact('contract'));
     }
 

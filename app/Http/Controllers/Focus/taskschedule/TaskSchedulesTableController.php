@@ -59,14 +59,17 @@ class TaskSchedulesTableController extends Controller
                 $contract_name = '';
                 if ($schedule->contract) {
                     $contract = $schedule->contract;
-                    $contract_name = $schedule->title;
-                    if ($contract->customer) $contract_name .= " - {$contract->customer->company}";
+                    if ($contract->customer) $contract_name .= $contract->customer->company;
                     $contract_name = '<a href="'. route('biller.contracts.show', $contract).'">'.$contract_name.'</a>';
                 }
+
                 return $contract_name;
             })
             ->addColumn('loaded', function ($schedule) {
-                $schedule_equip_ids = $schedule->equipments->pluck('id')->toArray();
+                $customer_id = @$schedule->contract->customer_id;
+                $schedule_equip_ids = $schedule->equipments()
+                    ->whereHas('branch', fn($q) => $q->where('customer_id', $customer_id))
+                    ->pluck('equipments.id')->toArray();
                 $serviced_equip_ids = $schedule->contract_service_items->pluck('equipment_id')->toArray();
                 // count
                 $schedule_units = count($schedule_equip_ids);
@@ -75,9 +78,8 @@ class TaskSchedulesTableController extends Controller
 
                 // service status
                 if ($serviced_units) {
-                    if ($serviced_units >= $schedule_units) {
-                        $this->service_status = 'complete';
-                    } else $this->service_status = 'partial';
+                    if ($serviced_units >= $schedule_units) $this->service_status = 'complete';
+                    else $this->service_status = 'partial';
                 } else $this->service_status = 'unserviced';
                     
                 $params = [
@@ -91,10 +93,18 @@ class TaskSchedulesTableController extends Controller
                 return "{$unserviced_link} <b>{$unserviced_units}/{$schedule_units}</b> <br> serviced: <b>{$serviced_units}/{$schedule_units}</b>";
             })
             ->addColumn('total_rate', function ($schedule) {
-                return numberFormat($schedule->equipments->sum('service_rate'));
+                $customer_id = @$schedule->contract->customer_id;
+                return numberFormat($schedule->equipments()
+                ->whereHas('branch', fn($q) => $q->where('customer_id', $customer_id))->sum('service_rate'));
             })
             ->addColumn('total_charged', function ($schedule) {
-                return numberFormat($schedule->equipments->sum('service_rate'));
+                $customer_id = @$schedule->contract->customer_id;
+                $serviced_equip_ids = $schedule->contract_service_items->pluck('equipment_id')->toArray();
+                
+                $total_charged  = $schedule->equipments()->whereIn('equipments.id', $serviced_equip_ids)
+                ->whereHas('branch', fn($q) => $q->where('customer_id', $customer_id))->sum('service_rate');
+
+                return numberFormat($total_charged);
             })
             ->addColumn('start_date', function ($schedule) {
                 return dateFormat($schedule->start_date);

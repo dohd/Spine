@@ -94,14 +94,23 @@ class TaskSchedulesController extends Controller
             ->doesntHave('equipments')
             ->get(['id', 'title']);
 
-        $branch_ids = $taskschedule->equipments->pluck('branch_id')->unique()->toArray();    
+        $customer_id = @$taskschedule->contract->customer_id;
+        $taskschedule['equipments'] = $taskschedule->equipments()
+            ->whereHas('branch', fn($q) => $q->where('customer_id', $customer_id))
+            ->get();
+            
+        $branch_ids = $taskschedule->equipments()
+            ->whereHas('branch', fn($q) => $q->where('customer_id', $customer_id))
+            ->select('branch_id')->distinct()
+            ->pluck('branch_id')->toArray(); 
+        
         $branches = Branch::whereIn('id', $branch_ids)->with([
             'taskschedule_equipments' => fn($q) => $q->where('schedule_id', $taskschedule->id),
             'service_contract_items' => function($q) use($taskschedule) {
                 $q->whereHas('contractservice', fn($q) =>  $q->where('schedule_id', $taskschedule->id));
             },
         ])->get();
-
+            
         return new ViewResponse('focus.taskschedules.view', compact('taskschedule', 'taskschedules_rel', 'branches'));
     }
 
@@ -113,6 +122,11 @@ class TaskSchedulesController extends Controller
      */
     public function edit(TaskSchedule $taskschedule)
     {
+        $customer_id = @$taskschedule->contract->customer_id;
+        $taskschedule['equipments'] = $taskschedule->equipments()
+            ->whereHas('branch', fn($q) => $q->where('customer_id', $customer_id))
+            ->get();
+
         return new ViewResponse('focus.taskschedules.edit', compact('taskschedule'));        
     }
 
@@ -167,14 +181,14 @@ class TaskSchedulesController extends Controller
     public function quote_product_search()
     {
         $taskschedules = TaskSchedule::whereHas('equipments')
-        ->whereHas('contract', fn($q) => $q->where('customer_id', request('customer_id')))
-        ->get()->map(fn($v) => [
-            'id' => $v->id,
-            'name' => "{$v->title} - {$v->contract->title}",
-            'unit' => 'Lot',
-            'purchase_price' => 0,
-            'price' => $v->equipments->sum('service_rate'),
-        ]);
+            ->whereHas('contract', fn($q) => $q->where('customer_id', request('customer_id')))
+            ->get()->map(fn($v) => [
+                'id' => $v->id,
+                'name' => "{$v->title} - {$v->contract->title}",
+                'unit' => 'Lot',
+                'purchase_price' => 0,
+                'price' => $v->equipments->sum('service_rate'),
+            ]);
 
         return response()->json($taskschedules);
     }

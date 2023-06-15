@@ -16,6 +16,7 @@
             </div>
         </div>
     </div>
+
     <div class="content-body">
         <div class="row">
             <div class="col-12">
@@ -27,7 +28,8 @@
                                     <label for="customer">Customer</label>
                                     <select name="customer" class="form-control" id="customer" data-placeholder="Choose Customer">
                                         @foreach ($customers as $row)
-                                            <option value="{{ $row->id }}">
+                                            <option value=""></option>
+                                            <option value="{{ $row->id }}" {{ $row->id == request('customer_id')? 'selected' : '' }}>
                                                 {{ $row->company }}
                                             </option>
                                         @endforeach
@@ -57,7 +59,8 @@
                                         <th>Location</th>   
                                         <th>Gas</th>  
                                         <th>Serial</th>                               
-                                        <th>Model</th>    
+                                        <th>Model</th> 
+                                        <th>Rate</th>   
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -91,22 +94,16 @@
     const Index = {
         queryString: @json(request()->getQueryString()),
         branches: @json($branches),
+        customerId: @json(request('customer_id')) || '',
 
         init() {
             $.ajaxSetup(config.ajax);
-            $('#customer').select2(config.select).val('').change();
+            $('#customer').select2(config.select);
             $('#branch').select2(config.select);
 
             this.drawDataTable();
             $('#customer').change(this.customerChange);
             $('#branch').change(this.branchChange);
-
-            this.parseQueryString();
-        },
-
-        parseQueryString() {
-            const customer_id = @json(request('customer_id'));
-            $('#customer').val(customer_id).change();
         },
 
         customerChange() {
@@ -137,7 +134,7 @@
                     url: "{{ route('biller.equipments.get') }}?" + this.queryString,
                     type: 'POST',
                     data: {
-                        customer_id: $('#customer').val(), 
+                        customer_id: $('#customer').val() || this.customerId, 
                         branch_id: $('#branch').val(),
                     },
                 },
@@ -151,12 +148,17 @@
                     {data: 'machine_gas', name: 'machine_gas'},
                     {data: 'equip_serial', name: 'equip_serial'},
                     {data: 'model', name: 'model'},
+                    {data: 'service_rate', name: 'service_rate'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
                 searchDelay: 500,
                 dom: 'Blfrtip',
                 buttons: ['csv', 'excel', 'print'],
+                lengthMenu: [
+                    [25, 50, 100, 200, -1],
+                    [25, 50, 100, 200, "All"]
+                ],
             });
         }
     };

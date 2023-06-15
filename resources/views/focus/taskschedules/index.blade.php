@@ -22,7 +22,7 @@
                     <div class="card-content">
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-4">
+                                <div class="col-md-6">
                                     <label for="customer">Customer</label>
                                     <select name="customer_id" class="form-control" id="customer" data-placeholder="Choose Customer">
                                         @foreach ($customers as $row)
@@ -33,13 +33,13 @@
                                     </select>
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-6">
                                     <label for="contract">Contract</label>
                                     <select name="contract_id" class="form-control" id="contract" data-placeholder="Choose Contract">
                                     </select>
                                 </div>
 
-                                <div class="col-2">
+                                <div class="col-md-2">
                                     <label for="status">Service Status</label>
                                     <select name="service_status" id="service_status" class="custom-select">
                                         <option value="">-- select status --</option>
@@ -60,11 +60,11 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Client Contract</th>
-                                        <th>Title</th>
-                                        <th>Unit Service Status</th>
-                                        <th>Total Service Amount</th>
-                                        <th>Total Bill Amount</th>
+                                        <th>Schedule</th>
+                                        <th>Customer</th>
+                                        <th>Service Status</th>
+                                        <th>Service Amount</th>
+                                        <th>Invoice Amount</th>
                                         <th>Start Date</th>
                                         <th>Actual Start Date</th>
                                         <th>Action</th>
@@ -163,12 +163,12 @@
                         name: 'id'
                     },
                     {
-                        data: 'contract',
-                        name: 'contract'
-                    },
-                    {
                         data: 'title',
                         name: 'title'
+                    },
+                    {
+                        data: 'contract',
+                        name: 'contract'
                     },
                     {
                         data: 'loaded',

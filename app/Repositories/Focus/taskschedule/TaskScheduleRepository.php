@@ -31,8 +31,8 @@ class TaskScheduleRepository extends BaseRepository
 
         $q->when(request('customer_id'), function ($q) {
             $q->whereHas('contract', fn($q) => $q->where('customer_id', request('customer_id')));
-        })->when(request('contract_id'), fn($q) => $q->where('contract_id', request('contract_id')));
-        $q->when(request('equip_status') == 'unserviced', function ($q) {
+        })->when(request('contract_id'), fn($q) => $q->where('contract_id', request('contract_id')))
+        ->when(request('equip_status') == 'unserviced', function ($q) {
             $q->doesntHave('contractservices')->whereHas('equipments');
         })->when(in_array(request('service_status'), ['partially_serviced', 'serviced']), function ($q) {
             $q->whereHas('contractservices')->whereHas('equipments');
