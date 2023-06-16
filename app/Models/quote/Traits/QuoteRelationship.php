@@ -22,6 +22,7 @@ use App\Models\projectstock\Projectstock;
 use App\Models\term\Term;
 use App\Models\verification\Verification;
 use App\Models\verifiedjcs\VerifiedJc;
+use App\Models\quote\EquipmentQuote;
 
 /**
  * Class QuoteRelationship
@@ -146,5 +147,10 @@ trait QuoteRelationship
     public function lead()
     {
         return $this->hasOne(Lead::class, 'id', 'lead_id')->withoutGlobalScopes();
+    }
+
+    public function equipments()
+    {
+        return $this->hasMany(EquipmentQuote::class, 'quote_id')->withoutGlobalScopes();
     }
 }

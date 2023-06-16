@@ -284,6 +284,129 @@
         profitState.sp_total = subtotal;
         calcProfit();   
     }
+    $('#add-check').change(function (){
+            if ($(this).is(":checked")) {
+                $('#addqproduct').removeClass('d-none');
+            }else{
+                $('#addqproduct').addClass('d-none');
+                
+            }
+        });
+
+    
+
+      // product row
+      function productRow(n) {            
+        return `
+            <tr>
+                <td><input type="text" class="form-control unique-id" name="unique_id[]" placeholder="Search Equipment" id="uniqueid-${n}"></td>
+                <td><input type="text" class="form-control eq-tid-row" name="equipment_tid[]" id="eq-tid-${n}"></td>
+                <td><input type="text" class="form-control equip-serial" name="equip_serial[]" id="equipserial-${n}"></td>
+                <td><input type="text" class="form-control make-type" name="make_type[]" id="maketype-${n}"></td>
+                <td><input type="text" class="form-control capacity" name="capacity[]" id="capacity-${n}"></td>
+                <td><input type="text" class="form-control location" name="location[]" id="location-${n}"></td>
+                <td>
+                    <select class="custom-select fault" name="fault[]" id="fault-${n}">
+                        @foreach($faults as $fault)
+                        <option value="{{$fault->name}}" selected>{{$fault->name}}</option>
+                        @endforeach
+                    </select>
+                </td>
+                <td class="text-center">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Action
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item delete" href="javascript:" data-rowid="${n}" >Remove</a>
+                            <a class="dropdown-item up" href="javascript:">Up</a>
+                            <a class="dropdown-item down" href="javascript:">Down</a>
+                        </div>
+                    </div>
+                </td>
+                <input type="hidden" name="row_index_id[]" value="0" class="row-index" id="rowindex-${n}">
+                <input type="hidden" name="item_id[]" value="0" class="item-id" id="itemid-${n}">
+            </tr>
+        `;
+    }
+
+    // equipment row counter;
+    let rowIds = 0;
+    //$('#equipmentsTbl tbody').append(productRow(0));
+    //$('#equipmentsTbl .datepicker').datepicker(config.date).datepicker('setDate', new Date());
+     $('#uniqueid-0').autocomplete(autocompleteProp(0));
+    
+    // on clicking addproduct
+    $('#addqproduct').on('click', function() {
+        rowIds++;
+        const i = rowIds;
+        $('#equipmentsTbl tbody').append(productRow(i));
+         $('#uniqueid-' + i).autocomplete(autocompleteProp(i));
+
+        $('#jobcard-'+i).val($("#jobcard").val());  
+        // $('#lastservicedate-'+ i).datepicker(config.date).datepicker('setDate', new Date());
+        // $('#nextservicedate-'+ i).datepicker(config.date).datepicker('setDate', new Date());
+         assignIndex();
+    });
+
+    // on clicking equipment drop down options
+    $("#equipmentsTbl").on("click", ".up, .down, .delete", function() {
+        var row = $(this).parents("tr:first");
+        if ($(this).is('.up')) row.insertBefore(row.prev());
+        if ($(this).is('.down')) row.insertAfter(row.next());
+        if ($(this).is('.delete')) $(this).closest('tr').remove();
+        assignIndex();
+    });
+
+    // autocompleteProp returns autocomplete object properties
+    function autocompleteProp(i) {
+        return {
+            source: function(request, response) {
+                $.ajax({
+                    url: baseurl + 'equipments/search/' + $("#customer_id").val(),
+                    dataType: "json",
+                    method: 'post',
+                    data: {
+                        keyword: request.term, 
+                        customer_id: $('#lead_id option:selected').attr('customer_id'),
+                        branch_id: $('#lead_id option:selected').attr('branch_id')
+                    },
+                    success: data => {
+                        data = data.map(v => {
+                            for (const key in v) {
+                                if (!v[key]) v[key] = '';
+                            }
+                            const label = `${v.unique_id} ${v.tid} ${v.id} ${v.equip_serial} ${v.make_type} ${v.model} ${v.machine_gas}
+                                ${v.capacity} ${v.location} ${v.building} ${v.floor}`;
+                            const value = v.unique_id;
+                            const data = v;
+                            return {label, value, data};
+                        })
+                        response(data);
+                    }
+                });
+            },
+            autoFocus: true,
+            minLength: 0,
+            select: function(event, ui) {
+                const {data} = ui.item;
+                // console.log(data)
+                $('#uniqueid-'+i).val(data.unique_id);
+                $('#eq-tid-'+i).val(data.tid);
+                $('#itemid-'+i).val(data.id);
+                $('#equipserial-'+i).val(data.equip_serial);
+                $('#maketype-'+i).val(data.make_type);
+                $('#capacity-'+i).val(data.capacity);
+                $('#location-'+i).val(data.location);
+            }
+        };
+    }
+    // assign row index
+    function assignIndex() {
+        $('#equipmentsTbl tr').each(function(i) {
+            if (i > 0) $(this).find('.row-index').val(i);
+        });
+    }
 
 
     /**

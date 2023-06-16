@@ -277,6 +277,17 @@
         <a href="javascript:" class="btn btn-purple ml-1" data-toggle="modal" data-target="#extrasModal" id="addExtras">
             <i class="fa fa-plus"></i> Header & Footer
         </a>
+        <div class="form-group row">
+            <div class='col-md-12'>
+                <div class='col m-1'>
+                                            
+                    <input type="checkbox" id="add-check" value="checked">
+                    <label for="client-type">Add Equipment</label>
+                </div>
+            </div>
+        </div>
+        @include('focus.quotes.partials.equipments')
+        
     </div>
     <div class="col-3">
         <div>

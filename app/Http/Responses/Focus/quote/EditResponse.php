@@ -7,6 +7,7 @@ use App\Models\bank\Bank;
 use App\Models\customer\Customer;
 use App\Models\lead\Lead;
 use App\Models\quote\Quote;
+use App\Models\fault\Fault;
 use Illuminate\Contracts\Support\Responsable;
 
 class EditResponse implements Responsable
@@ -48,8 +49,10 @@ class EditResponse implements Responsable
         $lastpi->tid = $quote->query()->where('ins', $quote->ins)->where('bank_id', '>', 0)->max('tid');
 
         $prefixes = prefixesArray(['quote', 'proforma_invoice', 'lead'], $quote->ins);
+        $equipments = $quote->equipments()->orderBy('row_index_id', 'ASC')->get();
+        $faults = Fault::all(['name']);
 
-        $common_params = ['lastquote', 'quote', 'leads', 'words', 'additionals', 'price_customers', 'prefixes'];
+        $common_params = ['lastquote', 'quote', 'leads', 'words', 'additionals', 'price_customers', 'prefixes','equipments','faults'];
 
         // copy quote to quote
         if (request('task') == 'quote_to_quote') {

@@ -1143,6 +1143,18 @@
                         <li><a class="dropdown-item" href="{{ route('biller.notes.index')? '#' : '#' }}" data-toggle="dropdown"><i class="icon-note"></i> {{trans('general.notes')}}</a>
                         </li>
                         @endauth
+                        @permission('manage-invoice')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="icon-umbrella"></i> Fault Management</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.faults.index')}}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Fault
+                                    </a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ route('biller.faults.create')}}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Fault
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        @endauth
                         @permission('manage-event')
                         <li><a class="dropdown-item" href="{{route('biller.events.index')}}" data-toggle="dropdown"><i class="icon-calendar"></i> {{trans('features.calendar')}}</a>
                         </li>

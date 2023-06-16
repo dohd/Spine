@@ -12,6 +12,7 @@ use App\Models\project\BudgetSkillset;
 use App\Models\verifiedjcs\VerifiedJc;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Models\quote\EquipmentQuote;
 
 /**
  * Class QuoteRepository.
@@ -176,7 +177,7 @@ class QuoteRepository extends BaseRepository
      */
     public function create(array $input)
     {
-         dd($input);
+        // dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
@@ -218,6 +219,17 @@ class QuoteRepository extends BaseRepository
             return array_replace($v, ['quote_id' => $result->id]);
         }, $skill_items);
         BudgetSkillset::insert($skill_items);
+
+        // quote Equipments
+        $equipments = $input['equipments'];
+        $equipments = array_map(function ($v) use($result) {
+            return array_replace($v, [
+                'quote_id' => $result->id,
+                'ins' => $result->ins,
+                'user_id' => auth()->user()->id,
+            ]);
+        }, $equipments);
+        EquipmentQuote::insert($equipments);
         
         if ($result) {
             DB::commit();

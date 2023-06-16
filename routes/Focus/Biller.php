@@ -194,6 +194,12 @@ Route::group(['namespace' => 'jobtitle'], function () {
     //For Datatable
     Route::post('jobtitles/get', 'JobTitleTableController')->name('jobtitles.get');
 });
+Route::group(['namespace' => 'fault'], function () {
+    Route::post('faults/select', 'FaultController@select')->name('faults.select');
+    Route::resource('faults', 'FaultController');
+    //For Datatable
+    Route::post('faults/get', 'FaultTableController')->name('faults.get');
+});
 
 Route::group(['namespace' => 'benefit'], function () {
     Route::post('benefits/select', 'BenefitController@select')->name('benefits.select');

@@ -8,6 +8,7 @@ use App\Models\customer\Customer;
 use App\Models\quote\Quote;
 use Illuminate\Contracts\Support\Responsable;
 use App\Models\lead\Lead;
+use App\Models\fault\Fault;
 
 class CreateResponse implements Responsable
 {
@@ -31,8 +32,9 @@ class CreateResponse implements Responsable
         $leads = Lead::where('status', 0)->orderBy('id', 'desc')->get();
         $additionals = Additional::all();
         $price_customers = Customer::whereHas('products')->get(['id', 'company']);
+        $faults = Fault::all(['name']);
         
-        $common_params = ['lastquote','leads', 'words', 'additionals', 'price_customers', 'prefixes'];
+        $common_params = ['lastquote','leads', 'words', 'additionals', 'price_customers', 'prefixes','faults'];
 
         // create proforma invoice
         if (request('page') == 'pi') {

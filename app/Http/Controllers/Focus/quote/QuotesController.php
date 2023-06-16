@@ -34,6 +34,7 @@ use App\Models\customer\Customer;
 use App\Models\items\VerifiedItem;
 use App\Models\lpo\Lpo;
 use App\Models\verifiedjcs\VerifiedJc;
+use App\Models\fault\Fault;
 
 /**
  * QuotesController
@@ -87,6 +88,7 @@ class QuotesController extends Controller
      */
     public function store(CreateQuoteRequest $request)
     {   
+       // dd($request->all());
         // extract request input fields
         $data = $request->only([
             'client_ref', 'tid', 'date', 'notes', 'subtotal', 'tax', 'total', 
@@ -100,15 +102,18 @@ class QuotesController extends Controller
             'unit', 'estimate_qty', 'buy_price', 'tax_rate', 'row_index', 'a_type', 'misc'
         ]);
         $skill_items = $request->only(['skill', 'charge', 'hours', 'no_technician' ]);
+
+        $equipments = $request->only(['unique_id','equipment_tid','equip_serial','make_type','item_id','capacity','location','fault','row_index_id']);
             
         $data['user_id'] = auth()->user()->id;
         $data['ins'] = auth()->user()->ins;
 
         $data_items = modify_array($data_items);
         $skill_items = modify_array($skill_items);
+        $equipments = modify_array($equipments);
 
         try {
-            $result = $this->repository->create(compact('data', 'data_items', 'skill_items'));
+            $result = $this->repository->create(compact('data', 'data_items', 'skill_items','equipments'));
 
             $route = route('biller.quotes.index');
             $msg = trans('alerts.backend.quotes.created');
@@ -120,7 +125,7 @@ class QuotesController extends Controller
             // print preview url
             $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
             $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) {dd($th);
             $inst = isset($data['bank_id'])? ' Proforma Invoice' : 'Quote';
             return errorHandler('Error Creating ' . $inst, $th);
         } 
@@ -255,11 +260,12 @@ class QuotesController extends Controller
      */
     public function verify_quote(Quote $quote)
     {
+        $faults = Fault::all(['name']);
         $products = VerifiedItem::where('quote_id', $quote->id)->get();
         if (!$products->count()) $products = $quote->products()->where('misc', 0)->get();
         $jobcards = VerifiedJc::where('quote_id', $quote->id)->with('equipment')->get();
 
-        return new ViewResponse('focus.quotesverify.create', compact('quote', 'products', 'jobcards') + bill_helper(2, 4));
+        return new ViewResponse('focus.quotesverify.create', compact('quote', 'products', 'jobcards', 'faults') + bill_helper(2, 4));
     }
 
     /**

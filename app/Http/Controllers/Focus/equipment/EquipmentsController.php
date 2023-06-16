@@ -185,6 +185,9 @@ class EquipmentsController extends Controller
             ->orWhere('make_type', 'LIKE', '%' . $k . '%')
             ->orWhere('location', 'LIKE', '%' . $k . '%');
         })->limit(10)->get();
+        foreach ($equipments as $equipment) {
+            $equipment->tid = gen4tid('Eq-',$equipment->tid);
+        }
 
         return response()->json($equipments);
     }

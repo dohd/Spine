@@ -71,13 +71,9 @@
                 <td><input type="text location" class="form-control" name="location[]" id="location-${n}"></td>
                 <td>
                     <select class="custom-select fault" name="fault[]" id="fault-${n}">
-                        <option value="none">None</option>
-                        <option value="faulty_compressor">Faulty Compressor</option>
-                        <option value="faulty_pcb">Faulty PCB</option>
-                        <option value="leakage_arrest">Leakage Arrest</option>
-                        <option value="electrical_fault">Electrical Fault</option>
-                        <option value="drainage">Drainage</option>
-                        <option value="other">Other</option>
+                        @foreach($faults as $fault)
+                        <option value="{{$fault->name}}" selected>{{$fault->name}}</option>
+                        @endforeach
                     </select>
                 </td>
                 <td><a href="javascript:" class="btn btn-primary btn-md removeJc" type="button">Remove</a></td>
