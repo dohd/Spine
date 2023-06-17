@@ -37,8 +37,8 @@ class PurchaseorderRepository extends BaseRepository
         $q->when(request('supplier_id'), function ($q) {
             $q->where('supplier_id', request('supplier_id'));
         })->when(request('status'), function ($q) {
-            if (request('Closed')) $q->where('closure_status', 1);   
-            else $q->where('status', request('status'));     
+            if (request('status') == 'Closed') $q->where('closure_status', 1);   
+            else $q->where('status', request('status'))->where('closure_status', 0);     
         });
 
         return $q;

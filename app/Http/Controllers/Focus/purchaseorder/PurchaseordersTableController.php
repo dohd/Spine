@@ -100,6 +100,7 @@ class PurchaseordersTableController extends Controller
                 $query->orderBy('grandttl', $order);
             })
             ->editColumn('status', function ($po) {
+                if ($po->closure_status) return 'Closed';
                 return $po->status;
             })
             ->addColumn('actions', function ($po) {
