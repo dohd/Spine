@@ -125,7 +125,7 @@ class QuotesController extends Controller
             // print preview url
             $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
             $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';
-        } catch (\Throwable $th) {dd($th);
+        } catch (\Throwable $th) {
             $inst = isset($data['bank_id'])? ' Proforma Invoice' : 'Quote';
             return errorHandler('Error Creating ' . $inst, $th);
         } 
@@ -155,7 +155,6 @@ class QuotesController extends Controller
     public function update(EditQuoteRequest $request, Quote $quote)
     {
         $request->validate(['lead_id' => 'required']);
-            
         // extract request input fields
         $data = $request->only([
             'client_ref', 'date', 'notes', 'subtotal', 'tax', 'total', 
@@ -169,15 +168,16 @@ class QuotesController extends Controller
             'unit', 'estimate_qty', 'tax_rate', 'buy_price', 'row_index', 'a_type', 'misc'
         ]);
         $skill_items = $request->only(['skill_id', 'skill', 'charge', 'hours', 'no_technician']);
+        $equipments = $request->only(['eqid','unique_id','equipment_tid','equip_serial','make_type','item_id','capacity','location','fault','row_index_id']);
 
         $data['user_id'] = auth()->user()->id;
         $data['ins'] = auth()->user()->ins;
 
         $data_items = modify_array($data_items);
         $skill_items = modify_array($skill_items);
-
+        $equipments = modify_array($equipments);
         try {
-            $result = $this->repository->update($quote, compact('data', 'data_items', 'skill_items'));
+            $result = $this->repository->update($quote, compact('data', 'data_items', 'skill_items','equipments'));
 
             $route = route('biller.quotes.index');
             $msg = trans('alerts.backend.quotes.updated');

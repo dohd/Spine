@@ -9,7 +9,7 @@ class EquipmentQuote extends Model
 {
     protected $table = 'quote_equipment';
 
-    protected $fillable = [];
+    protected $fillable = ['unique_id','equipment_tid', 'equip_serial','quote_id','location','make_type','capacity','row_index_id','fault','item_id'];
 
     public $timestamps = false;
 

@@ -297,6 +297,21 @@ class QuoteRepository extends BaseRepository
             $skillset->save();
         }
 
+        $equipments = $input['equipments'];
+        // remove omitted items
+        $item_ids = array_map(function ($v) { return $v['eqid']; }, $equipments);
+        $quote->equipments()->whereNotIn('id', $item_ids)->delete();
+        
+        // create or update items
+        foreach($equipments as $item) {
+            $equipment = EquipmentQuote::firstOrNew(['id' => $item['eqid']]);         
+            $equipment->fill(array_replace($item, ['quote_id' => $quote->id]));
+            if (!$equipment->id) unset($equipment->id);
+            unset($equipment->eqid);
+            //dd($equipment);
+            $equipment->save();
+        }
+
         if ($result) {
             DB::commit();
             return $quote;      

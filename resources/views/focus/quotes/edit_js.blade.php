@@ -449,6 +449,7 @@
                 </td>
                 <input type="hidden" name="row_index_id[]" value="0" class="row-index" id="rowindex-${n}">
                 <input type="hidden" name="item_id[]" value="0" class="item-id" id="itemid-${n}">
+                <input type="hidden" name="eqid[]" value="0" class="" id="eqid-${n}">
             </tr>
         `;
     }
@@ -547,9 +548,10 @@
             // console.log(data)
             i = i+1;
             $('#addqproduct').click();
-            $('#itemid-'+i).val(data.id);
+            $('#itemid-'+i).val(data.item_id);
             $('#uniqueid-'+i).val(data.unique_id);
             $('#eq-tid-'+i).val(data.equipment_tid);
+            $('#eqid-'+i).val(data.id);
             $('#equipserial-'+i).val(data.equip_serial);
             $('#maketype-'+i).val(data.make_type);
             $('#capacity-'+i).val(data.capacity);

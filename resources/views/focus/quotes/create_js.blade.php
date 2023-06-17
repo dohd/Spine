@@ -332,8 +332,6 @@
 
     // equipment row counter;
     let rowIds = 0;
-    //$('#equipmentsTbl tbody').append(productRow(0));
-    //$('#equipmentsTbl .datepicker').datepicker(config.date).datepicker('setDate', new Date());
      $('#uniqueid-0').autocomplete(autocompleteProp(0));
     
     // on clicking addproduct
@@ -342,10 +340,6 @@
         const i = rowIds;
         $('#equipmentsTbl tbody').append(productRow(i));
          $('#uniqueid-' + i).autocomplete(autocompleteProp(i));
-
-        $('#jobcard-'+i).val($("#jobcard").val());  
-        // $('#lastservicedate-'+ i).datepicker(config.date).datepicker('setDate', new Date());
-        // $('#nextservicedate-'+ i).datepicker(config.date).datepicker('setDate', new Date());
          assignIndex();
     });
 
