@@ -85,7 +85,7 @@ class RjcsController extends Controller
             'prepared_by', 'attention', 'region', 'report_date', 'image_one', 'image_two', 'image_three', 'image_four', 'caption_one', 
             'caption_two', 'caption_three', 'caption_four'
         ]);
-        $data_items = $request->only(['row_index', 'unique_id', 'jobcard', 'equip_serial', 'make_type', 'capacity', 'location', 'last_service_date', 'next_service_date']);
+        $data_items = $request->only(['row_index', 'unique_id', 'jobcard', 'equip_serial', 'make_type', 'capacity', 'location', 'last_service_date', 'next_service_date','equipment_id']);
 
         $data['ins'] = auth()->user()->ins;
         $data_items = modify_array($data_items);
