@@ -392,6 +392,7 @@ Route::group(['namespace' => 'pricegroup'], function () {
 });
 
 Route::group(['namespace' => 'client_product'], function () {
+    Route::post('client_products/store_code', 'ClientProductsController@store_code')->name('client_products.store_code');
     Route::resource('client_products', 'ClientProductsController');
     //For Datatable
     Route::post('client_products/get', 'ClientProductsTableController')->name('client_products.get');

@@ -62,6 +62,7 @@
                                         <th>Customer</th>
                                         <th>Contract</th>
                                         <th>Row No.</th>
+                                        <th>Product Code</th>
                                         <th>Product Description</th>
                                         <th>UoM</th>
                                         <th>Rate</th>
@@ -82,6 +83,7 @@
             </div>
         </div>
     </div>
+    @include('focus.client_products.modal.attach-inventory')
 </div>
 @endsection
 
@@ -96,12 +98,15 @@
     const Index = {
         customers: @json($customers),
         contracts: @json($contracts),
+        inventoryUrl: "{{ route('biller.queuerequisitions.select') }}",
 
         init() {
             $.ajaxSetup(config.ajax);
             $('#customer').select2({allowClear: true}).val('').change();
             this.drawDataTable();
-
+            $('#inventorybox').change(this.inventoryChange);
+            $('#inventorybox').select2(this.select2Config(this.inventoryUrl, this.inventoryData));
+            $('#listTbl').on('click', '.click', this.listChange);
             $('.mass-delete').click(this.massDelete);
             $('#customer').change(this.customerChange);
             $('#contract').change(this.contractChange);
@@ -119,6 +124,45 @@
                 showCancelButton: true,
             }, () => form.submit());
         },
+        inventoryData(data) {
+            return {results: data.map(v => ({id: v.id+'-'+v.code+'-'+v.qty+'-'+v.purchase_price, text: v.name+' : '+v.name}))};
+        },
+
+        inventoryChange() {
+                const name = $('#inventorybox option:selected').text().split(' : ')[0];
+                const [id, code, quantity,purchase_price] = $(this).val().split('-');
+                $('#inventoryid').val(id);
+                $('#inventory').val(name);
+                $('#product_code').val(code);
+                $('#item_id').val(id);
+                $('#purchase_price').val(accounting.formatNumber(purchase_price));
+               // $('#uom').val(unit);
+                $('#descr').val(name);
+                $('#item_qty').val(quantity);
+         },
+         listChange (e) {
+                var id = e.target.getAttribute('data_id');
+                $('#id').val(id);
+                var client_uom = e.target.getAttribute('client-uom');
+                $('#client_uom').val(client_uom);
+                var client_rate = e.target.getAttribute('client-rate');
+                $('#client_price').val(accounting.formatNumber(client_rate));
+                // var quantity = e.target.getAttribute('quantity');
+                // $('#item_qty').val(quantity);
+        },
+        
+        select2Config(url, callback) {
+                return {
+                    ajax: {
+                        url,
+                        dataType: 'json',
+                        type: 'POST',
+                        quietMillis: 50,
+                        data: ({term}) => ({q: term, keyword: term}),
+                        processResults: callback
+                    }
+                }
+         },
 
         customerChange() {
             if ($(this).val()) {
@@ -173,6 +217,10 @@
                     {
                         data: 'row',
                         name: 'row'
+                    },
+                    {
+                        data: 'product_code',
+                        name: 'product_code'
                     },
                     {
                         data: 'descr',

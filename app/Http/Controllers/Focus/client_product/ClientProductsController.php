@@ -140,4 +140,13 @@ class ClientProductsController extends Controller
             
         return new RedirectResponse(route('biller.client_products.index'), ['flash_success' => 'Pricelist Item Deleted Successfully']);
     }
+
+    public function store_code(Request $request){
+        //dd($request->all());
+        $client_product = ClientProduct::find($request->id);
+        $client_product->product_code = $request->product_code;
+        $client_product->item_id = $request->item_id;
+        $client_product->update();
+        return new RedirectResponse(route('biller.client_products.index'), ['flash_success' => 'ClientProduct Code Added!!']);
+    }
 }

@@ -70,6 +70,7 @@
                     <th>Expense Category</th>
                     <th>Supplier</th>
                     <th>Item Description</th>
+                    <th>Date</th>
                     <th>UoM</th>
                     <th>Qty</th>
                     <th>Rate</th>

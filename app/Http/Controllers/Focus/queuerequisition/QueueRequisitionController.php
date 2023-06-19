@@ -192,11 +192,32 @@ class QueueRequisitionController extends Controller
     public function select(Request $request)
     {
         $q = $request->keyword;
-        $users = ProductVariation::where('name', 'LIKE', '%'.$q.'%')
+        $products = ProductVariation::with('product')->where('name', 'LIKE', '%'.$q.'%')
             ->orWhere('code', 'LIKE', '%'.$q.'')
-            ->get(['id', 'name', 'code','qty']);
+            ->get(['id', 'name', 'code', 'qty', 'purchase_price']);
 
-        return response()->json($users);
+        // foreach ($products as $product) {
+        //     $product->unit = $product->unit ? $product->unit->code : '';
+
+        // }
+
+         // fetch inventory products
+        // $users = ProductVariation::whereHas('product', function ($q) {
+        //     $q->where('name', 'LIKE', '%'.$q.'%');
+        //     $q->orWhere('code', 'LIKE', '%'.$q.'');
+        // })->with('product')->get()->unique('name');
+        //$products = array();
+        // foreach ($users as $user) {
+        //     //dd($user->unit);
+        //     $product = array_intersect_key($user->toArray(), array_flip([
+        //         'id', 'name', 'code', 'qty', 'purchase_price'
+        //     ]));
+        //     $product = $product + [
+        //         'unit' => $user->unit ? $user->unit->code : '',
+        //     ];
+        //     $products[] = $product;
+        // }
+        return response()->json($products);
     }
 
     public function update_description(Request $request)

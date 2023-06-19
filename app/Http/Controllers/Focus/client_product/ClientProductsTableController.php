@@ -61,6 +61,13 @@ class ClientProductsTableController extends Controller
             ->addColumn('row', function ($client_product) {
                 return $client_product->row_num;
             })
+            ->addColumn('product_code', function ($client_product) {
+                $code = $client_product->product_code;
+                if($code) {
+                    return '<a class="font-weight-bold click text-primary" data-toggle="modal" client-rate="'.$client_product->rate.'"  client-uom="'.$client_product->uom.'" data_id="'.$client_product->id.'" " data-target="#inventoryModal">' . $code . '</a>';
+                }
+                return '<a class="font-weight-bold click text-danger" data-toggle="modal" client-rate="'.$client_product->rate.'" client-uom="'.$client_product->uom.'" data_id="'.$client_product->id.'" " data-target="#inventoryModal">Click</a>';
+            })
             ->addColumn('rate', function ($client_product) {
                 return numberFormat($client_product->rate);
             })
