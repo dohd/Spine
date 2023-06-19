@@ -39,7 +39,7 @@
             $('form').submit(this.formSubmit);
             
             // edit mode
-            if (this.invoicePayment.id) {
+            if (this.invoicePayment && this.invoicePayment.id) {
                 const pmt = this.invoicePayment;
                 if (pmt.date) $('#date').datepicker('setDate', new Date(pmt.date));
                 if (pmt.note) $('#note').val(pmt.note);
@@ -81,8 +81,7 @@
                 event.preventDefault();
                 alert('Total Allocated Amount must be equal to Payment Amount!');
             }
-            
-            // enable disabled fields (required)
+            // clear disabled attributes
             $(this).find(':disabled').attr('disabled', false);
         },
 

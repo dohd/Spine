@@ -25,13 +25,16 @@
             this.columnTotals();
 
             // edit mode
-            if (this.billPayment.id) {
+            if (this.billPayment && this.billPayment.id) {
                 const pmt = this.billPayment;
                 $('#date').datepicker('setDate', new Date(pmt.date));
                 if (pmt.supplier_id) {
                     $('#employee').val('').change().attr({'disabled': true, 'required':false});
                 } else if (pmt.employee_id) {
                     $('#supplier').val('').change().attr({'disabled': true, 'required':false});
+                }
+                if (pmt.rel_payment_id) {
+                    ['account', 'payment_mode', 'reference'].forEach(v => $(`#${v}`).attr('disabled', true));
                 }
             }
 
@@ -64,6 +67,8 @@
                 event.preventDefault();
                 alert('Total Allocated Amount must be equal to Payment Amount!');
             }
+            // clear disabled attributes
+            $(this).find(':disabled').attr('disabled', false);
         },
 
         unallocatedPmtChange() {
