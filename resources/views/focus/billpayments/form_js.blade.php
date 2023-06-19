@@ -25,12 +25,12 @@
             this.columnTotals();
 
             // edit mode
-            const editBill = this.billPayment;
-            if (editBill) {
-                $('#date').datepicker('setDate', new Date(editBill.date));
-                if (editBill.supplier_id) {
+            if (this.billPayment.id) {
+                const pmt = this.billPayment;
+                $('#date').datepicker('setDate', new Date(pmt.date));
+                if (pmt.supplier_id) {
                     $('#employee').val('').change().attr({'disabled': true, 'required':false});
-                } else if (editBill.employee_id) {
+                } else if (pmt.employee_id) {
                     $('#supplier').val('').change().attr({'disabled': true, 'required':false});
                 }
             }

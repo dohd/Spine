@@ -128,11 +128,13 @@ class BillPaymentRepository extends BaseRepository
         }
 
         if ($input['amount'] == 0) throw ValidationException::withMessages(['amount is required']);
-        if (@$input['reference']) {
-            $ref_exists = Billpayment::where('account_id', $input['account_id'])
-                ->where('reference', 'LIKE', "%{$input['reference']}%")  
-                ->whereNull('rel_payment_id')->exists();            
-            if ($ref_exists) throw ValidationException::withMessages(['Duplicate reference no.']);
+        if (empty($input['rel_payment_id'])) {
+            if (@$input['reference'] && @$input['account_id']) {
+                $ref_exists = Billpayment::where('account_id', $input['account_id'])
+                    ->where('reference', 'LIKE', "%{$input['reference']}%")  
+                    ->whereNull('rel_payment_id')->exists();            
+                if ($ref_exists) throw ValidationException::withMessages(['Duplicate reference no.']);
+            }
         }  
 
         // create payment
@@ -228,13 +230,15 @@ class BillPaymentRepository extends BaseRepository
         }
 
         if (@$input['amount'] == 0) throw ValidationException::withMessages(['amount is required']);
-        if (@$input['reference']) {
-            $ref_exists = Billpayment::where('id', '!=', $billpayment->id)
-            ->where('account_id', $input['account_id'])
-                ->where('reference', 'LIKE', "%{$input['reference']}%")  
-                ->whereNull('rel_payment_id')->exists();            
-            if ($ref_exists) throw ValidationException::withMessages(['Duplicate reference no.']);
-        }  
+        if (empty($input['rel_payment_id'])) {
+            if (@$input['reference'] && @$input['account_id']) {
+                $ref_exists = Billpayment::where('id', '!=', $billpayment->id)
+                ->where('account_id', $input['account_id'])
+                    ->where('reference', 'LIKE', "%{$input['reference']}%")  
+                    ->whereNull('rel_payment_id')->exists();            
+                if ($ref_exists) throw ValidationException::withMessages(['Duplicate reference no.']);
+            }  
+        }
 
         // delete billpayment with no unallocated line items
         $data_items = Arr::only($input, ['id', 'bill_id', 'paid']);

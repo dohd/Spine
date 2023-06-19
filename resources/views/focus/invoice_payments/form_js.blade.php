@@ -39,7 +39,7 @@
             $('form').submit(this.formSubmit);
             
             // edit mode
-            if (this.invoicePayment) {
+            if (this.invoicePayment.id) {
                 const pmt = this.invoicePayment;
                 if (pmt.date) $('#date').datepicker('setDate', new Date(pmt.date));
                 if (pmt.note) $('#note').val(pmt.note);
@@ -51,6 +51,10 @@
                 $('#reference').val(pmt.reference);
                 $('#rel_payment').attr('disabled', true);
                 this.calcTotal();
+                // allocation
+                if (pmt.rel_payment_id) {
+                    ['account', 'payment_mode', 'reference'].forEach(v => $(`#${v}`).attr('disabled', true));
+                }
             } else {
                 this.loadUnallocatedPayments();
             }
@@ -77,6 +81,9 @@
                 event.preventDefault();
                 alert('Total Allocated Amount must be equal to Payment Amount!');
             }
+            
+            // enable disabled fields (required)
+            $(this).find(':disabled').attr('disabled', false);
         },
 
         invoiceRow(v, i) {

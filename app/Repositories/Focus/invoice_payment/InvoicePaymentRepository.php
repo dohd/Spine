@@ -56,15 +56,17 @@ class InvoicePaymentRepository extends BaseRepository
         }
 
         if ($data['amount'] == 0) throw ValidationException::withMessages(['amount is required']);
-        if (@$data['reference']) {
-            $ref_exists = InvoicePayment::where('account_id', $data['account_id'])
-                ->where('reference', 'LIKE', "%{$data['reference']}%")  
-                ->whereNull('rel_payment_id')->exists();            
-            if ($ref_exists) throw ValidationException::withMessages(['Duplicate reference no.']);
+        if (empty($data['rel_payment_id'])) {
+            if (@$data['reference'] && @$data['account_id']) {
+                $ref_exists = InvoicePayment::where('account_id', $data['account_id'])
+                    ->where('reference', 'LIKE', "%{$data['reference']}%")  
+                    ->whereNull('rel_payment_id')->exists();            
+                if ($ref_exists) throw ValidationException::withMessages(['Duplicate reference no.']);
+            }
         }
 
         // create payment
-        $tid = InvoicePayment::where('ins', auth()->user()->ins)->max('tid');
+        $tid = InvoicePayment::max('tid');
         if ($data['tid'] <= $tid) $data['tid'] = $tid+1;
         $result = InvoicePayment::create($data);
 
@@ -145,12 +147,14 @@ class InvoicePaymentRepository extends BaseRepository
         }
 
         if ($data['amount'] == 0) throw ValidationException::withMessages(['amount is required']);
-        if (@$data['reference']) {
-            $ref_exists = InvoicePayment::where('id', '!=', $invoice_payment->id)
-                ->where('account_id', $data['account_id'])
-                ->where('reference', 'LIKE', "%{$data['reference']}%")  
-                ->whereNull('rel_payment_id')->exists();            
-            if ($ref_exists) throw ValidationException::withMessages(['Duplicate reference no.']);
+        if (empty($data['rel_payment_id'])) {
+            if (@$data['reference'] && @$data['account_id']) {
+                $ref_exists = InvoicePayment::where('id', '!=', $invoice_payment->id)
+                    ->where('account_id', $data['account_id'])
+                    ->where('reference', 'LIKE', "%{$data['reference']}%")  
+                    ->whereNull('rel_payment_id')->exists();            
+                if ($ref_exists) throw ValidationException::withMessages(['Duplicate reference no.']);
+            }
         }
             
         // delete invoice_payment with no unallocated line items
