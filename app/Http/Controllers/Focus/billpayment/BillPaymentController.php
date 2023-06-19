@@ -105,8 +105,8 @@ class BillPaymentController extends Controller
     public function store(Request $request)
     {
         try {
-            $this->repository->create($request->except('_token'));
-        } catch (\Throwable $th) {
+            $this->repository->create($request->except('_token', 'balance', 'unallocate_ttl'));
+        } catch (\Throwable $th) { 
             if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Bill Payment!', $th);
         }
@@ -155,7 +155,7 @@ class BillPaymentController extends Controller
     public function update(Request $request, Billpayment $billpayment)
     {
         try {
-            $this->repository->update($billpayment, $request->except('_token', 'balance'));
+            $this->repository->update($billpayment, $request->except('_token', 'balance', 'unallocate_ttl'));
         } catch (\Throwable $th) {
             if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Bill Payment!', $th);

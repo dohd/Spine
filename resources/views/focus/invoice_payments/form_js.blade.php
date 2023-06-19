@@ -74,7 +74,7 @@
                     location.reload();
                 }
             }
-            // check if payment amount >= allocated amount
+            // check if payment amount = allocated amount
             let amount = accounting.unformat($('#amount').val());
             let allocatedTotal = accounting.unformat($('#allocate_ttl').val());
             if (amount != allocatedTotal && $('#payment_type').val() == 'per_invoice') {
