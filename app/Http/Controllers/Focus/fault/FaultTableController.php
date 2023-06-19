@@ -39,7 +39,7 @@ class FaultTableController extends Controller
      * contructor to initialize repository object
      * @param faultRepository $fault ;
      */
-    public function __construct(faultRepository $fault)
+    public function __construct(FaultRepository $fault)
     {
         $this->fault = $fault;
     }
