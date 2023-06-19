@@ -66,6 +66,7 @@
                 </td>
                 <input type="hidden" name="row_index[]" value="0" class="row-index" id="rowindex-${n}">
                 <input type="hidden" name="item_id[]" value="0" class="item-id" id="itemid-${n}">
+                <input type="hidden" name="equipment_id[]" value="0" class="equipment-id" id="equipmentid-${n}">
             </tr>
         `;
     }
@@ -136,6 +137,7 @@
                 $('#maketype-'+i).val(data.make_type);
                 $('#capacity-'+i).val(data.capacity);
                 $('#location-'+i).val(data.location);
+                $('#equipmentid-'+i).val(data.id);
 
                 const lastDate = data.last_maintenance_date? new Date(data.last_maintenance_date) : '';
                 const nextDate = data.next_maintenance_date? new Date(data.next_maintenance_date) : '';

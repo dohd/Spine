@@ -99,7 +99,7 @@ class DjcsController extends Controller
             'caption_one', 'caption_two', 'caption_three', 'caption_four'
         ]);
         $data_items = $request->only(['row_index', 'unique_id', 'jobcard', 'equip_serial', 'make_type', 
-            'capacity', 'location', 'last_service_date', 'next_service_date'
+            'capacity', 'location', 'last_service_date', 'next_service_date','equipment_id'
         ]);
 
         $data['ins'] = auth()->user()->ins;
