@@ -61,7 +61,7 @@
                 </div>
             </div>
             
-            <div class="col-3">
+            <div class="col-6">
                 <label for="customer">Pre-agreed Pricing</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
@@ -74,18 +74,6 @@
                 </div>
             </div>
 
-            <div class="col-3">
-                <label for="serial_no" >{{ trans('general.serial_no') }}.</label>
-                <div class="input-group">
-                    <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
-                    @php
-                        $tid = isset($words['edit_mode'])? $quote->tid : $lastquote->tid+1;
-                        $tid_prefix = !isset($words['edit_mode'])? $prefixes[0] : ($quote->bank_id? $prefixes[1] : $prefixes[0]);
-                    @endphp
-                    {{ Form::text('tid', gen4tid("{$tid_prefix}-", $tid), ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
-                    <input type="hidden" name="tid" value="{{ $tid }}">
-                </div>
-            </div>
         </div>
 
         <div class="form-group row">
@@ -128,17 +116,15 @@
         <h3 class="form-group">{{ $is_pi ? 'PI Properties' : trans('quotes.properties')}}</h3>
         <div class="form-group row">
             <div class="col-4">
-                <label for="reference" >Djc Reference</label>
+                <label for="serial_no" >{{ trans('general.serial_no') }}.</label>
                 <div class="input-group">
-                    <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                    {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference', 'id' => 'reference']) }}
-                </div>
-            </div>
-            <div class="col-4">
-                <label for="reference_date" >Djc Reference Date</label>
-                <div class="input-group">
-                    <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
-                    {{ Form::text('reference_date', null, ['class' => 'form-control round datepicker', 'id' => 'referencedate']) }}
+                    <div class="input-group-text"><span class="fa fa-list" aria-hidden="true"></span></div>
+                    @php
+                        $tid = isset($words['edit_mode'])? $quote->tid : $lastquote->tid+1;
+                        $tid_prefix = !isset($words['edit_mode'])? $prefixes[0] : ($quote->bank_id? $prefixes[1] : $prefixes[0]);
+                    @endphp
+                    {{ Form::text('tid', gen4tid("{$tid_prefix}-", $tid), ['class' => 'form-control round', 'id' => 'tid', 'disabled']) }}
+                    <input type="hidden" name="tid" value="{{ $tid }}">
                 </div>
             </div>
             <div class="col-4">
@@ -147,10 +133,7 @@
                     <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
                     {{ Form::text('date', null, ['class' => 'form-control round datepicker', 'id' => 'date']) }}
                 </div>
-            </div>                                    
-        </div>
-
-        <div class="form-group row">
+            </div> 
             <div class="col-4"><label for="validity" >Validity Period</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-file-text-o" aria-hidden="true"></span></div>
@@ -170,6 +153,11 @@
                     </select>
                 </div>
             </div>
+            
+                                              
+        </div>
+
+        <div class="form-group row">
             <div class="col-4">
                 <label for="currency" >Currency</label>
                 <div class="input-group">
@@ -277,6 +265,29 @@
         <a href="javascript:" class="btn btn-purple ml-1" data-toggle="modal" data-target="#extrasModal" id="addExtras">
             <i class="fa fa-plus"></i> Header & Footer
         </a>
+        <div class="form-group row mt-2">
+            <div class='col-md-12'>
+                <div class='col m-1'>
+                                            
+                    <input type="checkbox" id="attach-djc" value="checked">
+                    <label for="client-type text-bold">Attach DJC</label>
+                </div>
+            </div>
+            <div class="col-4">
+                <label for="reference" >Djc Reference</label>
+                <div class="input-group">
+                    <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
+                    {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference', 'id' => 'reference']) }}
+                </div>
+            </div>
+            <div class="col-4">
+                <label for="reference_date" >Djc Reference Date</label>
+                <div class="input-group">
+                    <div class="input-group-addon"><span class="icon-calendar4" aria-hidden="true"></span></div>
+                    {{ Form::text('reference_date', null, ['class' => 'form-control round datepicker', 'id' => 'referencedate']) }}
+                </div>
+            </div>
+        </div>
         <div class="form-group row">
             <div class='col-md-12'>
                 <div class='col m-1'>

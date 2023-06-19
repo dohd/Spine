@@ -284,6 +284,17 @@
         profitState.sp_total = subtotal;
         calcProfit();   
     }
+    $('#attach-djc').prop("checked", true);
+    $('#attach-djc').change(function (){
+            if ($(this).is(":checked")) {
+                $('#reference').attr('disabled', false);
+                $('#referencedate').attr('disabled', false);
+            }else{
+                $('#reference').attr('disabled', true);
+                $('#referencedate').attr('disabled', true);
+                
+            }
+        });
     $('#add-check').change(function (){
             if ($(this).is(":checked")) {
                 $('#addqproduct').removeClass('d-none');
