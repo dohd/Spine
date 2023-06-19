@@ -277,7 +277,7 @@
                 <label for="reference" >Djc Reference</label>
                 <div class="input-group">
                     <div class="input-group-addon"><span class="icon-bookmark-o" aria-hidden="true"></span></div>
-                    {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference', 'id' => 'reference']) }}
+                    {{ Form::text('reference', null, ['class' => 'form-control round', 'placeholder' => 'Djc Reference', 'id' => 'reference', 'required']) }}
                 </div>
             </div>
             <div class="col-4">

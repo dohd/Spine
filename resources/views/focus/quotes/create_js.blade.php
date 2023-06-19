@@ -295,11 +295,15 @@
                 
             }
         });
-    $('#add-check').change(function (){
+    $('#add-check').prop("checked", true);
+    $('#addqproduct').removeClass('d-none');
+     $('#add-check').change(function (){
             if ($(this).is(":checked")) {
                 $('#addqproduct').removeClass('d-none');
+                $('#equipmentsTbl tbody').find('input').attr('disabled', false);
             }else{
                 $('#addqproduct').addClass('d-none');
+                $('#equipmentsTbl tbody').find('input').attr('disabled', true);
                 
             }
         });
@@ -310,12 +314,12 @@
       function productRow(n) {            
         return `
             <tr>
-                <td><input type="text" class="form-control unique-id" name="unique_id[]" placeholder="Search Equipment" id="uniqueid-${n}"></td>
-                <td><input type="text" class="form-control eq-tid-row" name="equipment_tid[]" id="eq-tid-${n}"></td>
-                <td><input type="text" class="form-control equip-serial" name="equip_serial[]" id="equipserial-${n}"></td>
-                <td><input type="text" class="form-control make-type" name="make_type[]" id="maketype-${n}"></td>
-                <td><input type="text" class="form-control capacity" name="capacity[]" id="capacity-${n}"></td>
-                <td><input type="text" class="form-control location" name="location[]" id="location-${n}"></td>
+                <td><input type="text" class="form-control unique-id" name="unique_id[]" placeholder="Search Equipment" id="uniqueid-${n}" required></td>
+                <td><input type="text" class="form-control eq-tid-row" name="equipment_tid[]" id="eq-tid-${n}" required></td>
+                <td><input type="text" class="form-control equip-serial" name="equip_serial[]" id="equipserial-${n}" required></td>
+                <td><input type="text" class="form-control make-type" name="make_type[]" id="maketype-${n}" required></td>
+                <td><input type="text" class="form-control capacity" name="capacity[]" id="capacity-${n}" required></td>
+                <td><input type="text" class="form-control location" name="location[]" id="location-${n}" required></td>
                 <td>
                     <select class="custom-select fault" name="fault[]" id="fault-${n}">
                         @foreach($faults as $fault)
@@ -343,6 +347,7 @@
 
     // equipment row counter;
     let rowIds = 0;
+    $('#equipmentsTbl tbody').append(productRow(0));
      $('#uniqueid-0').autocomplete(autocompleteProp(0));
     
     // on clicking addproduct
