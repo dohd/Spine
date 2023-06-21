@@ -36,6 +36,9 @@
                         <li class="nav-item">
                             <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Service Kits Attached</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Report</a>
+                        </li>
                     </ul>
                     <div class="tab-content px-1 pt-1">
                         <!-- tab1 -->
@@ -61,6 +64,8 @@
                                                 'Service Rate (VAT Exc)' => numberFormat($equipment->service_rate),
                                                 'Installation Date' => $equipment->install_date? dateFormat($equipment->install_date) : '',
                                                 'Remark' => $equipment->note,
+                                                'PM Duration(Mins)' => $equipment->pm_duration,
+                                                'Status' => $equipment->status,
                                             ];
                                         @endphp
                                         @foreach ($details as $key => $val)
@@ -74,7 +79,7 @@
                             </div>
                         </div>
                         <!-- tab2 -->
-                        <div class="tab-pane active in" id="active2" aria-labelledby="active-tab2" role="tabpane2">
+                        <div class="tab-pane in" id="active2" aria-labelledby="active-tab2" role="tabpane2">
 
                             <div class="card-content">
                                 <div class="card-body">
@@ -130,6 +135,59 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="tab-pane in" id="active3" aria-labelledby="active-tab3" role="tabpane3">
+
+                            <div class="card-content">
+                                <div class="card-header">
+                                    <div class="form-group row">
+                                        <div class="col-3">
+                                            <label for="customer" class="font-weight-bold">Customer</label>
+                                            <h4>{{$customer}}</h4>
+                                        </div>
+                                        <div class="col-3">
+                                            <label for="customer" class="font-weight-bold">Customer Branch</label>
+                                            <h4>{{$branch}}</h4>
+                                        </div>
+                                        <div class="col-3">
+                                            <label for="equipment" class="font-weight-bold">Equipment</label>
+                                            <h4>{{ gen4tid('Eq-', $equipment->tid) }}</h4>
+                                        </div>
+                                    </div>
+                                   
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-xs table-bordered" id="reportsTbl">
+                                        <thead>
+                                            <tr class="">
+                                                <th width="15%">Date</th>
+                                                <th width="25%">Source</th>
+                                                <th>Status</th>
+                                                <th>Document Type</th>                                    
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                    
+                                           {{-- {{ dd($grouped) }} --}}
+                                            @if($grouped)
+                                                @foreach ($grouped as $i => $item)
+                                                {{-- {{ dd($item) }} --}}
+                                                @if (isset($item))
+                                                <tr>
+                                                   
+                                                    <td>{{ $item['date'] }}</td>  
+                                                    <td>{{ $item['tid'] }}</td>
+                                                    <td>{{ $item['fault'] }}</td>  
+                                                    <td>{{ $item['document_type'] }}</td>
+                                                </tr>
+                                                @endif  
+                                            @endforeach
+                                            @endif
+                                        </tbody>
+                                    </table>
+                                   
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -139,3 +197,17 @@
 @endsection
 @include('focus.equipments.partials.attach-toolkit')
 @include('focus.equipments.partials.dettach-toolkit')
+@section('after-scripts')
+{{ Html::script(mix('js/dataTable.js')) }}
+    <script>
+         $('#reportsTbl').dataTable({
+            columnDefs: [
+                    { type: "custom-date-sort", targets: [1] }
+                ],
+                order: [[0, "desc"]],
+                searchDelay: 500,
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel', 'print']
+            });
+    </script>
+@endsection

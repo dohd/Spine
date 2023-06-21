@@ -31,7 +31,12 @@ use App\Http\Requests\Focus\equipment\StoreEquipmentRequest;
 use App\Models\branch\Branch;
 use App\Models\customer\Customer;
 use App\Models\equipmenttoolkit\EquipmentToolKit;
-
+use DB;
+use App\Models\djc\Djc;
+use App\Models\rjc\Rjc;
+use App\Models\quote\Quote;
+use App\Models\contractservice\ContractService;
+use App\Models\verifiedjcs\VerifiedJc;
 /**
  * ProductcategoriesController
  */
@@ -153,8 +158,11 @@ class EquipmentsController extends Controller
      */
     public function show(Equipment $equipment)
     {
-        //dd($equipment->toolkit);
-        return new ViewResponse('focus.equipments.view', compact('equipment'));
+        $group = $this->equipment_report($equipment->id);
+        $grouped = $group['grouped'];
+        $customer = $group['customer'];
+        $branch = $group['branch'];
+        return new ViewResponse('focus.equipments.view', compact('equipment', 'grouped','customer','branch'));
     }
 
     /**
@@ -220,5 +228,141 @@ class EquipmentsController extends Controller
         $dettach_equipment = EquipmentToolKit::where('equipment_id',$request->equipment_id)->where('tool_id',$request->toolkit_name)->get()->first();
         $dettach_equipment->delete();
         return new RedirectResponse(route('biller.equipments.show',$request->equipment_id), ['flash_success' => 'ToolKit Dettached Successfully']);
+    }
+
+    public function equipment_report($equipment_id){
+        
+        $results = DB::select("
+            SELECT rose_equipments.tid AS equip_tid,rose_equipments.customer_id AS customer_id, rose_equipments.branch_id AS branch_id, 
+            rose_djc_item.djc_id AS djc_id, 
+            rose_quote_equipment.quote_id AS quotation_id,rose_quote_equipment.fault AS faulting,
+            rose_verified_jcs.fault AS faults,rose_verified_jcs.quote_id AS verify_quote_id,
+            rose_rjc_items.rjc_id AS rjc_id,
+            rose_contract_service_items.*
+            FROM rose_equipments
+            LEFT JOIN rose_djc_item ON rose_equipments.id = rose_djc_item.equipment_id
+            LEFT JOIN rose_quote_equipment ON rose_equipments.id = rose_quote_equipment.item_id
+            LEFT JOIN rose_verified_jcs ON rose_equipments.id = rose_verified_jcs.equipment_id
+            LEFT JOIN rose_rjc_items ON rose_equipments.id = rose_rjc_items.equipment_id
+            LEFT JOIN rose_contract_service_items ON rose_equipments.id = rose_contract_service_items.equipment_id
+            WHERE rose_equipments.id = ".$equipment_id."
+            AND (
+                rose_djc_item.id IS NOT NULL
+                OR rose_quote_equipment.id IS NOT NULL
+                OR rose_verified_jcs.id IS NOT NULL
+                OR rose_rjc_items.id IS NOT NULL
+                OR rose_contract_service_items.id IS NOT NULL
+            )
+    
+        ");
+        $djc = [];
+        $rjc = [];
+        $quote_equipment = [];
+        $schedule = [];
+        $v_quote = [];
+        $customer = '';
+        $branch = '';
+        foreach ($results as $result) {
+            $customer = Customer::find($result->customer_id)->name;
+            $branch = Branch::find($result->branch_id)->name;
+
+            $djc_item = Djc::find($result->djc_id);
+            if (is_object($djc_item)) {
+                $djc = [
+                    'tid' => gen4tid('DJR-',$djc_item->tid),
+                    'fault'=> strip_tags($djc_item->root_cause),
+                    'date'=> $djc_item->report_date ? dateFormat($djc_item->report_date) : '',
+                    'document_type' => 'DJC REPORT',
+                ];
+            } else {
+                $djc = [
+                    'tid' => '',
+                    'fault'=> '',
+                    'date'=> '',
+                    'document_type' => '',
+                ];
+            }
+            
+            $rjc_item = Rjc::find($result->rjc_id);
+            if (is_object($rjc_item)) {
+                $rjc = [
+                    'tid' => gen4tid('RJR-',$rjc_item->tid),
+                    'fault'=> strip_tags($rjc_item->action_taken),
+                    'date'=> $rjc_item->report_date ? dateFormat($rjc_item->report_date):'',
+                    'document_type' => 'RJC REPORT',
+                    
+                ];
+            } else {
+                $rjc = [
+                    'tid' => '',
+                    'fault'=> '',
+                    'date'=> '',
+                    'document_type' => '',
+                ];
+            }
+            
+            $quote = Quote::find($result->quotation_id);
+            
+            if (is_object($quote)) {
+                $equip_quote = $quote->equipments ? $quote->equipments->first() : '';
+                $quote_equipment = [
+                    'tid' => gen4tid('QT-',$quote->tid),
+                    'fault'=> $result->faulting,
+                    'date'=> $quote->date? dateFormat($quote->date): '',
+                    'document_type' => 'QUOTE REPORT',
+                ];
+            } else {
+                $quote_equipment = [
+                    'tid' => '',
+                    'fault'=> '',
+                    'date'=> '',
+                    'document_type' => '',
+                ];
+            }
+            
+
+        
+            $verified_quote = Quote::find($result->verify_quote_id);
+            if (is_object($verified_quote)) {
+                $v_quote = [
+                    'tid' => gen4tid('QT-',$verified_quote->tid).'-'.'v',
+                    'fault'=> $result->faults,
+                    'date'=> dateFormat($verified_quote->date),
+                    'document_type' => 'VERIFICATION REPORT',
+                ];
+            } else {
+                $v_quote = [
+                    'tid' => '',
+                    'fault'=> '',
+                    'date'=> '',
+                    'document_type' => '',
+                ];
+            }
+            
+
+            $contract_service = ContractService::find($result->contractservice_id);
+            $schedules = $contract_service->task_schedule->first();
+            if (is_object($verified_quote)) {
+                $schedule = [
+                    'tid' => $schedules->title,
+                    'fault'=> $result->status,
+                    'date'=> $contract_service->date ? dateFormat($contract_service->date) :'',
+                    'document_type' => 'SCHEDULE REPORT',
+                ];
+            } else {
+                $schedule = [
+                    'tid' => '',
+                    'fault'=> '',
+                    'date'=> '',
+                    'document_type' => '',
+                ];
+            }
+            
+        }
+        
+        $grouped = [
+            $schedule,$rjc, $v_quote,$quote_equipment, $djc
+        ];
+       return compact('grouped', 'customer','branch');
     }
 }
