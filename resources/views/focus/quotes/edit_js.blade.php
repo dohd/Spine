@@ -548,9 +548,11 @@
             if ($(this).is(":checked")) {
                 $('#addqproduct').removeClass('d-none');
                 $('#equipmentsTbl tbody').find('input').attr('disabled', false);
+                $('#equipmentsTbl tbody').find('select').attr('disabled', false);
             }else{
                 $('#addqproduct').addClass('d-none');
                 $('#equipmentsTbl tbody').find('input').attr('disabled', true);
+                $('#equipmentsTbl tbody').find('select').attr('disabled', true);
                 
             }
         });

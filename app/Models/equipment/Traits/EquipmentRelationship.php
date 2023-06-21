@@ -9,6 +9,10 @@ use App\Models\items\ContractServiceItem;
 use App\Models\items\ServiceItem;
 use App\Models\toolkit\Toolkit;
 use App\Models\equipmenttoolkit\EquipmentToolKit;
+use App\Models\verifiedjcs\VerifiedJc;
+use App\Models\items\DjcItem;
+use App\Models\items\RjcItem;
+use App\Models\quote\EquipmentQuote;
 
 /**
  * Class EquipmentRelationship
@@ -110,5 +114,17 @@ trait EquipmentRelationship
     public function toolkit()
     {
         return $this->hasOneThrough(Toolkit::class, EquipmentToolKit::class)->withoutGlobalScopes();
+    }
+    public function verifiedjc(){
+        return $this->belongsTo(VerifiedJc::class, 'equipment_id')->withoutGlobalScopes();
+    }
+    public function djc_items(){
+        return $this->belongsTo(DjcItem::class, 'equipment_id')->withoutGlobalScopes();
+    }
+    public function rjc_items(){
+        return $this->belongsTo(RjcItem::class, 'equipment_id')->withoutGlobalScopes();
+    }
+    public function quote_equipment(){
+        return $this->belongsTo(EquipmentQuote::class, 'item_id')->withoutGlobalScopes();
     }
 }

@@ -31,7 +31,7 @@ class Equipment extends Model
      */
     protected $fillable = [
         'tid', 'customer_id', 'branch_id', 'equip_serial', 'unique_id', 'capacity', 'location', 'machine_gas',
-        'make_type', 'model', 'equipment_category_id', 'service_rate', 'building', 'floor', 'install_date', 'note'
+        'make_type', 'model', 'equipment_category_id', 'service_rate', 'building', 'floor', 'install_date', 'note','status','pm_duration'
     ];
 
     /**

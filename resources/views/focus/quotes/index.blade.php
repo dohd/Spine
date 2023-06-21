@@ -150,7 +150,7 @@
                         name: 'id'
                     },
                     ...[
-                        'date', 'tid', 'customer', 'notes', 'total', 'approved_date', 'source', 'lead_tid', 'invoice_tid'
+                        'date', 'tid', 'customer', 'notes', 'total', 'approved_date', 'client_ref', 'lead_tid', 'invoice_tid'
                     ].map(v => ({data: v, name: v})),
                     {
                         data: 'actions',

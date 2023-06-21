@@ -97,4 +97,17 @@
         {{ Form::label('note', 'Remark',['class' => 'col-12 control-label']) }}
         {{ Form::text('note', null, ['class' => 'col form-control ', 'placeholder' => 'Remark']) }}
     </div>
+    <div class='col-md-4'>
+        {{ Form::label('pm_duration', 'PM Duration(mins)',['class' => 'col-12 control-label']) }}
+        {{ Form::number('pm_duration', '30', ['class' => 'col form-control ']) }}
+    </div>
+    <div class='col-md-4'>
+        {{ Form::label('status', 'Equipment Status',['class' => 'col-12 control-label']) }}
+        <select name="status" class="custom-select" id="category_id">
+            <option value="">-- Select Status --</option>
+            <option value="active" {{ @$equipment->status == 'active' ? 'selected' : '' }}>Active</option>
+            <option value="cannibalized" {{ @$equipment->status == 'cannibalized' ? 'selected' : '' }}>Cannibalized</option>
+            <option value="decommissioned" {{ @$equipment->status == 'decommissioned' ? 'selected' : '' }}>Decommissioned </option>
+        </select>
+    </div>
 </div>
