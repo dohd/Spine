@@ -103,7 +103,8 @@ class AccountsController extends Controller
         try {
             $this->repository->create($input);
         } catch (\Throwable $th) {
-            return errorHandler('Error Creating Accounts!', $th);
+            if ($th instanceof ValidationException) throw $th;
+            return errorHandler('Error Creating Account', $th);
         }
 
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.created')]);
@@ -139,7 +140,8 @@ class AccountsController extends Controller
         try {
             $this->repository->update($account, $input);
         } catch (\Throwable $th) {
-            return errorHandler('Error Updating Accounts!', $th);
+            if ($th instanceof ValidationException) throw $th;
+            return errorHandler('Error Updating Account', $th);
         }
 
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.updated')]);
@@ -154,11 +156,11 @@ class AccountsController extends Controller
      */
     public function destroy(Account $account)
     {
-        
         try {
             $this->repository->delete($account);
         } catch (\Throwable $th) {
-            return errorHandler('Error Deleting Accounts!', $th);
+            if ($th instanceof ValidationException) throw $th;
+            return errorHandler('Error Deleting Account', $th);
         }
 
         return new RedirectResponse(route('biller.accounts.index'), ['flash_success' => trans('alerts.backend.accounts.deleted')]);

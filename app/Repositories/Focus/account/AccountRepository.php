@@ -334,7 +334,5 @@ class AccountRepository extends BaseRepository
       aggregate_account_transactions();
       return true;
     }
-
-    throw new GeneralException(trans('exceptions.backend.accounts.delete_error'));
   }
 }
