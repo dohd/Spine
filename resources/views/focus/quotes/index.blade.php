@@ -145,19 +145,13 @@
                         return data;
                     },
                 },
-                columns: [{
-                        data: 'DT_Row_Index',
-                        name: 'id'
-                    },
+                columns: [
+                    {data: 'DT_Row_Index', name: 'id'},
                     ...[
-                        'date', 'tid', 'customer', 'notes', 'total', 'approved_date', 'client_ref', 'lead_tid', 'invoice_tid'
+                        'date', 'tid', 'customer', 'notes', 'total', 'approved_date', 
+                        'client_ref', 'lead_tid', 'invoice_tid'
                     ].map(v => ({data: v, name: v})),
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        searchable: false,
-                        sortable: false
-                    }
+                    {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 columnDefs: [
                     { type: "custom-number-sort", targets: 5 },
