@@ -219,7 +219,6 @@ class ProjectsController extends Controller
         $output = array();
         foreach ($projects as $project) {
             // if ($project->status == 'closed') continue;
-
             $quote_tids = array();
             foreach ($project->quotes as $quote) {
                 if ($quote->bank_id) $quote_tids[] = gen4tid('PI-', $quote->tid);
@@ -228,14 +227,14 @@ class ProjectsController extends Controller
             $quote_tids = implode(', ', $quote_tids);
             $quote_tids = "[{$quote_tids}]";
 
-            $customer = $project->customer_project->company;
-            $branch = $project->branch->name;
+            $customer = @$project->customer_project->company;
+            $branch = @$project->branch->name;
             $project_tid = gen4tid('Prj-', $project->tid);
             $output[] = [
                 'id' => $project->id,
                 'name' => implode(' - ', [$quote_tids, $customer, $branch, $project_tid, $project->name]),
-                'client_id' => $project->customer_project->id,
-                'branch_id' => $project->branch->id
+                'client_id' => @$project->customer_project->id,
+                'branch_id' => @$project->branch->id
             ];
         }
 
