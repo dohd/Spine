@@ -193,15 +193,16 @@ class ProductsController extends Controller
         
         $products = [];
         foreach ($productvariations as $row) {
-            $product = array_intersect_key($row->toArray(), array_flip([
+            $prod_array = $row->replicate();
+            $product = array_intersect_key($prod_array->toArray(), array_flip([
                 'id', 'product_id', 'name', 'code', 'qty', 'image', 'purchase_price', 'price', 'alert'
             ]));
-            $product = $product + [
-                'taxrate' => $row->product->taxrate,
-                'product_des' => $row->product->product_des,
-                'units' => $row->product->units,
-                'warehouse' => $row->warehouse->toArray(),
-            ];
+            $product = array_replace($product, [
+                'taxrate' => @$row->product->taxrate,
+                'product_des' => @$row->product->product_des,
+                'units' => @$row->product->units? $row->product->units->array() : [],
+                'warehouse' => $row->warehouse? $row->warehouse->toArray() : [],
+            ]);
             // set purchase price using inventory valuation (LIFO) method
             $product['purchase_price'] = $this->repository->eval_purchase_price($row->id, $row->qty, $row->purchase_price);
             $products[] =  $product;
