@@ -349,8 +349,9 @@
                 // maintenance service product 
                 const docType = @json(request('doc_type'));
                 if (docType == 'maintenance') {
-                    url = "{{ route('biller.taskschedules.quote_product_search') }}";
+                    const schedule_url = "{{ route('biller.taskschedules.quote_product_search') }}";
                     data.customer_id = $('#lead_id option:selected').attr('customer_id');
+                    if ($('#price_customer').val()) url = schedule_url;
                 } 
                 $.ajax({
                     url, data,
