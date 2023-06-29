@@ -12,6 +12,7 @@ use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 use App\Models\quote\Quote;
 use App\Models\transactioncategory\Transactioncategory;
+use Illuminate\Validation\ValidationException;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
 /**
@@ -234,7 +235,9 @@ class InvoiceRepository extends BaseRepository
      */
     public function delete($invoice)
     {
-        // dd($invoice);
+        if ($invoice->payments()->exists())
+            throw ValidationException::withMessages(['Not allowed! Invoice has related payments']);
+        
         DB::beginTransaction();
 
         // pos invoice
@@ -263,7 +266,6 @@ class InvoiceRepository extends BaseRepository
         }
 
         DB::rollBack();
-        throw new GeneralException(trans('exceptions.backend.invoices.delete_error'));
     }
 
     /**

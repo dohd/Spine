@@ -395,6 +395,9 @@ class PurchaseRepository extends BaseRepository
      */
     public function delete($purchase)
     {
+        if ($purchase->bill()->whereHas('payments')->exists()) 
+            throw ValidationException::withMessages(['Not allowed! Purchase is billed and has related payments']);
+        
         DB::beginTransaction();
 
         try {

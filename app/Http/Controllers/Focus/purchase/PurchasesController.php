@@ -204,6 +204,7 @@ class PurchasesController extends Controller
         try {
             $this->repository->delete($purchase);
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Deleting Direct Purchase', $th);
         }
         

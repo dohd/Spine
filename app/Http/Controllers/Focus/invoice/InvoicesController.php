@@ -139,6 +139,7 @@ class InvoicesController extends Controller
         try {
             $this->repository->delete($invoice);
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Deleting Invoice', $th);
         }
         

@@ -214,6 +214,9 @@ class UtilityBillRepository extends BaseRepository
      */
     public function delete(UtilityBill $utility_bill)
     {     
+        if ($utility_bill->payments()->exists())
+            throw ValidationException::withMessages(['Not allowed! Bill has related payments']);
+        
         DB::beginTransaction();
     
         $utility_bill->transactions()->where('note', 'LIKE', "%{$utility_bill->note}%")->delete();

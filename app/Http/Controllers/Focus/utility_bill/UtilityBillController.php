@@ -10,6 +10,7 @@ use App\Models\supplier\Supplier;
 use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\utility_bill\UtilityBillRepository;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class UtilityBillController extends Controller
 {
@@ -61,6 +62,7 @@ class UtilityBillController extends Controller
         try {
             $this->respository->create($request->except('_token'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Bill', $th);
         }
 
@@ -113,6 +115,7 @@ class UtilityBillController extends Controller
         try {
             $this->respository->update($utility_bill, $request->except('_token'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Bill', $th);
         }
 
@@ -130,6 +133,7 @@ class UtilityBillController extends Controller
         try {
             $this->respository->delete($utility_bill);
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Deleting Bill', $th);
         }
 
