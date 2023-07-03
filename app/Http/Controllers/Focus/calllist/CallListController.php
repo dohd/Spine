@@ -18,6 +18,7 @@
 
 namespace App\Http\Controllers\Focus\calllist;
 
+use App\Exceptions\GeneralException;
 use App\Models\prospect\Prospect;
 
 use Illuminate\Http\Request;
@@ -35,6 +36,7 @@ use App\Models\prospect_calllist\ProspectCallList;
 use DB;
 use Illuminate\Support\Carbon;
 use DateTime;
+
 /**
  * CallListController
  */
@@ -75,10 +77,10 @@ class CallListController extends Controller
      */
     public function create()
     {
-        $direct = Prospect::where('call_status','notcalled')->where('category', 'direct')->count();
-        $excel = Prospect::select(DB::raw('title,COUNT("*") AS count '))->groupBy('title')->where('call_status','notcalled')->where('category', 'excel')->get();
+        
+        $prospects = Prospect::select(DB::raw('title,COUNT("*") AS count '))->groupBy('title')->where('call_status', 'notcalled')->get();
 
-        return view('focus.prospects.calllist.create', compact('direct', 'excel'));
+        return view('focus.prospects.calllist.create', compact('prospects'));
     }
 
     // /**
@@ -92,20 +94,25 @@ class CallListController extends Controller
 
         // filter request input fields
         $data = $request->except(['_token', 'ins', 'files']);
+     
+        if ($data["prospects_number"] == "0") {
+           return redirect()->back()->with('flash_error','Prospects number must be greater than 0');
+        }
        
-       $res = $this->repository->create($data);
-    
-       $restitle = $res['title'];
-       $restitle = strstr($restitle, ' ', true);
-       
+        $res = $this->repository->create($data);
+
+        $restitle = $res['title'];
+
+        $restitle = strstr($restitle, ' ', true);
+
         //get call id
         $callid = $res['id'];
         //get prospects based on title
-        $prospects = Prospect::where('call_status','notcalled')->where('title',$restitle)->get([
+        $prospects = Prospect::where(['call_status' => 'notcalled', 'title' => $restitle])->get([
             "id"
         ])->toArray();
 
-        //dd($prospects);
+
         //start and end date  
         $start = $res['start_date'];
         $end = $res['end_date'];
@@ -113,7 +120,7 @@ class CallListController extends Controller
         $validDates = [];
         $carbonstart = Carbon::parse($start);
         $carbonend = Carbon::parse($end);
-        
+
         // Loop through each date in the range
         for ($date = $carbonstart; $date <= $carbonend; $date->addDay()) {
             // Check if the current date is not a Sunday or Saturday
@@ -138,16 +145,16 @@ class CallListController extends Controller
             $prospectcalllist[] = [
                 "prospect_id" => $prospect,
                 "call_id" => $callid,
-                "call_date"=>$date
+                "call_date" => $date
             ];
             $prospectIndex++;
             $dateIndex = ($dateIndex + 1) % $dateCount;
         }
-    
+
         //dd($prospectcalllist);
         // //send data to prospectcalllisttable
-         ProspectCallList::insert($prospectcalllist);
-        
+        ProspectCallList::insert($prospectcalllist);
+
         return view('focus.prospects.calllist.index');
     }
 
@@ -180,50 +187,53 @@ class CallListController extends Controller
     }
     public function show(CallList $calllist)
     {
-     
+
         return new ViewResponse('biller.calllists.index', compact('calllist'));
     }
 
     public function mytoday()
     {
         $calllists = CallList::all();
-       
-        return view('focus.prospects.calllist.mycalls',compact('calllists'));
+
+        return view('focus.prospects.calllist.mycalls', compact('calllists'));
     }
     public function allocationdays($id)
     {
-       $titles =  Prospect::select('title')->distinct('title')->get();
-       $calllist = CallList::find($id);
-       $daterange ="Days With Prospects ".Carbon::parse($calllist->start_date)->format('Y-m-d')." To ".Carbon::parse($calllist->end_date)->format('Y-m-d');
-       $start = Carbon::parse($calllist->start_date)->format('n');
-       $end =Carbon::parse($calllist->end_date)->format('n');
+        $titles = Prospect::select('title')->distinct('title')->get();
+        $calllist = CallList::find($id);
+        $daterange = "Days With Prospects " . Carbon::parse($calllist->start_date)->format('Y-m-d') . " To " . Carbon::parse($calllist->end_date)->format('Y-m-d');
+        $start = Carbon::parse($calllist->start_date)->format('n');
+        $end = Carbon::parse($calllist->end_date)->format('n');
         $id = $calllist->id;
 
-        return view('focus.prospects.calllist.allocationdays',compact('id','start','end','daterange','titles'));
+        return view('focus.prospects.calllist.allocationdays', compact('id', 'start', 'end', 'daterange', 'titles'));
     }
     public function prospectviacalllist(Request $request)
     {
-      
-       
-        $prospects = ProspectCallList::where('call_id',$request->id)->whereMonth('call_date', $request->month)
-        ->whereDay('call_date', $request->day)
-        ->with(['prospect' => function ($q) {
-            $q->select('id', 'title', 'company','industry','contact_person','email','phone','region','call_status');
-        }])
-        ->get();
-        $prospectstotal = ProspectCallList::where('call_id',$request->id)->whereMonth('call_date', $request->month)
-        ->whereHas('prospect', function ($q) {
-                $q->select('id','call_status')->where('is_called',0)->orWhere('is_called',1);
+
+
+        $prospects = ProspectCallList::where('call_id', $request->id)->whereMonth('call_date', $request->month)
+            ->whereDay('call_date', $request->day)
+            ->with([
+                'prospect' => function ($q) {
+                    $q->select('id', 'title', 'company', 'industry', 'contact_person', 'email', 'phone', 'region', 'call_status');
+                }
+            ])
+            ->get();
+        $prospectstotal = ProspectCallList::where('call_id', $request->id)->whereMonth('call_date', $request->month)
+            ->whereHas('prospect', function ($q) {
+                $q->select('id', 'call_status')->where('is_called', 0)->orWhere('is_called', 1);
             })
-       
-        ->get()
-        ->toArray();
+
+            ->get()
+            ->toArray();
         $total_call_group = array_reduce($prospectstotal, function ($init, $curr) {
             $d = (new DateTime($curr['call_date']))->format('j');
             $key_exists = in_array($d, array_keys($init));
-            if (!$key_exists) $init[$d] = array();
+            if (!$key_exists)
+                $init[$d] = array();
             $init[$d][] = $curr['prospect_id'];
-            
+
             return $init;
         }, []);
         $total_day_call = array();
@@ -233,21 +243,22 @@ class CallListController extends Controller
                 'count' => count(array_unique($val))
             );
         }
-          
-        $not = ProspectCallList::where('call_id',$request->id)->whereMonth('call_date', $request->month)
-        ->whereHas('prospect', function ($q) {
-                $q->select('id','call_status')->where('is_called',0);
+
+        $not = ProspectCallList::where('call_id', $request->id)->whereMonth('call_date', $request->month)
+            ->whereHas('prospect', function ($q) {
+                $q->select('id', 'call_status')->where('is_called', 0);
             })
-       
-        ->get()->toArray();
+
+            ->get()->toArray();
 
 
         $day_call_group = array_reduce($not, function ($init, $curr) {
             $d = (new DateTime($curr['call_date']))->format('j');
             $key_exists = in_array($d, array_keys($init));
-            if (!$key_exists) $init[$d] = array();
+            if (!$key_exists)
+                $init[$d] = array();
             $init[$d][] = $curr['prospect_id'];
-            
+
             return $init;
         }, []);
         $day_call = array();
@@ -257,13 +268,14 @@ class CallListController extends Controller
                 'count' => count(array_unique($val))
             );
         }
-        
-     return response()->json(['notcalled'=>$day_call,'prospectstotal'=>$total_day_call,'prospects'=>$prospects]);
+
+        return response()->json(['notcalled' => $day_call, 'prospectstotal' => $total_day_call, 'prospects' => $prospects]);
     }
 
-    public function unallocatedbytitle($title){
-        
+    public function unallocatedbytitle($title)
+    {
+
     }
-   
+
 
 }

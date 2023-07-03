@@ -24,7 +24,6 @@ class CallListRequest extends FormRequest
     public function rules()
     {
         return [
-            'category' => 'required',
             'prospects_number' => 'required',
             'start_date' => 'required',
             'end_date' => 'required',

@@ -30,7 +30,6 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Title</th>
-                                            <th>Category</th>
                                             <th>Prospects to Call</th>
                                             <th>Explore Prospects</th>
                                             <th>Start Date</th>
@@ -102,10 +101,6 @@
                         {
                             data: 'title',
                             name: 'title'
-                        },
-                        {
-                            data: 'category',
-                            name: 'category'
                         },
                         {
                             data: 'prospects_number',

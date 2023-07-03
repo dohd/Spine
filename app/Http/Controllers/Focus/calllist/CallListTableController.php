@@ -59,11 +59,6 @@ class CallListTableController extends Controller
             $title = $calllist->title == null ? '----' : $calllist->title;
             return $title;
         })
-        ->addColumn('category', function ($calllist) {
-            $category = $calllist->category == null ? '----' : $calllist->category ;
-
-            return $category;
-        })
         ->addColumn('prospects_number', function ($calllist) {
             $prospects_number = $calllist->prospects_number == null ? '----' : $calllist->prospects_number;
 
