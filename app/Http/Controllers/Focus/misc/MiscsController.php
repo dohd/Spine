@@ -18,7 +18,6 @@
 namespace App\Http\Controllers\Focus\misc;
 
 use App\Models\misc\Misc;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;

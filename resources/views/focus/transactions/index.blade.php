@@ -102,7 +102,6 @@
                                         <th>{{ trans('transactions.credit') }}</th>
                                         <th>Balance</th>
                                         <th class="th-date">Date</th>
-                                        <th>Created At</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -171,7 +170,7 @@
                     },
                     ...[
                         'tid', 'tr_type', 'reference', 'note', ...obj, 'debit', 'credit',
-                        'balance', 'tr_date', 'created_at'
+                        'balance', 'tr_date'
                     ].map(v => ({data: v, name: v})),
                     {
                         data: 'actions',

@@ -32,7 +32,6 @@
                                         <th>Ledger Account</th>
                                         <th>Location</th>
                                         <th>Warranty</th>
-                                        <th>{{ trans('general.createdat') }}</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -93,10 +92,6 @@
                 {
                     data: 'warranty',
                     name: 'warranty'
-                },
-                {
-                    data: 'created_at',
-                    name: 'created_at'
                 },
                 {
                     data: 'actions',

@@ -391,6 +391,21 @@
                 <li class="dropdown nav-item" data-menu="dropdown">
                     <a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="fa fa-industry"></i><span>Project Management</span></a>
                     <ul class="dropdown-menu">
+                        {{-- project tags --}}
+                        @permission('manage-project') 
+                            <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> Project Tags</a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('biller.miscs.index') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage Tags</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('biller.miscs.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tags
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endauth 
+
                         {{-- project --}}
                         @permission('manage-project') 
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> Projects</a>
