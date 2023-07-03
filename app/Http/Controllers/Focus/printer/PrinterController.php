@@ -65,7 +65,7 @@ class PrinterController extends Controller
      */
     public function browser_print(ManageInvoiceRequest $request)
     {
-        $invoice = Invoice::find($request->invoice_id);
+        $invoice = Invoice::findOrFail($request->invoice_id);
         $extras = [
             'type' => 1,
             'custom' => 2,

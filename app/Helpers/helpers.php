@@ -312,32 +312,36 @@ function datetime_for_database($input, $c = true)
     $date = $date->format('Y-m-d H:i:s');
     return $date;
 }
+
 function amountFormat($number = 0, $currency = null)
 {
-    if (!$currency) {
+    if ($currency) {
+        $result = \App\Models\currency\Currency::where('id', $currency)->first();
+        if ($result) {
+            $precision_point = $result->precision_point;
+            $decimal_sep = $result->decimal_sep;
+            $thousand_sep = $result->thousand_sep;
+            $symbol_position = $result->symbol_position;
+            $symbol = $result->symbol;
+            if (config('currency.id') != $result->id) {
+                $number = $number / config('currency.rate');
+            }
+        }
+    }
+
+    if (!$currency || !$result) {
         $precision_point = config('currency.precision_point');
         $decimal_sep = config('currency.decimal_sep');
         $thousand_sep = config('currency.thousand_sep');
         $symbol_position = config('currency.symbol_position');
         $symbol = config('currency.symbol');
-    } else {
-        $result = \App\Models\currency\Currency::withoutGlobalScopes()->where('id', '=', $currency)->first();
-        $precision_point = $result->precision_point;
-        $decimal_sep = $result->decimal_sep;
-        $thousand_sep = $result->thousand_sep;
-        $symbol_position = $result->symbol_position;
-        $symbol = $result->symbol;
-        if (config('currency.id') != $result->id) {
-            $number = $number / config('currency.rate');
-        }
     }
+
     $number = number_format($number, $precision_point, $decimal_sep, $thousand_sep);
-    if ($symbol_position) {
-        return $symbol . ' ' . $number;
-    } else {
-        return $number . ' ' . $symbol;
-    }
+    if ($symbol_position) return $symbol . ' ' . $number;
+    return $number . ' ' . $symbol;
 }
+
 function numberFormat($number = 0, $currency = null, $precision_point_off = false)
 {
     if (!$currency) {

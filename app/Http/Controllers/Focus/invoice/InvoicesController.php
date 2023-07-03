@@ -525,14 +525,21 @@ class InvoicesController extends Controller
      */
     public function pos_store(CreateInvoiceRequest $request)
     {
-        if (request('is_pay') && (!request('pmt_reference') || !request('p_account'))) {
-            throw ValidationException::withMessages(['payment reference and payment account is required!']);
+        $request->validate(['customer_id' => 'required']);
+        if (count(array_filter($request->only('is_pay', 'pmt_reference', 'p_account'))) < 3) {
+            throw ValidationException::withMessages(['Payment Reference and Payment Account required']);
         }
         
-        // dd($request->all());
         try {
             $result = $this->pos_repository->create($request->except('_token'));
         } catch (\Throwable $th) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'Error', 
+                    'message' => 'Error Processing POS Transaction! Try again later',
+                    'error_message' => $th->getMessage(),
+                ]);
+            }
             return errorHandler('Error Creating POS Transaction', $th);
         }
         
@@ -540,7 +547,6 @@ class InvoicesController extends Controller
             'status' => 'Success', 
             'message' => 'POS Transaction Done Successfully',
             'invoice' => $result,
-            // 'invoice' => (object) ['id' => 62],
         ]);
     }
 

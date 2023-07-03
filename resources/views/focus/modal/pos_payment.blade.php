@@ -49,14 +49,14 @@
                             <div class="form-group  text-bold-600 red">
                                 <label for="amount">{{trans('general.balance_due')}}</label>
                                 <input type="text" class="form-control red" name="amount" id="balance1"
-                                    onkeypress="return isNumber(event)" value="0.00" required="">
+                                    onkeypress="return isNumber(event)" value="0.00" readonly>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="form-group text-bold-600 text-g">
                                 <label for="b_change">{{trans('pos.change')}}</label>
                                 <input type="text" onkeypress="return isNumber(event)" class="form-control green"
-                                    name="b_change" id="change_p" value="0">
+                                    name="b_change" id="change_p" value="0" readonly>
                             </div>
                         </div>
                     </div>
