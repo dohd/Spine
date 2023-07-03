@@ -65,13 +65,14 @@
                     </div>
                 </td>                
                 <td><input type="text" class="form-control new-qty" name="new_qty[]" id="newqty-${n}" required></td>
-                <td><input type="text" class="form-control price" name="price[]" id="price-${n}" required></td>
+                <td><input type="text" class="form-control price" name="price[]" id="price-${n}" required readonly></td>
                 <td class="text-center amount">0</td>
                 <td>${dropDown()}</td>
                 <input type="hidden" name="product_id[]" value="0" id="productid-${n}">
                 <input type="hidden" name="item_id[]" value="0" id="itemid-${n}">
                 <input type="hidden" class="row-index" name="row_index[]" value="${n}" id="rowindex-${n}">
-                <input type="hidden" name="a_type[]" value="1" id="atype-${n}">                
+                <input type="hidden" name="a_type[]" value="1" id="atype-${n}"> 
+                <input type="hidden" name="misc[]" value="0" id="misc-${n}"> 
             </tr>
         `;
     }
@@ -90,10 +91,27 @@
                 <input type="hidden" class="form-control update" name="new_qty[]" value="0" id="newqty-${n}">
                 <input type="hidden" class="form-control update" name="price[]" value="0" id="price-${n}">
                 <input type="hidden" class="row-index" name="row_index[]" value="${n}" id="rowindex-${n}">
-                <input type="hidden" name="a_type[]" value="2" id="atype-${n}">                
+                <input type="hidden" name="a_type[]" value="2" id="atype-${n}"> 
+                <input type="hidden" name="misc[]" value="0" id="misc-${n}"> 
             </tr>
         `;
     }
+    
+    // add miscellaneous product
+    let rowId = 1;
+    const rowHtml = $("#productRow").html();
+    $('#addMisc').click(function() {
+        $('#productsTbl tbody tr.invisible').remove();
+        const i = 'p' + rowId;
+        $('#productsTbl tbody').append(productRow(i));
+        $('#itemname-'+i).autocomplete(autocompleteProp(i));
+        $('#misc-'+i).val(1);
+        $('#qty-'+i).val(1);
+        ['qty', 'rate', 'amount', 'lineprofit'].forEach(v => {
+            $(`#${v}-${i}`).addClass('invisible');
+        });
+        rowId++;
+    });
 
     // On skill-item update
     $('#skill-item').on('change', '.update', function() {
@@ -198,12 +216,14 @@
             $('#newqty-'+i).val(parseFloat(v.estimate_qty || v.new_qty));
             $('#unit-'+i).val(v.unit).change();
             $('#price-'+i).val(accounting.formatNumber(v.buy_price || v.price)).change();
+            $('#misc-'+i).val(v.misc);
         } else if (v.a_type == 2) {
             // title type
             $('#productsTbl tbody').append(titleRow(i));
             $('#numbering-'+i).val(v.numbering);
             $('#itemid-'+i).val(v.id);
             $('#itemname-'+i).val(v.product_name);
+            $('#misc-'+i).val(v.misc);
         }
         productIndx++;
     });

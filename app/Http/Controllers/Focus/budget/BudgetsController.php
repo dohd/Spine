@@ -107,7 +107,7 @@ class BudgetsController extends Controller
             $project = @$budget->quote->project;
             if ($project) return new RedirectResponse(route('biller.projects.show', $project), ['flash_success' => 'Budget Updated Successfully']);
             return new RedirectResponse(route('biller.budgets.index'), ['flash_success' => 'Budget Updated Successfully']);
-        } catch (\Throwable $th) { dd($th);
+        } catch (\Throwable $th) {
             return errorHandler('Error Updating Budget!', $th);
         }
     }

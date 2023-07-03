@@ -121,8 +121,7 @@ class QuotesController extends Controller
             $valid_token = token_validator('', 'q'.$result->id .$result->tid, true);
             $msg .= ' <a href="'. route('biller.print_quote', [$result->id, 4, $valid_token, 1]) .'" class="invisible" id="printpreview"></a>';
         } catch (\Throwable $th) {
-            $inst = isset($data['bank_id'])? ' Proforma Invoice' : 'Quote';
-            return errorHandler('Error Creating ' . $inst, $th);
+            return errorHandler('Error Creating ' . (@$data['bank_id']? ' Proforma Invoice' : 'Quote'), $th);
         } 
 
         return new RedirectResponse($route, ['flash_success' => $msg]);

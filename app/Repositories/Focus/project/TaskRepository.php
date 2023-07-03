@@ -59,7 +59,7 @@ class TaskRepository extends BaseRepository
         if (!$project_id) trigger_error('Project required!');
 
         $milestone_id = @$input['milestone_id'];
-        if (!$project_id) trigger_error('Milestone required!');
+        if (!$milestone_id) trigger_error('Milestone required!');
 
         // task
         $task_input = array_diff_key($input, array_flip(['milestone_id', 'tags', 'employees', 'projects', 'link_to_calender', 'color']));

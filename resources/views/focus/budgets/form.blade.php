@@ -73,6 +73,7 @@
             <button type="button" class="btn btn-primary" id="add-title">
                 <i class="fa fa-plus-square"></i> Add Title
             </button>
+            <a href="javascript:" class="btn btn-warning px-3 ml-2" id="addMisc"><i class="fa fa-plus"></i> Expense & Misc</a>
         </div>
     </div>                            
 </div>

@@ -58,7 +58,7 @@ class BudgetRepository extends BaseRepository
         // budget items
         $data_items = Arr::only($input, [
             'numbering', 'row_index', 'a_type', 'product_id', 'product_name',            
-            'product_qty', 'unit', 'new_qty',  'price'
+            'product_qty', 'unit', 'new_qty',  'price','misc'
         ]);
         $data_items = modify_array($data_items);
         $data_items = array_map(function ($v) use($result) {
@@ -127,6 +127,7 @@ class BudgetRepository extends BaseRepository
                 'price' => numberClean($item['price']),
                 'new_qty' => numberClean($item['new_qty']),
                 'budget_id' => $budget->id,
+                'product_id' => $item['product_id'] ?: 0,
             ]);
             $new_item = BudgetItem::firstOrNew(['id' => $item['item_id']]);
             $new_item->fill($item);
@@ -171,8 +172,12 @@ class BudgetRepository extends BaseRepository
      */
     public function delete(Budget $budget)
     {   
-        if ($budget->delete()) return true;
-            
-        throw new GeneralException(trans('exceptions.backend.leave_category.delete_error'));
+        DB::beginTransaction();
+
+        $budget->items()->delete();
+        if ($budget->delete()) {
+            DB::commit();
+            return true;
+        }            
     }
 }
