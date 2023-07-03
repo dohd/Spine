@@ -72,7 +72,8 @@ class ProductsTableController extends Controller
             ->addColumn('name', function ($product) {
                 if ($product->standard) {
                     $this->standard_product = $product->standard;
-                    return '<a class="font-weight-bold" href="' . route('biller.products.show', [$product->id]) . '">' . "{$product->name} ({$product->standard->name})" . '</a>';
+                    $product_name = $product->name == $product->standard->name? $product->name : "{$product->name} ({$product->standard->name})";
+                    return '<a class="font-weight-bold" href="' . route('biller.products.show', [$product->id]) . '">' . $product_name . '</a>';
                 }
                 $this->standard_product = $product->standard ?: $product;
                 return '<a class="font-weight-bold" href="' . route('biller.products.show', [$product->id]) . '">' . $product->name . '</a>';

@@ -391,6 +391,18 @@
                 <li class="dropdown nav-item" data-menu="dropdown">
                     <a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="fa fa-industry"></i><span>Project Management</span></a>
                     <ul class="dropdown-menu">
+                        {{-- project --}}
+                        @permission('manage-project') 
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> Projects</a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage {{ trans('projects.projects')}}</a>
+                                </li>
+                                
+                            </ul>
+                        </li>
+                        @endauth 
+
                         {{-- project tags --}}
                         @permission('manage-project') 
                             <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> Project Tags</a>
@@ -404,18 +416,6 @@
                                     </li>
                                 </ul>
                             </li>
-                        @endauth 
-
-                        {{-- project --}}
-                        @permission('manage-project') 
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> Projects</a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage {{ trans('projects.projects')}}</a>
-                                </li>
-                                
-                            </ul>
-                        </li>
                         @endauth 
                         {{-- partial verification --}}
                         @permission('manage-quote-verify') 
@@ -571,7 +571,7 @@
                         {{-- Product Opening Stock --}}
                         @permission('manage-opening-stock')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu">
-                            <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-balance-scale"></i> Product Opening Stock</a>
+                            <a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-balance-scale"></i> Opening Stock</a>
                             <ul class="dropdown-menu">
                                 <li>
                                     <a class="dropdown-item" href="{{ route('biller.opening_stock.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Opening Stock</a>

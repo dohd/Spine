@@ -115,7 +115,6 @@ class ProductRepository extends BaseRepository
             if (empty($item['image'])) $item['image'] = 'example.png';
             $item['name'] = $item['variation_name'];
             unset($item['variation_name']);
-
             foreach ($item as $key => $val) {
                 if ($key == 'image' && $val != 'example.png') $item[$key] = $this->uploadFile($val);
                 if (in_array($key, ['price', 'purchase_price', 'disrate', 'qty', 'alert'])) {
@@ -132,18 +131,14 @@ class ProductRepository extends BaseRepository
                     else $item[$key] = null;
                 }
             }
-
-            $variations[] =  array_replace($item, [
-                'parent_id' => $result->id,
-                'ins' => auth()->user()->ins
-            ]);
+            $variations[] =  array_replace($item, ['parent_id' => $result->id, 'ins' => auth()->user()->ins]);
         }
         ProductVariation::insert($variations);   
         
-        DB::commit();
-        if ($result) return $result;
-
-        throw new GeneralException(trans('exceptions.backend.products.create_error'));
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
     }
 
     /**

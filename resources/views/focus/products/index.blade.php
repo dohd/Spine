@@ -74,14 +74,13 @@
                             <table id="productsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
-                                        <th>{{ trans('labels.backend.products.table.id') }}</th>
-                                        <th>Description</th>
-                                        <th>Product Code</th>
+                                        <th>#</th>
+                                        <th>Item Name</th>
+                                        <th>Code</th>
                                         <th>Qty</th>
                                         <th>UoM</th>
                                         <th>Unit Cost</th>
                                         <th>Total Cost</th>
-                                        <th>{{ trans('general.createdat') }}</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -174,7 +173,6 @@
                     {data: 'unit', name: 'unit'},
                     {data: 'purchase_price', name: 'purchase_price'},
                     {data: 'total', name: 'total'},
-                    {data: 'created_at', name: 'created_at'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
