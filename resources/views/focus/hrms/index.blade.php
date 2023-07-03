@@ -29,7 +29,8 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>{{ trans('hrms.employees') }}</th>
+                                        <th>Employee No.</th>
+                                        <th>Name</th>
                                         <th>{{ trans('hrms.role') }}</th>
                                         <th>{{ trans('hrms.email') }}</th>
                                         <th>{{ trans('hrms.picture') }}</th>
@@ -98,6 +99,7 @@
         },
         columns: [
             {data: 'DT_Row_Index', name: 'id'},
+            {data: 'employee_no', name: 'employee_no'},
             {data: 'name', name: 'name'},
             {data: 'role', name: 'role'},
             {data: 'email', name: 'email'},
