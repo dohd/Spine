@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Focus\goodsreceivenote;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
+use App\Models\additional\Additional;
 use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\supplier\Supplier;
 use App\Repositories\Focus\goodsreceivenote\GoodsreceivenoteRepository;
@@ -44,8 +45,9 @@ class GoodsReceiveNoteController extends Controller
     {
         $tid = Goodsreceivenote::where('ins', auth()->user()->ins)->max('tid');
         $suppliers = Supplier::get(['id', 'name']);
+        $additionals = Additional::get();
 
-        return view('focus.goodsreceivenotes.create', compact('tid', 'suppliers'));
+        return view('focus.goodsreceivenotes.create', compact('tid', 'suppliers', 'additionals'));
     }
 
     /**
@@ -88,8 +90,9 @@ class GoodsReceiveNoteController extends Controller
     public function edit(Goodsreceivenote $goodsreceivenote)
     {
         $suppliers = Supplier::get(['id', 'name']);
+        $additionals = Additional::get();
 
-        return view('focus.goodsreceivenotes.edit', compact('goodsreceivenote', 'suppliers'));
+        return view('focus.goodsreceivenotes.edit', compact('goodsreceivenote', 'suppliers', 'additionals'));
     }
 
     /**

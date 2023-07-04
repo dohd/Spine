@@ -28,9 +28,9 @@
     <div class="col-2">
         <label for="tax" class="caption">TAX %</label>
         <select name="tax_rate" id="tax_rate" class="custom-select">
-            @foreach ([0, 16, 8] as $val)
-                <option value="{{ $val }}" {{ @$goodsreceivenote && $goodsreceivenote->tax_rate == $val? 'selected' : '' }}>
-                    {{ $val? $val . '% VAT' : 'OFF' }}
+            @foreach ($additionals as $row)
+                <option value="{{ +$row->value }}" {{ @$goodsreceivenote && $goodsreceivenote->tax_rate == $row->value? 'selected' : '' }}>
+                    {{ $row->name }}
                 </option>
             @endforeach
         </select>
