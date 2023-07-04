@@ -42,7 +42,7 @@
         {{ Form::label('unit', trans('products.stock_type'),['class' => 'control-label']) }}
         <select class="custom-select" name="stock_type" required>
             @foreach (['general', 'consumable', 'service', ] as $i => $val)
-                <option value="{{ $i }}" {{ @$product->stock_type == $val? 'selected' : '' }}>
+                <option value="{{ $val }}" {{ @$product->stock_type == $val? 'selected' : '' }}>
                     {{ ucfirst($val) }}
                 </option>
             @endforeach

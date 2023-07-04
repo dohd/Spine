@@ -7,6 +7,7 @@ use DB;
 use App\Models\product\Product;
 use App\Exceptions\GeneralException;
 use App\Models\items\PurchaseItem;
+use App\Models\productcategory\Productcategory;
 use App\Repositories\BaseRepository;
 use DateTime;
 use Error;
@@ -115,6 +116,7 @@ class ProductRepository extends BaseRepository
             if (empty($item['image'])) $item['image'] = 'example.png';
             $item['name'] = $item['variation_name'];
             unset($item['variation_name']);
+
             foreach ($item as $key => $val) {
                 if ($key == 'image' && $val != 'example.png') $item[$key] = $this->uploadFile($val);
                 if (in_array($key, ['price', 'purchase_price', 'disrate', 'qty', 'alert'])) {
@@ -129,6 +131,20 @@ class ProductRepository extends BaseRepository
                     $now = new DateTime(date('Y-m-d'));
                     if ($expiry > $now) $item[$key] = date_for_database($val);
                     else $item[$key] = null;
+                }
+                if ($key == 'code' && !$val){
+                    $productcategory = Productcategory::where('id', @$input['productcategory_id'])->first();
+                    if ($productcategory) {
+                        $title_arr = explode(' ', $productcategory->title);
+                        if (count($title_arr) > 1) {
+                            $init = current($title_arr)[0];
+                            $end = end($title_arr)[0];
+                            $count = ProductVariation::whereHas('product', function($q) use($input) {
+                                $q->where('productcategory_id', $input['productcategory_id']);
+                            })->count();
+                            $item[$key] = $init . $end . sprintf("%04d", $count+1);
+                        }
+                    }
                 }
             }
             $variations[] =  array_replace($item, ['parent_id' => $result->id, 'ins' => auth()->user()->ins]);
@@ -198,6 +214,20 @@ class ProductRepository extends BaseRepository
                     $now = new DateTime(date('Y-m-d'));
                     if ($expiry > $now) $item[$key] = date_for_database($val);
                     else $item[$key] = null;
+                }
+                if ($key == 'code' && !$val){
+                    $productcategory = Productcategory::where('id', @$input['productcategory_id'])->first();
+                    if ($productcategory) {
+                        $title_arr = explode(' ', $productcategory->title);
+                        if (count($title_arr) > 1) {
+                            $init = current($title_arr)[0];
+                            $end = end($title_arr)[0];
+                            $count = ProductVariation::whereHas('product', function($q) use($input) {
+                                $q->where('productcategory_id', $input['productcategory_id']);
+                            })->count();
+                            $item[$key] = $init . $end . sprintf("%04d", $count+1);
+                        }
+                    }
                 }
             }
 
