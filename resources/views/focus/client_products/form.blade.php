@@ -29,7 +29,7 @@
         {{ Form::text('uom', null, ['class' => 'form-control', 'required']) }}
     </div>
     <div class="col-2">
-        <label for="rate">Rate (Ksh.)</label>
+        <label for="rate">Rate </label>
         {{ Form::text('rate', null, ['class' => 'form-control', 'id' => 'rate', 'required']) }}
     </div>
 </div>

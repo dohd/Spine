@@ -362,12 +362,12 @@
                                     @foreach ($data['stock_alert'] as $productvariation)
                                         <li class="list-group-item">
                                             <span class="badge badge-danger float-xs-right">
-                                                Qty: {{ +$productvariation->qty }} {{ $productvariation->product->unit }}                                             
+                                                Qty: {{ +$productvariation->qty }} {{ @$productvariation->product->unit }}                                             
                                             </span> - 
                                             <a href="{{ route('biller.products.show', $productvariation->parent_id) }}">
                                                 {{ $productvariation->name }}
                                             </a> - 
-                                            <small class="purple"> <iclass="ft-map-pin"></i>{{ $productvariation->warehouse->title }}</small>
+                                            <small class="purple"> <i class="ft-map-pin"></i>{{ @$productvariation->warehouse->title }}</small>
                                         </li>
                                     @endforeach
                                 </ul>
