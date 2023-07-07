@@ -544,6 +544,7 @@ class SupplierRepository extends BaseRepository
      */
     public function delete($supplier)
     {
+        if ($supplier->id == 1) throw ValidationException::withMessages(['Cannot delete default supplier']);
         if ($supplier->bills->count())
             throw ValidationException::withMessages(['Supplier has attached Bill!']);
         if ($supplier->delete()) return true;

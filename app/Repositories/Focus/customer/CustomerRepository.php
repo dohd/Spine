@@ -523,6 +523,7 @@ class CustomerRepository extends BaseRepository
      */
     public function delete($customer)
     {
+        if ($customer->id == 1) throw ValidationException::withMessages(['Cannot delete default customer']);
         if ($customer->leads->count()) 
             throw ValidationException::withMessages(['Customer has attached Tickets']);
         if ($customer->delete()) return true;
