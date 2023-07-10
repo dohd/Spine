@@ -61,6 +61,20 @@ class TransactionsTableController extends Controller
     {
         $query = $this->transaction->getForDataTable();
 
+        // aggregate
+        $aggregate = null;
+        $diff = 'credit-debit';
+        if (request('rel_id')) {
+            $q2 = clone $query;
+            $tranx = $q2->first();
+            if ($tranx && $tranx->account->account_type) {
+                $account_type = $tranx->account->account_type;
+                if (in_array($account_type, ['Asset', 'Expense'])) $diff = 'debit-credit';
+            }
+            $sql = "SUM(debit) as debit, SUM(credit) as credit, SUM({$diff}) as balance";
+            $aggregate = $q2->selectRaw($sql)->first()->toArray();
+        }
+
         // balance group
         $query_1 = clone $query;
         $result = $query_1->get();
@@ -99,7 +113,9 @@ class TransactionsTableController extends Controller
             ->addColumn('credit', function ($tr) {
                 return numberFormat($tr->credit);
             })
-            ->addColumn('balance', function ($tr) {
+            ->addColumn('balance', function ($tr) use($aggregate, $diff) {
+                if (@$aggregate) return numberFormat(0);
+                    
                 $balance = 0;
                 foreach($this->balance_groups as $group) {
                     if ($group->tid == $tr->tid) {
@@ -107,14 +123,24 @@ class TransactionsTableController extends Controller
                         break;
                     }
                 }
-                
                 return numberFormat($balance);
             })
             ->addColumn('tr_date', function ($tr) {
                 return dateFormat($tr->tr_date);
             })
-            ->addColumn('created_at', function ($tr) {
-                return $tr->created_at->format('d-m-Y');
+            ->addColumn('aggregate', function () use($aggregate) {
+                if (isset($aggregate)) {
+                    return [
+                        'debit' => numberFormat($aggregate['debit']), 
+                        'credit' => numberFormat($aggregate['credit']),
+                        'balance' => numberFormat($aggregate['balance']),
+                    ];
+                }
+                return [
+                    'debit' => 0, 
+                    'credit' => 0,
+                    'balance' => 0 
+                ];
             })
             ->addColumn('actions', function ($tr) {
                 return $tr->action_buttons;

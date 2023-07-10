@@ -9,20 +9,17 @@
             'customer' => [trans('customers.email') => $segment->email],
             'account' => [
                 'Account No' => $segment->number, 
+                $words['name'] => $words['name_data'],
                 'Account Type' => $segment->account_type, 
-                'Note' => $segment->note
+                'Note' => $segment->note,
+                'Debit' => amountFormat($segment->debit),
+                'Credit' => amountFormat($segment->credit),
+                'Ledger Balance' => in_array($segment->account_type, ['Asset', 'Expense'])? 
+                    amountFormat($segment->debit - $segment->credit) : amountFormat($segment->credit - $segment->debit),
             ],
-        ];
-        $totals = [amountFormat($segment->debit), amountFormat($segment->credit)];
-        $model_details = array_map(function ($v) use($words, $totals) {
-            $v = array_merge([$words['name'] => $words['name_data']], $v, [
-                'Debit' => $totals[0],
-                'Credit' => $totals[1]
-            ]);
-            return $v;                    
-        }, $model_details);
+        ];        
 
-        $rows = array();
+        $rows = [];
         if ($input['rel_type'] == 0) $rows = $model_details['tr_category']; 
         elseif ($input['rel_type'] < 9) $rows = $model_details['customer'];
         elseif ($input['rel_type'] == 9) $rows = $model_details['account'];
@@ -44,7 +41,7 @@
         </div>
     </div>
 
-    <!-- Account info -->
+    <!-- Account Summary -->
     @if ($words)
         <div class="card">
             <div class="card-body">
@@ -62,6 +59,7 @@
             </div>
         </div>
     @endif
+    <!-- End Account Summary -->
 
     <div class="content-body">
         <div class="row">
@@ -69,23 +67,45 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-2">{{ trans('general.search_date')}}</div>
+                            @if ($words)
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="">Debit</label>
+                                                <input type="text" class="form-control form-control-sm tbl_debit" readonly>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="">Credit</label>
+                                                <input type="text" class="form-control form-control-sm tbl_credit" readonly>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="">Balance</label>
+                                                <input type="text" class="form-control form-control-sm tbl_balance" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div class="row no-gutters">
                                 @php
                                     $now = date('d-m-Y');
                                     $start = date('d-m-Y', strtotime("{$now} - 3 months"));
                                 @endphp
-                                <div class="col-2">
+                                <div class="col-md-2">{{ trans('general.search_date')}}:</div>
+                                <div class="col-md-1 mr-1">
                                     <input type="text" name="start_date" value="{{ $start }}" id="start_date" class="form-control form-control-sm datepicker">
                                 </div>
-                                <div class="col-2">
+                                <div class="col-md-1 mr-1">
                                     <input type="text" name="end_date" value="{{ $now }}" id="end_date" class="form-control form-control-sm datepicker">
                                 </div>
-                                <div class="col-2">
+                                <div class="col-md-1">
                                     <input type="button" name="search" id="search" value="Search" class="btn btn-info btn-sm">
                                 </div>
                             </div>
-                            <hr>                            
+                            <hr> 
+
                             <table id="transactionsTbl" class="table table-striped table-bordered" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
@@ -163,6 +183,18 @@
                     url: '{{ route("biller.transactions.get") }}',
                     type: 'post',
                     data: {system, start_date: $('#start_date').val(), end_date: $('#end_date').val(), ...input},
+                    dataSrc: ({data}) => {
+                        $('.tbl_debit').val('');
+                        $('.tbl_credit').val('');
+                        $('.tbl_balance').val('');
+                        if (data.length && data[0].aggregate) {
+                            const aggr = data[0].aggregate;
+                            $('.tbl_debit').val(aggr.debit);
+                            $('.tbl_credit').val(aggr.credit);
+                            $('.tbl_balance').val(aggr.balance);
+                        }
+                        return data;
+                    },
                 },
                 columns: [{
                         data: 'DT_Row_Index',

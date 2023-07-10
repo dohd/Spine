@@ -114,6 +114,7 @@ class TransactionsController extends Controller
                 $words['name_data'] = $segment->holder;
                 break;
         }
+        
         return compact('words', 'segment');
     }
 

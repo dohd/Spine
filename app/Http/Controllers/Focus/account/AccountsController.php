@@ -177,7 +177,7 @@ class AccountsController extends Controller
     {
         $params =  ['rel_type' => 9, 'rel_id' => $account->id, 'system' => $account->system];
 
-        return new RedirectResponse(route('biller.transactions.index', $params), '');
+        return new RedirectResponse(route('biller.transactions.index', $params), []);
     }
 
     /**
