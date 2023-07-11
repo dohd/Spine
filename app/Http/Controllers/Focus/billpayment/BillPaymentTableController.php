@@ -101,9 +101,12 @@ class BillPaymentTableController extends Controller
             ->addColumn('unallocated', function ($billpayment) {
                 return numberFormat($billpayment->amount - $billpayment->allocate_ttl);
             })
-            ->editColumn('payment_mode', function ($payment) {
-                $pmt_type = ucfirst(str_replace('_', ' ', $payment->payment_type));
-                return "{$payment->payment_mode} - {$payment->reference} <br> ({$pmt_type})";
+            ->editColumn('payment_mode', function ($billpayment) {
+                $pmt_type = ucfirst(str_replace('_', ' ', $billpayment->payment_type));
+                return "{$billpayment->payment_mode} - {$billpayment->reference} <br> ({$pmt_type})";
+            })
+            ->filterColumn('payment_mode', function($query, $text) {
+                $query->where('payment_type', 'LIKE', "%{$text}%");
             })
             ->addColumn('bill_no', function ($billpayment) use ($prefixes) {
                 $links = [];
