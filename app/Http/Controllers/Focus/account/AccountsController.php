@@ -233,11 +233,7 @@ class AccountsController extends Controller
                 $q->when($dates, function ($q) use($dates) {
                     $q->whereBetween('tr_date', $dates);
                 });
-            })->with(['transactions' => function ($q) use($dates) {
-                $q->when($dates, function ($q) use($dates) {
-                    $q->whereBetween('tr_date', $dates);
-                });
-            }]);
+            });
 
         $accounts = $q->get();
 
@@ -266,16 +262,12 @@ class AccountsController extends Controller
             $bal_sheet_q->whereIn('account_type', ['Asset', 'Equity', 'Liability'])
                 ->whereHas('transactions', function ($q) use($date) {
                     $q->whereDate('tr_date', '<=', $date);
-                })->with(['transactions' => function ($q) use($date) {
-                    $q->whereDate('tr_date', '<=', $date);
-                }]);
+                });
             // profit & loss accounts
             $profit_loss_q->whereIn('account_type', ['Income', 'Expense'])
                 ->whereHas('transactions', function ($q) use($date) {
                     $q->where('tr_date', '<=', $date);
-                })->with(['transactions' => function ($q) use($date) {
-                    $q->whereDate('tr_date', '<=', $date);
-                }]);
+                });
         } else {
             // balance sheet accounts
             $bal_sheet_q->whereHas('transactions')->whereIn('account_type', ['Asset', 'Equity', 'Liability']);
@@ -287,8 +279,8 @@ class AccountsController extends Controller
         $net_profit = 0;
         $net_accounts = $profit_loss_q->get();
         foreach ($net_accounts as $account) {
-            $debit = $account->transactions->sum('debit');
-            $credit = $account->transactions->sum('credit');
+            $debit = $account->transactions()->sum('debit');
+            $credit = $account->transactions()->sum('credit');
             $account_type = $account->account_type;
             if ($account_type == 'Income') {
                 $credit_balance = round($credit - $debit, 2);
@@ -319,12 +311,8 @@ class AccountsController extends Controller
             $q->when($end_date, function ($q) use($end_date) {
                 $q->whereDate('tr_date', '<=', $end_date);
             });
-        })->with(['transactions' => function ($q) use($end_date) {
-            $q->when($end_date, function ($q) use($end_date) {
-                $q->whereDate('tr_date', '<=', $end_date);
-            });
-        }]);
-        
+        });
+    
         $accounts = $q->orderBy('number', 'asc')->get();
         $date = date_for_database($end_date);
         if ($request->type == 'p') 
