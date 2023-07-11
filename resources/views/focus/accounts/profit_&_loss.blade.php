@@ -74,8 +74,16 @@
                                             @if ($is_revenue || $is_cog || $is_dir_expense)                                          
                                                 @php
                                                     $balance = 0;
-                                                    $debit = $account->transactions()->sum('debit');
-                                                    $credit = $account->transactions()->sum('credit');
+                                                    $debit = $account
+                                                    ->transactions()
+                                                    ->when(@$dates, fn($q) => $q->whereBetween('tr_date', $dates))
+                                                    ->sum('debit');
+
+                                                    $credit = $account
+                                                    ->transactions()
+                                                    ->when(@$dates, fn($q) => $q->whereBetween('tr_date', $dates))
+                                                    ->sum('credit');
+                                                    
                                                     if ($type == 'Income') {
                                                         $credit_balance = round($credit - $debit, 2);
                                                         $balance = $credit_balance;

@@ -66,8 +66,15 @@
                                         @foreach ($accounts as $account)
                                             @php
                                                 $balance = 0;
-                                                $debit = $account->transactions()->sum('debit');
-                                                $credit = $account->transactions()->sum('credit');
+
+                                                $debit = $account->transactions()
+                                                ->when(@$date, fn($q) => $q->whereDate('tr_date', '<=', $date))
+                                                ->sum('debit');
+
+                                                $credit = $account->transactions()
+                                                ->when(@$date, fn($q) => $q->whereDate('tr_date', '<=', $date))
+                                                ->sum('credit');
+                                                
                                                 if ($account->account_type == 'Asset') {
                                                     $balance = round($debit - $credit, 2);
                                                     if ($balance < 0) {

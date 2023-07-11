@@ -60,8 +60,14 @@
                                 @endphp
                                 @foreach ($accounts as $i => $account)
                                     @php
-                                        $debit = $account->transactions()->sum('debit');
-                                        $credit = $account->transactions()->sum('credit');
+                                        $debit = $account->transactions()
+                                        ->when(@$date, fn($q) => $q->whereDate('tr_date', '<=', $date))
+                                        ->sum('debit');
+                                        
+                                        $credit = $account->transactions()
+                                        ->when(@$date, fn($q) => $q->whereDate('tr_date', '<=', $date))
+                                        ->sum('credit');
+
                                         $debit_balance = 0;
                                         $credit_balance = 0;
                                         if (in_array($account->account_type, ['Asset', 'Expense'], 1)) {
