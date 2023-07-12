@@ -106,14 +106,26 @@
             $('#allocate_ttl').val('');
             $('#balance').val('');
             $('#invoiceTbl tbody tr').remove();
-            if ($(this).val()) {
+            
+            customer_id = this.value;
+            if (customer_id) {
                 // fetch invoices
-                const url = "{{ route('biller.invoices.client_invoices') }}?customer_id=" + $(this).val();
+                const url = "{{ route('biller.invoices.client_invoices') }}?customer_id=" + customer_id;
                 $.get(url, data => {
                     data.forEach((v, i) => {
                         $('#invoiceTbl tbody').append(Form.invoiceRow(v, i));
                     });
                 });
+                
+                $('#rel_payment').val('');
+                $('#rel_payment option').each(function() {
+                    if ($(this).attr('customer_id') == customer_id)
+                        $(this).removeClass('d-none');
+                    else $(this).addClass('d-none');
+                })
+            } else {
+                $('#rel_payment option:not(:eq(0))').remove();
+                Form.loadUnallocatedPayments();
             }
         },
 
