@@ -53,9 +53,9 @@ class CashbookTableController extends Controller
     {
         // $core = $this->transaction();
         $core = AccountsController::cashbook_transactions();
-
-        $sum_debit = $core->sum('debit');
-        $sum_credit = $core->sum('credit');
+        
+        $sum_debit = $core->reduce(fn($init, $curr) => $init+$curr['debit'], 0);
+        $sum_credit = $core->reduce(fn($init, $curr) => $init+$curr['credit'], 0);
         $balance = $sum_debit - $sum_credit;
         $aggregate = compact('sum_debit', 'sum_credit', 'balance');
 

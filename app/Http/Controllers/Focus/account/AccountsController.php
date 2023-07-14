@@ -363,16 +363,14 @@ class AccountsController extends Controller
     // 
     static function cashbook_transactions()
     {
-        $q = Transaction::query()->where('tr_type', 'pmt');
-        $q->whereHas('account', function ($q) {
+        $q = Transaction::whereIn('tr_type', ['pmt', 'xfer'])
+        ->whereHas('account', function ($q) {
             $q->where('account_type', 'Asset')->whereHas('accountType', fn($q) => $q->where('system', 'bank'));
             $q->when(request('account_id'), fn($q) => $q->where('accounts.id', request('account_id')));
-        });
-
-        $q->when(request('tr_type') == 'receipt', fn($q) => $q->where('debit', '>', 0));
-        $q->when(request('tr_type') == 'payment', fn($q) => $q->where('credit', '>', 0));
-
-        $q->when(request('start_date') && request('end_date'), function ($q) {
+        })
+        ->when(request('tr_type') == 'receipt', fn($q) => $q->where('debit', '>', 0))
+        ->when(request('tr_type') == 'payment', fn($q) => $q->where('credit', '>', 0))
+        ->when(request('start_date') && request('end_date'), function ($q) {
             $q->whereBetween('tr_date', [
                 date_for_database(request('start_date')),
                 date_for_database(request('end_date')),

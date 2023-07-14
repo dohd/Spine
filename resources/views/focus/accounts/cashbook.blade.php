@@ -47,11 +47,11 @@
                                 </div>  
 
                                 <div class="col-2">
-                                    <label for="debit">Total Debit</label>
+                                    <label for="debit">Debit (Cash In)</label>
                                     {{ Form::text('debit', null, ['class' => 'form-control', 'id' => 'debit', 'readonly']) }}
                                 </div>
                                 <div class="col-2">
-                                    <label for="credit">Total Credit</label>
+                                    <label for="credit">Credit (Cash Out)</label>
                                     {{ Form::text('credit', null, ['class' => 'form-control', 'id' => 'credit', 'readonly']) }}
                                 </div>
                                 <div class="col-2">
@@ -92,8 +92,8 @@
                                         <th>Particulars</th>
                                         <th>Tr Type</th>
                                         <th>Account</th>
-                                        <th>Debit</th>
-                                        <th>Credit</th> 
+                                        <th>Debit (Cash In)</th>
+                                        <th>Credit (Cash Out)</th> 
                                     </tr>
                                 </thead>
                                 <tbody>
