@@ -62,12 +62,12 @@ class LeadRepository extends BaseRepository
         DB::beginTransaction();
         
         $result = $lead->update($data);
-        // update attached quote and djc
+        
+        // update related djcs, quotes, projects
+        $lead->djcs()->update(['client_id' => $lead->client_id, 'branch_id' => $lead->branch_id]);
         foreach ($lead->quotes as $quote) {
             $quote->update(['customer_id' => $lead->client_id, 'branch_id' => $lead->branch_id]);
-        }
-        foreach ($lead->djcs as $djc) {
-            $djc->update(['client_id' => $lead->client_id, 'branch_id' => $lead->branch_id]);
+            if ($quote->project) $quote->project->update(['customer_id' => $lead->client_id, 'branch_id' => $lead->branch_id]);
         }
 
         if ($result) {
