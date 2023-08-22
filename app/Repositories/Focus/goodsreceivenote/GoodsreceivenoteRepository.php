@@ -128,8 +128,6 @@ class GoodsreceivenoteRepository extends BaseRepository
             DB::commit();
             return $result;
         }
-
-        throw new GeneralException('Error Creating Lead');
     }
 
     /**
@@ -296,8 +294,6 @@ class GoodsreceivenoteRepository extends BaseRepository
             DB::commit(); 
             return true;
         }
-  
-        throw new GeneralException(trans('exceptions.backend.productcategories.delete_error'));
     }
 
 
