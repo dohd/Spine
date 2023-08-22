@@ -22,7 +22,7 @@
             </td>
             <td><input type="text" name="unit[]" id="unit-p0" class="form-control"></td>
             <td><input type="number" class="form-control estqty" name="estimate_qty[]" id="estqty-p0" step="0.1" required></td>  
-            <td><input type="text" class="form-control buyprice" name="buy_price[]" id="buyprice-p0" readonly></td>  
+            <td><input type="text" class="form-control buyprice" name="buy_price[]" id="buyprice-p0"></td>  
             <td><input type="number" class="form-control qty" name="product_qty[]" id="qty-p0" step="0.1" required></td>
             <td><input type="text" class="form-control rate" name="product_subtotal[]" id="rate-p0" required></td>
             <td>
