@@ -36,5 +36,5 @@
 @endsection
 
 @section('extra-scripts')
-    @include('focus.quotes.create_js')
+@include('focus.quotes.create_js')
 @endsection

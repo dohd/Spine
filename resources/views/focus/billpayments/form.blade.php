@@ -46,7 +46,7 @@
     <div class="col-2">
         <label for="payment_mode">Payment Mode</label>
         <select name="payment_mode" id="payment_mode" class="custom-select">
-            @foreach (['eft', 'rtgs','cash', 'mpesa', 'cheque'] as $val)
+            @foreach (['eft', 'rtgs','cash', 'mobile-money', 'cheque'] as $val)
                 <option value="{{ $val }}" {{ @$billpayment->payment_mode == $val? 'selected' : '' }}>{{ strtoupper($val) }}</option>
             @endforeach
         </select>

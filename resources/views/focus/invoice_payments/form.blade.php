@@ -52,7 +52,7 @@
         <label for="payment_mode">Mode</label>
         <select name="payment_mode" id="payment_mode" class="custom-select" required>
             <option value="">-- Select Mode --</option>
-            @foreach (['eft', 'rtgs','cash', 'mpesa', 'cheque'] as $val)
+            @foreach (['eft', 'rtgs','cash', 'mobile-money', 'cheque'] as $val)
                 <option value="{{ $val }}">{{ strtoupper($val) }}</option>
             @endforeach
         </select>
