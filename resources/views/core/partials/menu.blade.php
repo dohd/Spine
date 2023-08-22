@@ -800,7 +800,6 @@
                             <li><a class="dropdown-item" href="{{ route('biller.utility-bills.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Bills</a></li>
                             @permission('create-bill')
                             <li><a class="dropdown-item" href="{{ route('biller.utility-bills.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i>Create Bill</a></li> 
-                            <li><a class="dropdown-item" href="{{ route('biller.utility-bills.create_kra_bill') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i>Create KRA Bill</a> </li>
                             @endauth
                         </ul>
                     </li>
