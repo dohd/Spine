@@ -1178,6 +1178,26 @@
                             </ul>
                         </li>
                         @endauth
+
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-recycle" aria-hidden="true"></i> Product Refill</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.refills.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Refill Management
+                                    </a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ route('biller.refills.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Refill
+                                    </a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ route('biller.invoices.index')? '#' : '#' }}?md=sub" data-toggle="dropdown"><i class="fa fa-object-ungroup"></i> Product Categories
+                                    </a>
+                                </li>   
+                                <li><a class="dropdown-item" href="{{ route('biller.invoices.index')? '#' : '#' }}?md=sub" data-toggle="dropdown"><i class="fa fa-cube"></i> Products
+                                    </a>
+                                </li>  
+                                <li><a class="dropdown-item" href="{{ route('biller.invoices.index')? '#' : '#' }}?md=sub" data-toggle="dropdown"><i class="ft-users"></i></i> Customers
+                                    </a>
+                                </li> 
+                            </ul>
+                        </li>
                     </ul>
                 </li>
             @endif
