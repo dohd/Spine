@@ -9,6 +9,7 @@ use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\supplier\Supplier;
 use App\Repositories\Focus\goodsreceivenote\GoodsreceivenoteRepository;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class GoodsReceiveNoteController extends Controller
 {
@@ -64,6 +65,7 @@ class GoodsReceiveNoteController extends Controller
             $msg = 'Goods Received Note Created Successfully With DNote';
             if ($grn->invoice_no) $msg = 'Goods Received Note Created Successfully With Invoice';
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Goods Received Note', $th);
         }
 
@@ -107,6 +109,7 @@ class GoodsReceiveNoteController extends Controller
         try {
             $this->respository->update($goodsreceivenote, $request->except('_token'));
         } catch (\Throwable $th) {
+            if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Goods Received Note', $th);
         }
 
