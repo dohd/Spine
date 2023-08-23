@@ -1193,7 +1193,7 @@
                                 <li><a class="dropdown-item" href="{{ route('biller.refill_products.index') }}" data-toggle="dropdown"><i class="fa fa-cube"></i> Products
                                     </a>
                                 </li>  
-                                <li><a class="dropdown-item" href="#" data-toggle="dropdown"><i class="ft-users"></i></i> Customers
+                                <li><a class="dropdown-item" href="{{ route('biller.refill_customers.index') }}" data-toggle="dropdown"><i class="ft-users"></i></i> Customers
                                     </a>
                                 </li> 
                             </ul>

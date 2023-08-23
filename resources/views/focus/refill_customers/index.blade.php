@@ -1,16 +1,16 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Refill Product Management')
+@section('title', 'Refill Customer Management')
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row mb-2">
+    <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Refill Product Management</h4>
+            <h4 class="content-header-title">Refill Customer  Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.refill_products.partials.refill-header-buttons')
+                @include('focus.refill_customers.partials.refill-header-buttons')
             </div>
         </div>
     </div>

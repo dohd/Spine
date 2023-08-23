@@ -6,9 +6,9 @@
  */
 
 // Product Refill
-Route::group(['namespace' => 'refill_product'], function () {
-    Route::resource('refill_customers', 'RefillProductsController');
-    Route::post('refill_customers/get', 'RefillProductsTableController')->name('refill_products.get');
+Route::group(['namespace' => 'refill_customer'], function () {
+    Route::resource('refill_customers', 'RefillCustomersController');
+    Route::post('refill_customers/get', 'RefillCustomersTableController')->name('refill_products.get');
 });
 Route::group(['namespace' => 'refill_product'], function () {
     Route::resource('refill_products', 'RefillProductsController');
