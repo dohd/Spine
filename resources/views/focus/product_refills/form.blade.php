@@ -1,65 +1,65 @@
 <div class="form-group row">
-    <div class="col-3">
-        <label for="employee">Leave Applicant</label>
-        <select name="employee_id" id="user" class="form-control" data-placeholder="Search Employee" required>
-            @foreach ([] as $user)
-                <option value="{{ $user->id }}" {{ @$leave && $leave->employee_id == $user->id? 'selected' : '' }}>
-                    {{ $user->first_name }} {{ $user->last_name }}
+    <div class="col-md-6">
+        <label for="customer">Customer</label>
+        <select name="refill_customer_id" id="customer" class="form-control" data-placeholder="Search Customer" required>
+            <option value=""></option>
+            @foreach ($refill_customers as $row)
+                <option value="{{ $row->id }}" {{ $row->id == @$product_refill->refill_customer_id? 'selected' : '' }}>{{ $row->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <label for="date">Service Date</label>
+        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date', 'required' => 'required']) }}
+    </div>
+
+    <div class="col-md-2">
+        <label for="date">Next Service Date</label>
+        {{ Form::text('next_date', null, ['class' => 'form-control datepicker', 'id' => 'next_date']) }}
+    </div>  
+</div>
+
+<div class="form-group row">
+    <div class="col-md-6">
+        <label for="products">Products</label>
+        <select name="product_id[]" id="product" class="form-control" data-placeholder="Search Product" multiple required>
+            @php
+                $product_ids = @$product_refill? $product_refill->refill_products->pluck('id')->toArray() : [];
+            @endphp
+            @foreach ($refill_products as $row)
+                <option value="{{ $row->id }}" {{ in_array($row->id, $product_ids)? 'selected' : '' }}>
+                    {{ $row->name }}
                 </option>
             @endforeach
         </select>
     </div>
-    <div class="col-2">
-        <label for="category">Leave Category</label>
-        <select name="leave_category_id" id="leave_category" class="custom-select">
-            <option value="">-- select leave category --</option>
-            @isset($leave)
-                <option value="{{ $leave->leave_category_id }}" selected>
-                    {{ $leave->leave_category->title }}
-                </option>
-            @endisset
-        </select>
+    
+    <div class="col-md-2">
+        <label for="date">Reminder Start Date</label>
+        {{ Form::text('rem_start_date', null, ['class' => 'form-control datepicker', 'id' => 'rem_date']) }}
     </div>
-    <div class="col-2">
-        <label for="title">Viable Leave Days</label>
-        {{ Form::text('viable_qty', null, ['class' => 'form-control', 'id' => 'viable_days', 'readonly']) }}
-    </div>
-    <div class="col-2">
-        <label for="days">Leave Start Date</label>
-        {{ Form::text('start_date', null, ['class' => 'form-control datepicker', 'id' => 'start_date']) }}
-    </div>
-    <div class="col-2">
-        <label for="qty">Leave Duration (Days)</label>
-        {{ Form::number('qty', null, ['class' => 'form-control', 'min' => '1', 'id' => 'qty', 'required']) }}
-    </div>    
-</div>
 
-<div class="form-group row">
-    <div class="col-12">
-        <label for="title">Reason for Leave Request</label>
-        {{ Form::text('reason', null, ['class' => 'form-control', 'id' => 'title', 'required']) }}
-    </div>
-</div>
-
-<div class="form-group row">
-    <div class="col-3">
-        <label for="assistant">Duties Delegated To</label>
-        <select name="assist_employee_id" id="assist_user" class="form-control" data-placeholder="Search Employee">
-            @foreach ([] as $user)
-                <option value="{{ $user->id }}" {{ @$leave && $leave->assist_employee_id == $user->id? 'selected' : '' }}>
-                    {{ $user->first_name }} {{ $user->last_name }}
-                </option>
+    <div class="col-md-2">
+        <label for="interval">Reminder Interval</label>
+        <select name="rem_interval" id="interval" class="custom-select">
+            <option value="">-- Select Interval --</option>
+            @foreach (['daily', 'weekly', 'monthly'] as $value)
+                <option value="{{ $value }}" {{ $value == @$product_refill->rem_interval? 'selected' : '' }}>{{ ucfirst($value) }}</option>
             @endforeach
         </select>
     </div>
+    
+    <div class="col-md-2">
+        <label for="frequency">Reminder Frequency</label>
+        {{ Form::text('rem_frequency', null, ['class' => 'form-control', 'id' => 'frequency']) }}
+    </div>
 </div>
 
-<div class="form-group row no-gutters">
-    <div class="col-1 ml-auto">
-        <a href="{{ route('biller.leave.index') }}" class="btn btn-danger block">Cancel</a>    
-    </div>
-    <div class="col-1 ml-1">
-        {{ Form::submit(@$leave? 'Update' : 'Create', ['class' => 'form-control btn btn-primary']) }}
+<div class="form-group row">
+    <div class="col-md-12">
+        <label for="title">Note</label>
+        {{ Form::text('note', null, ['class' => 'form-control', 'id' => 'note']) }}
     </div>
 </div>
 
@@ -71,53 +71,17 @@
         date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
     };
 
-    const Index = {
-        leave: @json(@$leave),
+    $('#customer').select2({allowClear: true});
+    $('#product').select2({allowClear: true});
+    $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
 
-        init() {
-            $.ajaxSetup(config.ajax);
-            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
-            $('#leave_category').change(this.leaveCategoryChange);
-            $('#user').select2({allowClear: true});
-            $('#assist_user').select2({allowClear: true});
-
-            if (this.leave) {
-                $('#start_date').datepicker('setDate', new Date(this.leave.start_date));
-                $('#leave_category').val(this.leave.leave_category_id);
-            } else {
-                $('#user').val('').change();
-                $('#assist_user').val('').change();
-            }
-            $('#user').change(this.employeeChange);
-            $('#qty').change(this.leaveQtyChange);
-        },
-
-        leaveQtyChange() {
-            const qty = accounting.unformat($(this).val());
-            const viableDays = accounting.unformat($('#viable_days').val());
-            if (qty > viableDays) $(this).val(viableDays);
-        },
-
-        employeeChange() {
-            $('#viable_days').val('');
-            $('#leave_category option:not(:eq(0))').remove();
-            if (!$(this).val()) return; 
-
-            const url = "{{ route('biller.leave.leave_categories') }}";
-            $.post(url, {employee_id: $(this).val()}, data => {
-                data.forEach(v => {
-                    const opt = `<option value="${v.id}" category_qty="${v.qty}">${v.title}</option>`;
-                    $('#leave_category').append(opt);
-                });
-            });
-        },
-
-        leaveCategoryChange() {
-            const days = $(this).find(':selected').attr('category_qty');
-            $('#viable_days').val(days);
-        },
-    };
-
-    $(() => Index.init());
+    productRefill = @json(@$product_refill);
+    if (productRefill.id) {
+        $('#date').datepicker('setDate', new Date(productRefill.date));
+        if (productRefill.next_date) $('#next_date').datepicker('setDate', new Date(productRefill.next_date));
+        else $('#next_date').val('');
+        if (productRefill.rem_start_date) $('#rem_date').datepicker('setDate', new Date(productRefill.rem_start_date));
+        else $('#rem_date').val('');
+    }
 </script>
 @endsection

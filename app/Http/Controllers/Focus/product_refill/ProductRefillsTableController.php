@@ -37,8 +37,11 @@ class ProductRefillsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()    
-            ->addColumn('actions', function ($leave) {
-                return $leave->action_buttons;
+            ->addColumn('customer', function ($refill) {
+                return @$refill->product_customer->name;
+            })
+            ->addColumn('actions', function ($refill) {
+                return $refill->action_buttons;
             })
             ->make(true);
     }

@@ -3,13 +3,11 @@
 namespace App\Models\product_refill;
 
 use App\Models\ModelTrait;
-use App\Models\product_refill\Traits\ProductRefillAttribute;
-use App\Models\product_refill\Traits\ProductRefillRelationship;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductRefill extends Model
+class ProductRefillItem extends Model
 {
-    use ModelTrait, ProductRefillAttribute, ProductRefillRelationship;
+    use ModelTrait;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -20,7 +18,7 @@ class ProductRefill extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'product_refills';
+    protected $table = 'product_refill_items';
 
     /**
      * Mass Assignable fields of model
@@ -69,14 +67,10 @@ class ProductRefill extends Model
         parent::boot();
 
         static::creating(function ($instance) {
-            $instance->tid = ProductRefill::max('tid')+1;
+            $instance->user_id = ProductRefill::max('tid')+1;
             $instance->user_id = auth()->user()->id;
             $instance->ins = auth()->user()->ins;
             return $instance;
-        });
-
-        static::addGlobalScope('ins', function ($builder) {
-            $builder->where('ins', auth()->user()->ins);
         });
     }
 }

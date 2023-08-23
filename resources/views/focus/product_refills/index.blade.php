@@ -1,12 +1,12 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Product Refill Management')
+@section('title', 'Refill Service Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Product Refill Management</h4>
+            <h4 class="content-header-title">Refill Service  Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
@@ -25,9 +25,12 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>#Refill No.</th>
+                                        <th>#SVC No.</th>
                                         <th>Customer</th>
                                         <th>Date</th>
+                                        <th>Next Refill Date</th>
+                                        <th>Reminder Interval</th>
+                                        <th>Reminder Frequency</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -63,18 +66,18 @@
         },
 
         drawDataTable() {
-            $('#leaveTbl').dataTable({
+            $('#refillTbl').dataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: "{{ route('biller.leave.get') }}",
+                    url: "{{ route('biller.product_refills.get') }}",
                     type: 'POST',
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['tid', 'customer_id', 'date'].map(v => ({data:v, name:v})),
+                    ...['tid', 'customer', 'date', 'next_date', 'rem_interval', 'rem_frequency'].map(v => ({data:v, name:v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],

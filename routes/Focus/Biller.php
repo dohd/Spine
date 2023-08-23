@@ -20,7 +20,7 @@ Route::group(['namespace' => 'refill_product_category'], function () {
 });
 Route::group(['namespace' => 'product_refill'], function () {
     Route::resource('product_refills', 'ProductRefillsController');
-    Route::post('product_refills/get', 'ProductRefillsTableController')->name('refills.get');
+    Route::post('product_refills/get', 'ProductRefillsTableController')->name('product_refills.get');
 });
 
 // Utility bills

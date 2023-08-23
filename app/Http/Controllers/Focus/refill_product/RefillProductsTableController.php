@@ -40,6 +40,9 @@ class RefillProductsTableController extends Controller
             ->editColumn('unit_price', function ($product) {
                 return numberFormat($product->unit_price);
             }) 
+            ->editColumn('productcategory_id', function ($product) {
+                return @$product->product_category->title;
+            }) 
             ->addColumn('actions', function ($product) {
                 return $product->action_buttons;
             })
