@@ -31,54 +31,38 @@ class RefillProductCategoryRepository extends BaseRepository
      *
      * @param array $input
      * @throws GeneralException
-     * @return RefillProductCategory $leave
+     * @return RefillProductCategory $product_category
      */
     public function create(array $input)
     {
         // dd($input);
-        foreach ($input as $key => $val) {
-            if ($key == 'start_date') $input[$key] = date_for_database($val);
-            if (in_array($key, ['qty', 'viable_qty'])) $input[$key] = numberClean($val);
-        }
-        
         $result = RefillProductCategory::create($input);
-        if ($result) return $result;
-            
-        throw new GeneralException(trans('exceptions.backend.leave_category.create_error'));
+        return $result;
     }
 
     /**
      * For updating the respective Model in storage
      *
-     * @param RefillProductCategory $leave
+     * @param RefillProductCategory $product_category
      * @param  array $input
      * @throws GeneralException
      * return bool
      */
-    public function update(RefillProductCategory $leave, array $input)
+    public function update(RefillProductCategory $product_category, array $input)
     {
         // dd($input);
-        foreach ($input as $key => $val) {
-            if ($key == 'start_date') $input[$key] = date_for_database($val);
-            if (in_array($key, ['qty', 'viable_qty'])) $input[$key] = numberClean($val);
-        }
-
-        if ($leave->update($input)) return $leave;
-
-        throw new GeneralException(trans('exceptions.backend.leave_category.update_error'));
+        return $product_category->update($input);
     }
 
     /**
      * For deleting the respective model from storage
      *
-     * @param RefillProductCategory $leave
+     * @param RefillProductCategory $product_category
      * @throws GeneralException
      * @return bool
      */
-    public function delete(RefillProductCategory $leave)
+    public function delete(RefillProductCategory $product_category)
     {
-        if ($leave->delete()) return true;
-            
-        throw new GeneralException(trans('exceptions.backend.leave_category.delete_error'));
+        return $product_category->delete();
     }
 }

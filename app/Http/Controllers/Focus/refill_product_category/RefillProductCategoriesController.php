@@ -4,22 +4,23 @@ namespace App\Http\Controllers\Focus\refill_product_category;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
-use App\Repositories\Focus\product_refill\ProductRefillRepository;
+use App\Models\refill_product_category\RefillProductCategory;
+use App\Repositories\Focus\refill_product_category\RefillProductCategoryRepository;
 use Illuminate\Http\Request;
 
 class RefillProductCategoriesController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var ProductRefillRepository
+     * @var RefillProductCategoryRepository
      */
     protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param ProductRefillRepository $repository ;
+     * @param RefillProductCategoryRepository $repository ;
      */
-    public function __construct(ProductRefillRepository $repository)
+    public function __construct(RefillProductCategoryRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -51,11 +52,11 @@ class RefillProductCategoriesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
+    {  
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            errorHandler('Error Creating Product Category', $th);
+            return errorHandler('Error Creating Product Category', $th);
         }
 
         return new RedirectResponse(route('biller.refill_product_categories.index'), ['flash_success' =>  'Product Category Created Successfully']);
@@ -67,9 +68,9 @@ class RefillProductCategoriesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(RefillProductCategory $product_category)
+    public function show(RefillProductCategory $refill_product_category)
     {
-        return view('focus.refill_product_categories.view', compact('product_category'));
+        return view('focus.refill_product_categories.view', compact('refill_product_category'));
     }
 
     /**
@@ -78,9 +79,9 @@ class RefillProductCategoriesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(RefillProductCategory $product_category)
+    public function edit(RefillProductCategory $refill_product_category)
     {
-        return view('focus.refill_product_categories.edit', compact('product_category'));
+        return view('focus.refill_product_categories.edit', compact('refill_product_category'));
     }
 
     /**
@@ -90,10 +91,10 @@ class RefillProductCategoriesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, RefillProductCategory $product_category)
+    public function update(Request $request, RefillProductCategory $refill_product_category)
     {
         try {
-            $this->repository->update($product_category, $request->except('_token'));
+            $this->repository->update($refill_product_category, $request->except('_token'));
         } catch (\Throwable $th) {
             return errorHandler('Error Updating Product Category', $th);
         }
@@ -107,10 +108,10 @@ class RefillProductCategoriesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(RefillProductCategory $product_category)
+    public function destroy(RefillProductCategory $refill_product_category)
     {
         try {
-            $this->repository->delete($product_category);
+            $this->repository->delete($refill_product_category);
         } catch (\Throwable $th) {
             return errorHandler('Error Deleting Product Category', $th);
         }

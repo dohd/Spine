@@ -22,16 +22,14 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="productcategories-table"
+                            <table id="categoriesTbl"
                                     class="table table-striped table-bordered zero-configuration" cellspacing="0"
                                     width="100%">
                                 <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ trans('productcategories.title') }}</th>
-                                    <th>{{ trans('productcategories.total_products') }}</th>
-                                    <th>{{ trans('productcategories.total_worth') }}</th>
-                                    <th>{{ trans('general.createdat') }}</th>
+                                    <th>Title</th>
+                                    <th>Description</th>
                                     <th>{{ trans('labels.general.actions') }}</th>
                                 </tr>
                                 </thead>
@@ -64,44 +62,29 @@
     function draw_data() {
         $.ajaxSetup({
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
             }
         });
 
-        var dataTable = $('#productcategories-table').dataTable({
+        var dataTable = $('#categoriesTbl').dataTable({
             processing: true,
             serverSide: true,
             responsive: true,
-            language: {
-                @lang('datatable.strings')
-            },
+            language: {@lang('datatable.strings')},
             ajax: {
-                url: '{{ route("biller.productcategories.get") }}',
+                url: '{{ route("biller.refill_product_categories.get") }}',
                 type: 'post',
-                data: {c_type: 0}
             },
             columns: [
                 {data: 'DT_Row_Index', name: 'id'},
-                {data: 'name', name: 'name'},
-                {data: 'total', name: 'total'},
-                {data: 'worth', name: 'worth'},
-                {data: 'created_at', name: '{{config('module.productcategories.table')}}.created_at'},
+                ...['title', 'extra'].map(v => ({data:v, name: v})),
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ],
             order: [[0, "asc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
-            buttons: {
-                buttons: [
-
-                    {extend: 'csv', footer: true, exportOptions: {columns: [0, 1]}},
-                    {extend: 'excel', footer: true, exportOptions: {columns: [0, 1]}},
-                    {extend: 'print', footer: true, exportOptions: {columns: [0, 1]}}
-                ]
-            }
+            buttons: ['csv', 'excel', 'print'],
         });
-        $('#productcategories-table_wrapper').removeClass('form-inline');
-
     }
 </script>
 @endsection

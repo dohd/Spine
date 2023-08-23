@@ -22,11 +22,11 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            {{ Form::model($productcategories, ['route' => ['biller.refill_product_categories.update', $product_category], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-productcategory']) }}
+                            {{ Form::model($refill_product_category, ['route' => ['biller.refill_product_categories.update', $refill_product_category], 'class' => 'form-horizontal', 'role' => 'form', 'method' => 'PATCH', 'id' => 'edit-productcategory']) }}
                                 <div class="form-group">
-                                    @include("focus.productcategories.form")
+                                    @include("focus.refill_product_categories.form")
                                     <div class="edit-form-btn">
-                                        {{ link_to_route('biller.productcategories.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                                        {{ link_to_route('biller.refill_product_categories.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
                                         {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
                                         <div class="clearfix"></div>
                                     </div><!--edit-form-btn-->
