@@ -10,7 +10,7 @@
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.refills.partials.refill-header-buttons')
+                @include('focus.product_refills.partials.refill-header-buttons')
             </div>
         </div>
     </div>

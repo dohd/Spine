@@ -1179,18 +1179,18 @@
                         </li>
                         @endauth
 
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-recycle" aria-hidden="true"></i> Product Refill</a>
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-recycle" aria-hidden="true"></i> Refill Management</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.refills.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Refill Management
+                                <li><a class="dropdown-item" href="{{ route('biller.product_refills.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Refills
                                     </a>
                                 </li>
-                                <li><a class="dropdown-item" href="{{ route('biller.refills.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Refill
+                                <li><a class="dropdown-item" href="{{ route('biller.product_refills.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Refill
                                     </a>
                                 </li>
                                 <li><a class="dropdown-item" href="{{ route('biller.refill_product_categories.index') }}" data-toggle="dropdown"><i class="fa fa-object-ungroup"></i> Product Categories
                                     </a>
                                 </li>   
-                                <li><a class="dropdown-item" href="#" data-toggle="dropdown"><i class="fa fa-cube"></i> Products
+                                <li><a class="dropdown-item" href="{{ route('biller.refill_products.index') }}" data-toggle="dropdown"><i class="fa fa-cube"></i> Products
                                     </a>
                                 </li>  
                                 <li><a class="dropdown-item" href="#" data-toggle="dropdown"><i class="ft-users"></i></i> Customers

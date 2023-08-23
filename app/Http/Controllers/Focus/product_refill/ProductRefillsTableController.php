@@ -8,7 +8,7 @@ use Request;
 use Yajra\DataTables\Facades\DataTables;
 
 
-class RefillsTableController extends Controller
+class ProductRefillsTableController extends Controller
 {
     /**
      * variable to store the repository object

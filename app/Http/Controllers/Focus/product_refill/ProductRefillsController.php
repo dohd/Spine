@@ -8,7 +8,7 @@ use App\Models\product_refill\ProductRefill;
 use App\Repositories\Focus\product_refill\ProductRefillRepository;
 use Illuminate\Http\Request;
 
-class RefillsController extends Controller
+class ProductRefillsController extends Controller
 {
     /**
      * variable to store the repository object
@@ -32,7 +32,7 @@ class RefillsController extends Controller
      */
     public function index()
     {
-        return view('focus.refills.index');
+        return view('focus.product_refills.index');
     }
 
     /**
@@ -42,7 +42,7 @@ class RefillsController extends Controller
      */
     public function create()
     {
-        return view('focus.refills.create');
+        return view('focus.product_refills.create');
     }
 
     /**
@@ -58,7 +58,7 @@ class RefillsController extends Controller
         } catch (\Throwable $th) {
             errorHandler('Error Creating Refill', $th);
         }
-        return new RedirectResponse(route('biller.refills.index'), ['flash_success' => 'Refill Created Successfully']);
+        return new RedirectResponse(route('biller.product_refills.index'), ['flash_success' => 'Refill Created Successfully']);
     }
 
     /**
@@ -69,7 +69,7 @@ class RefillsController extends Controller
      */
     public function show(ProductRefill $product_refill)
     {
-        return view('focus.refills.view', compact('product_refill'));
+        return view('focus.product_refills.view', compact('product_refill'));
     }
 
     /**
@@ -80,7 +80,7 @@ class RefillsController extends Controller
      */
     public function edit(ProductRefill $product_refill)
     {
-        return view('focus.refills.edit', compact('product_refill'));
+        return view('focus.product_refills.edit', compact('product_refill'));
     }
 
     /**
@@ -98,7 +98,7 @@ class RefillsController extends Controller
             return errorHandler('Error Updating Refill', $th);
         }
 
-        return new RedirectResponse(route('biller.refills.index'), ['flash_success' => 'Refill Updated Successfully']);
+        return new RedirectResponse(route('biller.product_refills.index'), ['flash_success' => 'Refill Updated Successfully']);
     }
 
     /**
@@ -115,6 +115,6 @@ class RefillsController extends Controller
             return errorHandler('Error Deleting Refill', $th);
         }
 
-        return new RedirectResponse(route('biller.refills.index'), ['flash_success' => 'Refill Deleted Successfully']);
+        return new RedirectResponse(route('biller.product_refills.index'), ['flash_success' => 'Refill Deleted Successfully']);
     }
 }

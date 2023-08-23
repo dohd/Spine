@@ -1,8 +1,8 @@
 <div class="btn-group" role="group" aria-label="Basic example">
-    <a href="{{ route('biller.refills.index') }}" class="btn btn-info  btn-lighten-2">
+    <a href="{{ route('biller.product_refills.index') }}" class="btn btn-info  btn-lighten-2">
         <i class="fa fa-list-alt"></i> {{ trans('general.list') }}
     </a>            
-    <a href="{{ route('biller.refills.create') }}" class="btn btn-pink  btn-lighten-3">
+    <a href="{{ route('biller.product_refills.create') }}" class="btn btn-pink  btn-lighten-3">
         <i class="fa fa-plus-circle"></i> {{ trans('general.create') }}
     </a>
 </div>

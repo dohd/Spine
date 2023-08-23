@@ -10,7 +10,7 @@
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.refills.partials.refill-header-buttons')
+                @include('focus.product_refills.partials.refill-header-buttons')
             </div>
         </div>
     </div>
@@ -19,8 +19,8 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::model($product_refill, ['route' => ['biller.refills.update', $product_refill], 'method' => 'PATCH']) }}
-                        @include('focus.refills.form')
+                    {{ Form::model($product_refill, ['route' => ['biller.product_refills.update', $product_refill], 'method' => 'PATCH']) }}
+                        @include('focus.product_refills.form')
                     {{ Form::close() }}
                 </div>
             </div
