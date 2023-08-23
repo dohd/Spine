@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Focus\product_refill;
+namespace App\Http\Controllers\Focus\refill_product_category;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
-use App\Models\product_refill\ProductRefill;
 use App\Repositories\Focus\product_refill\ProductRefillRepository;
 use Illuminate\Http\Request;
 
-class RefillsController extends Controller
+class RefillProductCategoriesController extends Controller
 {
     /**
      * variable to store the repository object
@@ -24,7 +23,7 @@ class RefillsController extends Controller
     {
         $this->repository = $repository;
     }
-
+    
     /**
      * Display a listing of the resource.
      *
@@ -32,7 +31,7 @@ class RefillsController extends Controller
      */
     public function index()
     {
-        return view('focus.refills.index');
+        return view('focus.refill_product_categories.index');
     }
 
     /**
@@ -42,7 +41,7 @@ class RefillsController extends Controller
      */
     public function create()
     {
-        return view('focus.refills.create');
+        return view('focus.refill_product_categories.create');
     }
 
     /**
@@ -56,9 +55,10 @@ class RefillsController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            errorHandler('Error Creating Refill', $th);
+            errorHandler('Error Creating Product Category', $th);
         }
-        return new RedirectResponse(route('biller.refills.index'), ['flash_success' => 'Refill Created Successfully']);
+
+        return new RedirectResponse(route('biller.refill_product_categories.index'), ['flash_success' =>  'Product Category Created Successfully']);
     }
 
     /**
@@ -67,9 +67,9 @@ class RefillsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(ProductRefill $product_refill)
+    public function show(RefillProductCategory $product_category)
     {
-        return view('focus.refills.view', compact('product_refill'));
+        return view('focus.refill_product_categories.view', compact('product_category'));
     }
 
     /**
@@ -78,9 +78,9 @@ class RefillsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(ProductRefill $product_refill)
+    public function edit(RefillProductCategory $product_category)
     {
-        return view('focus.refills.edit', compact('product_refill'));
+        return view('focus.refill_product_categories.edit', compact('product_category'));
     }
 
     /**
@@ -90,15 +90,15 @@ class RefillsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, ProductRefill $product_refill)
+    public function update(Request $request, RefillProductCategory $product_category)
     {
         try {
-            $this->repository->update($product_refill, $request->except('_token'));
+            $this->repository->update($product_category, $request->except('_token'));
         } catch (\Throwable $th) {
-            return errorHandler('Error Updating Refill', $th);
+            return errorHandler('Error Updating Product Category', $th);
         }
 
-        return new RedirectResponse(route('biller.refills.index'), ['flash_success' => 'Refill Updated Successfully']);
+        return new RedirectResponse(route('biller.refill_product_categories.index'), ['flash_success' => 'Product Category Updated Successfully']);
     }
 
     /**
@@ -107,14 +107,14 @@ class RefillsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ProductRefill $product_refill)
+    public function destroy(RefillProductCategory $product_category)
     {
         try {
-            $this->repository->delete($product_refill);
+            $this->repository->delete($product_category);
         } catch (\Throwable $th) {
-            return errorHandler('Error Deleting Refill', $th);
+            return errorHandler('Error Deleting Product Category', $th);
         }
 
-        return new RedirectResponse(route('biller.refills.index'), ['flash_success' => 'Refill Deleted Successfully']);
+        return new RedirectResponse(route('biller.refill_product_categories.index'), ['flash_success' => 'Product Category Deleted Successfully']);
     }
 }

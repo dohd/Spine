@@ -1187,13 +1187,13 @@
                                 <li><a class="dropdown-item" href="{{ route('biller.refills.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Refill
                                     </a>
                                 </li>
-                                <li><a class="dropdown-item" href="{{ route('biller.invoices.index')? '#' : '#' }}?md=sub" data-toggle="dropdown"><i class="fa fa-object-ungroup"></i> Product Categories
+                                <li><a class="dropdown-item" href="{{ route('biller.refill_product_categories.index') }}" data-toggle="dropdown"><i class="fa fa-object-ungroup"></i> Product Categories
                                     </a>
                                 </li>   
-                                <li><a class="dropdown-item" href="{{ route('biller.invoices.index')? '#' : '#' }}?md=sub" data-toggle="dropdown"><i class="fa fa-cube"></i> Products
+                                <li><a class="dropdown-item" href="#" data-toggle="dropdown"><i class="fa fa-cube"></i> Products
                                     </a>
                                 </li>  
-                                <li><a class="dropdown-item" href="{{ route('biller.invoices.index')? '#' : '#' }}?md=sub" data-toggle="dropdown"><i class="ft-users"></i></i> Customers
+                                <li><a class="dropdown-item" href="#" data-toggle="dropdown"><i class="ft-users"></i></i> Customers
                                     </a>
                                 </li> 
                             </ul>
