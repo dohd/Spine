@@ -19,8 +19,15 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::model($product_refill, ['route' => ['biller.refill_products.update', $product_refill], 'method' => 'PATCH']) }}
-                        @include('focus.refill_products.form')
+                    {{ Form::model($refill_product, ['route' => ['biller.refill_products.update', $refill_product], 'method' => 'PATCH']) }}
+                        <div class="form-group">
+                            @include('focus.refill_products.form')
+                            <div class="edit-form-btn">
+                                {{ link_to_route('biller.refill_products.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                                {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
+                                <div class="clearfix"></div>
+                            </div><!--edit-form-btn-->
+                        </div><!-- form-group -->
                     {{ Form::close() }}
                 </div>
             </div

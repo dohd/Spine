@@ -31,54 +31,40 @@ class RefillProductRepository extends BaseRepository
      *
      * @param array $input
      * @throws GeneralException
-     * @return RefillProduct $leave
+     * @return RefillProduct $refill_product
      */
     public function create(array $input)
     {
         // dd($input);
-        foreach ($input as $key => $val) {
-            if ($key == 'start_date') $input[$key] = date_for_database($val);
-            if (in_array($key, ['qty', 'viable_qty'])) $input[$key] = numberClean($val);
-        }
-        
+        $input['unit_price'] = numberClean($input['unit_price']);
         $result = RefillProduct::create($input);
-        if ($result) return $result;
-            
-        throw new GeneralException(trans('exceptions.backend.leave_category.create_error'));
+        return $result;
     }
 
     /**
      * For updating the respective Model in storage
      *
-     * @param RefillProduct $leave
+     * @param RefillProduct $refill_product
      * @param  array $input
      * @throws GeneralException
      * return bool
      */
-    public function update(RefillProduct $leave, array $input)
+    public function update(RefillProduct $refill_product, array $input)
     {
         // dd($input);
-        foreach ($input as $key => $val) {
-            if ($key == 'start_date') $input[$key] = date_for_database($val);
-            if (in_array($key, ['qty', 'viable_qty'])) $input[$key] = numberClean($val);
-        }
-
-        if ($leave->update($input)) return $leave;
-
-        throw new GeneralException(trans('exceptions.backend.leave_category.update_error'));
+        $input['unit_price'] = numberClean($input['unit_price']);
+        return $refill_product->update($input);
     }
 
     /**
      * For deleting the respective model from storage
      *
-     * @param RefillProduct $leave
+     * @param RefillProduct $refill_product
      * @throws GeneralException
      * @return bool
      */
-    public function delete(RefillProduct $leave)
+    public function delete(RefillProduct $refill_product)
     {
-        if ($leave->delete()) return true;
-            
-        throw new GeneralException(trans('exceptions.backend.leave_category.delete_error'));
+        return $refill_product->delete();
     }
 }

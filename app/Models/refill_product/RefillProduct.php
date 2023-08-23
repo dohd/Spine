@@ -3,11 +3,13 @@
 namespace App\Models\refill_product;
 
 use App\Models\ModelTrait;
+use App\Models\refill_product\Traits\RefillProductAttribute;
+use App\Models\refill_product\Traits\RefillProductRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class RefillProduct extends Model
 {
-    use ModelTrait;
+    use ModelTrait, RefillProductAttribute, RefillProductRelationship;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,

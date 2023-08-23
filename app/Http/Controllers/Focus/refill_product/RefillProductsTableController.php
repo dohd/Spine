@@ -36,9 +36,12 @@ class RefillProductsTableController extends Controller
 
         return Datatables::of($core)
             ->escapeColumns(['id'])
-            ->addIndexColumn()    
-            ->addColumn('actions', function ($leave) {
-                return $leave->action_buttons;
+            ->addIndexColumn()   
+            ->editColumn('unit_price', function ($product) {
+                return numberFormat($product->unit_price);
+            }) 
+            ->addColumn('actions', function ($product) {
+                return $product->action_buttons;
             })
             ->make(true);
     }

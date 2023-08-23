@@ -10,7 +10,7 @@
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.product_refills.partials.refill-header-buttons')
+                @include('focus.refill_products.partials.refill-header-buttons')
             </div>
         </div>
     </div>
@@ -18,29 +18,26 @@
     <div class="content-body">
         <div class="card">
             <div class="card-content">
-                <div class="card-header"></div>
                 <div class="card-body">
-                    <table class="table table-bordered table-sm">
-                        @php
-                            $details = [
-                                'Employee' => $employee_name,
-                                'Leave Category' => $leave->leave_category? $leave->leave_category->title : '',
-                                'Leave Status' => $leave->status,
-                                'Leave Reason' => $leave->reason,
-                                'Leave Duration' => $leave->qty . ' days',
-                                'Start Date' => dateFormat($leave->start_date),
-                                'End Date' => dateFormat($leave->end_date),
-                            ];
-                        @endphp
-                        @foreach ([] as $key => $val)
-                            <tr>
-                                <th width="30%">{{ $key }}</th>
-                                <td>
-                                    {{ $val }}
-                                </td>
-                            </tr>
-                        @endforeach
-                    </table>
+                    @php
+                        $details = [
+                            'Product Name' => $refill_product->name,
+                            'UoM' => $refill_product->unit,
+                            'Product Category' => @$refill_product->product_category->title,
+                            'Unit Price' => numberFormat($refill_product->unit_price),
+                            'Product Description' => $refill_product->note,
+                        ];
+                    @endphp
+                    @foreach ($details as $key => $value)
+                        <div class="row">
+                            <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                <p>{{ $key }}</p>
+                            </div>
+                            <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                <p>{{ $value }}</p>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>

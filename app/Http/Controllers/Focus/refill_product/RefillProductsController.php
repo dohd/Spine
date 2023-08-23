@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Focus\refill_product;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Models\refill_product\RefillProduct;
+use App\Models\refill_product_category\RefillProductCategory;
 use App\Repositories\Focus\refill_product\RefillProductRepository;
 use Illuminate\Http\Request;
 
@@ -42,7 +43,9 @@ class RefillProductsController extends Controller
      */
     public function create()
     {
-        return view('focus.refill_products.create');
+        $productcategories = RefillProductCategory::get();
+
+        return view('focus.refill_products.create', compact('productcategories'));
     }
 
     /**
@@ -52,12 +55,13 @@ class RefillProductsController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
+    { 
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            errorHandler('Error Creating Product', $th);
+            return errorHandler('Error Creating Product', $th);
         }
+
         return new RedirectResponse(route('biller.refill_products.index'), ['flash_success' => 'Product Created Successfully']);
     }
 
@@ -80,7 +84,9 @@ class RefillProductsController extends Controller
      */
     public function edit(RefillProduct $refill_product)
     {
-        return view('focus.refill_products.edit', compact('refill_product'));
+        $productcategories = RefillProductCategory::get();
+
+        return view('focus.refill_products.edit', compact('refill_product', 'productcategories'));
     }
 
     /**
