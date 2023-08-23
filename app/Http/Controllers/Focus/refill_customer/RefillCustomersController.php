@@ -56,8 +56,9 @@ class RefillCustomersController extends Controller
         try {
             $this->repository->create($request->except('_token'));
         } catch (\Throwable $th) {
-            errorHandler('Error Creating Customer', $th);
+            return errorHandler('Error Creating Customer', $th);
         }
+
         return new RedirectResponse(route('biller.refill_customers.index'), ['flash_success' => 'Customer Created Successfully']);
     }
 

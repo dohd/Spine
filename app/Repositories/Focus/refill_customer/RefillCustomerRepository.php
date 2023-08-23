@@ -36,15 +36,8 @@ class RefillCustomerRepository extends BaseRepository
     public function create(array $input)
     {
         // dd($input);
-        foreach ($input as $key => $val) {
-            if ($key == 'start_date') $input[$key] = date_for_database($val);
-            if (in_array($key, ['qty', 'viable_qty'])) $input[$key] = numberClean($val);
-        }
-        
         $result = RefillCustomer::create($input);
-        if ($result) return $result;
-            
-        throw new GeneralException(trans('exceptions.backend.leave_category.create_error'));
+        return $result;
     }
 
     /**
@@ -58,14 +51,7 @@ class RefillCustomerRepository extends BaseRepository
     public function update(RefillCustomer $refill_customer, array $input)
     {
         // dd($input);
-        foreach ($input as $key => $val) {
-            if ($key == 'start_date') $input[$key] = date_for_database($val);
-            if (in_array($key, ['qty', 'viable_qty'])) $input[$key] = numberClean($val);
-        }
-
-        if ($refill_customer->update($input)) return $refill_customer;
-
-        throw new GeneralException(trans('exceptions.backend.leave_category.update_error'));
+        return $refill_customer->update($input);
     }
 
     /**
@@ -77,8 +63,6 @@ class RefillCustomerRepository extends BaseRepository
      */
     public function delete(RefillCustomer $refill_customer)
     {
-        if ($refill_customer->delete()) return true;
-            
-        throw new GeneralException(trans('exceptions.backend.leave_category.delete_error'));
+        return $refill_customer->delete();
     }
 }

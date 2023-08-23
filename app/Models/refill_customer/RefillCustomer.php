@@ -3,11 +3,13 @@
 namespace App\Models\refill_customer;
 
 use App\Models\ModelTrait;
+use App\Models\refill_customer\Traits\RefillCustomerAttribute;
+use App\Models\refill_customer\Traits\RefillCustomerRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class RefillCustomer extends Model
 {
-    use ModelTrait;
+    use ModelTrait, RefillCustomerAttribute, RefillCustomerRelationship;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,

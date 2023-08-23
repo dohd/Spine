@@ -21,13 +21,14 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="refillTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="customerTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>#Refill No.</th>
-                                        <th>Customer</th>
-                                        <th>Date</th>
+                                        <th>Customer Name</th>
+                                        <th>Phone</th>
+                                        <th>Email</th>
+                                        <th>Address</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -63,18 +64,18 @@
         },
 
         drawDataTable() {
-            $('#leaveTbl').dataTable({
+            $('#customerTbl').dataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: "{{ route('biller.leave.get') }}",
+                    url: "{{ route('biller.refill_customers.get') }}",
                     type: 'POST',
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['tid', 'customer_id', 'date'].map(v => ({data:v, name:v})),
+                    ...['name', 'phone', 'email', 'address'].map(v => ({data:v, name:v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
