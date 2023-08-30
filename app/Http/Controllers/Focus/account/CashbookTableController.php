@@ -54,8 +54,8 @@ class CashbookTableController extends Controller
         // $core = $this->transaction();
         $core = AccountsController::cashbook_transactions();
         
-        $sum_debit = $core->reduce(fn($init, $curr) => $init+$curr['debit'], 0);
-        $sum_credit = $core->reduce(fn($init, $curr) => $init+$curr['credit'], 0);
+        $sum_debit = $core->sum('debit');
+        $sum_credit = $core->sum('credit');
         $balance = $sum_debit - $sum_credit;
         $aggregate = compact('sum_debit', 'sum_credit', 'balance');
 
@@ -76,13 +76,17 @@ class CashbookTableController extends Controller
             ->addColumn('tid', function ($transaction) {
                 $link = '';
                 if ($transaction->debit > 0) {
-                    $payment = $transaction->invoice_payment;
-                    if ($payment && $payment->customer_id) 
-                        $link .= '<a href="'. route('biller.invoices.show_payment', $payment) .'">'. $payment->tid .'</a>';
+                    $invoice_pmt = $transaction->invoice_payment;
+                    if ($invoice_pmt && $invoice_pmt->customer_id) {
+                        $link .= '<a href="'. route('biller.invoices.show_payment', $invoice_pmt) .'">'. $invoice_pmt->tid .'</a>';
+                    } else {
+                        $link .= '<a href="'. route('biller.banktransfers.show', $transaction->id) .'">'. $transaction->tid .'</a>';
+                    }
                 } else {
-                    $payment = $transaction->bill_payment;
-                    if ($payment && $payment->supplier_id) 
-                        $link .= '<a href="'. route('biller.billpayments.show', $payment) .'">'. $payment->tid .'</a>';
+                    $bill_pmt = $transaction->bill_payment;
+                    if ($bill_pmt && $bill_pmt->supplier_id) {
+                        $link .= '<a href="'. route('biller.billpayments.show', $bill_pmt) .'">'. $bill_pmt->tid .'</a>';
+                    } 
                 }
 
                 return $link;
