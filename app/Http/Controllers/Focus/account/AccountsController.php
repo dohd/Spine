@@ -360,10 +360,12 @@ class AccountsController extends Controller
 
         return new ViewResponse('focus.accounts.cashbook', compact('accounts'));
     }
-    // 
+    // cashbook transasctions
     static function cashbook_transactions()
     {
-        $q = Transaction::whereIn('tr_type', ['pmt', 'xfer'])
+        $q = Transaction::where(function($q) {
+            $q->where('tr_type', 'pmt')->orWhere(fn($q) => $q->where('tr_type', 'xfer')->where('debit', '>', 0));
+        })
         ->whereHas('account', function ($q) {
             $q->where('account_type', 'Asset')->whereHas('accountType', fn($q) => $q->where('system', 'bank'));
             $q->when(request('account_id'), fn($q) => $q->where('accounts.id', request('account_id')));
