@@ -16,6 +16,7 @@
                 </div>
             </div>
         </div>
+        
         <div class="content-body">
             <div class="row">
                 <div class="col-12">
@@ -26,10 +27,10 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Account (Credited - Debited)</th>
+                                            <th>Bank Account</th>
                                             <th>Note</th>
                                             <th>Amount</th>
-                                            <th>Transaction Date</th>
+                                            <th>Date</th>
                                             <th>{{ trans('labels.general.actions') }}</th>                                            
                                         </tr>
                                     </thead>
@@ -68,22 +69,7 @@
                 data: 'DT_Row_Index',
                 name: 'id'
             },
-            {
-                data: 'account',
-                name: 'account'
-            },
-            {
-                data: 'note',
-                name: 'note'
-            },
-            {
-                data: 'debit',
-                name: 'debit'
-            },
-            {
-                data: 'transaction_date',
-                name: 'transaction_date'
-            },
+            ...['account', 'note', 'debit', 'transaction_date'].map(v => ({data:v, name:v})),
             {
                 data: 'actions',
                 name: 'actions',

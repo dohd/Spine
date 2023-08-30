@@ -57,7 +57,7 @@ class BanktransfersTableController extends Controller
                 $credit_tr = $core[$i - 1];
                 $credit_account_holder = $credit_tr->account->holder;
                 $debit_account_holder = $v->account->holder;
-                $holder = $credit_account_holder . " : " . $debit_account_holder;
+                $holder = $credit_account_holder . "<b> / </b>" . $debit_account_holder;
                 $v['holder'] = $holder;
             }
             return $v;

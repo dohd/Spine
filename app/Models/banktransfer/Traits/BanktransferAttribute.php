@@ -2,24 +2,31 @@
 
 namespace App\Models\banktransfer\Traits;
 
+use App\Models\banktransfer\Banktransfer;
+
 /**
  * Class ProductcategoryAttribute.
  */
 trait BanktransferAttribute
 {
-    // Make your attributes functions here
-    // Further, see the documentation : https://laravel.com/docs/5.4/eloquent-mutators#defining-an-accessor
-
-
     /**
      * Action Button Attribute to show in grid
      * @return string
      */
     public function getActionButtonsAttribute()
     {
-        return 
-        //  $this->getViewButtonAttribute("transaction-manage", "biller.banktransfers.show") 
-        $this->getEditButtonAttribute("manage-money-transfer", "biller.banktransfers.edit")
-        . ' ' . $this->getDeleteButtonAttribute("manage-money-transfer", "biller.banktransfers.destroy");                
+        return $this->getViewButtonAttribute("manage-money-transfer", "biller.banktransfers.show") 
+        . ' ' . $this->getEditButtonAttribute("edit-money-transfer", "biller.banktransfers.edit")
+        . ' ' . $this->getDeleteButtonAttribute("delete-money-transfer", "biller.banktransfers.destroy");                
+    }
+
+    function getTransToAttribute() 
+    {
+        return Banktransfer::where('tid', $this->tid)->where('debit', '>', 0)->first();
+    }
+
+    function getTransFromAttribute() 
+    {
+        return Banktransfer::where('tid', $this->tid)->where('credit', '>', 0)->first();
     }
 }

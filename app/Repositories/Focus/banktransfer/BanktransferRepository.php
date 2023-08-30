@@ -5,7 +5,6 @@ namespace App\Repositories\Focus\banktransfer;
 use App\Models\banktransfer\Banktransfer;
 use App\Exceptions\GeneralException;
 use App\Models\bank\Bank;
-use App\Models\transaction\Transaction;
 use App\Repositories\BaseRepository;
 use App\Models\transactioncategory\Transactioncategory;
 use DB;

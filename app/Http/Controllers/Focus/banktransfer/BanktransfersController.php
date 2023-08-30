@@ -159,7 +159,7 @@ class BanktransfersController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
     public function show(Banktransfer $banktransfer)
-    {
+    {   
         return new ViewResponse('focus.banktransfers.view', compact('banktransfer'));
     }
 }
