@@ -10,8 +10,8 @@ trait RefillProductCategoryAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("manage-product", "biller.refill_product_categories.show")
-        .' '. $this->getEditButtonAttribute("edit-product", "biller.refill_product_categories.edit")
-        .' '.$this->getDeleteButtonAttribute("delete-product", "biller.refill_product_categories.destroy");     
+        return $this->getViewButtonAttribute("manage-refill-product-category", "biller.refill_product_categories.show")
+        .' '. $this->getEditButtonAttribute("edit-refill-product-category", "biller.refill_product_categories.edit")
+        .' '.$this->getDeleteButtonAttribute("delete-refill-product-category", "biller.refill_product_categories.destroy");     
     }
 }

@@ -10,8 +10,8 @@ trait RefillCustomerAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("manage-product", "biller.refill_customers.show")
-        .' '. $this->getEditButtonAttribute("edit-product", "biller.refill_customers.edit")
-        .' '.$this->getDeleteButtonAttribute("delete-product", "biller.refill_customers.destroy");     
+        return $this->getViewButtonAttribute("manage-refill-customer", "biller.refill_customers.show")
+        .' '. $this->getEditButtonAttribute("edit-refill-customer", "biller.refill_customers.edit")
+        .' '.$this->getDeleteButtonAttribute("delete-refill-customer", "biller.refill_customers.destroy");     
     }
 }
