@@ -56,7 +56,7 @@
 
     <div class="col-2">
         {{ Form::label('unit', 'Base Unit', ['class' => 'control-label']) }}
-        <select class="custom-select" name="unit_id" id="unit">
+        <select class="custom-select" name="unit_id" id="unit" required>
             <option value="">-- Choose Base Unit --</option>
             @foreach($productvariables as $item)
                 @if ($item->unit_type == 'base')
