@@ -1179,25 +1179,37 @@
                         </li>
                         @endauth
 
+                        @if(access()->allowMultiple(['manage-refill', 'manage-refill-product-category', 'manage-refill-product', 'manage-refill-customer']))
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-recycle" aria-hidden="true"></i> Refill Management</a>
                             <ul class="dropdown-menu">
+                                @permission('manage-refill')
                                 <li><a class="dropdown-item" href="{{ route('biller.product_refills.index') }}" data-toggle="dropdown"><i class="ft-file-text"></i> Manage Refills
                                     </a>
                                 </li>
+                                @endauth
+                                @permission('create-refill')
                                 <li><a class="dropdown-item" href="{{ route('biller.product_refills.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Refill
                                     </a>
                                 </li>
+                                @endauth
+                                @permission('manage-refill-product-category')
                                 <li><a class="dropdown-item" href="{{ route('biller.refill_product_categories.index') }}" data-toggle="dropdown"><i class="fa fa-object-ungroup"></i> Product Categories
                                     </a>
                                 </li>   
+                                @endauth
+                                @permission('manage-refill-product')
                                 <li><a class="dropdown-item" href="{{ route('biller.refill_products.index') }}" data-toggle="dropdown"><i class="fa fa-cube"></i> Products
                                     </a>
                                 </li>  
+                                @endauth
+                                @permission('manage-refill-customer')
                                 <li><a class="dropdown-item" href="{{ route('biller.refill_customers.index') }}" data-toggle="dropdown"><i class="ft-users"></i></i> Customers
                                     </a>
                                 </li> 
+                                @endauth
                             </ul>
                         </li>
+                        @endauth
                     </ul>
                 </li>
             @endif
