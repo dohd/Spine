@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Focus\utility_bill;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
+use App\Models\additional\Additional;
 use App\Models\items\GoodsreceivenoteItem;
 use App\Models\items\UtilityBillItem;
 use App\Models\supplier\Supplier;
@@ -47,8 +48,9 @@ class UtilityBillController extends Controller
     {
         $tid = UtilityBill::where('ins', auth()->user()->ins)->max('tid');
         $suppliers = Supplier::get(['id', 'name']);
+        $additionals = Additional::all();
 
-        return view('focus.utility-bills.create', compact('tid', 'suppliers'));
+        return view('focus.utility-bills.create', compact('additionals', 'tid', 'suppliers'));
     }
 
     /**
@@ -89,6 +91,7 @@ class UtilityBillController extends Controller
     public function edit(UtilityBill $utility_bill)
     {
         $suppliers = Supplier::get(['id', 'name']);
+        $additionals = Additional::all();
 
         $doc_type = $utility_bill->document_type;
         if ($doc_type == 'direct_purchase') 
@@ -100,7 +103,7 @@ class UtilityBillController extends Controller
         elseif ($doc_type == 'advance_payment') 
             return response()->redirectTo(route('biller.advance_payments.edit', $utility_bill->ref_id));
 
-        return view('focus.utility-bills.edit', compact('utility_bill', 'suppliers'));
+        return view('focus.utility-bills.edit', compact('additionals', 'utility_bill', 'suppliers'));
     }
 
     /**
