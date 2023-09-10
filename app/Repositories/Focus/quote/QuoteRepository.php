@@ -176,7 +176,7 @@ class QuoteRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
+        dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];

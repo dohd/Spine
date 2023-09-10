@@ -345,6 +345,7 @@ Route::group(['namespace' => 'projectequipment'], function () {
 
 // quotes
 Route::group(['namespace' => 'quote'], function () {
+    Route::post('quotes/quote_type', 'QuotesController@quote_type')->name('quotes.quote_type');
     Route::post('quotes/convert', 'QuotesController@convert')->name('quotes.convert');
     Route::post('quotes/approve_quote/{quote}', 'QuotesController@approve_quote')->name('quotes.approve_quote');
 

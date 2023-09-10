@@ -12,9 +12,6 @@
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
-        <div class="alert alert-warning col-12 d-none budget-alert" role="alert">
-            <strong>E.P Margin Not Met!</strong> Check line item rates.
-        </div>
         <div class="content-header-left col-6">
             <h4 class="content-header-title">{{ $header_title }}</h4>
         </div>
@@ -29,6 +26,10 @@
         <div class="card-body">
         {{ Form::open(['route' => 'biller.quotes.store', 'method' => 'POST', 'id' => 'quoteForm']) }}
             @include('focus.quotes.form')
+            <div class="edit-form-btn row">
+                {{ link_to_route('biller.quotes.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md col-1 ml-auto mr-1']) }}
+                {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md col-1 mr-2']) }}                                           
+            </div>
         {{ Form::close() }}
         </div>
     </div> 
