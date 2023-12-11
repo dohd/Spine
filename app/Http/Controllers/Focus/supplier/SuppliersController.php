@@ -104,6 +104,7 @@ class SuppliersController extends Controller
                 return response()->json($result);
             } 
         } catch (\Throwable $th) {
+            dd($th);
             if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Supplier', $th);
         }
@@ -147,6 +148,7 @@ class SuppliersController extends Controller
         try {
             $result = $this->repository->update($supplier, compact('data', 'account_data', 'payment_data'));
         } catch (\Throwable $th) {
+            dd($th);
             if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Supplier', $th);
         }        
@@ -166,6 +168,7 @@ class SuppliersController extends Controller
         try {
             $this->repository->delete($supplier);
         } catch (\Throwable $th) {
+            dd($th);
             return errorHandler('Error Deleting Supplier', $th);
         }
 

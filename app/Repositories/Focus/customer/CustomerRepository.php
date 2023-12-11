@@ -5,6 +5,7 @@ namespace App\Repositories\Focus\customer;
 use DB;
 use App\Models\customer\Customer;
 use App\Exceptions\GeneralException;
+use App\Http\Controllers\ClientSupplierAuth;
 use App\Models\account\Account;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Storage;
@@ -22,6 +23,8 @@ use Illuminate\Validation\ValidationException;
  */
 class CustomerRepository extends BaseRepository
 {
+    use ClientSupplierAuth;
+
     /**
      *customer_picture_path .
      *
@@ -259,9 +262,10 @@ class CustomerRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);   
+        // dd($input);           
         DB::beginTransaction();
 
+        $input_pic = $input['picture'];
         if (isset($input['picture'])) $input['picture'] = $this->uploadPicture($input['picture']);
             
         $is_company = Customer::where('company', $input['company'])->exists();
@@ -358,6 +362,10 @@ class CustomerRepository extends BaseRepository
             }
         }
 
+        // authorize
+        $input['picture'] = $input_pic;
+        $this->createAuth($result, $input, 'client');
+
         if ($result) {
             DB::commit();
             return $result;
@@ -377,6 +385,7 @@ class CustomerRepository extends BaseRepository
         // dd($input);
         DB::beginTransaction();
 
+        $input_pic = $input['picture'];
         if (isset($input['picture'])) {
             $this->removePicture($customer, 'picture');
             $input['picture'] = $this->uploadPicture($input['picture']);
@@ -504,8 +513,12 @@ class CustomerRepository extends BaseRepository
             
             /**accounting */    
             if ($data) $this->post_transaction((object) $data);    
-        }     
-
+        }    
+        
+        // authorize
+        $input['picture'] = $input_pic;
+        $this->updateAuth($customer, $input, 'client');
+        
         if ($result) {
             DB::commit();
             return true;
@@ -526,7 +539,7 @@ class CustomerRepository extends BaseRepository
         if ($customer->id == 1) throw ValidationException::withMessages(['Cannot delete default customer']);
         if ($customer->leads->count()) 
             throw ValidationException::withMessages(['Customer has attached Tickets']);
-        if ($customer->delete()) return true;
+        if ($this->deleteAuth($customer, 'client') && $customer->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.customers.delete_error'));
     }

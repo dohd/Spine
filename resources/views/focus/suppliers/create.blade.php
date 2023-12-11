@@ -22,7 +22,7 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            {{ Form::open(['route' => 'biller.suppliers.store', 'method' => 'post', 'id' => 'create-supplier']) }}
+                            {{ Form::open(['route' => 'biller.suppliers.store', 'method' => 'post', 'files' => true, 'id' => 'create-supplier']) }}
                             <div class="form-group">
                                 @include("focus.suppliers.form")
                                 <div class="edit-form-btn">

@@ -267,7 +267,6 @@ class HrmRepository extends BaseRepository
     */
     public function uploadPicture($logo, $path)
     {
-
         $image_name = time() . $logo->getClientOriginalName();
 
         $this->storage->put($path . $image_name, file_get_contents($logo->getRealPath()));

@@ -192,6 +192,12 @@
                         {!! Form::file('picture', array('class'=>'input' )) !!}
                     </div>
                 </div>
+                <div class='form-group'>
+                    {{ Form::label( 'password', trans('customers.password'),['class' => 'col-lg-2 control-label']) }}
+                    <div class='col-lg-10'>
+                        {{ Form::text('password', null, ['class' => 'form-control box-size', 'placeholder' => trans('customers.password')]) }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

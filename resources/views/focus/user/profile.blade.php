@@ -233,7 +233,7 @@
                         </div>
                         <div class="media-body media-middle p-1">
                             <h5 class="media-heading">{{$hrm['first_name'].' '.$hrm['last_name']}} </h5>
-                            ({{$hrm->role['name']}})
+                            ({{ @$hrm->role['name'] }})
                         </div>
                         <div class="media-middle pr-1"><span
                                     class="avatar avatar-lg rounded-circle ml-2"><img

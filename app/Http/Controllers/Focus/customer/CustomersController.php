@@ -92,9 +92,8 @@ class CustomersController extends Controller
         $input = $request->except(['_token', 'ins', 'balance']);
 
         $input['ins'] = auth()->user()->ins;
-        if (!$request->password || strlen($request->password) < 6) 
-            $input['password'] = rand(111111, 999999);
-
+        if (!$request->password) $input['password'] = rand(111111, 999999);
+            
         try {
             $result = $this->repository->create($input);
         } catch (\Throwable $th) {

@@ -25,6 +25,7 @@ use App\Models\Access\User\UserProfile;
 use App\Models\Company\ConfigMeta;
 use Illuminate\Http\Request;
 use App\Http\Responses\ViewResponse;
+use App\Models\Access\Role\Role;
 use App\Models\Company\Company;
 use App\Models\hrm\Attendance;
 use App\Models\hrm\Hrm;
@@ -69,6 +70,7 @@ class UserController extends Controller
             'contact' => $hrm->primary_contact,
             'tax_id' => $hrm->tax_id,
         ]);
+        $hrm->meta = new HrmMeta();
 
         return view('focus.user.profile', compact('hrm'));
     }

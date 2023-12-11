@@ -5,6 +5,7 @@ namespace App\Repositories\Focus\supplier;
 use DB;
 use App\Models\supplier\Supplier;
 use App\Exceptions\GeneralException;
+use App\Http\Controllers\ClientSupplierAuth;
 use App\Models\account\Account;
 use App\Models\billpayment\Billpayment;
 use App\Models\Company\Company;
@@ -23,6 +24,8 @@ use Illuminate\Validation\ValidationException;
  */
 class SupplierRepository extends BaseRepository
 {
+    use ClientSupplierAuth;
+    
     /**
      *customer_picture_path .
      *
@@ -240,7 +243,8 @@ class SupplierRepository extends BaseRepository
     {
         // dd($input);
         $data = $input['data'];
-        if (!empty($data['picture'])) $data['picture'] = $this->uploadPicture($data['picture']);
+        $input_pic = $data['picture'];
+        if (isset($data['picture'])) $data['picture'] = $this->uploadPicture($data['picture']);
 
         if (@$data['taxid']) {
             $taxid_exists = Supplier::where('taxid', $data['taxid'])->whereNotNull('taxid')->exists();
@@ -331,6 +335,10 @@ class SupplierRepository extends BaseRepository
             } 
         }
 
+        // authorize
+        $input['picture'] = $input_pic;
+        $this->createAuth($result, $input['data'], 'supplier');
+
         DB::commit();
         if ($result) return $result;
     }
@@ -350,7 +358,8 @@ class SupplierRepository extends BaseRepository
         DB::beginTransaction();
 
         $data = $input['data'];
-        if (!empty($input['picture'])) {
+        $input_pic = $data['picture'];
+        if (isset($data['picture'])) {
             $this->removePicture($supplier, 'picture');
             $data['picture'] = $this->uploadPicture($data['picture']);
         }
@@ -493,6 +502,10 @@ class SupplierRepository extends BaseRepository
             if ($journal_data) $this->post_transaction((object) $journal_data);
         }
 
+        // authorize
+        $input['picture'] = $input_pic;
+        $this->updateAuth($supplier, $input['data'], 'supplier');
+
         if ($result) {
             DB::commit();
             return $result;
@@ -547,7 +560,7 @@ class SupplierRepository extends BaseRepository
         if ($supplier->id == 1) throw ValidationException::withMessages(['Cannot delete default supplier']);
         if ($supplier->bills->count())
             throw ValidationException::withMessages(['Supplier has attached Bill!']);
-        if ($supplier->delete()) return true;
+        if ($this->deleteAuth($supplier, 'supplier') && $supplier->delete()) return true;
 
         throw new GeneralException(trans('exceptions.backend.suppliers.delete_error'));
     }
