@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\Auth\Auth;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Validation\ValidationException;
 
 class CoreController extends Controller
 {
@@ -43,14 +44,18 @@ class CoreController extends Controller
     * Check to see if the users account is confirmed and active
     */
     protected function authenticated(Request $request, $user)
-    {
+    {   
+        if (@$user->business->status != 'Active') {
+            access()->logout();
+            return redirect()->back()->with(['flash_user_error' => 'Your account is not activated. Please contact the administrator']);
+        }
         if (!$user->isConfirmed()) {
             access()->logout();
-            trigger_error(trans('exceptions.frontend.auth.confirmation.resend', ['user_id' => $user->id]));
+            return redirect()->back()->with(['flash_user_error' => trans('exceptions.frontend.auth.confirmation.resend')]);
         }
         if (!$user->isActive()) {
             access()->logout();
-            trigger_error(trans('exceptions.frontend.auth.deactivated'));
+            return redirect()->back()->with(['flash_user_error' => trans('exceptions.frontend.auth.deactivated')]);
         }
     }
 
