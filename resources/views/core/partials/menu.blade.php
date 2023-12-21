@@ -1382,8 +1382,8 @@
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-comments-o" aria-hidden="true"></i> Support Tickets</a>
                         <ul class="dropdown-menu">
                             @permission('manage-note')
-                                <li><a class="dropdown-item" href="{{ route('biller.tenant_services.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Support Tickets</a></li>
-                                <li><a class="dropdown-item" href="{{ route('biller.tenant_services.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Ticket</a></li>
+                                <li><a class="dropdown-item" href="{{ route('biller.tenant_tickets.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Support Tickets</a></li>
+                                <li><a class="dropdown-item" href="{{ route('biller.tenant_tickets.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Ticket</a></li>
                             @endauth
                         </ul>
                     </li>

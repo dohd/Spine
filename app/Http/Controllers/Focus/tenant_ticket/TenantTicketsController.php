@@ -16,20 +16,17 @@
  * ***********************************************************************
  */
 
-namespace App\Http\Controllers\Focus\tenant;
+namespace App\Http\Controllers\Focus\tenant_ticket;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
-use App\Models\Access\User\User;
-use App\Models\tenant\Tenant;
-use App\Repositories\Focus\tenant\TenantRepository;
+use App\Models\tenant_service\TenantService;
+use App\Models\tenant_ticket\TenantTicket;
+use App\Repositories\Focus\tenant_ticket\TenantTicketRepository;
 
-/**
- * ProductcategoriesController
- */
-class TenantsController extends Controller
+class TenantTicketsController extends Controller
 {
     /**
      * variable to store the repository object
@@ -41,7 +38,7 @@ class TenantsController extends Controller
      * contructor to initialize repository object
      * @param ProductcategoryRepository $repository ;
      */
-    public function __construct(TenantRepository $repository)
+    public function __construct(TenantTicketRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -54,7 +51,7 @@ class TenantsController extends Controller
      */
     public function index(Request $request)
     {
-        return new ViewResponse('focus.tenants.index');
+        return new ViewResponse('focus.tenant_tickets.index');
     }
 
     /**
@@ -64,8 +61,10 @@ class TenantsController extends Controller
      * @return \App\Http\Responses\Focus\productcategory\CreateResponse
      */
     public function create()
-    {
-        return view('focus.tenants.create');
+    {   
+        $services = TenantService::get();
+
+        return view('focus.tenant_tickets.create', compact('services'));
     }
 
     /**
@@ -75,26 +74,19 @@ class TenantsController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
     public function store(Request $request)
-    {
+    {   
         $request->validate([
-            'cname' => 'required',
-            'address' => 'required',
-            'postbox' => 'required',
-            'cemail' => 'required',
-            'phone' => 'required',
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'email' => 'required',
-            'password' => 'required',
+            'subject' => 'required',
+            'message' => 'required',
         ]);
 
         try {
             $this->repository->create($request->except(['_token']));
         } catch (\Throwable $th) {
-            return errorHandler('Error Creating Tenant!', $th);
+            return errorHandler('Error Creating Ticket!', $th);
         }
         
-        return new RedirectResponse(route('biller.tenants.index'), ['flash_success' => 'Tenant  Successfully Created']);
+        return new RedirectResponse(route('biller.tenant_tickets.index'), ['flash_success' => 'Ticket  Successfully Created']);
     }
 
     /**
@@ -104,39 +96,31 @@ class TenantsController extends Controller
      * @param EditProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
-    public function edit(Tenant $tenant, Request $request)
+    public function edit(TenantTicket $tenant_ticket, Request $request)
     {
-        $user = User::where('ins', $tenant->id)
-        ->where('created_at', $tenant->created_at)
-        ->first();
-        
-        return view('focus.tenants.edit', compact('tenant', 'user'));
+        $services = TenantService::get();
+
+        return view('focus.tenant_tickets.edit', compact('tenant_ticket', 'services'));
     }
 
     /**
      * Update Resource in Storage
      * 
      */
-    public function update(Request $request, Tenant $tenant)
+    public function update(Request $request, TenantTicket $tenant_ticket)
     {
         $request->validate([
-            'cname' => 'required',
-            'address' => 'required',
-            'postbox' => 'required',
-            'cemail' => 'required',
-            'phone' => 'required',
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'email' => 'required',
+            'subject' => 'required',
+            'message' => 'required',
         ]);
 
         try {
-            $this->repository->update($tenant, $request->except(['_token']));
+            $this->repository->update($tenant_ticket, $request->except(['_token']));
         } catch (\Throwable $th) {
-            return errorHandler('Error Updating Tenant!', $th);
+            return errorHandler('Error Updating Ticket!', $th);
         }
         
-        return new RedirectResponse(route('biller.tenants.index'), ['flash_success' => 'Tenant  Successfully Updated']);
+        return new RedirectResponse(route('biller.tenant_tickets.index'), ['flash_success' => 'Ticket  Successfully Updated']);
     }
 
     /**
@@ -146,15 +130,15 @@ class TenantsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(Tenant $tenant)
+    public function destroy(TenantTicket $tenant_ticket)
     {
         try {
-            $this->repository->delete($tenant);
+            $this->repository->delete($tenant_ticket);
         } catch (\Throwable $th) {
-            return errorHandler('Error Deleting Tenant!', $th);
+            return errorHandler('Error Deleting Ticket!', $th);
         }
 
-        return new RedirectResponse(route('biller.tenants.index'), ['flash_success' => 'Tenant  Successfully Deleted']);
+        return new RedirectResponse(route('biller.tenant_tickets.index'), ['flash_success' => 'Ticket  Successfully Deleted']);
     }
 
     /**
@@ -164,19 +148,8 @@ class TenantsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(Tenant $tenant, Request $request)
+    public function show(TenantTicket $tenant_ticket, Request $request)
     {
-        return new ViewResponse('focus.tenants.view', compact('tenant'));
-    }
-
-    /**
-     * Select Tenants
-     * 
-     */
-    public function select(Request $request)
-    {
-        $q = $request->input('q');
-        $tenants = Tenant::where('cname', 'LIKE', '%' . $q . '%')->limit(10)->get();
-        return response()->json($tenants);
+        return new ViewResponse('focus.tenant_tickets.view', compact('tenant_ticket'));
     }
 }
