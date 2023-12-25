@@ -23,6 +23,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\tenant_service\TenantService;
+use App\Models\tenant_ticket\TenantReply;
 use App\Models\tenant_ticket\TenantTicket;
 use App\Repositories\Focus\tenant_ticket\TenantTicketRepository;
 
@@ -151,5 +152,38 @@ class TenantTicketsController extends Controller
     public function show(TenantTicket $tenant_ticket, Request $request)
     {
         return new ViewResponse('focus.tenant_tickets.view', compact('tenant_ticket'));
+    }
+
+    /**
+     * Update Ticket Status
+     * 
+     */
+    public function status(TenantTicket $tenant_ticket, Request $request)
+    {
+        try {
+            $tenant_ticket->update(['status' => 'Closed', 'closed_at' => now()]);
+        } catch (\Throwable $th) {
+            return errorHandler('', $th);
+        }
+        return new RedirectResponse(route('biller.tenant_tickets.index'), ['flash_success' => 'Ticket  Successfully Closed']);
+    }
+
+    /**
+     * Ticket Reply
+     * 
+     */
+    public function reply(Request $request)
+    {
+        $request->validate(['message' => 'required']);
+        try {
+            $input = $request->only('tenant_ticket_id', 'message');
+            $tenant_reply = TenantReply::create($input);
+            if ($tenant_reply->tenant_ticket) {
+                $tenant_reply->tenant_ticket->update(['status' => 'Open', 'closed_at' => null]);
+            }
+        } catch (\Throwable $th) {
+            return errorHandler('', $th);
+        }
+        return redirect()->back();
     }
 }

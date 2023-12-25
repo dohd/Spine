@@ -26,6 +26,8 @@ Route::group(['namespace' => 'tenant_deposit'], function () {
     Route::post('tenant_deposits/get', 'TenantDepositsTableController')->name('tenant_deposits.get');
 });
 Route::group(['namespace' => 'tenant_ticket'], function () {
+    Route::patch('tenant_tickets/status/{tenant_ticket}', 'TenantTicketsController@status')->name('tenant_tickets.status');
+    Route::post('tenant_tickets/reply', 'TenantTicketsController@reply')->name('tenant_tickets.reply');
     Route::resource('tenant_tickets', 'TenantTicketsController');
     //For Datatable
     Route::post('tenant_tickets/get', 'TenantTicketsTableController')->name('tenant_tickets.get');
