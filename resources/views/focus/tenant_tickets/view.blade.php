@@ -16,12 +16,16 @@
     </div>
 
     <div class="content-body">
+        @if ($tenant_ticket->status == 'Closed')
+            <div class="badge text-center white d-block">
+                <h5><span class="btn btn-warning round text-white"><b>Closed Ticket! Reply to the ticket to reopen it.</b></span></h5>
+            </div>
+        @endif
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
                     <a href="#" class="btn btn-danger float-right" id="close"><i class="fa fa-times" aria-hidden="true"></i> Closed</a>
-                    {{ Form::open(['route' => ['biller.tenant_tickets.status', $tenant_ticket], 'method' => 'PATCH', 'id' => 'closeForm']) }} 
-                    {{ Form::close() }}
+                    {{ Form::open(['route' => ['biller.tenant_tickets.status', $tenant_ticket], 'method' => 'PATCH', 'id' => 'closeForm']) }} {{ Form::close() }}
                     <button type="button" class="btn btn-outline-secondary float-right mr-1" id="reply" onclick="window.scrollTo(0, document.body.scrollHeight)"><i class="fa fa-pencil" aria-hidden="true"></i> Reply</button>                    
                     <h3 class="text-success mb-1">{{ gen4tid('#TKT-', $tenant_ticket->tid) }}</h3>
                     <h5>Subject: <b>{{ $tenant_ticket->subject }}</b></h5>
