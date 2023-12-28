@@ -23,8 +23,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\Access\User\User;
+use App\Models\customer\Customer;
 use App\Models\tenant\Tenant;
 use App\Repositories\Focus\tenant\TenantRepository;
+use DB;
 
 /**
  * ProductcategoriesController
@@ -65,7 +67,54 @@ class TenantsController extends Controller
      */
     public function create()
     {
-        return view('focus.tenants.create');
+        $packages = collect([
+            [
+                'id' => 1,
+                'category' => 'Basic',
+                'cost' => 200000,
+                'maintenance_cost' => 40000,
+                'maintenance_term' => 12,
+            ],
+            [
+                'id' => 2,
+                'category' => 'Silver',
+                'cost' => 300000,
+                'maintenance_cost' => 60000,
+                'maintenance_term' => 12,
+            ],
+            [
+                'id' => 3,
+                'category' => 'Gold',
+                'cost' => 400000,
+                'maintenance_cost' => 80000,
+                'maintenance_term' => 12,
+            ],
+        ]);
+        $package_items = collect([
+            [
+                'id' => 1,
+                'name' => 'e-Commerce',
+                'cost' => 1000,
+                'term' => 1,
+            ],
+            [
+                'id' => 2,
+                'name' => 'Single Domain SSL',
+                'cost' => 1000,
+                'term' => 1,
+            ],
+            [
+                'id' => 3,
+                'name' => 'Professional Email',
+                'cost' => 1000,
+                'term' => 1,
+            ],
+        ]);
+        foreach ($packages as $key => $value) {
+            $value['items'] = $package_items;
+            $packages[$key] = $value;
+        }
+        return view('focus.tenants.create', compact('packages'));
     }
 
     /**
@@ -75,26 +124,29 @@ class TenantsController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
     public function store(Request $request)
-    {
+    {  
         $request->validate([
             'cname' => 'required',
             'address' => 'required',
+            'country' => 'required',
             'postbox' => 'required',
-            'cemail' => 'required',
+            'email' => 'required',
             'phone' => 'required',
             'first_name' => 'required',
             'last_name' => 'required',
-            'email' => 'required',
+            'user_email' => 'required',
             'password' => 'required',
+            'package_id' => 'required',
+            'maintenance_cost' => 'required',
         ]);
 
         try {
             $this->repository->create($request->except(['_token']));
         } catch (\Throwable $th) {
-            return errorHandler('Error Creating Tenant!', $th);
+            return errorHandler('Error Creating Account!', $th);
         }
         
-        return new RedirectResponse(route('biller.tenants.index'), ['flash_success' => 'Tenant  Successfully Created']);
+        return new RedirectResponse(route('biller.tenants.index'), ['flash_success' => 'Account  Successfully Created']);
     }
 
     /**
@@ -109,8 +161,56 @@ class TenantsController extends Controller
         $user = User::where('ins', $tenant->id)
         ->where('created_at', $tenant->created_at)
         ->first();
+
+        $packages = collect([
+            [
+                'id' => 1,
+                'category' => 'Basic',
+                'cost' => 200000,
+                'maintenance_cost' => 40000,
+                'maintenance_term' => 12,
+            ],
+            [
+                'id' => 2,
+                'category' => 'Silver',
+                'cost' => 300000,
+                'maintenance_cost' => 60000,
+                'maintenance_term' => 12,
+            ],
+            [
+                'id' => 3,
+                'category' => 'Gold',
+                'cost' => 400000,
+                'maintenance_cost' => 80000,
+                'maintenance_term' => 12,
+            ],
+        ]);
+        $package_items = collect([
+            [
+                'id' => 1,
+                'name' => 'e-Commerce',
+                'cost' => 1000,
+                'term' => 1,
+            ],
+            [
+                'id' => 2,
+                'name' => 'Single Domain SSL',
+                'cost' => 1000,
+                'term' => 1,
+            ],
+            [
+                'id' => 3,
+                'name' => 'Professional Email',
+                'cost' => 1000,
+                'term' => 1,
+            ],
+        ]);
+        foreach ($packages as $key => $value) {
+            $value['items'] = $package_items;
+            $packages[$key] = $value;
+        }
         
-        return view('focus.tenants.edit', compact('tenant', 'user'));
+        return view('focus.tenants.edit', compact('tenant', 'user', 'packages'));
     }
 
     /**
@@ -122,21 +222,24 @@ class TenantsController extends Controller
         $request->validate([
             'cname' => 'required',
             'address' => 'required',
+            'country' => 'required',
             'postbox' => 'required',
-            'cemail' => 'required',
+            'email' => 'required',
             'phone' => 'required',
             'first_name' => 'required',
             'last_name' => 'required',
-            'email' => 'required',
+            'user_email' => 'required',
+            'package_id' => 'required',
+            'maintenance_cost' => 'required',
         ]);
 
         try {
             $this->repository->update($tenant, $request->except(['_token']));
-        } catch (\Throwable $th) {
-            return errorHandler('Error Updating Tenant!', $th);
+        } catch (\Throwable $th) { dd($th);
+            return errorHandler('Error Updating Account!', $th);
         }
         
-        return new RedirectResponse(route('biller.tenants.index'), ['flash_success' => 'Tenant  Successfully Updated']);
+        return new RedirectResponse(route('biller.tenants.index'), ['flash_success' => 'Account  Successfully Updated']);
     }
 
     /**
@@ -151,10 +254,10 @@ class TenantsController extends Controller
         try {
             $this->repository->delete($tenant);
         } catch (\Throwable $th) {
-            return errorHandler('Error Deleting Tenant!', $th);
+            return errorHandler('Error Deleting Account!', $th);
         }
 
-        return new RedirectResponse(route('biller.tenants.index'), ['flash_success' => 'Tenant  Successfully Deleted']);
+        return new RedirectResponse(route('biller.tenants.index'), ['flash_success' => 'Account  Successfully Deleted']);
     }
 
     /**
@@ -178,5 +281,17 @@ class TenantsController extends Controller
         $q = $request->input('q');
         $tenants = Tenant::where('cname', 'LIKE', '%' . $q . '%')->limit(10)->get();
         return response()->json($tenants);
+    }
+
+    /**
+     * Select Business Customers
+     */
+    public function customers(Request $request)
+    {
+        $q = $request->input('q');
+        $customers = Customer::where('company', 'LIKE', '%' . $q . '%')
+        ->limit(10)->get();
+
+        return response()->json($customers);
     }
 }

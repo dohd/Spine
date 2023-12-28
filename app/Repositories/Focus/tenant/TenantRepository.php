@@ -8,7 +8,10 @@ use App\Models\Access\User\User;
 use App\Models\employee\RoleUser;
 use App\Models\hrm\Hrm;
 use App\Models\tenant\Tenant;
+use App\Models\tenant_package\TenantPackage;
+use App\Models\tenant_package\TenantPackageItem;
 use App\Repositories\BaseRepository;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -42,30 +45,49 @@ class TenantRepository extends BaseRepository
      * @return bool
      */
     public function create(array $input)
-    { 
+    {   
         DB::beginTransaction();
 
-        // save images
-        //
+        $user_data = Arr::only($input, ['first_name', 'last_name', 'user_email', 'password', 'confirm_password']);
+        $package_data = Arr::only($input, ['package_id', 'cost', 'maintenance_cost', 'extras_cost', 'total_cost', 'package_item_id']);
+        $tenant_data = array_diff_key($input, array_merge($user_data, $package_data));
 
-        $user_data = Arr::only($input, ['first_name', 'last_name', 'email', 'password']);
-        $tenant_data = array_diff_key($input, $user_data);
-        $tenant_data['email'] = $tenant_data['cemail'];
-        unset($tenant_data['cemail']);
         $tenant = Tenant::create($tenant_data);
 
+        $package_data = array_replace($package_data, [
+            'company_id' => $tenant->id,
+            'cost' => numberClean($package_data['cost']),
+            'maintenance_cost' => numberClean($package_data['maintenance_cost']),
+            'extras_cost' => numberClean($package_data['extras_cost']),
+            'total_cost' => numberClean($package_data['total_cost']),
+            'date' => date('Y-m-d'),
+            'due_date' => (new Carbon(date('Y-m-d')))->addYear()->format('Y-m-d'),
+        ]);
+        unset($package_data['package_item_id']);
+        $tenant_package = TenantPackage::create($package_data);
+
+        $input['package_item_id'] = @$input['package_item_id'] ?: [];
+        foreach ($input['package_item_id'] as $key => $value) {
+            $input['package_item_id'][$key] = [
+                'tenant_package_id' => $tenant_package->id,
+                'package_item_id' => $value,
+            ];
+        }
+        TenantPackageItem::insert($input['package_item_id']);
+
         $user_data = array_replace($user_data, [
+            'email' => $user_data['user_email'],
             'username' => Str::random(4),
             'confirmed' => 1,
             'ins' => $tenant->id,
             'created_by' => auth()->user()->id,
         ]);
+        unset($user_data['user_email'],$user_data['confirm_password']);
         $hrm = Hrm::create($user_data);
-
         // assign business owner role and permissions
         RoleUser::create(['user_id' => $hrm->id, 'role_id' => 2]);
-        $permissions = PermissionRole::select('permission_id')->distinct()->where('role_id', 2)->pluck('permission_id')->toArray();
-        $hrm->permissions()->attach($permissions);
+        $permissions = PermissionRole::select('permission_id')->distinct()->where('role_id', 2)->pluck('permission_id');
+        $hrm->permissions()->attach($permissions->toArray());
 
         DB::commit();
         return $tenant;
@@ -83,14 +105,34 @@ class TenantRepository extends BaseRepository
     {
         DB::beginTransaction();
 
-        // save images
-        //
+        $user_data = Arr::only($input, ['first_name', 'last_name', 'user_email', 'password', 'confirm_password']);
+        $package_data = Arr::only($input, ['package_id', 'cost', 'maintenance_cost', 'extras_cost', 'total_cost', 'package_item_id']);
+        $tenant_data = array_diff_key($input, array_merge($user_data, $package_data));
 
-        $user_data = Arr::only($input, ['first_name', 'last_name', 'email', 'password']);
-        $tenant_data = array_diff_key($input, $user_data);
-        $tenant_data['email'] = $tenant_data['cemail'];
-        unset($tenant_data['cemail']);
         $tenant->update($tenant_data);
+
+        $package_data = array_replace($package_data, [
+            'cost' => numberClean($package_data['cost']),
+            'maintenance_cost' => numberClean($package_data['maintenance_cost']),
+            'extras_cost' => numberClean($package_data['extras_cost']),
+            'total_cost' => numberClean($package_data['total_cost']),
+            'date' => date('Y-m-d'),
+            'due_date' => (new Carbon(date('Y-m-d')))->addYear()->format('Y-m-d'),
+        ]);
+        unset($package_data['package_item_id']);
+        $tenant_package = $tenant->package;
+        if ($tenant_package) {
+            $tenant_package->update($package_data);
+            $tenant_package->items()->delete();
+            $input['package_item_id'] = @$input['package_item_id'] ?: [];
+            foreach ($input['package_item_id'] as $key => $value) {
+                $input['package_item_id'][$key] = [
+                    'tenant_package_id' => $tenant_package->id,
+                    'package_item_id' => $value,
+                ];
+            }
+            TenantPackageItem::insert($input['package_item_id']);
+        }
 
         $hrm = User::where('ins', $tenant->id)->where('created_at', $tenant->created_at)->first();
         if ($hrm) {
@@ -99,12 +141,14 @@ class TenantRepository extends BaseRepository
             $hrm->update($user_data);
         } else {
             $user_data = array_replace($user_data, [
+                'email' => $user_data['user_email'],
                 'username' => Str::random(4),
                 'confirmed' => 1,
                 'ins' => $tenant->id,
                 'created_by' => auth()->user()->id,
                 'updated_by' => auth()->user()->id,
             ]);
+            unset($user_data['user_email'],$user_data['confirm_password']);
             $hrm = Hrm::create($user_data);
         }
         

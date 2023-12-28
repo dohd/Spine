@@ -5,6 +5,7 @@
  *
  */
 Route::group(['namespace' => 'tenant'], function () {
+    Route::post('tenants/customers', 'TenantsController@customers')->name('tenants.customers');
     Route::post('tenants/select', 'TenantsController@select')->name('tenants.select');
     Route::resource('tenants', 'TenantsController');
     //For Datatable

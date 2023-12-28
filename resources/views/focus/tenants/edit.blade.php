@@ -1,14 +1,14 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Business Tenant Management | Edit')
+@section ('title', 'Business Account Management | Edit')
 
 @section('content')
 <div class="content-wrapper">
-    <div class="content-header row">
+    <div class="content-header row mb-1">
         <div class="content-header-left col-md-6 col-12 mb-2">
-            <h4 class="mb-0">Edit Tenant</h4>
+            <h4 class="mb-0">Edit Account</h4>
         </div>
-        <div class="content-header-right col-md-6 col-12">
+        <div class="content-header-right col-md-6">
             <div class="media width-250 float-right">
                 <div class="media-body media-right text-right">
                     @include('focus.tenants.partials.tenants-header-buttons')
@@ -17,7 +17,7 @@
         </div>
     </div>
     <div class="content-body">
-        {{ Form::model($tenant, ['route' => ['biller.tenants.update', $tenant], 'method' => 'PATCH', 'files' => true]) }}
+        {{ Form::model($tenant, ['route' => ['biller.tenants.update', $tenant], 'method' => 'PATCH', 'id' => 'tenantForm']) }}
         <div class="form-group">                                    
             @include("focus.tenants.form")
             <div class="edit-form-btn">
