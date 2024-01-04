@@ -25,8 +25,8 @@ use App\Http\Responses\ViewResponse;
 use App\Models\Access\User\User;
 use App\Models\customer\Customer;
 use App\Models\tenant\Tenant;
+use App\Models\tenant_service\TenantService;
 use App\Repositories\Focus\tenant\TenantRepository;
-use DB;
 
 /**
  * ProductcategoriesController
@@ -67,54 +67,9 @@ class TenantsController extends Controller
      */
     public function create()
     {
-        $packages = collect([
-            [
-                'id' => 1,
-                'category' => 'Basic',
-                'cost' => 200000,
-                'maintenance_cost' => 40000,
-                'maintenance_term' => 12,
-            ],
-            [
-                'id' => 2,
-                'category' => 'Silver',
-                'cost' => 300000,
-                'maintenance_cost' => 60000,
-                'maintenance_term' => 12,
-            ],
-            [
-                'id' => 3,
-                'category' => 'Gold',
-                'cost' => 400000,
-                'maintenance_cost' => 80000,
-                'maintenance_term' => 12,
-            ],
-        ]);
-        $package_items = collect([
-            [
-                'id' => 1,
-                'name' => 'e-Commerce',
-                'cost' => 1000,
-                'term' => 1,
-            ],
-            [
-                'id' => 2,
-                'name' => 'Single Domain SSL',
-                'cost' => 1000,
-                'term' => 1,
-            ],
-            [
-                'id' => 3,
-                'name' => 'Professional Email',
-                'cost' => 1000,
-                'term' => 1,
-            ],
-        ]);
-        foreach ($packages as $key => $value) {
-            $value['items'] = $package_items;
-            $packages[$key] = $value;
-        }
-        return view('focus.tenants.create', compact('packages'));
+        $tenant_services = TenantService::get();
+
+        return view('focus.tenants.create', compact('tenant_services'));
     }
 
     /**
@@ -158,59 +113,10 @@ class TenantsController extends Controller
      */
     public function edit(Tenant $tenant, Request $request)
     {
-        $user = User::where('ins', $tenant->id)
-        ->where('created_at', $tenant->created_at)
-        ->first();
+        $user = User::where(['ins' => $tenant->id, 'created_at' => $tenant->created_at])->first();
+        $tenant_services = TenantService::get();
 
-        $packages = collect([
-            [
-                'id' => 1,
-                'category' => 'Basic',
-                'cost' => 200000,
-                'maintenance_cost' => 40000,
-                'maintenance_term' => 12,
-            ],
-            [
-                'id' => 2,
-                'category' => 'Silver',
-                'cost' => 300000,
-                'maintenance_cost' => 60000,
-                'maintenance_term' => 12,
-            ],
-            [
-                'id' => 3,
-                'category' => 'Gold',
-                'cost' => 400000,
-                'maintenance_cost' => 80000,
-                'maintenance_term' => 12,
-            ],
-        ]);
-        $package_items = collect([
-            [
-                'id' => 1,
-                'name' => 'e-Commerce',
-                'cost' => 1000,
-                'term' => 1,
-            ],
-            [
-                'id' => 2,
-                'name' => 'Single Domain SSL',
-                'cost' => 1000,
-                'term' => 1,
-            ],
-            [
-                'id' => 3,
-                'name' => 'Professional Email',
-                'cost' => 1000,
-                'term' => 1,
-            ],
-        ]);
-        foreach ($packages as $key => $value) {
-            $value['items'] = $package_items;
-            $packages[$key] = $value;
-        }
-        
-        return view('focus.tenants.edit', compact('tenant', 'user', 'packages'));
+        return view('focus.tenants.edit', compact('tenant', 'user', 'tenant_services'));
     }
 
     /**

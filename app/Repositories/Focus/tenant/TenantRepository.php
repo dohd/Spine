@@ -108,7 +108,7 @@ class TenantRepository extends BaseRepository
         $user_data = Arr::only($input, ['first_name', 'last_name', 'user_email', 'password', 'confirm_password']);
         $package_data = Arr::only($input, ['package_id', 'cost', 'maintenance_cost', 'extras_cost', 'total_cost', 'package_item_id']);
         $tenant_data = array_diff_key($input, array_merge($user_data, $package_data));
-
+        
         $tenant->update($tenant_data);
 
         $package_data = array_replace($package_data, [

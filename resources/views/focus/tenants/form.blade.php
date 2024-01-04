@@ -123,15 +123,15 @@
                                         {{ Form::label('account_plan', 'Account Plan', ['class' => 'col control-label']) }}
                                         <div class='col'>
                                             <select name="package_id" id="package" class="custom-select">
-                                                @foreach ($packages as $i => $package)
+                                                @foreach ($tenant_services as $i => $service)
                                                     <option 
-                                                        value="{{ $package['id'] }}" 
-                                                        category="{{ $package['category'] }}"
-                                                        cost="{{ $package['cost'] }}" 
-                                                        maint_cost="{{ $package['maintenance_cost'] }}"
-                                                        {{ $package['id'] == @$tenant->package->package_id? 'selected' : '' }}
+                                                        value="{{ $service['id'] }}" 
+                                                        category="{{ $service['name'] }}"
+                                                        cost="{{ $service['cost'] }}" 
+                                                        maint_cost="{{ $service['maintenance_cost'] }}"
+                                                        {{ $service['id'] == @$tenant->package->package_id? 'selected' : '' }}
                                                     >
-                                                        {{ $package['category'] }} Package - {{ amountFormat($package['cost']) }}
+                                                        {{ $service['name'] }} Package - {{ amountFormat($service['cost']) }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -151,15 +151,15 @@
                             <div class="table-responsive">
                                 <table class="table table-flush-spacing">
                                     <tbody>
-                                        @foreach ($packages as $package)
-                                            @foreach ($package['items'] as $item)
-                                                <tr class="grp-{{ $package['category'] }} d-none">
-                                                    <td class="text-nowrap fw-bolder"><span class="me-1">{{ $item['name'] }} ({{ $package['category'] }})</span> </td>
+                                        @foreach ($tenant_services as $service)
+                                            @foreach ($service->items as $item)
+                                                <tr class="grp-{{ $service['name'] }} d-none">
+                                                    <td class="text-nowrap fw-bolder"><span class="me-1">{{ $item->package_extra->name }} ({{ $service['name'] }})</span> </td>
                                                     <td>
                                                         <div class="form-check mx-5">
-                                                            <input class="form-check-input select" type="checkbox" value="{{ $item['cost'] }}"/>
+                                                            <input class="form-check-input select" type="checkbox" value="{{ $item['extra_cost'] }}"/>
                                                             {{ Form::hidden('package_item_id[]', $item['id'], ['class' => 'item_id', 'disabled' => 'disabled']) }}
-                                                            <label class="form-check-label" for="select"> {{ numberFormat($item['cost']) }} per month </label>
+                                                            <label class="form-check-label" for="select"> {{ numberFormat($item['extra_cost']) }} Per Month </label>
                                                         </div>
                                                     </td>
                                                 </tr>
