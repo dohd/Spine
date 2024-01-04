@@ -16,7 +16,7 @@
     </div>
 
     <div class="content-body">
-        <div class="card">
+        <div class="card rounded">
             <div class="card-content">
                 <div class="card-body">
                     {{ Form::open(['route' => 'biller.tenant_services.store', 'method' => 'POST']) }}
@@ -28,7 +28,7 @@
                     {{ Form::close() }}
                 </div>
             </div>
-        </div>
+        </div>        
     </div>
 </div>
 @endsection

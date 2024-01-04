@@ -25,11 +25,10 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Service</th>
-                                        <th>Tenant</th>
-                                        <th>Costing</th>
-                                        <th>Next Due Date</th>
-                                        <th>Status</th>
+                                        <th>Service/Product</th>
+                                        <th>Package Costing</th>
+                                        <th>Maintenance Fee</th>
+                                        <th>Maintenance Term (Months)</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -76,7 +75,7 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['category', 'tenant', 'cost', 'due_date', 'status'].map(v => ({data: v, name: v})),
+                    ...['name', 'cost', 'maintenance_cost', 'maintenance_term'].map(v => ({data: v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],

@@ -4,8 +4,11 @@ namespace App\Repositories\Focus\tenant_service;
 
 use App\Exceptions\GeneralException;
 use App\Models\tenant_service\TenantService;
+use App\Models\tenant_service\TenantServiceItem;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
+use DB;
+use Illuminate\Support\Arr;
 
 /**
  * Class ProductcategoryRepository.
@@ -40,19 +43,31 @@ class TenantServiceRepository extends BaseRepository
      */
     public function create(array $input)
     {   
-        $input['cost'] = numberClean($input['cost']);
-        $input['date'] = date_for_database($input['date']);
-        
-        $due_date = '';
-        $date = new Carbon($input['date']);
-        $subscr = $input['subscription'];
-        if ($subscr == 'Monthly') $due_date = $date->addMonth()->format('Y-m-d');
-        if ($subscr == 'Quarterly') $due_date = $date->addMonths(3)->format('Y-m-d');
-        if ($subscr == 'Yearly') $due_date = $date->addYear()->format('Y-m-d');
-        $input['due_date'] = $due_date;
- 
+        DB::beginTransaction();
+
+        foreach ($input as $key => $value) {
+            $keys = ['cost', 'maintenance_cost', 'total_cost', 'extras_total', 'maintenance_term', 'extras_term', 'extra_cost'];
+            if (in_array($key, $keys)) {
+                if (is_array($value)) {
+                    $input[$key] = array_map(fn($v) => numberClean($v), $value);
+                } else {
+                    $input[$key] = numberClean($value);
+                }
+            }
+        } 
         $service = TenantService::create($input);
-        return $service;
+
+        $items_data = Arr::only($input, ['extra_cost', 'package_id']);
+        $items_data = modify_array($items_data);
+        foreach ($items_data as $key => $value) {
+            $items_data[$key]['tenant_service_id'] = $service->id; 
+        }
+        TenantServiceItem::insert($items_data);
+
+        if ($service) {
+            DB::commit();
+            return $service;
+        }
     }
 
     /**
@@ -65,18 +80,32 @@ class TenantServiceRepository extends BaseRepository
      */
     public function update(TenantService $tenant_service, array $input)
     {   
-        $input['cost'] = numberClean($input['cost']);
-        $input['date'] = date_for_database($input['date']);
-        
-        $due_date = '';
-        $date = new Carbon($input['date']);
-        $subscr = $input['subscription'];
-        if ($subscr == 'Monthly') $due_date = $date->addMonth()->format('Y-m-d');
-        if ($subscr == 'Quarterly') $due_date = $date->addMonths(3)->format('Y-m-d');
-        if ($subscr == 'Yearly') $due_date = $date->addYear()->format('Y-m-d');
-        $input['due_date'] = $due_date;
+        DB::beginTransaction();
 
-        return $tenant_service->update($input);
+        foreach ($input as $key => $value) {
+            $keys = ['cost', 'maintenance_cost', 'total_cost', 'extras_total', 'maintenance_term', 'extras_term', 'extra_cost'];
+            if (in_array($key, $keys)) {
+                if (is_array($value)) {
+                    $input[$key] = array_map(fn($v) => numberClean($v), $value);
+                } else {
+                    $input[$key] = numberClean($value);
+                }
+            }
+        }
+        $result = $tenant_service->update($input);
+        $tenant_service->items()->delete();
+
+        $items_data = Arr::only($input, ['extra_cost', 'package_id']);
+        $items_data = modify_array($items_data);
+        foreach ($items_data as $key => $value) {
+            $items_data[$key]['tenant_service_id'] = $tenant_service->id; 
+        }
+        TenantServiceItem::insert($items_data);
+
+        if ($result) {
+            DB::commit();
+            return true;
+        }
     }
 
     /**
@@ -87,7 +116,8 @@ class TenantServiceRepository extends BaseRepository
      * @return bool
      */
     public function delete(TenantService $tenant_service)
-    {
-        return $tenant_service->delete();
+    {  
+        if ($tenant_service->items()->delete() && $tenant_service->delete())
+        return true;
     }
 }

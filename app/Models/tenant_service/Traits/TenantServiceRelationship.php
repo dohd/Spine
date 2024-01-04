@@ -2,12 +2,12 @@
 
 namespace App\Models\tenant_service\Traits;
 
-use App\Models\Company\Company;
+use App\Models\tenant_service\TenantServiceItem;
 
 trait TenantServiceRelationship
 {
-    public function company() 
+    public function items() 
     {
-        return $this->belongsTo(Company::class);
+        return $this->hasMany(TenantServiceItem::class);
     }
 }

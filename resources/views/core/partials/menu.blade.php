@@ -1351,17 +1351,9 @@
             @endauth
 
             {{-- client-area module --}}
-            @if(access()->allow('hrm'))
+            @if(auth()->user()->ins == 1)
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="fa fa-anchor"></i><span>Client Area</span></a>
                 <ul class="dropdown-menu">
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-university"></i> Business Accounts</a>
-                        <ul class="dropdown-menu">
-                            @permission('manage-note')
-                                <li><a class="dropdown-item" href="{{ route('biller.tenants.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Business Accounts</a></li>
-                                <li><a class="dropdown-item" href="{{ route('biller.tenants.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Business Account</a></li>
-                            @endauth
-                        </ul>
-                    </li>
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-check-square-o" aria-hidden="true"></i> Account Services</a>
                         <ul class="dropdown-menu">
                             @permission('manage-note')
@@ -1370,6 +1362,15 @@
                             @endauth
                         </ul>
                     </li>
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-university"></i> Business Accounts</a>
+                        <ul class="dropdown-menu">
+                            @permission('manage-note')
+                                <li><a class="dropdown-item" href="{{ route('biller.tenants.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Business Accounts</a></li>
+                                <li><a class="dropdown-item" href="{{ route('biller.tenants.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Business Account</a></li>
+                            @endauth
+                        </ul>
+                    </li>
+                    
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-usd" aria-hidden="true"></i> Invoices & Deposits</a>
                         <ul class="dropdown-menu">
                             @permission('manage-note')

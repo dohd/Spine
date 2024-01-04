@@ -21,6 +21,7 @@ namespace App\Http\Controllers\Focus\tenant_service;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
+use App\Models\tenant_service\PackageExtra;
 use App\Models\tenant_service\TenantService;
 use App\Repositories\Focus\tenant_service\TenantServiceRepository;
 
@@ -67,7 +68,9 @@ class TenantServicesController extends Controller
      */
     public function create()
     {
-        return view('focus.tenant_services.create');
+        $package_extras = PackageExtra::get();
+
+        return view('focus.tenant_services.create', compact('package_extras'));
     }
 
     /**
@@ -79,20 +82,19 @@ class TenantServicesController extends Controller
     public function store(Request $request)
     { 
         $request->validate([
-            'company_id' => 'required',
+            'name' => 'required',
             'cost' => 'required',
-            'subscription' => 'required',
-            'date' => 'required',
-            'category' => 'required',
+            'maintenance_cost' => 'required',
+            'maintenance_term' => 'required',
         ]);
 
         try {
             $this->repository->create($request->except(['_token']));
         } catch (\Throwable $th) {
-            return errorHandler('Error Creating TenantService!', $th);
+            return errorHandler('Error Creating Tenant Service!', $th);
         }
         
-        return new RedirectResponse(route('biller.tenant_services.index'), ['flash_success' => 'TenantService  Successfully Created']);
+        return new RedirectResponse(route('biller.tenant_services.index'), ['flash_success' => 'Tenant Service  Successfully Created']);
     }
 
     /**
@@ -104,7 +106,17 @@ class TenantServicesController extends Controller
      */
     public function edit(TenantService $tenant_service, Request $request)
     {
-        return view('focus.tenant_services.edit', compact('tenant_service'));
+        $package_extras = PackageExtra::get();
+        foreach ($package_extras as $key => $package) {
+            foreach ($tenant_service->items as $key => $item) {
+                if ($item->package_id == $package->id) {
+                    $package_extras[$key]['extra_cost'] = $item->extra_cost;
+                    $package_extras[$key]['checked'] = 'checked';
+                }
+            }
+        }
+        
+        return view('focus.tenant_services.edit', compact('tenant_service', 'package_extras'));
     }
 
     /**
@@ -114,20 +126,19 @@ class TenantServicesController extends Controller
     public function update(Request $request, TenantService $tenant_service)
     {
         $request->validate([
-            'company_id' => 'required',
+            'name' => 'required',
             'cost' => 'required',
-            'subscription' => 'required',
-            'date' => 'required',
-            'category' => 'required',
+            'maintenance_cost' => 'required',
+            'maintenance_term' => 'required',
         ]);
 
         try {
             $this->repository->update($tenant_service, $request->except(['_token']));
         } catch (\Throwable $th) {
-            return errorHandler('Error Updating TenantService!', $th);
+            return errorHandler('Error Updating Tenant Service!', $th);
         }
 
-        return new RedirectResponse(route('biller.tenant_services.index'), ['flash_success' => 'TenantService  Successfully Updated']);
+        return new RedirectResponse(route('biller.tenant_services.index'), ['flash_success' => 'Tenant Service  Successfully Updated']);
     }
 
     /**
@@ -142,10 +153,10 @@ class TenantServicesController extends Controller
         try {
             $this->repository->delete($tenant_service);
         } catch (\Throwable $th) {
-            return errorHandler('Error Deleting TenantService!', $th);
+            return errorHandler('Error Deleting Tenant Service!', $th);
         }
 
-        return new RedirectResponse(route('biller.tenant_services.index'), ['flash_success' => 'TenantService successfully deleted']);
+        return new RedirectResponse(route('biller.tenant_services.index'), ['flash_success' => 'Tenant Service successfully deleted']);
     }
 
     /**

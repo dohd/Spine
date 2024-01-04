@@ -2,15 +2,10 @@
 
 namespace App\Models\tenant_service;
 
-use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\tenant_service\Traits\TenantServiceAttribute;
-use App\Models\tenant_service\Traits\TenantServiceRelationship;
 
-class TenantService extends Model
+class PackageExtra extends Model
 {
-    use ModelTrait, TenantServiceAttribute, TenantServiceRelationship;
-
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
      * then follow the steps here : https://laravel.com/docs/5.4/eloquent#soft-deleting
@@ -20,23 +15,13 @@ class TenantService extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'tenant_services';
+    protected $table = 'package_extras';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-        'name',
-        'cost',
-        'maintenance_cost',
-        'maintenance_term',
-        'extras_term',
-        'total_cost',
-        'extras_total',
-        'user_id',
-        'ins',
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
@@ -73,11 +58,5 @@ class TenantService extends Model
     protected static function boot()
     {
         parent::boot();
-
-        static::creating(function($instance) {
-            $instance->user_id = auth()->user()->id;
-            $instance->ins = auth()->user()->ins;
-            return $instance;
-        });
     }
 }

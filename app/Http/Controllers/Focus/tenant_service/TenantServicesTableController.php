@@ -52,20 +52,11 @@ class TenantServicesTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->editColumn('tenant', function ($tenant_service) {
-                return @$tenant_service->company->cname;
-            })
             ->editColumn('cost', function ($tenant_service) {
                 return numberFormat($tenant_service->cost);
             })
-            ->editColumn('due_date', function ($tenant_service) {
-                return date('d-M-Y', strtotime($tenant_service->due_date));
-            })
-            ->editColumn('status', function ($tenant) {
-                $variant = 'badge-secondary';
-                if ($tenant->status == 'Active') $variant = 'badge-success';
-                if ($tenant->status == 'Terminated') $variant = 'badge-danger';
-                return '<span class="badge '. $variant .'">'. $tenant->status .'</span>';
+            ->editColumn('maintenance_cost', function ($tenant_service) {
+                return numberFormat($tenant_service->maintenance_cost);
             })
             ->addColumn('actions', function ($tenant_service) {
                 return $tenant_service->action_buttons;

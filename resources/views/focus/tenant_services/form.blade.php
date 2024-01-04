@@ -1,50 +1,63 @@
-<div class="form-group row">
-    <div class="col-md-5 col-12">
-        <label for="company">Company</label>
-        <select name="company_id" id="company" class="form-control" data-placeholder="Search Company" required>
-            @if(isset($tenant_service))
-                <option value="{{ $tenant_service->company_id }}" selected>
-                    {{ @$tenant_service->company->cname }}
-                </option>
-            @endif
-        </select>
+<div class="row mb-1">
+    <div class="col-6">
+        <h6 class="mb-2">Package Info</h6>
+        <div class="row">
+            <div class="col-12">
+                <div class='form-group'>
+                    {{ Form::label('package_name', 'Package Name', ['class' => 'col control-label']) }}
+                    <div class='col'>
+                        {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => 'Package Name', 'id' => 'name', 'required' => 'required']) }}
+                    </div>
+                </div>
+                <div class='form-group'>
+                    {{ Form::label('cost', 'Package Cost', ['class' => 'col control-label']) }}
+                    <div class='col'>
+                        {{ Form::text('cost', null, ['class' => 'form-control box-size', 'placeholder' => 'Package Cost', 'id' => 'cost', 'required' => 'required']) }}
+                    </div>
+                </div>
+                <div class='form-group'>
+                    {{ Form::label('maintenance_cost', 'Maintenance Cost', ['class' => 'col control-label']) }}
+                    <div class='col'>
+                        {{ Form::text('maintenance_cost', null, ['class' => 'form-control box-size', 'placeholder' => 'Maintenance Cost', 'id' => 'maintenance_cost', 'required' => 'required']) }}
+                    </div>
+                </div>
+                <div class='form-group'>
+                    {{ Form::label('maintenance_term', 'Maintenance Term (Months)', ['class' => 'col control-label']) }}
+                    <div class='col'>
+                        {{ Form::text('maintenance_term', 12, ['class' => 'form-control box-size', 'placeholder' => 'Maintenance Term', 'id' => 'maintenance_term', 'required' => 'required']) }}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="col-md-2">
-        <label for="cost">Service Cost</label>
-        {{ Form::text('cost', null, ['class' => 'form-control', 'id' => 'cost', 'required']) }}
+    <div class="col-6">
+        <h6 class="mb-2 ml-1">Package Extras</h6>
+        <div class='form-group mb-3'>
+            {{ Form::label('extras_term', 'Package Extras Term (Months)', ['class' => 'col control-label']) }}
+            <div class='col'>
+                {{ Form::text('extras_term', 12, ['class' => 'form-control box-size', 'placeholder' => 'Package Extras Term', 'id' => 'extras_term']) }}
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-flush-spacing">
+                <tbody>
+                    @foreach ($package_extras as $package)
+                        <tr>
+                            <td class="text-nowrap fw-bolder">{{ $package->name }}</td>
+                            <td><input type="text" class="form-control col-10 extra-cost" placeholder="Cost" name="extra_cost[]" value="{{ $package->extra_cost }}"></td>
+                            <td><input type="checkbox" class="form-check-input select" name="package_id[]" value="{{ $package->id }}" {{ $package->checked }}></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>        
+        </div>
     </div>
-
-    <div class="col-md-3">
-        <label for="subscription">Subscription</label>
-        <select name="subscription" id="subscription" class="custom-select">
-            @foreach (['Monthly', 'Quaterly', 'Yearly'] as $i => $value)
-                <option value="{{ $value }}" {{ @$tenant_service->subscription == $value? 'selected' : '' }}>
-                    {{ $value }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-
-    <div class="col-md-2">
-        <label for="date" class="caption">Date</label>
-        {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date']) }}
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-5">
-        <label for="category">Service Category</label>
-        <select name="category" id="category" class="custom-select">
-            @foreach (['Maintenance'] as $i => $value)
-                <option value="{{ $value }}">
-                    {{ $value }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-    <div class="col-md-7">
-        <label for="cost">Service Description</label>
-        {{ Form::text('description', null, ['class' => 'form-control', 'id' => 'description', 'required']) }}
+</div> 
+<div class="row mb-2">
+    <div class="col-12">
+        <h5 class="ml-2 font-weight-bold">Total Cost: <span class="total-cost"></span></h5>
+        {{ Form::hidden('total_cost', null, ['id' => 'total-cost']) }}
+        {{ Form::hidden('extras_total', null, ['id' => 'extras-cost']) }}
     </div>
 </div>
 
@@ -54,34 +67,42 @@
     config = {
         ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
         date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
-        companySelect2: {
-            allowClear: true,
-            ajax: {
-                url: "{{ route('biller.tenants.select') }}",
-                dataType: 'json',
-                delay: 250,
-                method: 'POST',
-                data: ({term}) => ({q: term}),
-                processResults: data => {
-                    return {results: data.map(v => ({text: v.cname, id: v.id}))}
-                }
-            },
-        }
     };
 
-    const Index = {
-        init() {
-            $.ajaxSetup(config.ajax);
-            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
-            $('#company').select2(config.companySelect2);
+    $.ajaxSetup(config.ajax);
+    $('form').on('keyup', '#cost, #maintenance_cost', function() {
+        calcTotals();
+    });
+    $('table').on('change', '.select', function() {
+        calcTotals();
+    });
 
-            const service = @json(@$tenant_service);
-            if (service.id) {
-                $('#date').datepicker('setDate', new Date(service.date));
+    function calcTotals() {
+        const pkgCost = accounting.unformat($('#cost').val()); 
+        const maintCost = accounting.unformat($('#maintenance_cost').val()); 
+        let extraCost = 0;
+        $('table .select').each(function() {
+            const row = $(this).parents('tr');
+            if ($(this).prop('checked')) {
+                extraCost += accounting.unformat(row.find('.extra-cost').val()); 
             }
-        },
-    };
+        });
+        const total = pkgCost+maintCost+extraCost;
+        $('.total-cost').text(accounting.formatNumber(total));
+        $('#total-cost').val(accounting.formatNumber(total));
+        $('#extras-cost').val(accounting.formatNumber(extraCost));
+    }
+    
+    $('form').submit(function(e) {
+        $('table .select').each(function() {
+            const row = $(this).parents('tr');
+            if (!$(this).prop('checked')) row.remove();
+        });
+    });
 
-    $(Index.init);
+    const service = @json(@$tenant_service);
+    if (service && service.id) {
+        $('#cost').keyup();
+    }
 </script>
 @endsection
