@@ -58,7 +58,13 @@ class SupplierRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        return $this->query()->get();
+        $q = $this->query();
+
+        // supplier user filter
+        $supplier_id = auth()->user()->supplier_id;
+        $q->when($supplier_id, fn($q) => $q->where('id', $supplier_id));
+
+        return $q->get();
     }
 
     public function getBillsForDataTable($supplier_id = 0)

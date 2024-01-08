@@ -35,6 +35,10 @@ class GoodsreceivenoteRepository extends BaseRepository
     {
         $q = $this->query();
 
+        // supplier user filter
+        $supplier_id = auth()->user()->supplier_id;
+        $q->when($supplier_id, fn($q) => $q->where('supplier_id', $supplier_id));
+
         $q->when(request('supplier_id'), function ($q) {
             $q->where('supplier_id', request('supplier_id'));
         })->when(request('invoice_status'), function ($q) {

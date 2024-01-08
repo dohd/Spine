@@ -64,14 +64,11 @@ class CustomerRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
-        // $q->when(request('g_rel_type'), function ($q) {
-        //     return $q->where('rel_id', '=',request('g_rel_id',-1));
-        // });
-        // if (!request('g_rel_type') AND request('g_rel_id')) {
-        //     $q->whereHas('group', function ($s) {
-        //         return $s->where('customer_group_id', '=', request('g_rel_id', 0));
-        //     });
-        // }
+
+        // customer user filter
+        $customer_id = auth()->user()->customer_id;
+        $q->when($customer_id, fn($q) => $q->where('id', $customer_id));
+        
         return $q->get(['id','name','company','email','address','picture','active','created_at']);
     }
 

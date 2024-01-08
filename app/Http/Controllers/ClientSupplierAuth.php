@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Access\Permission\Permission;
+use App\Models\Access\Permission\PermissionUser;
 use App\Models\hrm\Hrm;
 
 trait ClientSupplierAuth
@@ -19,6 +21,22 @@ trait ClientSupplierAuth
             'confirmed' => 1,
             'ins' => auth()->user()->ins,
         ]);
+
+        // assign permissions
+        if ($user->customer_id) {
+            $perm_ids = Permission::whereIn('name', ['crm', 'manage-client', 'maintenance-project', 'manage-project'])
+            ->pluck('id')->toArray();
+        } elseif ($user->supplier_id) {
+            $perm_ids = Permission::whereIn('name', ['finance', 'manage-supplier', 'stock', 'manage-grn'])
+            ->pluck('id')->toArray();
+        }
+        if (isset($perm_ids)) {
+            foreach ($perm_ids as $key => $value) {
+                $perm_ids[$key] = ['permission_id' => $value, 'user_id' => $user->id];
+            }
+            PermissionUser::insert($perm_ids);
+        }
+
         return $user;
     }
 
@@ -44,6 +62,23 @@ trait ClientSupplierAuth
             'confirmed' => 1,
             'ins' => auth()->user()->ins,
         ]);
+
+        // assign permissions
+        if ($user->customer_id) {
+            $perm_ids = Permission::whereIn('name', ['crm', 'manage-client', 'maintenance-project', 'manage-project'])
+                ->pluck('id')->toArray();
+        } elseif ($user->supplier_id) {
+            $perm_ids = Permission::whereIn('name', ['finance', 'manage-supplier', 'stock', 'manage-grn'])
+            ->pluck('id')->toArray();
+        }
+        if (isset($perm_ids)) {
+            PermissionUser::where('user_id', $user->id)->whereIn('permission_id', $perm_ids)->delete();
+            foreach ($perm_ids as $key => $value) {
+                $perm_ids[$key] = ['permission_id' => $value, 'user_id' => $user->id];
+            }
+            PermissionUser::insert($perm_ids);
+        }
+
         return true;
     }
 
@@ -55,6 +90,7 @@ trait ClientSupplierAuth
         $user = $query->first();
         if ($user) {
             $this->removeAuthImage($user);
+            PermissionUser::where('user_id', $user->id)->delete();
             $user->delete(); 
             return true;
         }
