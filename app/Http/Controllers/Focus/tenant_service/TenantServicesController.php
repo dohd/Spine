@@ -53,10 +53,6 @@ class TenantServicesController extends Controller
      */
     public function index(Request $request)
     {
-
-        // $core = $this->tenant_service->getForDataTable();
-        // dd($core );
-
         return view('focus.tenant_services.index');
     }
 
@@ -69,7 +65,7 @@ class TenantServicesController extends Controller
     public function create()
     {
         $package_extras = PackageExtra::get();
-
+        
         return view('focus.tenant_services.create', compact('package_extras'));
     }
 

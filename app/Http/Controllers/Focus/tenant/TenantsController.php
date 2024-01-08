@@ -175,7 +175,9 @@ class TenantsController extends Controller
      */
     public function show(Tenant $tenant, Request $request)
     {
-        return new ViewResponse('focus.tenants.view', compact('tenant'));
+        $user = User::where(['ins' => $tenant->id, 'created_at' => $tenant->created_at])->first();
+        $service = @$tenant->package->service ?: new TenantService;
+        return new ViewResponse('focus.tenants.view', compact('tenant', 'user', 'service'));
     }
 
     /**

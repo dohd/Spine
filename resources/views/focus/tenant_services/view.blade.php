@@ -40,14 +40,11 @@
                     @if ($tenant_service->items->count())
                         <table class="table table-bordered table-sm">
                             @php
-                                $details = [
-                                    'Extras Term (Months)' => $tenant_service->maintenance_term,
-                                ];
+                                $details = [];
+                                if (count($tenant_service->items)) $details['Extras Term (Months)'] = $tenant_service->maintenance_term;
                                 foreach ($tenant_service->items as $key => $item) {
                                     $package = $item->package_extra;
-                                    if ($package) {
-                                        $details[$package->name] = numberFormat($item->extra_cost);
-                                    }
+                                    if ($package) $details[$package->name] = numberFormat($item->extra_cost);
                                 }
                             @endphp
                             @foreach ($details as $key => $val)

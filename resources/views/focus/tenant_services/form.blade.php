@@ -1,5 +1,5 @@
 <div class="row mb-1">
-    <div class="col-6">
+    <div class="{{ count($package_extras)? 'col-6' : 'col-12' }}">
         <h6 class="mb-2">Package Info</h6>
         <div class="row">
             <div class="col-12">
@@ -30,28 +30,30 @@
             </div>
         </div>
     </div>
-    <div class="col-6">
-        <h6 class="mb-2 ml-1">Package Extras</h6>
-        <div class='form-group mb-3'>
-            {{ Form::label('extras_term', 'Package Extras Term (Months)', ['class' => 'col control-label']) }}
-            <div class='col'>
-                {{ Form::text('extras_term', 12, ['class' => 'form-control box-size', 'placeholder' => 'Package Extras Term', 'id' => 'extras_term']) }}
+    @if (count($package_extras))
+        <div class="col-6">
+            <h6 class="mb-2 ml-1">Package Extras</h6>
+            <div class='form-group mb-3'>
+                {{ Form::label('extras_term', 'Package Extras Term (Months)', ['class' => 'col control-label']) }}
+                <div class='col'>
+                    {{ Form::text('extras_term', 12, ['class' => 'form-control box-size', 'placeholder' => 'Package Extras Term', 'id' => 'extras_term']) }}
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-flush-spacing">
+                    <tbody>
+                        @foreach ($package_extras as $package)
+                            <tr>
+                                <td class="text-nowrap fw-bolder">{{ $package->name }}</td>
+                                <td><input type="text" class="form-control col-10 extra-cost" placeholder="Cost" name="extra_cost[]" value="{{ $package->extra_cost }}"></td>
+                                <td><input type="checkbox" class="form-check-input select" name="package_id[]" value="{{ $package->id }}" {{ $package->checked }}></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>        
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-flush-spacing">
-                <tbody>
-                    @foreach ($package_extras as $package)
-                        <tr>
-                            <td class="text-nowrap fw-bolder">{{ $package->name }}</td>
-                            <td><input type="text" class="form-control col-10 extra-cost" placeholder="Cost" name="extra_cost[]" value="{{ $package->extra_cost }}"></td>
-                            <td><input type="checkbox" class="form-check-input select" name="package_id[]" value="{{ $package->id }}" {{ $package->checked }}></td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>        
-        </div>
-    </div>
+    @endif
 </div> 
 <div class="row mb-2">
     <div class="col-12">

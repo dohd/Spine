@@ -19,16 +19,63 @@
     
     <div class="card">
         <div class="card-body">
-            <table id="branchTbl" class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
+            <h6>Business Info</h6>
+            <table class="table table-sm table-bordered mb-2" cellspacing="0" width="100%">
                 <tbody>
                     @php
                         $details = [
-                            
+                            'Business Name' => $tenant->cname,
+                            'Street Address' => $tenant->address,
+                            'Country' => $tenant->country,
+                            'Post Box' => $tenant->postbox,
+                            'Email Address' => $tenant->email,
+                            'Phone Number' => $tenant->phone,
                         ];
                     @endphp
                     @foreach ($details as $key => $val)
                         <tr>
-                            <th>{{ $key }}</th>
+                            <th width="40%">{{ $key }}</th>
+                            <td>{{ $val }}</td>
+                        </tr> 
+                    @endforeach                                      
+                </tbody>
+            </table>
+
+            <h6>User Info</h6>
+            <table class="table table-sm table-bordered mb-2" cellspacing="0" width="100%">
+                <tbody>
+                    @php
+                        $details = [
+                            'First Name' => $user->first_name,
+                            'Last Name' => $user->last_name,
+                            'User Email' => $user->email,
+                        ];
+                    @endphp
+                    @foreach ($details as $key => $val)
+                        <tr>
+                            <th width="40%">{{ $key }}</th>
+                            <td>{{ $val }}</td>
+                        </tr> 
+                    @endforeach                                      
+                </tbody>
+            </table>
+            
+            <h6>Package Info</h6>
+            <table class="table table-sm table-bordered mb-2" cellspacing="0" width="100%">
+                <tbody>
+                    @php
+                        $package = $tenant->package;
+                        $details = [
+                            'Account Plan' => $service->name,
+                            'Package Cost' => numberFormat(@$package->cost),
+                            'Maintenance Cost' => numberFormat(@$package->maintenance_cost),
+                            'Extras Cost' => numberFormat(@$package->extras_cost),
+                            'Total Cost' => numberFormat(@$package->total_cost),
+                        ];
+                    @endphp
+                    @foreach ($details as $key => $val)
+                        <tr>
+                            <th width="40%">{{ $key }}</th>
                             <td>{{ $val }}</td>
                         </tr> 
                     @endforeach                                      
