@@ -64,13 +64,17 @@
         },
 
         drawDataTable() {
+            let link = "{{ route('biller.tenant_deposits.get') }}";
+            const mode = @json(request('mode'));
+            if (mode == 'mpesa') link = "{{ route('biller.tenant_deposits.get', 'mode=mpesa') }}"
+            
             $('#servicesTbl').dataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: "{{ route('biller.tenant_deposits.get') }}",
+                    url: link,
                     type: 'POST',
                 },
                 columns: [

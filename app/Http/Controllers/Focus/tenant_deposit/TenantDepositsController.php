@@ -47,7 +47,8 @@ class TenantDepositsController extends Controller
     public function getForDataTable()
     {
         $q = InvoicePayment::query();
-
+        $q->when(request('mode') == 'mpesa', fn($q) => $q->where('payment_mode', 'mpesa'));
+        
         return $q->get();
     }
 

@@ -398,7 +398,6 @@
                                 <li>
                                     <a class="dropdown-item" href="{{ route('biller.projects.index') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage {{ trans('projects.projects')}}</a>
                                 </li>
-                                
                             </ul>
                         </li>
                         @endauth 
@@ -1376,7 +1375,7 @@
                             @permission('manage-note')
                                 <li><a class="dropdown-item" href="{{ route('biller.tenant_invoices.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Invoices</a></li>
                                 <li><a class="dropdown-item" href="{{ route('biller.tenant_deposits.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Deposits</a></li>
-                                <li><a class="dropdown-item" href="{{ route('biller.tenant_deposits.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage M-PESA Deposits</a></li>
+                                <li><a class="dropdown-item" href="{{ route('biller.tenant_deposits.index', 'mode=mpesa') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage M-PESA Deposits</a></li>
                             @endauth
                         </ul>
                     </li>

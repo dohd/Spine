@@ -49,7 +49,7 @@ class TenantDepositsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->editColumn('tid', function ($deposit) {
-                return '<a href="#"><b>'. $deposit->tid .'</b></a>';
+                return '<a href="#"><b>'. gen4tid('PMT-', $deposit->tid)  .'</b></a>';
             })
             ->editColumn('date', function ($deposit) {
                 return date('d-M-Y', strtotime($deposit->date));

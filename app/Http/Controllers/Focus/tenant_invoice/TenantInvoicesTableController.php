@@ -49,7 +49,7 @@ class TenantInvoicesTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->editColumn('tid', function ($invoice) {
-                return '<a href="#"><b>'. $invoice->tid .'</b></a>';
+                return '<a href="#"><b>'. gen4tid('INV-', $invoice->tid) .'</b></a>';
             })
             ->editColumn('invoicedate', function ($invoice) {
                 return date('d-M-Y', strtotime($invoice->invoicedate));
