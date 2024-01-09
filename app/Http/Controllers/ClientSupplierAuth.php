@@ -10,34 +10,26 @@ trait ClientSupplierAuth
 {
     public function createAuth($entity, $input, $user_type)
     {
+        if (!isset($input['first_name'], $input['last_name'], $input['email'], $input['password']))
+            return false;
+
         if (isset($input['picture'])) {
             $input['picture'] = $this->uploadAuthImage($input['picture']);
         }
-        if ($user_type == 'client_vendor') {
-            $user = Hrm::create([
-                'client_vendor_id' => $entity->id,
-                'first_name' => $input['first_name'],
-                'last_name' => $input['last_name'],
-                'email' => $input['email'],
-                'password' => $input['password'],
-                'confirmed' => 1,
-                'ins' => auth()->user()->ins,
-                'created_by' => auth()->user()->id,
-            ]);
-        } else {
-            $user = Hrm::create([
-                'customer_id' => ($user_type == 'client'? $entity->id : null),
-                'supplier_id' => ($user_type == 'supplier'? $entity->id : null),
-                'first_name' => $input['name'],
-                'email' => $input['email'],
-                'picture' => $input['picture'],
-                'password' => $input['password'],
-                'confirmed' => 1,
-                'ins' => auth()->user()->ins,
-                'created_by' => auth()->user()->id,
-            ]);
-        }
-
+        
+        $user = Hrm::create([
+            'customer_id' => ($user_type == 'client'? $entity->id : null),
+            'supplier_id' => ($user_type == 'supplier'? $entity->id : null),
+            'client_vendor_id' => ($user_type == 'client_vendor'? $entity->id : null),
+            'first_name' => $input['first_name'],
+            'last_name' => $input['last_name'],
+            'email' => $input['email'],
+            'password' => $input['password'],
+            'confirmed' => 1,
+            'ins' => auth()->user()->ins,
+            'created_by' => auth()->user()->id,
+        ]);
+        
         // assign permissions
         $perm_ids = [];
         if ($user->customer_id) {
@@ -66,36 +58,29 @@ trait ClientSupplierAuth
             ->when($user_type == 'supplier', fn($q) => $q->where('supplier_id', $entity->id));
         $user = $user->first();   
         if (!$user) return $this->createAuth($entity, $input, $user_type);
-        
+
+        if (!isset($input['first_name'], $input['last_name'], $input['email']))
+            return false;
+
         if (isset($input['picture'])) {
             $this->removeAuthImage($user);
             $input['picture'] = $this->uploadAuthImage($input['picture']);
         }
-        if ($user_type == 'client_vendor') {
-            $user->update([
-                'client_vendor_id' => $entity->id,
-                'first_name' => $input['first_name'],
-                'last_name' => $input['last_name'],
-                'email' => $input['email'],
-                'password' => $input['password'],
-                'confirmed' => 1,
-                'ins' => auth()->user()->ins,
-                'updated_by' => auth()->user()->id,
-            ]);
-        } else {
-            $user->update([
-                'customer_id' => $user_type == 'client'? $entity->id : null,
-                'supplier_id' => $user_type == 'supplier'? $entity->id : null,
-                'first_name' => $input['name'],
-                'email' => $input['email'],
-                'picture' => $input['picture'],
-                'password' => $input['password'],
-                'confirmed' => 1,
-                'ins' => auth()->user()->ins,
-                'updated_by' => auth()->user()->id,
-            ]);
-        }
-
+        
+        $data = [
+            'customer_id' => $user_type == 'client'? $entity->id : null,
+            'supplier_id' => $user_type == 'supplier'? $entity->id : null,
+            'client_vendor_id' => $user_type == 'client_vendor'? $entity->id : null,
+            'first_name' => $input['first_name'],
+            'last_name' => $input['last_name'],
+            'email' => $input['email'],
+            'confirmed' => 1,
+            'ins' => auth()->user()->ins,
+            'updated_by' => auth()->user()->id,
+        ];
+        if (isset($input['password'])) $data['password'] = $input['password'];
+        $user->update($data);
+        
         // assign permissions
         $perm_ids = [];
         if ($user->customer_id) {

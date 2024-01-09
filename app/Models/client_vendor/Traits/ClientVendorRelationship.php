@@ -2,8 +2,8 @@
 
 namespace App\Models\client_vendor\Traits;
 
+use App\Models\Access\User\User;
 use App\Models\customer\Customer;
-use App\Models\hrm\Hrm;
 
 trait ClientVendorRelationship
 {
@@ -14,6 +14,6 @@ trait ClientVendorRelationship
 
     public function user()
     {
-        return $this->hasOne(Hrm::class, 'client_vendor_id');
+        return $this->hasOne(User::class, 'client_vendor_id');
     }
 }
