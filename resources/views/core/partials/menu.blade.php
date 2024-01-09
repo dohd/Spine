@@ -295,6 +295,14 @@
                             </ul>
                         </li>
                         @endauth
+
+                        {{-- Client Vendor --}}
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-ship" aria-hidden="true"></i> Vendor Management</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.client_vendors.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Vendors </a></li>
+                                <li><a class="dropdown-item" href="{{ route('biller.client_vendors.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Vendor</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </li>
             @endif 
