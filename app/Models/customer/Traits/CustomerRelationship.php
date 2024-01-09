@@ -2,6 +2,7 @@
 
 namespace App\Models\customer\Traits;
 
+use App\Models\Access\User\User;
 use App\Models\branch\Branch;
 use App\Models\client_product\ClientProduct;
 use App\Models\lead\Lead;
@@ -14,6 +15,11 @@ use App\Models\quote\Quote;
  */
 trait CustomerRelationship
 {
+    public function user()
+    {
+        return $this->hasOne(User::class, 'customer_id');
+    }
+    
     function projects() {
         return $this->hasMany(Project::class);
     }

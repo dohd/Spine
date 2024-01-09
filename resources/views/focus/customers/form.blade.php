@@ -257,15 +257,39 @@
                     </div>
                 </div>
                 <div class='form-group hide_picture'>
-                    {{ Form::label( 'picture', trans('customers.picture'),['class' => 'col-lg-2 control-label']) }}
+                    {{ Form::label('picture', trans('customers.picture'),['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-6'>
                         {!! Form::file('picture', array('class'=>'input' )) !!}
+                    </div>
+                </div>
+                <hr>
+                <h6 class="mb-2">User Info</h6>
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class='form-group'>
+                                    {{ Form::label('first_name', 'First Name',['class' => 'col-12 control-label']) }}
+                                    <div class='col-12'>
+                                        {{ Form::text('first_name', @$customer->user->first_name, ['class' => 'form-control box-size', 'placeholder' => 'First Name']) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class='form-group'>
+                                    {{ Form::label('last_name', 'Last Name',['class' => 'col-12 control-label']) }}
+                                    <div class='col-12'>
+                                        {{ Form::text('last_name', @$customer->user->last_name, ['class' => 'form-control box-size', 'placeholder' => 'Last Name']) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class='form-group'>
                     {{ Form::label( 'password', trans('customers.password'),['class' => 'col-lg-2 control-label']) }}
                     <div class='col-lg-10'>
-                        {{ Form::text('password', '', ['class' => 'form-control box-size', 'placeholder' => trans('customers.password')]) }}
+                        {{ Form::password('password', ['class' => 'form-control box-size', 'placeholder' => trans('customers.password')]) }}
                     </div>
                 </div>
             </div>

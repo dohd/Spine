@@ -2,6 +2,7 @@
 
 namespace App\Models\supplier\Traits;
 
+use App\Models\Access\User\User;
 use App\Models\creditnote\CreditNote;
 use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\items\PaidbillItem;
@@ -15,6 +16,11 @@ use App\Models\supplier_product\SupplierProduct;
  */
 trait SupplierRelationship
 {
+    public function user()
+    {
+        return $this->hasOne(User::class, 'supplier_id');
+    }
+
     public function debit_notes()
     {
         return $this->hasMany(CreditNote::class);

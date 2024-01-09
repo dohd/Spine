@@ -247,9 +247,7 @@ class SupplierRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
         $data = $input['data'];
-        $input_pic = $data['picture'];
         if (isset($data['picture'])) $data['picture'] = $this->uploadPicture($data['picture']);
 
         if (@$data['taxid']) {
@@ -342,8 +340,7 @@ class SupplierRepository extends BaseRepository
         }
 
         // authorize
-        $input['picture'] = $input_pic;
-        $this->createAuth($result, $input['data'], 'supplier');
+        $this->createAuth($result, $input['user_data'], 'supplier');
 
         DB::commit();
         if ($result) return $result;
@@ -360,11 +357,9 @@ class SupplierRepository extends BaseRepository
      */
     public function update($supplier, array $input)
     {
-        // dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
-        $input_pic = $data['picture'];
         if (isset($data['picture'])) {
             $this->removePicture($supplier, 'picture');
             $data['picture'] = $this->uploadPicture($data['picture']);
@@ -509,15 +504,12 @@ class SupplierRepository extends BaseRepository
         }
 
         // authorize
-        $input['picture'] = $input_pic;
-        $this->updateAuth($supplier, $input['data'], 'supplier');
+        $this->updateAuth($supplier, $input['user_data'], 'supplier');
 
         if ($result) {
             DB::commit();
             return $result;
         }
-
-        throw new GeneralException(trans('exceptions.backend.suppliers.update_error'));
     }
 
     /**

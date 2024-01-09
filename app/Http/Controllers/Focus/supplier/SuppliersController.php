@@ -22,9 +22,9 @@ use App\Http\Requests\Focus\purchaseorder\CreatePurchaseorderRequest;
 use App\Http\Requests\Focus\supplier\ManageSupplierRequest;
 use App\Http\Requests\Focus\supplier\StoreSupplierRequest;
 use App\Http\Responses\Focus\supplier\CreateResponse;
-use App\Http\Responses\Focus\supplier\EditResponse;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\account\Account;
 use App\Models\supplier\Supplier;
 use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Focus\supplier\SupplierRepository;
@@ -93,18 +93,17 @@ class SuppliersController extends Controller
             'expense_account_id'
         ]);
         $payment_data = $request->only(['bank', 'bank_code', 'payment_terms', 'credit_limit', 'mpesa_payment']);
-
+        $user_data = $request->only('first_name', 'last_name', 'email', 'password', 'picture');
         $data['ins'] = auth()->user()->ins;
 
         try {
-            $result = $this->repository->create(compact('data', 'account_data', 'payment_data'));
+            $result = $this->repository->create(compact('data', 'account_data', 'payment_data', 'user_data'));
 
             if ($request->ajax()) {
                 $result['random_password'] = null;
                 return response()->json($result);
             } 
         } catch (\Throwable $th) {
-            dd($th);
             if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Creating Supplier', $th);
         }
@@ -121,7 +120,9 @@ class SuppliersController extends Controller
      */
     public function edit(Supplier $supplier, StoreSupplierRequest $request)
     {
-        return new EditResponse($supplier);
+        $accounts = Account::where('account_type', 'Expense')->get(['id', 'holder']);
+
+        return view('focus.suppliers.edit', compact('supplier', 'accounts'));
     }
 
     /**
@@ -144,11 +145,11 @@ class SuppliersController extends Controller
             'expense_account_id'
         ]);
         $payment_data = $request->only(['bank', 'bank_code', 'payment_terms', 'credit_limit', 'mpesa_payment']);
+        $user_data = $request->only('first_name', 'last_name', 'email', 'password', 'picture');
 
         try {
             $result = $this->repository->update($supplier, compact('data', 'account_data', 'payment_data'));
         } catch (\Throwable $th) {
-            dd($th);
             if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Supplier', $th);
         }        

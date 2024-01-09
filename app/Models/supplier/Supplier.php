@@ -11,9 +11,9 @@ class Supplier extends Model
 {
     use ModelTrait,
         SupplierAttribute,
-    	SupplierRelationship {
-            // SupplierAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+        SupplierRelationship {
+        // SupplierAttribute::getEditButtonAttribute insteadof ModelTrait;
+    }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -30,17 +30,20 @@ class Supplier extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
+    protected $fillable = [];
 
-    ];
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = ['password'];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -69,10 +72,20 @@ class Supplier extends Model
     }
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', '=', auth()->user()->ins);
-    });
+        });
+    }
+
+    /**
+     * Set password attribute.
+     *
+     * @param [string] $password
+     */
+    public function setPasswordAttribute($password)
+    {
+        if (isset($password)) $this->attributes['password'] = bcrypt($password);
     }
 
     public function getPictureAttribute()

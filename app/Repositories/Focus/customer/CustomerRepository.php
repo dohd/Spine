@@ -16,6 +16,7 @@ use App\Models\items\JournalItem;
 use App\Models\manualjournal\Journal;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -259,10 +260,11 @@ class CustomerRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);           
         DB::beginTransaction();
 
-        $input_pic = $input['picture'];
+        $user_data = Arr::only($input, ['first_name', 'last_name', 'email', 'password', 'picture']);
+        unset($input['first_name'], $input['last_name']);
+
         if (isset($input['picture'])) $input['picture'] = $this->uploadPicture($input['picture']);
             
         $is_company = Customer::where('company', $input['company'])->exists();
@@ -360,8 +362,7 @@ class CustomerRepository extends BaseRepository
         }
 
         // authorize
-        $input['picture'] = $input_pic;
-        $this->createAuth($result, $input, 'client');
+        $this->createAuth($result, $user_data, 'client');
 
         if ($result) {
             DB::commit();
@@ -378,11 +379,12 @@ class CustomerRepository extends BaseRepository
      * return bool
      */
     public function update($customer, array $input)
-    {
-        // dd($input);
+    { 
         DB::beginTransaction();
 
-        $input_pic = $input['picture'];
+        $user_data = Arr::only($input, ['first_name', 'last_name', 'email', 'password', 'picture']);
+        unset($input['first_name'], $input['last_name']);
+
         if (isset($input['picture'])) {
             $this->removePicture($customer, 'picture');
             $input['picture'] = $this->uploadPicture($input['picture']);
@@ -513,15 +515,12 @@ class CustomerRepository extends BaseRepository
         }    
         
         // authorize
-        $input['picture'] = $input_pic;
-        $this->updateAuth($customer, $input, 'client');
+        $this->updateAuth($customer, $user_data, 'client');
         
         if ($result) {
             DB::commit();
             return true;
         }
-
-        throw new GeneralException(trans('exceptions.backend.customers.update_error'));
     }
 
     /**
@@ -598,9 +597,6 @@ class CustomerRepository extends BaseRepository
         if ($customer->$type && $storage_exists) {
             $this->storage->delete($path . $customer->$type);
         }
-
-        if ($customer->update([$type => ''])) return true;
-            
-        throw new GeneralException(trans('exceptions.backend.settings.update_error'));
+        return $customer->update([$type => '']);    
     }
 }
