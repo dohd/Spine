@@ -59,6 +59,17 @@ class TenantsTableController extends Controller
                 if ($tenant->status == 'Terminated') $variant = 'badge-danger';
                 return '<span class="badge '. $variant .'">'. $tenant->status .'</span>';
             })
+            ->addColumn('service', function ($tenant) {
+                return @$tenant->package->service->name;
+            })
+            ->addColumn('pricing', function ($tenant) {
+                return numberFormat(@$tenant->package->maintenance_cost);
+            })
+            ->addColumn('due_date', function ($tenant) {
+                $due_date = @$tenant->package->due_date;
+                if ($due_date) return date('d-M-Y', strtotime($due_date));
+                return '';
+            })
             ->addColumn('actions', function ($tenant) {
                 return $tenant->action_buttons;
             })

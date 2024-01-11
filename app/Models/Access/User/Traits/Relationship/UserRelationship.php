@@ -8,12 +8,18 @@ use App\Models\leave\Leave;
 use App\Models\System\Session;
 use App\Models\Access\Permission\PermissionUser;
 use App\Models\Access\Permission\Permission;
+use App\Models\tenant\Tenant;
 
 /**
  * Class UserRelationship.
  */
 trait UserRelationship
 {
+    public function tenant()
+    {
+        return $this->hasOne(Tenant::class, 'id', 'ins');
+    }
+
     public function leaves()
     {
         return $this->hasMany(Leave::class, 'employee_id');

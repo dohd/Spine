@@ -64,7 +64,7 @@ class TenantServicesController extends Controller
      */
     public function create()
     {
-        $package_extras = PackageExtra::get();
+        $package_extras = PackageExtra::where('active', 0)->get();
         
         return view('focus.tenant_services.create', compact('package_extras'));
     }
@@ -120,14 +120,15 @@ class TenantServicesController extends Controller
      * 
      */
     public function update(Request $request, TenantService $tenant_service)
-    {
+    {  
         $request->validate([
             'name' => 'required',
             'cost' => 'required',
             'maintenance_cost' => 'required',
             'maintenance_term' => 'required',
         ]);
-
+        if (!$request->module_id) return errorHandler('Selected modules are required!');
+        
         try {
             $this->repository->update($tenant_service, $request->except(['_token']));
         } catch (\Throwable $th) {

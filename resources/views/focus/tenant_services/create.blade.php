@@ -16,19 +16,13 @@
     </div>
 
     <div class="content-body">
-        <div class="card rounded">
-            <div class="card-content">
-                <div class="card-body">
-                    {{ Form::open(['route' => 'biller.tenant_services.store', 'method' => 'POST']) }}
-                        @include('focus.tenant_services.form')
-                        <div class="edit-form-btn ml-2">
-                            {{ link_to_route('biller.tenant_services.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
-                            {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md']) }}
-                        </div> 
-                    {{ Form::close() }}
-                </div>
-            </div>
-        </div>        
+        {{ Form::open(['route' => 'biller.tenant_services.store', 'method' => 'POST']) }}
+            @include('focus.tenant_services.form')
+            <div class="edit-form-btn ml-2">
+                {{ link_to_route('biller.tenant_services.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md']) }}
+            </div> 
+        {{ Form::close() }}
     </div>
 </div>
 @endsection

@@ -27,6 +27,7 @@ class TenantService extends Model
      * @var array
      */
     protected $fillable = [
+        'module_id',
         'name',
         'cost',
         'maintenance_cost',

@@ -27,9 +27,9 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Business Name</th>
-                                        <th>Address</th>
-                                        <th>Phone</th>
-                                        <th>Email</th>
+                                        <th>Product/Service</th>
+                                        <th>Recurrent Cost</th>
+                                        <th>Next Due Date</th>
                                         <th>Status</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -55,7 +55,6 @@
 
 <script>
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
-
     $.ajaxSetup({headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" }});
 
     function draw_data() {        
@@ -68,22 +67,13 @@
                 url: '{{ route("biller.tenants.get") }}',
                 type: 'POST',
             },
-            columns: [{
-                    data: 'DT_Row_Index',
-                    name: 'id'
-                },
-                ...['cname', 'address', 'phone', 'email', 'status']
+            columns: [
+                {data: 'DT_Row_Index',name: 'id'},
+                ...['cname', 'service', 'pricing', 'due_date', 'status']
                 .map(v => ({data: v, name: v})),
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    searchable: false,
-                    sortable: false
-                }
+                {data: 'actions',name: 'actions',searchable: false,sortable: false}
             ],
-            order: [
-                [0, "desc"]
-            ],
+            order: [[0, "desc"]],
             searchDelay: 500,
             dom: 'Blfrtip',
             buttons: ['csv', 'excel', 'print'],

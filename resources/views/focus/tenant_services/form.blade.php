@@ -1,67 +1,115 @@
-<div class="row mb-1">
-    <div class="{{ count($package_extras)? 'col-6' : 'col-12' }}">
-        <h6 class="mb-2">Package Info</h6>
-        <div class="row">
-            <div class="col-12">
-                <div class='form-group'>
-                    {{ Form::label('package_name', 'Package Name', ['class' => 'col control-label']) }}
-                    <div class='col'>
-                        {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => 'Package Name', 'id' => 'name', 'required' => 'required']) }}
+<div class="card rounded">
+    <div class="card-content">
+        <div class="card-body">
+            <div class="row mb-1">
+                <div class="col-12">
+                    <h6 class="mb-2">Package Info</h6>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class='form-group'>
+                                {{ Form::label('package_name', 'Package Name', ['class' => 'col control-label']) }}
+                                <div class='col'>
+                                    {{ Form::text('name', null, ['class' => 'form-control box-size', 'placeholder' => 'Package Name', 'id' => 'name', 'required' => 'required']) }}
+                                </div>
+                            </div>
+                            <div class='form-group'>
+                                {{ Form::label('cost', 'Package Cost', ['class' => 'col control-label']) }}
+                                <div class='col'>
+                                    {{ Form::text('cost', null, ['class' => 'form-control box-size', 'placeholder' => 'Package Cost', 'id' => 'cost', 'required' => 'required']) }}
+                                </div>
+                            </div>
+                            <div class='form-group'>
+                                {{ Form::label('maintenance_cost', 'Maintenance Cost', ['class' => 'col control-label']) }}
+                                <div class='col'>
+                                    {{ Form::text('maintenance_cost', null, ['class' => 'form-control box-size', 'placeholder' => 'Maintenance Cost', 'id' => 'maintenance_cost', 'required' => 'required']) }}
+                                </div>
+                            </div>
+                            <div class='form-group'>
+                                {{ Form::label('maintenance_term', 'Maintenance Term (Months)', ['class' => 'col control-label']) }}
+                                <div class='col'>
+                                    {{ Form::text('maintenance_term', 12, ['class' => 'form-control box-size', 'placeholder' => 'Maintenance Term', 'id' => 'maintenance_term', 'required' => 'required']) }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class='form-group'>
-                    {{ Form::label('cost', 'Package Cost', ['class' => 'col control-label']) }}
-                    <div class='col'>
-                        {{ Form::text('cost', null, ['class' => 'form-control box-size', 'placeholder' => 'Package Cost', 'id' => 'cost', 'required' => 'required']) }}
+            </div> 
+        </div>
+    </div>
+</div>  
+
+<div class="card rounded">
+    <div class="card-content">
+        <div class="card-body">
+            @if (count($package_extras))
+                <div class="row mb-2">
+                    <div class="col-12">
+                        <h6 class="mb-2 ml-1">Package Extras</h6>
+                        <div class='form-group mb-2'>
+                            {{ Form::label('extras_term', 'Package Extras Term (Months)', ['class' => 'col control-label']) }}
+                            <div class='col'>
+                                {{ Form::text('extras_term', 12, ['class' => 'form-control box-size', 'placeholder' => 'Package Extras Term', 'id' => 'extras_term']) }}
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-flush-spacing" id="extrasTbl">
+                                <tbody>
+                                    @foreach ($package_extras as $package)
+                                        <tr>
+                                            <td class="text-nowrap fw-bolder">{{ $package->name }}</td>
+                                            <td><input type="text" class="form-control col-10 pb-0 pt-0 extra-cost" placeholder="Cost" name="extra_cost[]" value="{{ $package->extra_cost }}"></td>
+                                            <td><input type="checkbox" class="form-check-input select" name="package_id[]" value="{{ $package->id }}" {{ $package->checked }}></td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>        
+                        </div>
                     </div>
                 </div>
-                <div class='form-group'>
-                    {{ Form::label('maintenance_cost', 'Maintenance Cost', ['class' => 'col control-label']) }}
-                    <div class='col'>
-                        {{ Form::text('maintenance_cost', null, ['class' => 'form-control box-size', 'placeholder' => 'Maintenance Cost', 'id' => 'maintenance_cost', 'required' => 'required']) }}
-                    </div>
-                </div>
-                <div class='form-group'>
-                    {{ Form::label('maintenance_term', 'Maintenance Term (Months)', ['class' => 'col control-label']) }}
-                    <div class='col'>
-                        {{ Form::text('maintenance_term', 12, ['class' => 'form-control box-size', 'placeholder' => 'Maintenance Term', 'id' => 'maintenance_term', 'required' => 'required']) }}
-                    </div>
+            @endif
+            <div class="row">
+                <div class="col-12">
+                    <h5 class="ml-2 font-weight-bold">Total Cost: <span class="total-cost"></span></h5>
+                    {{ Form::hidden('total_cost', null, ['id' => 'total-cost']) }}
+                    {{ Form::hidden('extras_total', null, ['id' => 'extras-cost']) }}
                 </div>
             </div>
         </div>
     </div>
-    @if (count($package_extras))
-        <div class="col-6">
-            <h6 class="mb-2 ml-1">Package Extras</h6>
-            <div class='form-group mb-3'>
-                {{ Form::label('extras_term', 'Package Extras Term (Months)', ['class' => 'col control-label']) }}
-                <div class='col'>
-                    {{ Form::text('extras_term', 12, ['class' => 'form-control box-size', 'placeholder' => 'Package Extras Term', 'id' => 'extras_term']) }}
-                </div>
-            </div>
+</div>  
+
+<div class="card rounded">
+    <div class="card-content">
+        <div class="card-body">
+            <h5 class="ml-1">Select Modules</h5>
             <div class="table-responsive">
-                <table class="table table-flush-spacing">
+                <table class="table table-flush-spacing" id="modulesTbl">
                     <tbody>
-                        @foreach ($package_extras as $package)
-                            <tr>
-                                <td class="text-nowrap fw-bolder">{{ $package->name }}</td>
-                                <td><input type="text" class="form-control col-10 extra-cost" placeholder="Cost" name="extra_cost[]" value="{{ $package->extra_cost }}"></td>
-                                <td><input type="checkbox" class="form-check-input select" name="package_id[]" value="{{ $package->id }}" {{ $package->checked }}></td>
-                            </tr>
-                        @endforeach
+                        @php
+                            $modules = ['Dashboard', 'CRM', 'Sales', 'Project Management', 'Inventory', 'Procurement', 'Finance', 'Banking', 'HRM', 'Miscellaneous', 'Data & Reports'];
+                        @endphp
+                        <tr>
+                            <td class="text-nowrap fw-bolder">
+                                <div class="row">
+                                    @foreach ($modules as $i => $module)
+                                        <div class="col-3 mb-1">
+                                            <div class="row">
+                                                <div class="col-8">{{ $module }}</div>
+                                                <div class="col-4">
+                                                    <input type="checkbox" class="form-check-input select" name="module_id[]" value="{{ $i+1 }}" id="mod-{{ $i+1 }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </td>    
+                        </tr>
                     </tbody>
                 </table>        
             </div>
         </div>
-    @endif
-</div> 
-<div class="row mb-2">
-    <div class="col-12">
-        <h5 class="ml-2 font-weight-bold">Total Cost: <span class="total-cost"></span></h5>
-        {{ Form::hidden('total_cost', null, ['id' => 'total-cost']) }}
-        {{ Form::hidden('extras_total', null, ['id' => 'extras-cost']) }}
     </div>
-</div>
+</div>  
 
 @section('extra-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
@@ -75,7 +123,7 @@
     $('form').on('keyup', '#cost, #maintenance_cost', function() {
         calcTotals();
     });
-    $('table').on('change', '.select', function() {
+    $('#extrasTbl').on('change', '.select', function() {
         calcTotals();
     });
 
@@ -83,7 +131,7 @@
         const pkgCost = accounting.unformat($('#cost').val()); 
         const maintCost = accounting.unformat($('#maintenance_cost').val()); 
         let extraCost = 0;
-        $('table .select').each(function() {
+        $('#extrasTbl .select').each(function() {
             const row = $(this).parents('tr');
             if ($(this).prop('checked')) {
                 extraCost += accounting.unformat(row.find('.extra-cost').val()); 
@@ -96,7 +144,7 @@
     }
     
     $('form').submit(function(e) {
-        $('table .select').each(function() {
+        $('#extrasTbl .select').each(function() {
             const row = $(this).parents('tr');
             if (!$(this).prop('checked')) row.remove();
         });
@@ -105,6 +153,11 @@
     const service = @json(@$tenant_service);
     if (service && service.id) {
         $('#cost').keyup();
+        const module_ids = service.module_id? service.module_id.split(',') : [];
+        $('#modulesTbl .select').each(function() {
+            const id = $(this).attr('id').split('-')[1];
+            if (module_ids.includes(id+'')) $(this).prop('checked', true);
+        });
     }
 </script>
 @endsection

@@ -6,7 +6,6 @@ use App\Exceptions\GeneralException;
 use App\Models\tenant_service\TenantService;
 use App\Models\tenant_service\TenantServiceItem;
 use App\Repositories\BaseRepository;
-use Carbon\Carbon;
 use DB;
 use Illuminate\Support\Arr;
 
@@ -54,6 +53,7 @@ class TenantServiceRepository extends BaseRepository
                     $input[$key] = numberClean($value);
                 }
             }
+            if ($key == 'module_id') $input[$key] = implode(',', $value);
         } 
         $service = TenantService::create($input);
 
@@ -91,7 +91,9 @@ class TenantServiceRepository extends BaseRepository
                     $input[$key] = numberClean($value);
                 }
             }
+            if ($key == 'module_id') $input[$key] = implode(',', $value);
         }
+        
         $result = $tenant_service->update($input);
         $tenant_service->items()->delete();
 

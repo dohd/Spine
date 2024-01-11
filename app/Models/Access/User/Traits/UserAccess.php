@@ -87,58 +87,53 @@ trait UserAccess
      * @return bool
      */
     public function allow($nameOrId)
-    {
-        /*
-         *
-         * Update for this function due to issue of user custom permission
-         */
-
-        //Check permissions directly tied to user
-        foreach ($this->permissions as $perm) {
-
-            //First check to see if it's an ID
-            if (is_numeric($nameOrId)) {
-                if ($perm->id == $nameOrId) {
-                    return true;
-                }
-            }
-
-            //Otherwise check by name
-            if ($perm->name == $nameOrId) {
-                return true;
-            }
-        }
-
-        foreach ($this->roles as $role) {
-            // See if role has all permissions
-            if ($role->all) {
-                return true;
-            }
-
-            /*
-             *
-             * below code is commented due to issue of user custom permisssion
-             * if this code is not commented then if user dont have permission of one module but role which is assigned to that user have that permission than allow() method return true
-             *
-             */
-
-            // Validate against the Permission table
-            /*foreach ($role->permissions as $perm) {
-
-                // First check to see if it's an ID
+    {   
+        if (auth()->user()->ins == 1) {
+            //Check permissions directly tied to user
+            foreach ($this->permissions as $perm) {
                 if (is_numeric($nameOrId)) {
                     if ($perm->id == $nameOrId) {
                         return true;
                     }
                 }
-
-                // Otherwise check by name
                 if ($perm->name == $nameOrId) {
                     return true;
                 }
-            }*/
-        }
+            }
+            // See if role has all permissions
+            foreach ($this->roles as $role) {
+                if ($role->all) {
+                    return true;
+                }
+            }
+            return false;
+        } 
 
+        // grant permissions based on tenant service package i.e Basic or Standard
+        $tenant = auth()->user()->tenant;
+        $module_ids = @$tenant->package->service->module_id;
+        $module_ids = $module_ids? explode(',', $module_ids) : [];
+        foreach ($this->permissions as $perm) {
+            if (in_array($perm->module_id, $module_ids)) {
+                if (is_numeric($nameOrId) && $perm->id == $nameOrId) {
+                    return true;
+                } elseif ($perm->name == $nameOrId) {
+                    return true;
+                }
+            }
+        }
+        // check role permssions
+        foreach ($this->roles as $role) {
+            foreach ($role->permissions as $perm) {
+                if (in_array($perm->module_id, $module_ids)) {
+                    if (is_numeric($nameOrId) && $perm->id == $nameOrId) {
+                        return true;
+                    } elseif ($perm->name == $nameOrId) {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 

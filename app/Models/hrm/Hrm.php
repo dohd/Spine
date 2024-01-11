@@ -77,9 +77,8 @@ class Hrm extends Model
      */
     public function setPasswordAttribute($password)
     {
-        if (!empty($password)) {
-            $this->attributes['password'] = bcrypt($password);
-        }
+        dd($password);
+        if ($password) $this->attributes['password'] = bcrypt($password);
     }
 
     /**
