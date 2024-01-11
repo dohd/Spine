@@ -13,9 +13,9 @@
         <label for="service">Related Service</label>
         <select name="tenant_service_id" id="service" class="custom-select">
             <option value="">None</option>
-            @foreach ($services as $i => $service)
+            @foreach ([] as $i => $service)
                 <option value="{{ $service->id }}" {{ @$tenant_ticket->tenant_service_id == $service->id? 'selected' : '' }}>
-                    {{ $service->name }}
+                    {{ $service->description }}
                 </option>
             @endforeach
         </select>
@@ -58,19 +58,6 @@
     config = {
         ajax: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
         date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
-        companySelect2: {
-            allowClear: true,
-            ajax: {
-                url: "{{ route('biller.tenants.select') }}",
-                dataType: 'json',
-                delay: 250,
-                method: 'POST',
-                data: ({term}) => ({q: term}),
-                processResults: data => {
-                    return {results: data.map(v => ({text: v.cname, id: v.id}))}
-                }
-            },
-        }
     };
 
     const Index = {

@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Models\tenant_ticket;
+namespace App\Models\client_vendor_ticket;
 
-use App\Models\tenant_ticket\Traits\TenantReplyRelationship;
+use App\Models\client_vendor_ticket\Traits\ClientVendorTicketAttribute;
+use App\Models\client_vendor_ticket\Traits\ClientVendorTicketRelationship;
+use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class TenantReply extends Model
+class ClientVendorTicket extends Model
 {
-    use TenantReplyRelationship;
-    
+    use ModelTrait, ClientVendorTicketAttribute, ClientVendorTicketRelationship;
+
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
      * then follow the steps here : https://laravel.com/docs/5.4/eloquent#soft-deleting
@@ -18,7 +20,7 @@ class TenantReply extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'tenant_replies';
+    protected $table = 'client_vendor_tickets';
 
     /**
      * Mass Assignable fields of model
@@ -64,9 +66,8 @@ class TenantReply extends Model
         
         static::creating(function ($instance) {
             $instance->fill([
-                'index' => TenantReply::max('index')+1,
+                'tid' => ClientVendorTicket::max('tid')+1,
                 'date' => date('Y-m-d'),
-                'category' => auth()->user()->ins == 1? 'Operator' : 'Owner',
                 'ins' => auth()->user()->ins,
                 'user_id' => auth()->user()->id,
             ]);

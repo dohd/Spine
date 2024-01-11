@@ -9,7 +9,7 @@ trait TenantTicketRelationship
 {
     public function replies()
     {
-        return $this->hasMany(TenantReply::class)->orderBy('indx', 'ASC');
+        return $this->hasMany(TenantReply::class)->orderBy('index', 'ASC');
     }
 
     public function user()

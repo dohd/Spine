@@ -303,6 +303,15 @@
                                 <li><a class="dropdown-item" href="{{ route('biller.client_vendors.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Vendor</a></li>
                             </ul>
                         </li>
+                        {{-- Vendor Tickets --}}
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-comments-o" aria-hidden="true"></i> Support Tickets</a>
+                            <ul class="dropdown-menu">
+                                @permission('manage-note')
+                                    <li><a class="dropdown-item" href="{{ route('biller.client_vendor_tickets.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Support Tickets</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('biller.client_vendor_tickets.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Ticket</a></li>
+                                @endauth
+                            </ul>
+                        </li>
                     </ul>
                 </li>
             @endif 

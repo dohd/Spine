@@ -16,18 +16,17 @@
  * ***********************************************************************
  */
 
-namespace App\Http\Controllers\Focus\tenant_ticket;
+namespace App\Http\Controllers\Focus\client_vendor_ticket;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
-use App\Models\tenant_service\TenantService;
-use App\Models\tenant_ticket\TenantReply;
-use App\Models\tenant_ticket\TenantTicket;
-use App\Repositories\Focus\tenant_ticket\TenantTicketRepository;
+use App\Models\client_vendor_ticket\ClientVendorReply;
+use App\Models\client_vendor_ticket\ClientVendorTicket;
+use App\Repositories\Focus\client_vendor_ticket\ClientVendorTicketRepository;
 
-class TenantTicketsController extends Controller
+class ClientVendorTicketsController extends Controller
 {
     /**
      * variable to store the repository object
@@ -39,7 +38,7 @@ class TenantTicketsController extends Controller
      * contructor to initialize repository object
      * @param ProductcategoryRepository $repository ;
      */
-    public function __construct(TenantTicketRepository $repository)
+    public function __construct(ClientVendorTicketRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -52,7 +51,7 @@ class TenantTicketsController extends Controller
      */
     public function index(Request $request)
     {
-        return new ViewResponse('focus.tenant_tickets.index');
+        return new ViewResponse('focus.client_vendor_tickets.index');
     }
 
     /**
@@ -63,9 +62,7 @@ class TenantTicketsController extends Controller
      */
     public function create()
     {   
-        $services = TenantService::get();
-        
-        return view('focus.tenant_tickets.create', compact('services'));
+        return view('focus.client_vendor_tickets.create');
     }
 
     /**
@@ -87,7 +84,7 @@ class TenantTicketsController extends Controller
             return errorHandler('Error Creating Ticket!', $th);
         }
         
-        return new RedirectResponse(route('biller.tenant_tickets.index'), ['flash_success' => 'Ticket  Successfully Created']);
+        return new RedirectResponse(route('biller.client_vendor_tickets.index'), ['flash_success' => 'Ticket  Successfully Created']);
     }
 
     /**
@@ -97,18 +94,16 @@ class TenantTicketsController extends Controller
      * @param EditProductcategoryRequestNamespace $request
      * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
-    public function edit(TenantTicket $tenant_ticket, Request $request)
+    public function edit(ClientVendorTicket $client_vendor_ticket, Request $request)
     {
-        $services = TenantService::get();
-
-        return view('focus.tenant_tickets.edit', compact('tenant_ticket', 'services'));
+        return view('focus.client_vendor_tickets.edit', compact('client_vendor_ticket'));
     }
 
     /**
      * Update Resource in Storage
      * 
      */
-    public function update(Request $request, TenantTicket $tenant_ticket)
+    public function update(Request $request, ClientVendorTicket $client_vendor_ticket)
     {
         $request->validate([
             'subject' => 'required',
@@ -116,12 +111,12 @@ class TenantTicketsController extends Controller
         ]);
 
         try {
-            $this->repository->update($tenant_ticket, $request->except(['_token']));
+            $this->repository->update($client_vendor_ticket, $request->except(['_token']));
         } catch (\Throwable $th) {
             return errorHandler('Error Updating Ticket!', $th);
         }
         
-        return new RedirectResponse(route('biller.tenant_tickets.index'), ['flash_success' => 'Ticket  Successfully Updated']);
+        return new RedirectResponse(route('biller.client_vendor_tickets.index'), ['flash_success' => 'Ticket  Successfully Updated']);
     }
 
     /**
@@ -131,15 +126,15 @@ class TenantTicketsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function destroy(TenantTicket $tenant_ticket)
+    public function destroy(ClientVendorTicket $client_vendor_ticket)
     {
         try {
-            $this->repository->delete($tenant_ticket);
+            $this->repository->delete($client_vendor_ticket);
         } catch (\Throwable $th) {
             return errorHandler('Error Deleting Ticket!', $th);
         }
 
-        return new RedirectResponse(route('biller.tenant_tickets.index'), ['flash_success' => 'Ticket  Successfully Deleted']);
+        return new RedirectResponse(route('biller.client_vendor_tickets.index'), ['flash_success' => 'Ticket  Successfully Deleted']);
     }
 
     /**
@@ -149,23 +144,23 @@ class TenantTicketsController extends Controller
      * @param App\Models\productcategory\Productcategory $productcategory
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(TenantTicket $tenant_ticket, Request $request)
+    public function show(ClientVendorTicket $client_vendor_ticket, Request $request)
     {
-        return new ViewResponse('focus.tenant_tickets.view', compact('tenant_ticket'));
+        return new ViewResponse('focus.client_vendor_tickets.view', compact('client_vendor_ticket'));
     }
 
     /**
      * Update Ticket Status
      * 
      */
-    public function status(TenantTicket $tenant_ticket, Request $request)
+    public function status(ClientVendorTicket $client_vendor_ticket, Request $request)
     {
         try {
-            $tenant_ticket->update(['status' => 'Closed', 'closed_at' => now()]);
+            $client_vendor_ticket->update(['status' => 'Closed', 'closed_at' => now()]);
         } catch (\Throwable $th) {
             return errorHandler('', $th);
         }
-        return new RedirectResponse(route('biller.tenant_tickets.index'), ['flash_success' => 'Ticket  Successfully Closed']);
+        return new RedirectResponse(route('biller.client_vendor_tickets.index'), ['flash_success' => 'Ticket  Successfully Closed']);
     }
 
     /**
@@ -177,13 +172,14 @@ class TenantTicketsController extends Controller
         $request->validate(['message' => 'required']);
         try {
             $input = $request->only('tenant_ticket_id', 'message');
-            $tenant_reply = TenantReply::create($input);
-            if ($tenant_reply->tenant_ticket) {
-                $tenant_reply->tenant_ticket->update(['status' => 'Open', 'closed_at' => null]);
+            $client_vendor_reply = ClientVendorReply::create($input);
+            if ($client_vendor_reply->ticket) {
+                $client_vendor_reply->ticket->update(['status' => 'Open', 'closed_at' => null]);
             }
         } catch (\Throwable $th) {
             return errorHandler('', $th);
         }
+        
         return redirect()->back();
     }
 }
