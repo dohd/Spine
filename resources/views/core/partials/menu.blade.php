@@ -295,12 +295,21 @@
                             </ul>
                         </li>
                         @endauth
-
+                        <hr>
                         {{-- Client Vendor --}}
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-ship" aria-hidden="true"></i> Vendor Management</a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('biller.client_vendors.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Vendors </a></li>
                                 <li><a class="dropdown-item" href="{{ route('biller.client_vendors.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Vendor</a></li>
+                            </ul>
+                        </li>
+                        {{-- Tickets Category --}}
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-sun-o"></i> Ticket Category</a>
+                            <ul class="dropdown-menu">
+                                @permission('manage-note')
+                                    <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Ticket Categories</a></li>
+                                    <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Ticket Category</a></li>
+                                @endauth
                             </ul>
                         </li>
                         {{-- Vendor Tickets --}}
@@ -1392,10 +1401,11 @@
                             @permission('manage-note')
                                 <li><a class="dropdown-item" href="{{ route('biller.tenant_invoices.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Invoices</a></li>
                                 <li><a class="dropdown-item" href="{{ route('biller.tenant_deposits.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Deposits</a></li>
-                                <li><a class="dropdown-item" href="{{ route('biller.tenant_deposits.index', 'mode=mpesa') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage M-PESA Deposits</a></li>
+                                <li><a class="dropdown-item" href="{{ route('biller.mpesa_deposits.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage M-PESA Deposits</a></li>
                             @endauth
                         </ul>
                     </li>
+                    
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-comments-o" aria-hidden="true"></i> Support Tickets</a>
                         <ul class="dropdown-menu">
                             @permission('manage-note')
