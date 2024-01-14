@@ -33,6 +33,7 @@ class TenantRepository extends BaseRepository
     {
 
         $q = $this->query();
+        $q->where('id', '>', 1);
 
         return $q->get();
     }
@@ -49,13 +50,14 @@ class TenantRepository extends BaseRepository
         DB::beginTransaction();
 
         $user_data = Arr::only($input, ['first_name', 'last_name', 'user_email', 'password', 'confirm_password']);
-        $package_data = Arr::only($input, ['package_id', 'cost', 'maintenance_cost', 'extras_cost', 'total_cost', 'package_item_id']);
+        $package_data = Arr::only($input, ['date', 'package_id', 'cost', 'maintenance_cost', 'extras_cost', 'total_cost', 'package_item_id']);
         $tenant_data = array_diff_key($input, array_merge($user_data, $package_data));
 
         $tenant = Tenant::create($tenant_data);
 
         $package_data = array_replace($package_data, [
             'company_id' => $tenant->id,
+            'date' => date_for_database($package_data['date']),
             'cost' => numberClean($package_data['cost']),
             'maintenance_cost' => numberClean($package_data['maintenance_cost']),
             'extras_cost' => numberClean($package_data['extras_cost']),
@@ -106,22 +108,23 @@ class TenantRepository extends BaseRepository
         DB::beginTransaction();
 
         $user_data = Arr::only($input, ['first_name', 'last_name', 'user_email', 'password', 'confirm_password']);
-        $package_data = Arr::only($input, ['package_id', 'cost', 'maintenance_cost', 'extras_cost', 'total_cost', 'package_item_id']);
+        $package_data = Arr::only($input, ['date', 'package_id', 'cost', 'maintenance_cost', 'extras_cost', 'total_cost', 'package_item_id']);
         $tenant_data = array_diff_key($input, array_merge($user_data, $package_data));
         
         $tenant->update($tenant_data);
 
-        $package_data = array_replace($package_data, [
-            'cost' => numberClean($package_data['cost']),
-            'maintenance_cost' => numberClean($package_data['maintenance_cost']),
-            'extras_cost' => numberClean($package_data['extras_cost']),
-            'total_cost' => numberClean($package_data['total_cost']),
-            'date' => date('Y-m-d'),
-            'due_date' => (new Carbon(date('Y-m-d')))->addYear()->format('Y-m-d'),
-        ]);
-        unset($package_data['package_item_id']);
         $tenant_package = $tenant->package;
         if ($tenant_package) {
+            $package_data = array_replace($package_data, [
+                'date' => date_for_database($package_data['date']),
+                'cost' => numberClean($package_data['cost']),
+                'maintenance_cost' => numberClean($package_data['maintenance_cost']),
+                'extras_cost' => numberClean($package_data['extras_cost']),
+                'total_cost' => numberClean($package_data['total_cost']),
+                'date' => date('Y-m-d'),
+                'due_date' => (new Carbon(date('Y-m-d')))->addYear()->format('Y-m-d'),
+            ]);
+            unset($package_data['package_item_id']);
             $tenant_package->update($package_data);
             $tenant_package->items()->delete();
             $input['package_item_id'] = @$input['package_item_id'] ?: [];

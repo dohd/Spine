@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-6">
-        <div class="card rounded">
+        <div class="card rounded pb-2">
             <div class="card-content">
                 <div class="card-body">
                     <h6 class="mb-2">Business Info</h6>
@@ -120,6 +120,12 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class='form-group'>
+                                        {{ Form::label('date', 'Date', ['class' => 'col control-label']) }}
+                                        <div class='col'>
+                                            {{ Form::text('date', null, ['class' => 'form-control datepicker', 'id' => 'date', 'required' => 'required']) }}
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
                                         {{ Form::label('account_plan', 'Account Plan', ['class' => 'col control-label']) }}
                                         <div class='col'>
                                             <select name="package_id" id="package" class="custom-select">
@@ -216,6 +222,7 @@
     };
 
     $.ajaxSetup(config.ajax);
+    $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
     $('#customer').select2(config.customerSelect2);
     $('#customer').change(function() {
         const data = $(this).select2('data')[0];
@@ -310,6 +317,9 @@
 
     /** Edit Mode */
     if (tenant) {
+        if (tenant.package) {
+            $('.datepicker').datepicker('setDate', new Date(tenant.package.date));
+        }
         $('#password').attr('required', false);
         $('#confirm_password').attr('required', false);
         let package_items = @json(@$tenant->package->items);

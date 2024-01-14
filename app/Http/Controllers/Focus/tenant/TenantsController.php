@@ -93,6 +93,7 @@ class TenantsController extends Controller
             'password' => 'required',
             'package_id' => 'required',
             'maintenance_cost' => 'required',
+            'date' => 'required',
         ]);
 
         try {
@@ -137,6 +138,7 @@ class TenantsController extends Controller
             'user_email' => 'required',
             'package_id' => 'required',
             'maintenance_cost' => 'required',
+            'date' => 'required',
         ]);
 
         try {
