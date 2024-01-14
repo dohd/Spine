@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Access\Permission\Permission;
 use App\Models\Access\Permission\PermissionUser;
+use App\Models\Access\User\User;
 use App\Models\hrm\Hrm;
 
 trait ClientSupplierAuth
@@ -52,13 +53,13 @@ trait ClientSupplierAuth
 
     public function updateAuth($entity, $input, $user_type)
     {
-        $user = Hrm::query()
+        $user = User::query()
             ->when($user_type == 'client_vendor', fn($q) => $q->where('client_vendor_id', $entity->id))
             ->when($user_type == 'client', fn($q) => $q->where('customer_id', $entity->id))
             ->when($user_type == 'supplier', fn($q) => $q->where('supplier_id', $entity->id));
         $user = $user->first();   
         if (!$user) return $this->createAuth($entity, $input, $user_type);
-
+        
         if (!isset($input['first_name'], $input['last_name'], $input['email']))
             return false;
 
@@ -80,7 +81,7 @@ trait ClientSupplierAuth
         ];
         if (isset($input['password'])) $data['password'] = $input['password'];
         $user->update($data);
-        
+
         // assign permissions
         $perm_ids = [];
         if ($user->customer_id) {
@@ -104,7 +105,7 @@ trait ClientSupplierAuth
 
     public function deleteAuth($entity, $user_type)
     {
-        $query = Hrm::query()
+        $query = User::query()
             ->when($user_type == 'client_vendor', fn($q) => $q->where('client_vendor_id', $entity->id))
             ->when($user_type == 'client', fn($q) => $q->where('customer_id', $entity->id))
             ->when($user_type == 'supplier', fn($q) => $q->where('supplier_id', $entity->id));

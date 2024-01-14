@@ -148,7 +148,7 @@ class SuppliersController extends Controller
         $user_data = $request->only('first_name', 'last_name', 'email', 'password', 'picture');
 
         try {
-            $result = $this->repository->update($supplier, compact('data', 'account_data', 'payment_data'));
+            $result = $this->repository->update($supplier, compact('data', 'account_data', 'payment_data', 'user_data'));
         } catch (\Throwable $th) {
             if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Supplier', $th);
@@ -169,7 +169,6 @@ class SuppliersController extends Controller
         try {
             $this->repository->delete($supplier);
         } catch (\Throwable $th) {
-            dd($th);
             return errorHandler('Error Deleting Supplier', $th);
         }
 
