@@ -55,7 +55,7 @@
                 <div class="form-group">
                     {{ Form::label('first_name', 'First Name',['class' => 'col-12 control-label']) }}
                     <div class='col'>
-                        {{ Form::text('first_name', @$user->first_name, ['class' => 'form-control', 'placeholder' => 'First Name', 'required' => 'required']) }}
+                        {{ Form::text('first_name', @$client_vendor->user->first_name, ['class' => 'form-control', 'placeholder' => 'First Name', 'required' => 'required']) }}
                     </div>
                 </div>
             </div>
@@ -63,7 +63,7 @@
                 <div class="form-group">
                     {{ Form::label('last_name', 'Last Name',['class' => 'col-12 control-label']) }}
                     <div class='col'>
-                        {{ Form::text('last_name', @$user->last_name, ['class' => 'form-control', 'placeholder' => 'Last Name', 'required' => 'required']) }}
+                        {{ Form::text('last_name', @$client_vendor->user->last_name, ['class' => 'form-control', 'placeholder' => 'Last Name', 'required' => 'required']) }}
                     </div>
                 </div>
             </div>
