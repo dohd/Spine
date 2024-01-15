@@ -25,7 +25,7 @@
             <div class="card-content">
                 <div class="card-body">
                     <a href="#" class="btn btn-danger float-right" id="close"><i class="fa fa-times" aria-hidden="true"></i> Closed</a>
-                    {{ Form::open(['route' => ['biller.tenant_tickets.status', $client_vendor_ticket], 'method' => 'PATCH', 'id' => 'closeForm']) }} {{ Form::close() }}
+                    {{ Form::open(['route' => ['biller.client_vendor_tickets.status', $client_vendor_ticket], 'method' => 'PATCH', 'id' => 'closeForm']) }} {{ Form::close() }}
                     <button type="button" class="btn btn-outline-secondary float-right mr-1" id="reply" onclick="window.scrollTo(0, document.body.scrollHeight)"><i class="fa fa-pencil" aria-hidden="true"></i> Reply</button>                    
                     <h3 class="text-success mb-1">{{ gen4tid('#TKT-', $client_vendor_ticket->tid) }}</h3>
                     <h5>Subject: <b>{{ $client_vendor_ticket->subject }}</b></h5>
@@ -58,7 +58,7 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
-                    {{ Form::open(['route' => 'biller.tenant_tickets.reply', 'method' => 'POST']) }}
+                    {{ Form::open(['route' => 'biller.client_vendor_tickets.reply', 'method' => 'POST']) }}
                         <h5><b>Reply</b></h5><hr>
                         <div class="form-group row">
                             <div class="col-12">
@@ -66,13 +66,13 @@
                                 <div class="input-group">
                                     <div class="w-100">
                                         {{ Form::textarea('message', null, ['class' => 'form-control', 'rows' => 6, 'required' => 'required']) }}
-                                        {{ Form::hidden('tenant_ticket_id', $client_vendor_ticket->id) }}
+                                        {{ Form::hidden('client_vendor_ticket_id', $client_vendor_ticket->id) }}
                                     </div>
                                 </div>
                             </div>
                         </div> 
                         <div class="edit-form-btn">
-                            {{ link_to_route('biller.tenant_tickets.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                            {{ link_to_route('biller.client_vendor_tickets.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
                             {{ Form::submit('Submit', ['class' => 'btn btn-primary btn-md']) }}
                         </div> 
                     {{ Form::close() }}

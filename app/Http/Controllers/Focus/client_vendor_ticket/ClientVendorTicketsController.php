@@ -162,7 +162,7 @@ class ClientVendorTicketsController extends Controller
         try {
             $client_vendor_ticket->update(['status' => 'Closed', 'closed_at' => now()]);
         } catch (\Throwable $th) {
-            return errorHandler('', $th);
+            return errorHandler('Error Updating Status', $th);
         }
         return new RedirectResponse(route('biller.client_vendor_tickets.index'), ['flash_success' => 'Ticket  Successfully Closed']);
     }
@@ -172,16 +172,16 @@ class ClientVendorTicketsController extends Controller
      * 
      */
     public function reply(Request $request)
-    {
+    { 
         $request->validate(['message' => 'required']);
         try {
-            $input = $request->only('tenant_ticket_id', 'message');
+            $input = $request->only('client_vendor_ticket_id', 'message');
             $client_vendor_reply = ClientVendorReply::create($input);
             if ($client_vendor_reply->ticket) {
                 $client_vendor_reply->ticket->update(['status' => 'Open', 'closed_at' => null]);
             }
-        } catch (\Throwable $th) {
-            return errorHandler('', $th);
+        } catch (\Throwable $th) { dd($th);
+            return errorHandler('Error Replying Ticket!', $th);
         }
         
         return redirect()->back();
