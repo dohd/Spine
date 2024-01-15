@@ -53,6 +53,9 @@ class TenantTicketsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('tenant', function ($ticket) {
+                return @$ticket->tenant->cname;
+            })
             ->editColumn('tid', function ($ticket) {
                 return gen4tid('TKT-', $ticket->tid);
             })

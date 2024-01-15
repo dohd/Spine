@@ -25,6 +25,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Owner</th>
                                         <th>Ticket No.</th>
                                         <th>Category</th>
                                         <th>Subject</th>
@@ -76,7 +77,7 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['tid', 'category', 'subject', 'date', 'status'].map(v => ({data: v, name: v})),
+                    ...['tenant', 'tid', 'category', 'subject', 'date', 'status'].map(v => ({data: v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],

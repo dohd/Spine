@@ -37,7 +37,7 @@
                 <div class="card-body">
                     @foreach ($tenant_ticket->replies as $reply)
                         <div>
-                            <h5 class="float-right"><span class="badge badge-info">{{ $reply->category }}</span></h5>
+                            <h5 class="float-right"><span class="badge badge-info">{{ @$reply->tenant->cname }}</span></h5>
                             <h5>Posted By <b>{{ @$reply->user->name }}</b></h5>
                             <h6 class="text-light">{{ date('D j, F, Y', strtotime($reply->date)) }}</h6>
                             <br>
@@ -49,7 +49,7 @@
                     @endforeach
                     <div>
                         <br>
-                        <h5 class="float-right"><span class="badge badge-success">Owner</span></h5>
+                        <h5 class="float-right"><span class="badge badge-success">{{ @$tenant_ticket->tenant->cname }}</span></h5>
                         <h5>Posted By <b>{{ @$tenant_ticket->user->name }}</b></h5>
                         <h6 class="text-light">{{ date('D j, F, Y', strtotime($tenant_ticket->date)) }}</h6>
                         <br><h5>{{ $tenant_ticket->message }}</h5><hr>
@@ -57,6 +57,7 @@
                 </div>
             </div>
         </div>
+
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
