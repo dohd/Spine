@@ -38,6 +38,41 @@
     </div>
 </div>  
 
+{{-- select modules --}}
+<div class="card rounded">
+    <div class="card-content">
+        <div class="card-body">
+            <h5 class="ml-1">Select Modules</h5>
+            <div class="table-responsive">
+                <table class="table table-flush-spacing" id="modulesTbl">
+                    <tbody>
+                        @php
+                            $modules = ['Dashboard', 'CRM', 'Sales', 'Project Management', 'Inventory', 'Procurement', 'Finance', 'Banking', 'HRM', 'Miscellaneous', 'Data & Reports'];
+                        @endphp
+                        <tr>
+                            <td class="text-nowrap fw-bolder">
+                                <div class="row">
+                                    @foreach ($modules as $i => $module)
+                                        <div class="col-3 mb-1">
+                                            <div class="row">
+                                                <div class="col-8">{{ $module }}</div>
+                                                <div class="col-4">
+                                                    <input type="checkbox" class="form-check-input select" name="module_id[]" value="{{ $i+1 }}" id="mod-{{ $i+1 }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </td>    
+                        </tr>
+                    </tbody>
+                </table>        
+            </div>
+        </div>
+    </div>
+</div>  
+
+{{-- package extras --}}
 <div class="card rounded">
     <div class="card-content">
         <div class="card-body">
@@ -77,40 +112,6 @@
         </div>
     </div>
 </div>  
-
-<div class="card rounded">
-    <div class="card-content">
-        <div class="card-body">
-            <h5 class="ml-1">Select Modules</h5>
-            <div class="table-responsive">
-                <table class="table table-flush-spacing" id="modulesTbl">
-                    <tbody>
-                        @php
-                            $modules = ['Dashboard', 'CRM', 'Sales', 'Project Management', 'Inventory', 'Procurement', 'Finance', 'Banking', 'HRM', 'Miscellaneous', 'Data & Reports'];
-                        @endphp
-                        <tr>
-                            <td class="text-nowrap fw-bolder">
-                                <div class="row">
-                                    @foreach ($modules as $i => $module)
-                                        <div class="col-3 mb-1">
-                                            <div class="row">
-                                                <div class="col-8">{{ $module }}</div>
-                                                <div class="col-4">
-                                                    <input type="checkbox" class="form-check-input select" name="module_id[]" value="{{ $i+1 }}" id="mod-{{ $i+1 }}">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </td>    
-                        </tr>
-                    </tbody>
-                </table>        
-            </div>
-        </div>
-    </div>
-</div>  
-
 @section('extra-scripts')
 {{ Html::script('focus/js/select2.min.js') }}
 <script type="text/javascript">
