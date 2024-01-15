@@ -72,15 +72,17 @@ class ClientVendorTicketsController extends Controller
      * @return \App\Http\Responses\RedirectResponse
      */
     public function store(Request $request)
-    {   
+    {
         $request->validate([
+            'category_id' => 'required',
+            'priority' => 'required',
             'subject' => 'required',
             'message' => 'required',
         ]);
 
         try {
             $this->repository->create($request->except(['_token']));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) { 
             return errorHandler('Error Creating Ticket!', $th);
         }
         
@@ -106,13 +108,15 @@ class ClientVendorTicketsController extends Controller
     public function update(Request $request, ClientVendorTicket $client_vendor_ticket)
     {
         $request->validate([
+            'category_id' => 'required',
+            'priority' => 'required',
             'subject' => 'required',
             'message' => 'required',
         ]);
 
         try {
             $this->repository->update($client_vendor_ticket, $request->except(['_token']));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) { dd($th);
             return errorHandler('Error Updating Ticket!', $th);
         }
         

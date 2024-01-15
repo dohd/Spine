@@ -34,7 +34,7 @@ class ClientVendorTicketRepository extends BaseRepository
      * @return bool
      */
     public function create(array $input)
-    {   
+    {
         $ticket = ClientVendorTicket::create($input);
         return $ticket;
     }

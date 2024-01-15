@@ -315,10 +315,10 @@
                         {{-- Vendor Tickets --}}
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-comments-o" aria-hidden="true"></i> Support Tickets</a>
                             <ul class="dropdown-menu">
-                                @permission('manage-note')
+                                {{-- @permission('manage-note') --}}
                                     <li><a class="dropdown-item" href="{{ route('biller.client_vendor_tickets.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Support Tickets</a></li>
                                     <li><a class="dropdown-item" href="{{ route('biller.client_vendor_tickets.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Ticket</a></li>
-                                @endauth
+                                {{-- @endauth --}}
                             </ul>
                         </li>
                     </ul>
@@ -639,38 +639,6 @@
                             </ul>
                         </li>  
                         @endauth   
-
-                    {{-- Stock Return
-                        @permission('manage-creditnote')
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-phone-outgoing"></i> {{ trans('orders.stock_return_customer') }}</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{route('biller.orders.index')}}?section=creditnote" data-toggle="dropdown"><i class="ft-file-text"></i> {{ trans('orders.credit_notes_manage')}}
-                                    </a>
-                                </li>
-                                @permission('data-creditnote')
-                                <li><a class="dropdown-item" href="{{ route('biller.orders.create')}}?section=creditnote" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('orders.credit_notes_create') }}
-                                    </a>
-                                </li> @endauth
-                            </ul>
-                        </li>
-                        @endauth
-                        --}}
-                        
-                        {{-- Print Product Labels
-                        @permission('manage-product')
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-barcode"></i> {{ trans('products.product_label_print') }}
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{route('biller.products.product_label')}}" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('products.product_label_print') }}
-                                    </a>
-                                </li>
-                                <li><a class="dropdown-item" href="{{route('biller.products.standard')}}" data-toggle="dropdown"> <i class="ft-list"></i> {{ trans('products.standard_sheet') }}
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        @endauth
-                        --}}
 
                         {{-- Stock Transfer --}}
                         @permission('manage-stock-transfer')

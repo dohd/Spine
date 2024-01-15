@@ -1,30 +1,19 @@
 <div class="form-group row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <label for="category">Ticket Category</label>
-        <select name="category" id="category" class="custom-select">
+        <select name="category_id" id="category" class="custom-select">
             @foreach (['Login Reset'] as $i => $value)
-                <option value="{{ $value }}" {{ @$tenant_ticket->category == $value? 'selected' : '' }}>
+                <option value="{{ $i+1 }}" {{ @$client_vendor_ticket->category_id == ($i+1)? 'selected' : '' }}>
                     {{ $value }}
                 </option>
             @endforeach
         </select>
     </div>
-    <div class="col-md-4">
-        <label for="service">Related Service</label>
-        <select name="tenant_service_id" id="service" class="custom-select">
-            <option value="">None</option>
-            @foreach ([] as $i => $service)
-                <option value="{{ $service->id }}" {{ @$tenant_ticket->tenant_service_id == $service->id? 'selected' : '' }}>
-                    {{ $service->description }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-    <div class="col-md-4">
+    <div class="col-md-6">
         <label for="priority">Priority</label>
         <select name="priority" id="priority" class="custom-select">
             @foreach (['Low', 'Medium', 'High'] as $i => $value)
-                <option value="{{ $value }}" {{ @$tenant_ticket->priority == $value? 'selected' : '' }}>
+                <option value="{{ $value }}" {{ @$client_vendor_ticket->priority == $value? 'selected' : '' }}>
                     {{ $value }}
                 </option>
             @endforeach

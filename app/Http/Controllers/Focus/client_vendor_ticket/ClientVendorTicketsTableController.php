@@ -52,6 +52,12 @@ class ClientVendorTicketsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->editColumn('customer_id', function ($ticket) {
+                return @$ticket->customer->company;
+            })
+            ->editColumn('category_id', function ($ticket) {
+                return @$ticket->category->name;
+            })
             ->editColumn('tid', function ($ticket) {
                 return gen4tid('TKT-', $ticket->tid);
             })

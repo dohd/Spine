@@ -66,6 +66,7 @@ class ClientVendorTicket extends Model
         
         static::creating(function ($instance) {
             $instance->fill([
+                'customer_id' => auth()->user()->customer_id,
                 'tid' => ClientVendorTicket::max('tid')+1,
                 'date' => date('Y-m-d'),
                 'ins' => auth()->user()->ins,

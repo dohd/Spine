@@ -99,9 +99,9 @@ class ClientVendorsController extends Controller
      * @return \App\Http\Responses\Focus\productcategory\EditResponse
      */
     public function edit(ClientVendor $client_vendor, Request $request)
-    {  
-        $user = $client_vendor->user;
-        return view('focus.client_vendors.edit', compact('client_vendor', 'user'));
+    {   
+        if ($client_vendor->user) unset($client_vendor->user->password);
+        return view('focus.client_vendors.edit', compact('client_vendor'));
     }
 
     /**
