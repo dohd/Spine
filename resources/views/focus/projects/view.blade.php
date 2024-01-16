@@ -33,21 +33,29 @@
                                 <i class="ft-file-text"></i> Quote / PI 
                             </a>
                         </li> 
-                        <li class="nav-item">
-                            <a class="nav-link" id="tab8" data-toggle="tab" href="#tab_data8" aria-controls="tab_data8" role="tab" aria-selected="true">
-                                <i class="ft-file-text"></i> Budget (Quote / PI)
-                            </a>
-                        </li> 
+
+                        @if (!auth()->user()->customer_id)
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab8" data-toggle="tab" href="#tab_data8" aria-controls="tab_data8" role="tab" aria-selected="true">
+                                    <i class="ft-file-text"></i> Budget (Quote / PI)
+                                </a>
+                            </li> 
+                        @endif
+                    
                         <li class="nav-item">
                             <a class="nav-link" id="tab2" data-toggle="tab" href="#tab_data2" aria-controls="tab_data2" role="tab" aria-selected="true">
                                 <i class="fa fa-flag-checkered"></i> {{trans('projects.milestones')}}
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="tab3" data-toggle="tab" href="#tab_data3" aria-controls="tab_data3" role="tab" aria-selected="true">
-                                <i class="icon-directions"></i> {{trans('tasks.tasks')}}
-                            </a>
-                        </li>
+                        
+                        @if (!auth()->user()->customer_id)
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab3" data-toggle="tab" href="#tab_data3" aria-controls="tab_data3" role="tab" aria-selected="true">
+                                    <i class="icon-directions"></i> {{trans('tasks.tasks')}}
+                                </a>
+                            </li>
+                        @endif
+                        
                         @if($project->creator->id==auth()->user()->id)
                             <li class="nav-item">
                                 <a class="nav-link" id="tab4" data-toggle="tab" href="#tab_data4" aria-controls="tab_data4" role="tab" aria-selected="true">
@@ -65,30 +73,34 @@
                                 <i class="icon-note"></i> {{trans('general.notes')}}
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="tab11" data-toggle="tab" href="#tab_data11" aria-controls="tab_data11" role="tab" aria-selected="true">
-                                <i class="ft-users"></i> {{trans('projects.users')}}
-                            </a>
-                        </li>
-                       
+                        
                         <!-- Financial Report -->
-                        <li class="nav-item">
-                            <a class="nav-link" id="tab9" data-toggle="tab" href="#tab_data9" aria-controls="tab_data9" role="tab" aria-selected="true">
-                                <i class="ft-file-text"></i> Expenses 
-                            </a>
-                        </li> 
-                        {{-- @if($project->creator->id == auth()->user()->id) --}}
+                        @if (!auth()->user()->customer_id)
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab11" data-toggle="tab" href="#tab_data11" aria-controls="tab_data11" role="tab" aria-selected="true">
+                                    <i class="ft-users"></i> {{trans('projects.users')}}
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab9" data-toggle="tab" href="#tab_data9" aria-controls="tab_data9" role="tab" aria-selected="true">
+                                    <i class="ft-file-text"></i> Expenses 
+                                </a>
+                            </li> 
+                        @endif
+                        
                         <li class="nav-item">
                             <a class="nav-link" id="tab10" data-toggle="tab" href="#tab_data10" aria-controls="tab_data10" role="tab" aria-selected="true">
                                 <i class="ft-file-text"></i> {{trans('invoices.invoices')}}
                             </a>
                         </li> 
-                        {{-- @endif --}}
-                        <li class="nav-item">
-                            <a class="nav-link" id="tab12" data-toggle="tab" href="#tab_data12" aria-controls="tab_data12" role="tab" aria-selected="true">
-                                <i class="fa fa-money"></i>Gross Profit
-                            </a>
-                        </li>
+                        
+                        @if (!auth()->user()->customer_id)
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab12" data-toggle="tab" href="#tab_data12" aria-controls="tab_data12" role="tab" aria-selected="true">
+                                    <i class="fa fa-money"></i>Gross Profit
+                                </a>
+                            </li>
+                        @endif
                         <!-- End Financial Report -->
                     </ul>
 
