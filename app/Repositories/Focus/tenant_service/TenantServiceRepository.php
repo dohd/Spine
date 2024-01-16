@@ -45,7 +45,7 @@ class TenantServiceRepository extends BaseRepository
         DB::beginTransaction();
 
         foreach ($input as $key => $value) {
-            $keys = ['cost', 'maintenance_cost', 'total_cost', 'extras_total', 'maintenance_term', 'extras_term', 'extra_cost'];
+            $keys = ['cost', 'maintenance_cost', 'total_cost', 'extras_total', 'maintenance_term', 'extras_term', 'extra_cost', 'maint_cost'];
             if (in_array($key, $keys)) {
                 if (is_array($value)) {
                     $input[$key] = array_map(fn($v) => numberClean($v), $value);
@@ -57,7 +57,7 @@ class TenantServiceRepository extends BaseRepository
         } 
         $service = TenantService::create($input);
 
-        $items_data = Arr::only($input, ['extra_cost', 'package_id']);
+        $items_data = Arr::only($input, ['package_id', 'extra_cost', 'maint_cost']);
         $items_data = modify_array($items_data);
         foreach ($items_data as $key => $value) {
             $items_data[$key]['tenant_service_id'] = $service->id; 
@@ -81,9 +81,9 @@ class TenantServiceRepository extends BaseRepository
     public function update(TenantService $tenant_service, array $input)
     {   
         DB::beginTransaction();
-
+        
         foreach ($input as $key => $value) {
-            $keys = ['cost', 'maintenance_cost', 'total_cost', 'extras_total', 'maintenance_term', 'extras_term', 'extra_cost'];
+            $keys = ['cost', 'maintenance_cost', 'total_cost', 'extras_total', 'maintenance_term', 'extras_term', 'extra_cost', 'maint_cost'];
             if (in_array($key, $keys)) {
                 if (is_array($value)) {
                     $input[$key] = array_map(fn($v) => numberClean($v), $value);
@@ -97,7 +97,7 @@ class TenantServiceRepository extends BaseRepository
         $result = $tenant_service->update($input);
         $tenant_service->items()->delete();
 
-        $items_data = Arr::only($input, ['extra_cost', 'package_id']);
+        $items_data = Arr::only($input, ['package_id', 'extra_cost', 'maint_cost']);
         $items_data = modify_array($items_data);
         foreach ($items_data as $key => $value) {
             $items_data[$key]['tenant_service_id'] = $tenant_service->id; 

@@ -107,6 +107,7 @@ class TenantServicesController extends Controller
             foreach ($tenant_service->items as $key => $item) {
                 if ($item->package_id == $package->id) {
                     $package_extras[$key]['extra_cost'] = $item->extra_cost;
+                    $package_extras[$key]['maint_cost'] = $item->maint_cost;
                     $package_extras[$key]['checked'] = 'checked';
                 }
             }
@@ -131,7 +132,7 @@ class TenantServicesController extends Controller
         
         try {
             $this->repository->update($tenant_service, $request->except(['_token']));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) { dd($th);
             return errorHandler('Error Updating Tenant Service!', $th);
         }
 

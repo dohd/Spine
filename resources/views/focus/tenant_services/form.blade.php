@@ -46,18 +46,15 @@
             <div class="table-responsive">
                 <table class="table table-flush-spacing" id="modulesTbl">
                     <tbody>
-                        @php
-                            $modules = ['Dashboard', 'CRM', 'Sales', 'Project Management', 'Inventory', 'Procurement', 'Finance', 'Banking', 'HRM', 'Miscellaneous', 'Data & Reports'];
-                        @endphp
                         <tr>
                             <td class="text-nowrap fw-bolder">
                                 <div class="row">
-                                    @foreach ($modules as $i => $module)
+                                    @foreach ($package_extras as $i => $package)
                                         <div class="col-3 mb-1">
                                             <div class="row">
-                                                <div class="col-8">{{ $module }}</div>
+                                                <div class="col-8">{{ $package->name }}</div>
                                                 <div class="col-4">
-                                                    <input type="checkbox" class="form-check-input select" name="module_id[]" value="{{ $i+1 }}" id="mod-{{ $i+1 }}">
+                                                    <input type="checkbox" class="form-check-input select" name="module_id[]" value="{{ $package->id }}" id="mod-{{ $package->id }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -86,18 +83,23 @@
                                 {{ Form::text('extras_term', 12, ['class' => 'form-control box-size', 'placeholder' => 'Package Extras Term', 'id' => 'extras_term']) }}
                             </div>
                         </div>
-                        <div class="table-responsive">
-                            <table class="table table-flush-spacing" id="extrasTbl">
-                                <tbody>
-                                    @foreach ($package_extras as $package)
-                                        <tr>
-                                            <td class="text-nowrap fw-bolder">{{ $package->name }}</td>
-                                            <td><input type="text" class="form-control col-10 pb-0 pt-0 extra-cost" placeholder="Cost" name="extra_cost[]" value="{{ $package->extra_cost }}"></td>
-                                            <td><input type="checkbox" class="form-check-input select" name="package_id[]" value="{{ $package->id }}" {{ $package->checked }}></td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>        
+                        <div class="row">
+                            <div class="col-md-10 ml-auto mr-auto">
+                                <div class="table-responsive">
+                                    <table class="table table-flush-spacing" id="extrasTbl">
+                                        <tbody>
+                                            @foreach ($package_extras as $package)
+                                                <tr>
+                                                    <td class="text-nowrap fw-bolder">{{ $package->name }}</td>
+                                                    <td><input type="text" class="form-control col-10 pb-0 pt-0 extra-cost" placeholder="Cost" name="extra_cost[]" value="{{ $package->extra_cost }}"></td>
+                                                    <td><input type="text" class="form-control col-10 pb-0 pt-0 maint-cost" placeholder="Maintenance Cost" name="maint_cost[]" value="{{ $package->maint_cost }}"></td>
+                                                    <td><input type="checkbox" class="form-check-input select" name="package_id[]" value="{{ $package->id }}" {{ $package->checked }}></td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>        
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -132,13 +134,15 @@
         const pkgCost = accounting.unformat($('#cost').val()); 
         const maintCost = accounting.unformat($('#maintenance_cost').val()); 
         let extraCost = 0;
+        let lineMaintCost = 0;
         $('#extrasTbl .select').each(function() {
             const row = $(this).parents('tr');
             if ($(this).prop('checked')) {
                 extraCost += accounting.unformat(row.find('.extra-cost').val()); 
+                extraCost += accounting.unformat(row.find('.maint-cost').val()); 
             }
         });
-        const total = pkgCost+maintCost+extraCost;
+        const total = pkgCost + maintCost + extraCost + lineMaintCost;
         $('.total-cost').text(accounting.formatNumber(total));
         $('#total-cost').val(accounting.formatNumber(total));
         $('#extras-cost').val(accounting.formatNumber(extraCost));

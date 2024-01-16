@@ -156,17 +156,24 @@
                             <h6 class="mb-4 ml-1">Package Extras</h6>
                             <div class="table-responsive">
                                 <table class="table table-flush-spacing">
+                                    <thead>
+                                        <tr>
+                                            <th>Module</th>
+                                            <th>Cost</th>
+                                            <th>Maintenance</th>
+                                            <th>Check</th>
+                                        </tr>
+                                    </thead>
                                     <tbody>
                                         @foreach ($tenant_services as $service)
                                             @foreach ($service->items as $item)
                                                 <tr class="grp-{{ $service['name'] }} d-none">
                                                     <td class="text-nowrap fw-bolder"><span class="me-1">{{ $item->package_extra->name }} ({{ $service['name'] }})</span> </td>
+                                                    <td><label class="form-check-label maint-cost" for="maint-cost"> {{ numberFormat($item['maint_cost']) }} </label></td>
+                                                    <td><label class="form-check-label" for="extra-cost"> {{ numberFormat($item['extra_cost']) }} </label></td>
                                                     <td>
-                                                        <div class="form-check mx-5">
-                                                            <input class="form-check-input select" type="checkbox" value="{{ $item['extra_cost'] }}"/>
-                                                            {{ Form::hidden('package_item_id[]', $item['id'], ['class' => 'item_id', 'disabled' => 'disabled']) }}
-                                                            <label class="form-check-label" for="select"> {{ numberFormat($item['extra_cost']) }} Per Month </label>
-                                                        </div>
+                                                        <input class="form-check-input ml-1 select" type="checkbox" value="{{ $item['extra_cost'] }}"/>
+                                                        {{ Form::hidden('package_item_id[]', $item['id'], ['class' => 'item_id', 'disabled' => 'disabled']) }}
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -265,16 +272,20 @@
     $('#package').change(function() {
         const option = $(this).find(':selected');
         const maint_cost = accounting.unformat(option.attr('maint_cost'));
-        $('#maintenance_cost').val(accounting.formatNumber(maint_cost));
-
-        $('table tr').each(function() {
+        let line_maint_cost = 0;
+        $('table tbody tr').each(function() {
             const name = 'grp-'+option.attr('category');
             if ($(this).hasClass(name)) {
                 $(this).removeClass('d-none')
             } else if (!$(this).hasClass('d-none')) {
                 $(this).addClass('d-none');
             }
+            if ($(this).find('input').is(':checked')) {
+                line_maint_cost += accounting.unformat($(this).find('.maint-cost').text());
+            }
         });
+
+        $('#maintenance_cost').val(accounting.formatNumber(maint_cost+line_maint_cost));
         totalCost();
     }).change();
 
@@ -292,14 +303,18 @@
         const cost = accounting.unformat(option.attr('cost'));
         const maint_cost = accounting.unformat(option.attr('maint_cost'));
         let extra_cost = 0;
+        let line_maint_cost = 0;
         $('table input').each(function() {
-            if (!$(this).parents('tr').hasClass('d-none')) {
+            const row = $(this).parents('tr');
+            if (!row.hasClass('d-none')) {
                 if ($(this).is(':checked')) {
                     extra_cost += accounting.unformat($(this).val());
+                    line_maint_cost +=  accounting.unformat(row.find('.maint-cost').text());
                 }
             }
         });
-        const total = cost+maint_cost+extra_cost;
+        const total = cost + maint_cost + extra_cost + line_maint_cost;
+        $('#maintenance_cost').val(accounting.formatNumber(maint_cost+line_maint_cost));
         $('.total-cost').text(accounting.formatNumber(total));
         $('#total_cost').val(total);
         $('#cost').val(cost);
