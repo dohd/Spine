@@ -263,7 +263,8 @@ class CustomerRepository extends BaseRepository
         DB::beginTransaction();
 
         $user_data = Arr::only($input, ['first_name', 'last_name', 'email', 'password', 'picture']);
-        unset($input['first_name'], $input['last_name']);
+        $user_data['email'] = @$input['user_email'];
+        unset($input['first_name'], $input['last_name'], $input['user_email']);
 
         if (isset($input['picture'])) $input['picture'] = $this->uploadPicture($input['picture']);
             
@@ -382,8 +383,9 @@ class CustomerRepository extends BaseRepository
     { 
         DB::beginTransaction();
 
-        $user_data = Arr::only($input, ['first_name', 'last_name', 'email', 'password', 'picture']);
-        unset($input['first_name'], $input['last_name']);
+        $user_data = Arr::only($input, ['first_name', 'last_name', 'password', 'picture']);
+        $user_data['email'] = @$input['user_email'];
+        unset($input['first_name'], $input['last_name'], $input['user_email']);
 
         if (isset($input['picture'])) {
             $this->removePicture($customer, 'picture');

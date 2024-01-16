@@ -286,12 +286,29 @@
                         </div>
                     </div>
                 </div>
-                <div class='form-group'>
-                    {{ Form::label( 'password', trans('customers.password'),['class' => 'col-lg-2 control-label']) }}
-                    <div class='col-lg-10'>
-                        {{ Form::password('password', ['class' => 'form-control box-size', 'placeholder' => trans('customers.password')]) }}
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class='form-group'>
+                                    {{ Form::label('user_email', 'Email', ['class' => 'col-12 control-label']) }}
+                                    <div class='col-12'>
+                                        {{ Form::text('user_email', @$customer->user->email, ['class' => 'form-control box-size', 'placeholder' => 'Email']) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class='form-group'>
+                                    {{ Form::label( 'password', trans('customers.password'),['class' => 'col-12 control-label']) }}
+                                    <div class='col-12'>
+                                        {{ Form::password('password', ['class' => 'form-control box-size', 'placeholder' => trans('customers.password')]) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                
             </div>
         </div>
     </div>

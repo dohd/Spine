@@ -94,6 +94,7 @@ class SuppliersController extends Controller
         ]);
         $payment_data = $request->only(['bank', 'bank_code', 'payment_terms', 'credit_limit', 'mpesa_payment']);
         $user_data = $request->only('first_name', 'last_name', 'email', 'password', 'picture');
+        $user_data['email'] = $request->user_email;
         $data['ins'] = auth()->user()->ins;
 
         try {
@@ -145,11 +146,12 @@ class SuppliersController extends Controller
             'expense_account_id'
         ]);
         $payment_data = $request->only(['bank', 'bank_code', 'payment_terms', 'credit_limit', 'mpesa_payment']);
-        $user_data = $request->only('first_name', 'last_name', 'email', 'password', 'picture');
+        $user_data = $request->only('first_name', 'last_name', 'password', 'picture');
+        $user_data['email'] = $request->user_email;
 
         try {
             $result = $this->repository->update($supplier, compact('data', 'account_data', 'payment_data', 'user_data'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) { dd($th);
             if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Supplier', $th);
         }        
