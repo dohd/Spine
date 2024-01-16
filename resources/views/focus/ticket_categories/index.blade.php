@@ -1,16 +1,16 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Tenant Tickets Management')
+@section('title', 'Ticket Categories Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Tenant Tickets Management</h4>
+            <h4 class="content-header-title">Ticket Categories Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.tenant_services.partials.tenant-services-header-buttons')
+                @include('focus.ticket_categories.partials.ticketcategories-header-buttons')
             </div>
         </div>
     </div>
@@ -21,16 +21,12 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="servicesTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="TicketCategoryTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Owner</th>
-                                        <th>Ticket No.</th>
-                                        <th>Category</th>
-                                        <th>Subject</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
+                                        <th>Name</th>
+                                        <th>Module</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -62,22 +58,23 @@
 
     const Index = {
         init() {
-            Index.drawDataTable();
+            this.drawDataTable();
         },
 
         drawDataTable() {
-            $('#servicesTbl').dataTable({
+            $('#TicketCategoryTbl').dataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: "{{ route('biller.tenant_tickets.get') }}",
+                    url: "{{ route('biller.ticket_categories.get') }}",
                     type: 'POST',
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['tenant', 'tid', 'category_id', 'subject', 'date', 'status'].map(v => ({data: v, name: v})),
+                    {data: 'name', name: 'name'},
+                    {data: 'module', name: 'module'},                    
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
@@ -88,6 +85,6 @@
         }
     };
 
-    $(Index.init);
+    $(() => Index.init());
 </script>
 @endsection

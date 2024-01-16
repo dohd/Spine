@@ -24,6 +24,7 @@ use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\client_vendor_ticket\ClientVendorReply;
 use App\Models\client_vendor_ticket\ClientVendorTicket;
+use App\Models\ticket_category\TicketCategory;
 use App\Repositories\Focus\client_vendor_ticket\ClientVendorTicketRepository;
 
 class ClientVendorTicketsController extends Controller
@@ -62,7 +63,9 @@ class ClientVendorTicketsController extends Controller
      */
     public function create()
     {   
-        return view('focus.client_vendor_tickets.create');
+        $categories = TicketCategory::where('module', 'CRM')->get();
+
+        return view('focus.client_vendor_tickets.create', compact('categories'));
     }
 
     /**
@@ -98,7 +101,9 @@ class ClientVendorTicketsController extends Controller
      */
     public function edit(ClientVendorTicket $client_vendor_ticket, Request $request)
     {
-        return view('focus.client_vendor_tickets.edit', compact('client_vendor_ticket'));
+        $categories = TicketCategory::where('module', 'CRM')->get();
+
+        return view('focus.client_vendor_tickets.edit', compact('client_vendor_ticket', 'categories'));
     }
 
     /**

@@ -25,6 +25,7 @@ use App\Http\Responses\ViewResponse;
 use App\Models\tenant_service\TenantService;
 use App\Models\tenant_ticket\TenantReply;
 use App\Models\tenant_ticket\TenantTicket;
+use App\Models\ticket_category\TicketCategory;
 use App\Repositories\Focus\tenant_ticket\TenantTicketRepository;
 
 class TenantTicketsController extends Controller
@@ -64,8 +65,9 @@ class TenantTicketsController extends Controller
     public function create()
     {   
         $services = TenantService::get();
+        $categories = TicketCategory::where('module', 'Client Area')->get();
         
-        return view('focus.tenant_tickets.create', compact('services'));
+        return view('focus.tenant_tickets.create', compact('services', 'categories'));
     }
 
     /**
@@ -100,8 +102,9 @@ class TenantTicketsController extends Controller
     public function edit(TenantTicket $tenant_ticket, Request $request)
     {
         $services = TenantService::get();
+        $categories = TicketCategory::where('module', 'Client Area')->get();
 
-        return view('focus.tenant_tickets.edit', compact('tenant_ticket', 'services'));
+        return view('focus.tenant_tickets.edit', compact('tenant_ticket', 'services', 'categories'));
     }
 
     /**

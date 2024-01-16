@@ -56,6 +56,9 @@ class TenantTicketsTableController extends Controller
             ->addColumn('tenant', function ($ticket) {
                 return @$ticket->tenant->cname;
             })
+            ->editColumn('category_id', function ($ticket) {
+                return @$ticket->category->name;
+            })
             ->editColumn('tid', function ($ticket) {
                 return gen4tid('TKT-', $ticket->tid);
             })

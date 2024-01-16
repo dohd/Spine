@@ -1,10 +1,10 @@
 <div class="form-group row">
     <div class="col-md-4">
         <label for="category">Ticket Category</label>
-        <select name="category" id="category" class="custom-select">
-            @foreach (['Login Reset'] as $i => $value)
-                <option value="{{ $value }}" {{ @$tenant_ticket->category == $value? 'selected' : '' }}>
-                    {{ $value }}
+        <select name="category_id" id="category" class="custom-select">
+            @foreach ($categories as $i => $item)
+                <option value="{{ $item->id }}" {{ @$tenant_ticket->category_id == $item->id? 'selected' : '' }}>
+                    {{ $item->name }}
                 </option>
             @endforeach
         </select>

@@ -29,6 +29,8 @@
                                                     </a></li>
                                                 <li><a class="dropdown-item" href="{{route('biller.settings.status')}}"><i class="fa fa-flag-o"></i> {{trans('meta.default_status')}}
                                                     </a></li>
+                                                <li><a class="dropdown-item" href="{{ route('biller.ticket_categories.index') }}"><i class="fa fa-sun-o"></i> Ticket Categories
+                                                    </a></li>
                                             </ul>
                                         </li>
                                     </ul>
@@ -301,15 +303,6 @@
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('biller.client_vendors.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Vendors </a></li>
                                 <li><a class="dropdown-item" href="{{ route('biller.client_vendors.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Vendor</a></li>
-                            </ul>
-                        </li>
-                        {{-- Tickets Category --}}
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-sun-o"></i> Ticket Category</a>
-                            <ul class="dropdown-menu">
-                                @permission('manage-note')
-                                    <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Ticket Categories</a></li>
-                                    <li><a class="dropdown-item" href="{{ '#' }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Ticket Category</a></li>
-                                @endauth
                             </ul>
                         </li>
                         {{-- Vendor Tickets --}}
@@ -1373,7 +1366,7 @@
                             @endauth
                         </ul>
                     </li>
-                    
+
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-comments-o" aria-hidden="true"></i> Support Tickets</a>
                         <ul class="dropdown-menu">
                             @permission('manage-note')

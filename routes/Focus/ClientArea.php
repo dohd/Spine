@@ -33,6 +33,11 @@ Route::group(['namespace' => 'tenant_ticket'], function () {
     //For Datatable
     Route::post('tenant_tickets/get', 'TenantTicketsTableController')->name('tenant_tickets.get');
 });
+Route::group(['namespace' => 'ticket_category'], function () {
+    Route::resource('ticket_categories', 'TicketCategoriesController');
+    //For Datatable
+    Route::post('ticket_categories/get', 'TicketCategoriesTableController')->name('ticket_categories.get');
+});
 
 // Mpesa Callback Urls 
 Route::group(['namespace' => 'mpesa_deposit'], function () {

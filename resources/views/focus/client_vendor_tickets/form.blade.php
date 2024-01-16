@@ -2,9 +2,9 @@
     <div class="col-md-6">
         <label for="category">Ticket Category</label>
         <select name="category_id" id="category" class="custom-select">
-            @foreach (['Login Reset'] as $i => $value)
-                <option value="{{ $i+1 }}" {{ @$client_vendor_ticket->category_id == ($i+1)? 'selected' : '' }}>
-                    {{ $value }}
+            @foreach ($categories as $i => $item)
+                <option value="{{ $item->id }}" {{ @$client_vendor_ticket->category_id == $item->id? 'selected' : '' }}>
+                    {{ $item->name }}
                 </option>
             @endforeach
         </select>
