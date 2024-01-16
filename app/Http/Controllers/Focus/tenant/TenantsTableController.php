@@ -53,6 +53,9 @@ class TenantsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('tid', function ($tenant) {
+                return gen4tid('CL-', $tenant->tid);
+            })
             ->editColumn('status', function ($tenant) {
                 $variant = 'badge-secondary';
                 if ($tenant->status == 'Active') $variant = 'badge-success';

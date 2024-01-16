@@ -18,6 +18,13 @@
     </div>
     
     <div class="card">
+        <div class="card-header">
+            <div class="button-group">
+                <a href="#" class="btn btn-info btn-sm mr-1" data-toggle="modal" data-target="#statusModal">
+                    <i class="fa fa-pencil" aria-hidden="true"></i> Status
+                </a>
+            </div>
+        </div>
         <div class="card-body">
             <h6>Business Info</h6>
             <table class="table table-sm table-bordered mb-2" cellspacing="0" width="100%">
@@ -84,4 +91,5 @@
         </div>
     </div>
 </div>
+@include('focus.tenants.partials.status_modal')
 @endsection

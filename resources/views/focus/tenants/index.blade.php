@@ -26,6 +26,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Code</th>
                                         <th>Business Name</th>
                                         <th>Product/Service</th>
                                         <th>Recurrent Cost</th>
@@ -69,7 +70,7 @@
             },
             columns: [
                 {data: 'DT_Row_Index',name: 'id'},
-                ...['cname', 'service', 'pricing', 'due_date', 'status']
+                ...['tid', 'cname', 'service', 'pricing', 'due_date', 'status']
                 .map(v => ({data: v, name: v})),
                 {data: 'actions',name: 'actions',searchable: false,sortable: false}
             ],

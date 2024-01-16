@@ -204,4 +204,21 @@ class TenantsController extends Controller
 
         return response()->json($customers);
     }
+
+    /**
+     * Update Lead Status
+     */
+    public function update_status(Tenant $tenant, Request $request)
+    {
+        try {
+            $tenant->update([
+                'status' => $request->status,
+                'status_msg' => $request->status_msg,
+            ]);
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Status!', $th);
+        }
+        
+        return redirect()->back()->with('flash_success', 'Status Updated Successfully');
+    }
 }
