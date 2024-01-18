@@ -10,7 +10,7 @@
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.tenant_services.partials.tenant-services-header-buttons')
+                @include('focus.tenant_tickets.partials.tenant-tickets-header-buttons')
             </div>
         </div>
     </div>
