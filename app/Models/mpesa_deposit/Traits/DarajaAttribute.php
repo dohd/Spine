@@ -2,7 +2,7 @@
 
 namespace App\Models\mpesa_deposit\Traits;
 
-use net\authorize\util\HttpClientClient;
+use net\authorize\util\HttpClient;
 
 /**
  * Update the Http Client
@@ -19,6 +19,15 @@ trait DarajaAttribute
         'accept' => 'application/json',
         'content_type' => 'application/json',
     ];
+
+    function testGuzzle() {
+        $client = new \GuzzleHttp\Client();
+        $response = $client->get('https://api.publicapis.org/entries');
+        $result = $response->getBody()->getContents();
+        // if POST
+        // $result = simplexml_load_string($result);
+        return $result;
+    }
 
     /**
      * Authorization Token
