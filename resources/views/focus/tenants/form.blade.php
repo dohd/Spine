@@ -14,7 +14,7 @@
                         <div class='form-group'>
                             {{ Form::label('cname', 'Business Name', ['class' => 'col control-label']) }}
                             <div class='col'>
-                                {{ Form::text('cname', @$tenant['cname'], ['class' => 'form-control box-size', 'placeholder' => 'Business Name', 'cname' => 'cname', 'required' => 'required']) }}
+                                {{ Form::text('cname', @$tenant['cname'], ['class' => 'form-control box-size', 'placeholder' => 'Business Name', 'cname' => 'cname', 'required' => 'required', 'readonly' => 'readonly']) }}
                             </div>
                         </div>
                         <div class="row">
@@ -30,7 +30,7 @@
                                 <div class='form-group'>
                                     {{ Form::label('country', trans('hrms.country'), ['class' => 'col control-label']) }}
                                     <div class='col-12'>
-                                        {{ Form::text('country', @$tenant['country'], ['class' => 'form-control box-size', 'placeholder' => trans('hrms.country'), 'country' => 'country', 'required' => 'required']) }}
+                                        {{ Form::text('country', @$tenant['country'], ['class' => 'form-control box-size', 'placeholder' => trans('hrms.country'), 'country' => 'country', 'required' => 'required', 'readonly' => 'readonly']) }}
                                     </div>
                                 </div>
                             </div>
@@ -44,13 +44,13 @@
                         <div class='form-group'>
                             {{ Form::label('email', 'Email Address', ['class' => 'col control-label']) }}
                             <div class='col'>
-                                {{ Form::text('email', @$tenant['email'], ['class' => 'form-control box-size', 'placeholder' => 'Email Address', 'email' => 'email', 'required' => 'required']) }}
+                                {{ Form::text('email', @$tenant['email'], ['class' => 'form-control box-size', 'placeholder' => 'Email Address', 'email' => 'email', 'required' => 'required', 'readonly' => 'readonly']) }}
                             </div>
                         </div>
                         <div class='form-group'>
                             {{ Form::label('phone', trans('general.phone'), ['class' => 'col control-label']) }}
                             <div class='col'>
-                                {{ Form::text('phone', @$tenant['phone'], ['class' => 'form-control box-size', 'placeholder' => trans('general.phone'), 'phone' => 'phone', 'required' => 'required']) }}
+                                {{ Form::text('phone', @$tenant['phone'], ['class' => 'form-control box-size', 'placeholder' => trans('general.phone'), 'phone' => 'phone', 'required' => 'required', 'readonly' => 'readonly']) }}
                             </div>
                         </div>
                     </div>
@@ -323,10 +323,20 @@
 
     const tenant = @json(@$tenant);
     $('#tenantForm').submit(function(e) {
-        const errorElems = $('#password').parents('.card').find('.text-danger');
-        if (!tenant && errorElems.length && !errorElems.hasClass('d-none')) {
-            e.preventDefault();
-            return swal('Check errors on the password fields!');
+        const mustHaveErrElem = $('#password').parents('.card').find('h5.text-danger');
+        const mismatchErrElem = $('#password').parents('.card').find('label.d-none');
+        if (tenant) {
+            if ($('#password').val() || $('#confirm_password').val()) {
+                if (mustHaveErrElem.length || !mismatchErrElem.length) {
+                    e.preventDefault();
+                    return swal('Check errors on the password fields!');
+                }
+            }
+        } else {
+            if (mustHaveErrElem.length || !mismatchErrElem.length) {
+                e.preventDefault();
+                return swal('Check errors on the password fields!');
+            }
         }
     });
 
