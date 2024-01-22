@@ -60,7 +60,9 @@ class EquipmentsController extends Controller
     public function index(ManageEquipmentRequest $request)
     {
 
-       $customers = Customer::get(['id', 'company']);
+        $customer_id = auth()->user()->customer_id;
+        $customers = Customer::when($customer_id, fn($q) => $q->where('id', $customer_id))
+            ->get(['id', 'company']);
        $branches = Branch::where('name', '!=', 'All Branches')->get(['id', 'name', 'customer_id']);
 
         return new ViewResponse('focus.equipments.index', compact('customers', 'branches'));

@@ -34,7 +34,7 @@ trait ClientSupplierAuth
         // assign permissions
         $perm_ids = [];
         if ($user->customer_id) {
-            $perm_ids = Permission::whereIn('name', ['crm', 'manage-client', 'maintenance-project', 'manage-project'])
+            $perm_ids = Permission::whereIn('name', ['sale','manage-quote', 'crm', 'manage-client', 'maintenance-project', 'manage-project', 'manage-equipment', 'manage-pm-contract','manage-schedule',])
             ->pluck('id')->toArray();
         } elseif ($user->supplier_id) {
             $perm_ids = Permission::whereIn('name', ['finance', 'manage-supplier', 'stock', 'manage-grn'])
@@ -85,7 +85,7 @@ trait ClientSupplierAuth
         // assign permissions
         $perm_ids = [];
         if ($user->customer_id) {
-            $perm_ids = Permission::whereIn('name', ['crm', 'manage-client', 'maintenance-project', 'manage-project'])
+            $perm_ids = Permission::whereIn('name', ['sale','manage-quote', 'crm', 'manage-client', 'maintenance-project', 'manage-project', 'manage-equipment', 'manage-pm-contract','manage-schedule',])
                 ->pluck('id')->toArray();
         } elseif ($user->supplier_id) {
             $perm_ids = Permission::whereIn('name', ['finance', 'manage-supplier', 'stock', 'manage-grn'])

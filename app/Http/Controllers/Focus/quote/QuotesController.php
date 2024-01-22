@@ -63,8 +63,10 @@ class QuotesController extends Controller
      */
     public function index(ManageQuoteRequest $request)
     {   
-        $customers = Customer::all(['id', 'company']);
-        
+        $customer_id = auth()->user()->customer_id;
+        $customers = Customer::when($customer_id, fn($q) => $q->where('id', $customer_id))
+            ->get(['id', 'company']);
+
         return new ViewResponse('focus.quotes.index', compact('customers'));
     }
 

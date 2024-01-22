@@ -32,6 +32,11 @@ class QuoteRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query()->with('currency');
+
+        // filter by customer login
+        if (auth()->user()->customer_id) {
+            $q->where('customer_id', auth()->user()->customer_id);
+        }
         
         $q->when(request('page') == 'pi', fn($q) => $q->where('bank_id', '>', 0));
         $q->when(request('page') == 'qt', fn($q) => $q->where('bank_id', 0));

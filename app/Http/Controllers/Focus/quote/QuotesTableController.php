@@ -97,6 +97,7 @@ class QuotesTableController extends Controller
             ->editColumn('lead_tid', function($quote) use($prefixes) {
                 $link = '';
                 if ($quote->lead) {
+                    if (auth()->user()->customer_id) return gen4tid("{$prefixes[2]}-", $quote->lead->reference);
                     $link = '<a href="'. route('biller.leads.show', $quote->lead) .'">'.gen4tid("{$prefixes[2]}-", $quote->lead->reference).'</a>';
                 }
                 return $link;
@@ -134,6 +135,8 @@ class QuotesTableController extends Controller
                     $name = 'biller.quotes.show';
                     $action_buttons = str_replace(route($name, $quote), route($name, [$quote, 'page=pi']), $action_buttons);
                 }
+                if (auth()->user()->customer_id) return $action_buttons;
+
                 $valid_token = token_validator('', 'q'.$quote->id .$quote->tid, true);
                 $copy_text = $quote->bank_id ? 'PI Copy' : 'Quote Copy';
                 $task = $quote->bank_id ? 'page=pi&task=pi_to_pi' : 'task=quote_to_quote';

@@ -33,10 +33,16 @@ use Illuminate\Support\Facades\DB;
 class CoreDashboard extends Controller
 {
     public function index()
-    {
-        if (!access()->allow('dashboard-owner')) 
+    {   
+        $user = auth()->user();
+        if (!$user->password_updated_at) {
+            session()->put('flash_success', 'Please Update Your Password.');
+        }
+        if (!access()->allow('dashboard-owner')) {
             return view('focus.dashboard.common');
+        }
         
+            
         $start_date = date('Y-m') . '-01';
         $today = date('Y-m-d');
         // invoices

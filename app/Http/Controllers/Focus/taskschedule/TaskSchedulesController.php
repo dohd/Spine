@@ -37,7 +37,9 @@ class TaskSchedulesController extends Controller
      */
     public function index()
     {
-        $customers = Customer::get(['id', 'company']);
+        $customer_id = auth()->user()->customer_id;
+        $customers = Customer::when($customer_id, fn($q) => $q->where('id', $customer_id))
+            ->get(['id', 'company']);
         $contracts = Contract::get(['id', 'title', 'customer_id']);
 
         return new ViewResponse('focus.taskschedules.index', compact('customers', 'contracts'));        

@@ -423,18 +423,21 @@
 
                         {{-- project tags --}}
                         @permission('manage-project') 
-                            <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> Project Tags</a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('biller.miscs.index') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage Tags</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('biller.miscs.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tags
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
+                            @if (!auth()->user()->customer_id)
+                                <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-calendar"></i> Project Tags</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('biller.miscs.index') }}" data-toggle="dropdown"><i class="ft-list"></i>Manage Tags</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('biller.miscs.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tags
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            @endif
                         @endauth 
+                        
                         {{-- partial verification --}}
                         {{-- @permission('manage-quote-verify') 
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="ft-file-text"></i> Partial Job Verification</a>
@@ -1337,7 +1340,11 @@
             @endauth
 
             {{-- client-area module --}}
-            @if(auth()->user()->ins == 1)
+            @php
+                $user = auth()->user();
+                $app_owner = $user->ins == 1 && !$user->customer_id && !$user->supplier_id && !$user->client_vendor_id;
+            @endphp
+            @if($app_owner)
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="fa fa-anchor"></i><span>Client Area</span></a>
                 <ul class="dropdown-menu">
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-check-square-o" aria-hidden="true"></i> Account Services</a>

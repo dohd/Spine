@@ -26,6 +26,9 @@ class EquipmentRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
+
+        $customer_id = auth()->user()->customer_id;
+        $q->when($customer_id, fn($q) => $q->where('customer_id', $customer_id));
         
         $q->when(request('customer_id'), function ($q) {
             $q->where('customer_id', request('customer_id'));

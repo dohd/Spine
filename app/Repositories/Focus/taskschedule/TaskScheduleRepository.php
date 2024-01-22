@@ -29,6 +29,9 @@ class TaskScheduleRepository extends BaseRepository
     {
         $q = $this->query();
 
+        $customer_id = auth()->user()->customer_id;
+        $q->when($customer_id, fn($q) => $q->whereHas('contract', fn($q) => $q->where('customer_id', $customer_id)));
+
         $q->when(request('customer_id'), function ($q) {
             $q->whereHas('contract', fn($q) => $q->where('customer_id', request('customer_id')));
         })->when(request('contract_id'), fn($q) => $q->where('contract_id', request('contract_id')))
