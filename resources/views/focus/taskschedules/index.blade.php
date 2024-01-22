@@ -10,7 +10,9 @@
         </div>
         <div class="content-header-right col-6">
             <div class="media width-250 float-right">
-                @include('focus.taskschedules.partials.taskschedule-header-buttons')
+                <div class="media-body media-right text-right">
+                    @include('focus.taskschedules.partials.taskschedule-header-buttons')
+                </div>
             </div>
         </div>
     </div>
@@ -21,9 +23,9 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label for="customer">Customer</label>
+                            <div class="row mb-2">
+                                <div class="col-md-12">
+                                    {{-- <label for="customer">Customer</label> --}}
                                     <select name="customer_id" class="form-control" id="customer" data-placeholder="Choose Customer">
                                         @foreach ($customers as $row)
                                             <option value="{{ $row->id }}">
@@ -32,17 +34,19 @@
                                         @endforeach
                                     </select>
                                 </div>
-
-                                <div class="col-md-6">
-                                    <label for="contract">Contract</label>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-md-12">
+                                    {{-- <label for="contract">Contract</label> --}}
                                     <select name="contract_id" class="form-control" id="contract" data-placeholder="Choose Contract">
                                     </select>
                                 </div>
-
-                                <div class="col-md-2">
-                                    <label for="status">Service Status</label>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    {{-- <label for="status">Service Status</label> --}}
                                     <select name="service_status" id="service_status" class="custom-select">
-                                        <option value="">-- select status --</option>
+                                        <option value="">-- Select Service Status --</option>
                                         @foreach (['unserviced', 'partially_serviced', 'serviced'] as $status)
                                             <option value="{{ $status }}">{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
                                         @endforeach
