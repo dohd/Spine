@@ -11,7 +11,7 @@ trait InvoicePaymentRelationship
 {
     public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'tr_ref')->whereIn('tr_type', ['pmt', 'adv_pmt']);
+        return $this->hasMany(Transaction::class, 'deposit_id');
     }
 
     public function account()
