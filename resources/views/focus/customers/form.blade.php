@@ -219,20 +219,7 @@
                     <div class='col-lg-10'>
                         {{ Form::text('open_balance_note', null, ['class' => 'form-control', 'id' => 'open_balance_note']) }}
                     </div>
-                </div>       
-                <div class='form-group'>
-                    {{ Form::label('sale_account', 'Recognise Sale on Account',['class' => 'col-lg-2 control-label']) }}
-                    <div class='col-lg-10'>
-                        <select name="sale_account_id" class="custom-select" id="sale_account">
-                            <option value="">-- Select Sale Account --</option>
-                            @foreach ($accounts as $row) 
-                                <option value="{{ $row->id }}" {{ $row->id == @$customer->sale_account_id? 'selected' : '' }}>
-                                    {{ $row->holder }}
-                                </option>
-                            @endforeach
-                        </select>                        
-                    </div>
-                </div>           
+                </div>                  
             </div>
 
             <!-- other details -->

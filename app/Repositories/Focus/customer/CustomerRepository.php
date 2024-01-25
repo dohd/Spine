@@ -124,29 +124,24 @@ class CustomerRepository extends BaseRepository
         }
         Branch::insert($branches);
 
+        // opening balance
         $open_balance = $result->open_balance;
-        $open_balance_date = $result->open_balance_date;
         if ($open_balance > 0) {
-            $note = $result->id . '-customer Account Opening Balance ' . $result->open_balance_note;
-            $user_id = auth()->user()->id;
-
+            $open_balance_date = $result->open_balance_date;
             // create journal
             $journal = Journal::create([
                 'tid' => Journal::where('ins', auth()->user()->ins)->max('tid') + 1,
                 'date' => $open_balance_date,
-                'note' => $note,
+                'note' => $result->open_balance_note,
                 'debit_ttl' => $open_balance,
                 'credit_ttl' => $open_balance,
                 'ins' => $result->ins,
-                'user_id' => $user_id,
+                'user_id' => $result->user_id,
                 'customer_id' => $result->id,
             ]);
             $debtor_account = Account::where('system', 'receivable')->first(['id']);
             foreach ([1,2] as $v) {
-                $data = [
-                    'journal_id' => $journal->id,
-                    'account_id' => $debtor_account->id,
-                ];
+                $data = ['journal_id' => $journal->id,'account_id' => $debtor_account->id];
                 if ($v == 1) {
                     $data['debit'] = $open_balance;
                 } else {
@@ -161,17 +156,15 @@ class CustomerRepository extends BaseRepository
                 'invoiceduedate' => $open_balance_date,
                 'subtotal' => $open_balance,
                 'total' => $open_balance,
-                'notes' => $note,
+                'notes' => $result->open_balance_note,
                 'customer_id' => $result->id,
-                'user_id' => $user_id,
+                'user_id' => $result->user_id,
                 'ins' => $result->ins,
-                'account_id' => $result->sale_account_id,
                 'man_journal_id' => $journal->id
             ]);
-
             /** accounting */
-            $data = array_replace($journal->toArray(), ['open_balance' => $open_balance,'account_id' => $debtor_account->id]);
-            $this->post_customer_opening_balance((object) $data);
+            $tr_data = array_replace($journal->toArray(), ['open_balance' => $open_balance,'account_id' => $debtor_account->id]);
+            $this->post_customer_opening_balance((object) $tr_data);
         }
 
         // authorize
@@ -233,33 +226,23 @@ class CustomerRepository extends BaseRepository
         ]);
         $result = $customer->update($input);
 
+        // opening balance
         $open_balance = $customer->open_balance;
-        $open_balance_date = $customer->open_balance_date;
         if ($open_balance > 0) {
-            $data = array();
-            $user_id = auth()->user()->id;
-            $note = $customer->id . '-customer Account Opening Balance ' . $customer->open_balance_note;
-            $journal = Journal::where('note', 'LIKE', "%{$customer->id}-customer Account Opening Balance %")->first();
+            $data = [];
+            $open_balance_date = $customer->open_balance_date;
+            $note = $customer->open_balance_note;
+            $journal = Journal::where('customer_id', $customer->id)->first();
             if ($journal) {
-                // remove previous transactions
-                Transaction::where('man_journal_id', $journal->id)
-                ->orWhere(function($q) use($journal) {
-                    $q->where('tr_ref',  $journal->id)
-                    ->where('note', 'LIKE', '%{$journal->note}%');
-                })->delete();
-                
                 // update invoice
-                $invoice = Invoice::where('man_journal_id', $journal->id)
-                ->orWhere('notes', 'LIKE', "%{$journal->note}%")->first();
+                $invoice = Invoice::where('man_journal_id', $journal->id)->first();
                 if ($invoice) {
                     $invoice->update([
                         'notes' => $note, 
                         'subtotal' => $open_balance, 
                         'total' => $open_balance,
-                        'account_id' => $customer->sale_account_id
                     ]);   
                 }
-                
                 // update manual journal
                 $journal->update([
                     'note' => $note,
@@ -267,15 +250,16 @@ class CustomerRepository extends BaseRepository
                     'debit_ttl' => $open_balance,
                     'credit_ttl' => $open_balance,
                 ]);
-                $debtor_account = Account::where('system', 'receivable')->first(['id']);   
-                $data = array_replace($journal->toArray(), [
-                    'open_balance' => $open_balance,
-                    'account_id' => $debtor_account->id,
-                ]);
                 foreach ($journal->items as $item) {
                     if ($item->debit > 0) $item->update(['debit' => $open_balance]);
                     elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
                 }
+                $debtor_account = Account::where('system', 'receivable')->first(['id']); 
+                $tr_data = array_replace($journal->toArray(), [
+                    'open_balance' => $open_balance,
+                    'account_id' => $debtor_account->id,
+                ]);
+                Transaction::where('man_journal_id', $journal->id)->delete();
             } else {
                 // create manual journal
                 $journal = Journal::create([
@@ -285,15 +269,12 @@ class CustomerRepository extends BaseRepository
                     'debit_ttl' => $open_balance,
                     'credit_ttl' => $open_balance,
                     'ins' => $customer->ins,
-                    'user_id' => $user_id,
+                    'user_id' => $customer->user_id,
                     'customer_id' => @$customer->id,
                 ]);
                 $debtor_account = Account::where('system', 'receivable')->first(['id']);
                 foreach ([1,2] as $v) {
-                    $data = [
-                        'journal_id' => $journal->id,
-                        'account_id' => $debtor_account->id,
-                    ];
+                    $data = ['journal_id' => $journal->id,'account_id' => $debtor_account->id];
                     if ($v == 1) {
                         $data['debit'] = $open_balance;
                     } else {
@@ -310,15 +291,17 @@ class CustomerRepository extends BaseRepository
                     'total' => $open_balance,
                     'notes' => $note,
                     'customer_id' => $customer->id,
-                    'user_id' => $user_id,
+                    'user_id' => $customer->user_id,
                     'ins' => $customer->ins,
-                    'account_id' => $customer->sale_account_id,
                     'man_journal_id' => @$journal->id,
                 ]);
-                $data = array_replace($journal->toArray(), ['open_balance' => $open_balance,'account_id' => $debtor_account->id]);
+                $tr_data = array_replace($journal->toArray(), [
+                    'open_balance' => $open_balance,
+                    'account_id' => $debtor_account->id
+                ]);
             }
             /**accounting */    
-            if ($data) $this->post_customer_opening_balance((object) $data);    
+            if ($tr_data) $this->post_customer_opening_balance((object) $tr_data);    
         }    
         
         // authorize
@@ -340,11 +323,16 @@ class CustomerRepository extends BaseRepository
     public function delete($customer)
     {
         if ($customer->id == 1) throw ValidationException::withMessages(['Cannot delete default customer']);
-        if ($customer->leads->count()) 
-            throw ValidationException::withMessages(['Customer has attached Tickets']);
-        if ($this->deleteAuth($customer, 'client') && $customer->delete()) return true;
+        if ($customer->leads->exists()) throw ValidationException::withMessages(['Customer has attached Tickets']);
+        DB::beginTransaction();
 
-        throw new GeneralException(trans('exceptions.backend.customers.delete_error'));
+        $this->deleteAuth($customer, 'client');
+        $result = $customer->delete();
+
+        if ($result) {
+            DB::commit();
+            return true;
+        }
     }
 
     /*
@@ -354,7 +342,6 @@ class CustomerRepository extends BaseRepository
     {
         $image = time() . $file->getClientOriginalName();
         $this->storage->put($this->customer_picture_path . $image, file_get_contents($file->getRealPath()));
-
         return $image;
     }
 
