@@ -8,69 +8,35 @@ use App\Models\transaction\Transaction;
 trait CustomerStatement
 {
     /**
+     * Customer Invoices data
+     */
+    public function getInvoicesForDataTable($customer_id = 0)
+    {
+        return Invoice::where('customer_id', request('customer_id', $customer_id))->get();
+    }
+    
+    /**
      * Statement on account transactions
      */
     public function getTransactionsForDataTable($customer_id = 0)
     {            
         $params = ['customer_id' => request('customer_id', $customer_id)];
-        
+
+    
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
         })
         ->where(function ($q) use($params) {
-            $q->where(function($q) use($params) {
-                $q->where('tr_type', 'inv')->where('debit', '>', 0)
-                ->where(function($q) use($params) {
-                    $q->where($params)
-                    ->orWhere(function($q) use($params) {
-                        $q->whereIn('tr_ref', function($q) use($params) {
-                            $q->select('id')->from('invoices')->where($params);
-                        });
-                    });
-                });
-            })
-            ->orwhere(function($q) use($params) {
-                $q->where('tr_type', 'dep')->where('credit', '>', 0)
-                ->where(function($q) use($params) {
-                    $q->where($params)
-                    ->orWhere(function($q) use($params) {
-                        $q->whereIn('tr_ref', function($q) use($params) {
-                            $q->select('id')->from('paid_invoices')->where($params);
-                        });
-                    });
-                });
-            })
-            ->orwhere(function($q) use($params) {
-                $q->where('tr_type', 'withholding')->where('credit', '>', 0)
-                ->where(function($q) use($params) {
-                    $q->where($params)
-                    ->orWhere(function($q) use($params) {
-                        $q->whereIn('tr_ref', function($q) use($params) {
-                            $q->select('id')->from('withholdings')->where($params);
-                        });
-                    });
-                });
-            })
-            ->orwhere(function($q) use($params) {
-                $q->where('tr_type', 'cnote')->where('credit', '>', 0)
-                ->where(function($q) use($params) {
-                    $q->where($params)
-                    ->orWhere(function($q) use($params) {
-                        $q->whereIn('tr_ref', function($q) use($params) {
-                            $q->select('id')->from('credit_notes')->where($params);
-                        });
-                    });
-                });
-            });
+            $q->whereHas('invoice', fn($q) => $q->where($params))
+            ->orWhereHas('deposit', fn($q) => $q->where($params))
+            ->orWhereHas('withholding', fn($q) => $q->where($params))
+            ->orWhereHas('creditnote', fn($q) => $q->where($params))
+            ->orWhereHas('debitnote', fn($q) => $q->where($params));
         })
-        ->orWhere(function ($q) use($params) {
-            $q->where('tr_type', 'genjr')->where('debit', '>', 0)
-            ->where('user_type', 'customer')
-            ->where('note', 'LIKE', "%{$params['customer_id']}-customer%")
-            ->where(function($q) use($params) {
-                $q->where($params)->orWhere('customer_id', null);
-            });
-        });       
+        ->orWhere(function($q) use($params) {
+            $q->whereHas('manualjournal', fn($q) => $q->where($params))
+            ->where('debit', '>', 0);     
+        });
         
         // on date filter
         if (request('start_date') && request('is_transaction')) {
@@ -130,7 +96,7 @@ trait CustomerStatement
                 'credit' => 0,
                 'invoice_id' => $invoice_id
             );
-
+            // invoice deposits
             $payments = collect();
             foreach ($invoice->payments as $pmt) {
                 if (!$pmt->paid_invoice) continue;
@@ -153,7 +119,7 @@ trait CustomerStatement
                 );
                 $payments->add($record);
             }    
-
+            // invoice withholdings
             $withholdings = collect();
             foreach ($invoice->withholding_payments as $pmt) {
                 $i++;
@@ -173,7 +139,7 @@ trait CustomerStatement
                 );
                 $withholdings->add($record);
             }  
-
+            // invoice credit notes
             $creditnotes = collect();
             foreach ($invoice->creditnotes as $cnote) {
                 $i++;
@@ -189,7 +155,7 @@ trait CustomerStatement
                 );
                 $creditnotes->add($record);
             }   
-
+            // invoice debit notes
             $debitnotes = collect();
             foreach ($invoice->debitnotes as $dnote) {
                 $i++;
@@ -205,13 +171,11 @@ trait CustomerStatement
                 );
                 $debitnotes->add($record);
             }   
-
             $statement->add($inv_record);
             $statement = $statement->merge($payments);
             $statement = $statement->merge($creditnotes);
             $statement = $statement->merge($withholdings);
         }
-
         return $statement;        
     }
 }
