@@ -66,8 +66,15 @@ class Branch extends Model
     protected static function boot()
     {
         parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->ins = auth()->user()->ins;
+            $instance->user_id = auth()->user()->id;
+            return $instance;
+        });
+
         static::addGlobalScope('ins', function ($builder) {
-            $builder->where('ins', '=', auth()->user()->ins);
+            $builder->where('ins', auth()->user()->ins);
         });
     }
 }
