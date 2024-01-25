@@ -2,16 +2,12 @@
 
 namespace App\Repositories\Focus\invoice;
 
-use App\Models\account\Account;
 use App\Models\items\InvoiceItem;
 use App\Models\invoice\Invoice;
 use App\Exceptions\GeneralException;
 use App\Models\invoice_payment\InvoicePayment;
-use App\Models\transaction\Transaction;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
-use App\Models\quote\Quote;
-use App\Models\transactioncategory\Transactioncategory;
 use Illuminate\Validation\ValidationException;
 use Mavinoo\LaravelBatch\LaravelBatchFacade as Batch;
 
@@ -85,36 +81,6 @@ class InvoiceRepository extends BaseRepository
     }
 
     /**
-     * Convert Invoice totals to KES
-     */
-    public function convert_totals_to_kes($result)
-    {
-        $quote_ids = [];
-        $inv_has_tax = $result['tax_id'] > 0;
-        foreach ($result->products as $key => $inv_product) {
-            $quote = $inv_product->quote;
-            if ($quote) {
-                if (in_array($quote->id, $quote_ids)) continue;
-                $quote_ids[] = $quote->id;
-                $currency = $inv_product->quote->currency;
-                if ($currency && $currency->rate > 1) {
-                    $subtotal = $quote->verified_products()->sum(DB::raw('product_subtotal * product_qty')) * $currency->rate;
-                    $total = $quote->verified_products()->sum(DB::raw('product_price * product_qty')) * $currency->rate;
-                    if ($key == 0) {
-                        foreach (['total', 'tax', 'subtotal'] as $value) {
-                            $result[$value] = 0;
-                        }
-                    }
-                    $result['total'] += $total;
-                    $result['subtotal'] += $subtotal;
-                    if ($inv_has_tax) $result['tax'] += $total - $subtotal;
-                }
-            }
-        }
-        return $result;
-    }
-
-    /**
      * Create project invoice
      */
     public function create_project_invoice(array $input)
@@ -160,7 +126,7 @@ class InvoiceRepository extends BaseRepository
         $result = $this->convert_totals_to_kes($result);
         
         /** accounting */
-        $this->post_transaction_project_invoice($result);
+        $this->post_invoice($result);
 
         if ($result) {
             DB::commit();
@@ -216,7 +182,7 @@ class InvoiceRepository extends BaseRepository
 
         /**accounting */
         $invoice->transactions()->delete();
-        $this->post_transaction_project_invoice($invoice);
+        $this->post_invoice($invoice);
 
         if ($bill) {
             DB::commit();
@@ -235,9 +201,13 @@ class InvoiceRepository extends BaseRepository
      */
     public function delete($invoice)
     {
-        if ($invoice->payments()->exists())
-            throw ValidationException::withMessages(['Not allowed! Invoice has related payments']);
-        
+        if ($invoice->payments()->exists()) {
+            foreach ($invoice->payments as $key => $pmt_item) {
+                $tids[] = @$pmt_item->paid_invoice->tid ?: '';
+            }
+            throw ValidationException::withMessages(['Invoice is linked to payments: (' . implode(', ', $tids) . ')']);
+        }
+            
         DB::beginTransaction();
 
         // pos invoice
@@ -247,7 +217,6 @@ class InvoiceRepository extends BaseRepository
                 $pos_product = $item->product;
                 if ($pos_product) $pos_product->decrement('qty', $item->product_qty);
             }
-
             // delete related payment
             InvoicePayment::whereHas('items', fn($q) => $q->where('invoice_id', $invoice->id))->delete();
         } else {
@@ -260,6 +229,7 @@ class InvoiceRepository extends BaseRepository
 
         $invoice->transactions()->delete();
         aggregate_account_transactions();
+        $invoice->products()->delete();
         if ($invoice->delete()) {
             DB::commit();
             return true;
@@ -268,111 +238,31 @@ class InvoiceRepository extends BaseRepository
         DB::rollBack();
     }
 
-    /**
-     * Project Invoice transaction
-     */
-    public function post_transaction_project_invoice($result)
+    // Convert Invoice totals to KES
+    public function convert_totals_to_kes($result)
     {
-        // debit Accounts Receivable (Debtors)
-        $account = Account::where('system', 'receivable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'inv')->first(['id', 'code']);
-        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
-        $dr_data = [
-            'tid' => $tid,
-            'account_id' => $account->id,
-            'trans_category_id' => $tr_category->id,
-            'debit' => $result->total,
-            'tr_date' => $result->invoicedate,
-            'due_date' => $result->invoiceduedate,
-            'user_id' => $result->user_id,
-            'note' => $result->notes,
-            'ins' => $result->ins,
-            'tr_type' => $tr_category->code,
-            'tr_ref' => $result->id,
-            'user_type' => 'customer',
-            'is_primary' => 1,
-        ];
-        Transaction::create($dr_data);
-
-        unset($dr_data['debit'], $dr_data['is_primary']);
-
-        // credit Revenue Account (Income)
-        $inc_cr_data = array_replace($dr_data, [
-            'account_id' => $result->account_id,
-            'credit' => $result->subtotal,
-        ]);
-        Transaction::create($inc_cr_data);
-
-        // credit tax (VAT)
-        if ($result->tax > 0) {
-            $account = Account::where('system', 'tax')->first(['id']);
-            $tax_cr_data = array_replace($dr_data, [
-                'account_id' => $account->id,
-                'credit' => $result->tax,
-            ]);
-            Transaction::create($tax_cr_data);
-        }
-
-        // WIP and COG transactions
-        $tr_data = array();
-
-        // stock amount for items issued from inventory
-        $store_inventory_amount = 0;
-        // direct purchase item amounts for item directly issued to project
-        $dirpurch_inventory_amount = 0;
-        $dirpurch_expense_amount = 0;
-        $dirpurch_asset_amount = 0;
-
-        // invoice related quotes and pi
-        $quote_ids = $result->products->pluck('quote_id')->toArray();
-        $quotes = Quote::whereIn('id', $quote_ids)->get();
-        foreach ($quotes as $quote) {
-            $store_inventory_amount  = $quote->projectstock->sum('subtotal');
-            // direct purchase items issued to project
-            if (isset($quote->project_quote->project)) {
-                foreach ($quote->project_quote->project->purchase_items as $item) {
-                    if ($item->itemproject_id) {
-                        $subtotal = $item->amount - $item->taxrate;
-                        if ($item->type == 'Expense') $dirpurch_expense_amount += $subtotal;
-                        elseif ($item->type == 'Stock') $dirpurch_inventory_amount += $subtotal;
-                        elseif ($item->type == 'Asset') $dirpurch_asset_amount += $subtotal;
+        $quote_ids = [];
+        $inv_has_tax = $result['tax_id'] > 0;
+        foreach ($result->products as $key => $inv_product) {
+            $quote = $inv_product->quote;
+            if ($quote) {
+                if (in_array($quote->id, $quote_ids)) continue;
+                $quote_ids[] = $quote->id;
+                $currency = $inv_product->quote->currency;
+                if ($currency && $currency->rate > 1) {
+                    $subtotal = $quote->verified_products()->sum(DB::raw('product_subtotal * product_qty')) * $currency->rate;
+                    $total = $quote->verified_products()->sum(DB::raw('product_price * product_qty')) * $currency->rate;
+                    if ($key == 0) {
+                        foreach (['total', 'tax', 'subtotal'] as $value) {
+                            $result[$value] = 0;
+                        }
                     }
-                    
+                    $result['total'] += $total;
+                    $result['subtotal'] += $subtotal;
+                    if ($inv_has_tax) $result['tax'] += $total - $subtotal;
                 }
             }
         }
-
-        // credit WIP account and debit COG
-        $wip_account = Account::where('system', 'wip')->first(['id']);
-        $cog_account = Account::where('system', 'cog')->first(['id']);
-        $cr_data = array_replace($dr_data, ['account_id' => $wip_account->id, 'is_primary' => 1]);
-        $dr_data = array_replace($dr_data, ['account_id' => $cog_account->id, 'is_primary' => 0]);
-        
-        if ($dirpurch_inventory_amount > 0) {
-            $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_inventory_amount]);
-            $tr_data[] = array_replace($dr_data, ['debit' => $dirpurch_inventory_amount]);
-        }
-        if ($dirpurch_expense_amount > 0) {
-            $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_expense_amount]);
-            $tr_data[] = array_replace($dr_data, ['debit' => $dirpurch_expense_amount]);
-        }
-        if ($dirpurch_asset_amount > 0) {
-            $tr_data[] = array_replace($cr_data, ['credit' => $dirpurch_asset_amount]);
-            $tr_data[] = array_replace($dr_data, ['debit' => $dirpurch_asset_amount]);
-        }
-        if ($store_inventory_amount > 0) {
-            $tr_data[] = array_replace($cr_data, ['credit' => $store_inventory_amount]);
-            $tr_data[] = array_replace($dr_data, ['debit' => $store_inventory_amount]);
-        }
-
-        $tr_data = array_map(function ($v) {
-            if (isset($v['debit']) && $v['debit'] > 0) $v['credit'] = 0;
-            elseif (isset($v['credit']) && $v['credit'] > 0) $v['debit'] = 0;
-            return $v;
-        }, $tr_data);
-
-        Transaction::insert($tr_data);        
-        aggregate_account_transactions();        
+        return $result;
     }
-
 }
