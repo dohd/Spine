@@ -6,6 +6,7 @@ use App\Models\billpayment\Billpayment;
 use App\Models\charge\Charge;
 use App\Models\creditnote\CreditNote;
 use App\Models\hrm\Hrm;
+use App\Models\invoice\PaidInvoice;
 use App\Models\invoice_payment\InvoicePayment;
 use App\Models\loan\Loan;
 use App\Models\loan\Paidloan;
@@ -29,24 +30,34 @@ trait TransactionRelationship
         return $this->belongsTo(Billpayment::class, 'tr_ref');
     }
 
-    public function journalentry() 
+    public function manualjournal() 
     {
-        return $this->belongsTo(Journal::class, 'tr_ref');
+        return $this->belongsTo(Journal::class, 'man_journal_id');
+    }
+
+    public function customer_manualjournal() 
+    {
+        return $this->belongsTo(Journal::class, 'man_journal_id')->where('customer_id', '>', 0);
+    }
+
+    public function supplier_manualjournal() 
+    {
+        return $this->belongsTo(Journal::class, 'man_journal_id')->where('supplier_id', '>', 0);
     }
 
     public function debitnote()
     {
-        return $this->belongsTo(CreditNote::class, 'tr_ref')->where('is_debit', 1);
+        return $this->belongsTo(CreditNote::class, 'dnote_id');
     }
 
     public function creditnote()
     {
-        return $this->belongsTo(CreditNote::class, 'tr_ref')->where('is_debit', 0);
+        return $this->belongsTo(CreditNote::class, 'cnote_id');
     }
 
     public function withholding()
     {
-        return $this->belongsTo(Withholding::class, 'tr_ref');
+        return $this->belongsTo(Withholding::class, 'wht_id');
     }
 
     public function charge()
@@ -71,7 +82,12 @@ trait TransactionRelationship
     
     public function invoice()
     {
-        return $this->belongsTo('App\Models\invoice\Invoice', 'tr_ref');
+        return $this->belongsTo('App\Models\invoice\Invoice', 'invoice_id');
+    }
+
+    public function deposit()
+    {
+        return $this->belongsTo(PaidInvoice::class, 'deposit_id');
     }
 
     public function paidbill()

@@ -7,6 +7,7 @@ namespace App\Repositories;
  */
 class BaseRepository
 {
+    use Accounting;
     /**
      * @return mixed
      */
