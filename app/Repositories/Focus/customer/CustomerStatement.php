@@ -21,8 +21,6 @@ trait CustomerStatement
     public function getTransactionsForDataTable($customer_id = 0)
     {            
         $params = ['customer_id' => request('customer_id', $customer_id)];
-
-    
         $q = Transaction::whereHas('account', function ($q) { 
             $q->where('system', 'receivable');  
         })

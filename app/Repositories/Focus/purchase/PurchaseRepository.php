@@ -4,18 +4,15 @@ namespace App\Repositories\Focus\purchase;
 
 use App\Models\purchase\Purchase;
 use App\Exceptions\GeneralException;
-use App\Models\account\Account;
-use App\Models\assetequipment\Assetequipment;
 use App\Models\Company\Company;
 use App\Models\items\PurchaseItem;
 use App\Models\items\UtilityBillItem;
 use App\Models\product\ProductVariation;
 use App\Models\supplier\Supplier;
 use App\Models\transaction\Transaction;
-use App\Models\transactioncategory\Transactioncategory;
 use App\Models\utility_bill\UtilityBill;
+use App\Repositories\Accounting;
 use App\Repositories\BaseRepository;
-use Error;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -24,6 +21,8 @@ use Illuminate\Validation\ValidationException;
  */
 class PurchaseRepository extends BaseRepository
 {
+    use Accounting;
+    
     /**
      * Associated Repository Model.
      */
@@ -47,95 +46,6 @@ class PurchaseRepository extends BaseRepository
     }
 
     /**
-     * Import Expenses from external array data
-     */
-    function expense_import_data($file_name = '') {
-        try {
-            $expense_data = [];
-
-            $file = base_path() . '/main_creditors/' . $file_name;
-            if (!file_exists($file)) return $expense_data;
-            // dd($file);
-
-            // convert csv to array
-            $export = [];
-            $csv_file = fopen($file, 'r');
-            while ($row = fgetcsv($csv_file)) $export[] = $row;
-            fclose($csv_file);
-            // dd($export);
-
-            // compatible database array
-            $import = [];
-            $headers = current($export);
-            $data_rows = array_slice($export, 1, count($export));
-            foreach ($data_rows as $i => $row) {
-                if (count($headers) != count($row)) {
-                    throw ValidationException::withMessages([
-                        'Unequal column count on line '. strval($i+1). ' on file '.$file_name
-                    ]);
-                }
-
-                $new_row = [];
-                foreach ($row as $key => $val) {
-                    if (stripos($val, 'null') !== false) $val = null;
-                    $new_row[$headers[$key]] = $val; 
-                }
-                $import[] = $new_row;
-            }
-            // dd($import);
-
-            // expense and expense_items
-            foreach ($import as $key => $data) {
-                // sanitize data
-                $supplier = Supplier::find($data['supplier_id'], ['id', 'taxid']);
-                if ($supplier) $data['supplier_taxid'] = $supplier->taxid;
-                if ($data['grandtax'] == 0) $data['tax'] = 0;
-                
-                foreach ($data as $key => $value) {
-                    if (in_array($key, ['date', 'due_date'])) {
-                        $data[$key] = date_for_database($value);
-                    }
-                    $data[$key] = trim($value);
-                }
-                
-
-                if (stripos($data['status'], 'paid') !== false) $data['status'] = 'paid';
-                elseif (stripos($data['status'], 'partly paid') !== false) $data['status'] = 'partial';
-                else $data['status'] = 'pending';
-
-                // skip payments
-                if (stripos($data['status'], 'pmt') !== false) continue;
-
-                // expense items
-                $data_items = array_map(fn($v) => [
-                    'item_id' => @$data['ledger_id']? $data['ledger_id'] : 103, // cog account
-                    'description' => $v['note'],
-                    'itemproject_id' => $v['project_id'],
-                    'qty' => 1,
-                    'rate' => $v['paidttl'],
-                    'taxrate' => $v['grandtax'],
-                    'itemtax' => $v['tax'],
-                    'amount' => $v['grandttl'],
-                    'type' => 'Expense', 
-                    'warehouse_id' => null, 
-                    'uom' => 'Lot',
-                ], [$data]);
-
-                unset($data['id'], $data['po_id'], $data['created_at'], $data['updated_at'], $data['ledger_id']);
-                $data_keys = array_filter(array_keys($data));
-                $data = array_intersect_key($data, array_flip($data_keys));
-                // dd(compact('data', 'data_items'));
-                $expense_data[] = compact('data', 'data_items');
-            }
-            return $expense_data;
-        } catch (\Throwable $th) {
-            $err = $th->getMessage();
-            throw new Error("{$err} on file {$file_name}");
-        }
-    }
-
-    
-    /**
      * For Creating the respective model in storage
      *
      * @param array $input
@@ -144,7 +54,6 @@ class PurchaseRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        // dd($input);
         DB::beginTransaction();
 
         $data = $input['data'];
@@ -240,13 +149,12 @@ class PurchaseRepository extends BaseRepository
                 } else throw ValidationException::withMessages(['Please attach units to stock items']);
             }
         }
-        PurchaseItem::insert($data_items);
-
-        // direct purchase bill
-        $this->generate_bill($result);
+        PurchaseItem::insert($data_items);        
 
         /** accounting **/
-        $this->post_transaction($result);
+        $bill = $this->generate_bill($result);
+        $result->bill_id = $bill->id;
+        $this->post_purchase_expense($result);
 
         if ($result) {
             DB::commit();
@@ -254,7 +162,6 @@ class PurchaseRepository extends BaseRepository
         }
         
         DB::rollBack();
-        throw new GeneralException(trans('exceptions.backend.purchaseorders.create_error'));
     }
 
     /**
@@ -369,13 +276,12 @@ class PurchaseRepository extends BaseRepository
             elseif ($purchase_item->itemproject_id) unset($purchase_item->warehouse_id);
             $purchase_item->save();
         }
-
-        // direct purchase bill 
-        $this->generate_bill($purchase);
-
+        
         /** accounting */
-        Transaction::where(['tr_type' => 'bill', 'tr_ref' => $purchase->id])->where('note', 'LIKE', "%{$prev_note}%")->delete();
-        $this->post_transaction($purchase);
+        $bill = $this->generate_bill($purchase);
+        $purchase->bill_id = $bill->id;
+        Transaction::where('bill_id', $bill->id)->delete();
+        $this->post_purchase_expense($purchase);
 
         if ($result) {
             DB::commit();
@@ -383,7 +289,6 @@ class PurchaseRepository extends BaseRepository
         }
 
         DB::rollBack();
-        throw new GeneralException(trans('exceptions.backend.purchaseorders.update_error'));
     }
 
     /**
@@ -448,6 +353,16 @@ class PurchaseRepository extends BaseRepository
      */
     public function generate_bill($purchase)
     {
+        $purchase_items = $purchase->items->toArray();
+        $bill_items_data = array_map(fn($v) => [
+            'ref_id' => $v['id'],
+            'note' => "({$v['type']}) {$v['description']} {$v['uom']}",
+            'qty' => $v['qty'],
+            'subtotal' => $v['qty'] * $v['rate'],
+            'tax' => $v['taxrate'],
+            'total' => $v['amount'], 
+        ], $purchase_items);
+
         $bill_data = [
             'supplier_id' => $purchase->supplier_id,
             'reference' => $purchase->doc_ref,
@@ -462,136 +377,24 @@ class PurchaseRepository extends BaseRepository
             'total' => $purchase->grandttl,
             'note' => $purchase->note,
         ];
-
-        $purchase_items = $purchase->items->toArray();
-        $bill_items_data = array_map(fn($v) => [
-            'ref_id' => $v['id'],
-            'note' => "({$v['type']}) {$v['description']} {$v['uom']}",
-            'qty' => $v['qty'],
-            'subtotal' => $v['qty'] * $v['rate'],
-            'tax' => $v['taxrate'],
-            'total' => $v['amount'], 
-        ], $purchase_items);
-
-        $bill = UtilityBill::where([
-            'document_type' => $bill_data['document_type'], 
-            'ref_id' => $bill_data['ref_id']
-        ])->first();
-        
+        $bill = UtilityBill::where(['document_type' => 'direct_purchase','ref_id' => $purchase->id])->first();
         if ($bill) {
             // update bill
             $bill->update($bill_data);
             foreach ($bill_items_data as $item) {
-                $new_item = UtilityBillItem::firstOrNew([
-                    'bill_id' => $bill->id,
-                    'ref_id' => $item['ref_id']
-                ]);
+                $new_item = UtilityBillItem::firstOrNew(['bill_id' => $bill->id,'ref_id' => $item['ref_id']]);
                 $new_item->save();
             }
         } else {
             // create bill
-            $bill_data['tid'] = UtilityBill::where('ins', auth()->user()->ins)->max('tid') + 1;
+            $bill_data['tid'] = UtilityBill::max('tid')+1;
             $bill = UtilityBill::create($bill_data);
-
             $bill_items_data = array_map(function ($v) use($bill) {
                 $v['bill_id'] = $bill->id;
                 return $v;
             }, $bill_items_data);
             UtilityBillItem::insert($bill_items_data);
         }
-
         return $bill;
-    }
-
-    /**
-     * Direct Purchase Transaction
-     * 
-     * @param Purchase $purchase
-     * @return void
-     */
-    public function post_transaction($purchase) 
-    {
-        // credit Accounts Payable (Creditors)
-        $account = Account::where('system', 'payable')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
-        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
-        $cr_data = [
-            'tid' => $tid,
-            'account_id' => $account->id,
-            'trans_category_id' => $tr_category->id,
-            'credit' => $purchase->grandttl,
-            'tr_date' => $purchase->date,
-            'due_date' => $purchase->due_date,
-            'user_id' => $purchase->user_id,
-            'note' => $purchase->note,
-            'ins' => $purchase->ins,
-            'tr_type' => $tr_category->code,
-            'tr_ref' => $purchase->id,
-            'user_type' => 'supplier',
-            'is_primary' => 1,
-        ];
-        Transaction::create($cr_data);
-
-        $dr_data = array();
-        unset($cr_data['credit'], $cr_data['is_primary']);
-
-        // debit Stock
-        $wip_account = Account::where('system', 'wip')->first(['id']);
-        $stock_exists = $purchase->items()->where('type', 'Stock')->count();
-        if ($stock_exists) {
-            // if project stock, WIP account else Stock account
-            $is_project_stock = $purchase->items()->where('type', 'Stock')->where('itemproject_id', '>', 0)->count();
-            if ($is_project_stock) {
-                $dr_data[] = array_replace($cr_data, [
-                    'account_id' => $wip_account->id,
-                    'debit' => $purchase['stock_subttl'],
-                ]);    
-            } else {
-                $account = Account::where('system', 'stock')->first(['id']);
-                $dr_data[] = array_replace($cr_data, [
-                    'account_id' => $account->id,
-                    'debit' => $purchase['stock_subttl'],
-                ]);    
-            }
-        }
-
-        // debit Expense and Asset account
-        foreach ($purchase->items as $item) {
-            $subttl = $item['amount'] - $item['taxrate'];
-            // debit Expense 
-            if ($item['type'] == 'Expense') {
-                $account_id = $item['item_id'];
-                // if project expense, use WIP account
-                if ($item['itemproject_id']) 
-                    $account_id = $wip_account->id;
-                    
-                $dr_data[] = array_replace($cr_data, [
-                    'account_id' => $account_id,
-                    'debit' => $subttl,
-                ]);
-            }
-            //  debit Asset 
-            if ($item['type'] == 'Asset') {
-                $account_id = Assetequipment::find($item['item_id'])->account_id;
-                // if project asset, use WIP account
-                if ($item['itemproject_id']) 
-                    $account_id = $wip_account->id;
-                $dr_data[] = array_replace($cr_data, [
-                    'account_id' => $account_id,
-                    'debit' => $subttl,
-                ]);
-            }
-        }
-
-        // debit tax (VAT)
-        if ($purchase['grandtax'] > 0) {
-            $account = Account::where('system', 'tax')->first(['id']);
-            $dr_data[] = array_replace($cr_data, [
-                'account_id' => $account->id, 
-                'debit' => $purchase['grandtax'],
-            ]);
-        }
-        Transaction::insert($dr_data); 
-        aggregate_account_transactions();
     }
 }

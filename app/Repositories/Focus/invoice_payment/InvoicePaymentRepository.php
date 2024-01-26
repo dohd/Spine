@@ -223,9 +223,9 @@ class InvoicePaymentRepository extends BaseRepository
         DB::beginTransaction();
         $invoice_payment_id = $invoice_payment->id;
         $allocation_id = $invoice_payment->rel_payment_id;
-        $is_allocation = $invoice_payment->rel_payment_id;
+        $is_allocation = boolval($invoice_payment->rel_payment_id);
         $customer = $invoice_payment->customer;
-        $invoice_ids = $invoice_ids = $invoice_payment->items()->pluck('invoice_id')->toArray();
+        $invoice_ids = $invoice_payment->items()->pluck('invoice_id')->toArray();
     
         $invoice_payment->items()->delete();
         $result =  $invoice_payment->delete();
@@ -256,6 +256,8 @@ class InvoicePaymentRepository extends BaseRepository
         if ($result) {
             DB::commit(); 
             return true;
-        }         
+        }      
+        
+        DB::rollBack();
     }
 }

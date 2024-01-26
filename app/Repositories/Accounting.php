@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\account\Account;
+use App\Models\assetequipment\Assetequipment;
 use App\Models\invoice\Invoice;
 use App\Models\quote\Quote;
 use App\Models\transaction\Transaction;
@@ -11,7 +12,7 @@ use App\Models\transactioncategory\Transactioncategory;
 trait Accounting
 {
     /**
-     * Customer Opening Balance Transaction
+     * Customer Opening Balance
      * @param object $manual_journal
      */
     public function post_customer_opening_balance($manual_journal)
@@ -368,4 +369,252 @@ trait Accounting
         }
         aggregate_account_transactions();        
     }
+
+    /**
+     * Supplier Opening Balance 
+     * @param object $manual_journal
+     */
+    public function post_supplier_opening_balance($manual_journal)
+    {
+        // credit Accounts Payable (Creditor)
+        $tr_category = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
+        $cr_data = [
+            'tid' => Transaction::max('tid') + 1,
+            'account_id' => $manual_journal->account_id,
+            'trans_category_id' => $tr_category->id,
+            'tr_date' => $manual_journal->date,
+            'due_date' => $manual_journal->date,
+            'user_id' => $manual_journal->user_id,
+            'note' => $manual_journal->note,
+            'credit' => $manual_journal->open_balance,
+            'ins' => $manual_journal->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $manual_journal->id,
+            'user_type' => 'supplier',
+            'is_primary' => 1,
+            'supplier_id' => $manual_journal->supplier_id,
+            'man_journal_id' => $manual_journal->id,
+        ];
+        Transaction::create($cr_data);
+
+        // debit Retained Earning (Equity)
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $account = Account::where('system', 'retained_earning')->first(['id']);
+        $dr_data = array_replace($cr_data, ['account_id' => $account->id, 'debit' => $manual_journal->open_balance]);
+        Transaction::create($dr_data);
+        aggregate_account_transactions();
+    }
+
+    /**
+     * Post Bill Payment
+     * @param object $bill_payment
+     */
+    public function post_bill_payment($bill_payment)
+    {   
+        // default liability accounts
+        $account = Account::where('system', 'payable')->first(['id']);
+        if ($bill_payment->employee_id) $account = Account::where('system', 'adv_salary')->first(['id']);
+            
+        $tr_category = Transactioncategory::where('code', 'pmt')->first(['id', 'code']);
+        $dr_data = [
+            'tid' => Transaction::max('tid')+1,
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'debit' => $bill_payment->amount,
+            'tr_date' => $bill_payment->date,
+            'due_date' => $bill_payment->date,
+            'user_id' => $bill_payment->user_id,
+            'note' => ($bill_payment->note ?: "{$bill_payment->payment_mode} - {$bill_payment->reference}"),
+            'ins' => $bill_payment->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $bill_payment->id,
+            'user_type' => 'supplier',
+            'is_primary' => 1,
+            'payment_id' => $bill_payment->id,
+            'supplier_id' => $bill_payment->supplier_id
+        ];
+
+        if ($bill_payment->is_advance_allocation) {
+            // debit Payables (liability)
+            Transaction::create($dr_data);
+            
+            // credit supplier advance payment 
+            unset($dr_data['debit'], $dr_data['is_primary']);
+            $account = Account::where('system', 'adv_pmt')->first(['id']);
+            $cr_data = array_replace($dr_data, [
+                'account_id' => $account->id,
+                'credit' => $bill_payment->amount,
+            ]);    
+            Transaction::create($cr_data);
+        } else {
+            if ($bill_payment->payment_type == 'advance_payment') {
+                // debit supplier advance payment 
+                $account = Account::where('system', 'adv_pmt')->first(['id']);
+                $dr_data['account_id'] = $account->id;
+                Transaction::create($dr_data);
+                
+                // credit bank
+                unset($dr_data['debit'], $dr_data['is_primary']);
+                $cr_data = array_replace($dr_data, [
+                    'account_id' => $bill_payment->account_id,
+                    'credit' => $bill_payment->amount,
+                ]);    
+                Transaction::create($cr_data);
+            } else {
+                // debit Payables (liability)
+                Transaction::create($dr_data);
+                            
+                // credit bank
+                unset($dr_data['debit'], $dr_data['is_primary']);
+                $cr_data = array_replace($dr_data, [
+                    'account_id' => $bill_payment->account_id,
+                    'credit' => $bill_payment->amount,
+                ]);    
+                Transaction::create($cr_data);
+            }
+        }
+        aggregate_account_transactions();
+    }
+
+    /**
+     * Direct Purchase Expense
+     * @param Purchase $purchase
+     */
+    public function post_purchase_expense($purchase) 
+    {
+        // credit Accounts Payable (Creditors)
+        $account = Account::where('system', 'payable')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
+        $cr_data = [
+            'tid' => $tid,
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $purchase->grandttl,
+            'tr_date' => $purchase->date,
+            'due_date' => $purchase->due_date,
+            'user_id' => $purchase->user_id,
+            'note' => $purchase->note,
+            'ins' => $purchase->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $purchase->bill_id,
+            'user_type' => 'supplier',
+            'is_primary' => 1,
+            'bill_id' => $purchase->bill_id,
+            'supplier_id' => $purchase->supplier_id
+        ];
+        Transaction::create($cr_data);
+
+        $dr_data = [];
+        unset($cr_data['credit'], $cr_data['is_primary']);
+
+        // debit Stock
+        $wip_account = Account::where('system', 'wip')->first(['id']);
+        $stock_exists = $purchase->items()->where('type', 'Stock')->count();
+        if ($stock_exists) {
+            // if project stock, WIP account else Stock account
+            $is_project_stock = $purchase->items()->where('type', 'Stock')->where('itemproject_id', '>', 0)->count();
+            if ($is_project_stock) {
+                $dr_data[] = array_replace($cr_data, [
+                    'account_id' => $wip_account->id,
+                    'debit' => $purchase['stock_subttl'],
+                ]);    
+            } else {
+                $account = Account::where('system', 'stock')->first(['id']);
+                $dr_data[] = array_replace($cr_data, [
+                    'account_id' => $account->id,
+                    'debit' => $purchase['stock_subttl'],
+                ]);    
+            }
+        }
+
+        // debit Expense and Asset account
+        foreach ($purchase->items as $item) {
+            $subttl = $item['amount'] - $item['taxrate'];
+            // debit Expense 
+            if ($item['type'] == 'Expense') {
+                $account_id = $item['item_id'];
+                // if project expense, use WIP account
+                if ($item['itemproject_id']) 
+                    $account_id = $wip_account->id;
+                    
+                $dr_data[] = array_replace($cr_data, [
+                    'account_id' => $account_id,
+                    'debit' => $subttl,
+                ]);
+            }
+            //  debit Asset 
+            if ($item['type'] == 'Asset') {
+                $account_id = Assetequipment::find($item['item_id'])->account_id;
+                // if project asset, use WIP account
+                if ($item['itemproject_id']) 
+                    $account_id = $wip_account->id;
+                $dr_data[] = array_replace($cr_data, [
+                    'account_id' => $account_id,
+                    'debit' => $subttl,
+                ]);
+            }
+        }
+
+        // debit tax (VAT)
+        if ($purchase['grandtax'] > 0) {
+            $account = Account::where('system', 'tax')->first(['id']);
+            $dr_data[] = array_replace($cr_data, [
+                'account_id' => $account->id, 
+                'debit' => $purchase['grandtax'],
+            ]);
+        }
+        Transaction::insert($dr_data); 
+        aggregate_account_transactions();
+    }
+
+    /**
+     * Goods Received Note Bill
+     * @param UtilityBill $purchase
+     */
+    public function post_grn_bill($utility_bill)
+    {
+        // debit Uninvoiced Goods Received Note (liability)
+        $account = Account::where('system', 'grn')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
+        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
+        $dr_data = [
+            'tid' => $tid,
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'debit' => $utility_bill->subtotal,
+            'tr_date' => $utility_bill->date,
+            'due_date' => $utility_bill->due_date,
+            'user_id' => $utility_bill->user_id,
+            'note' => $utility_bill->note,
+            'ins' => $utility_bill->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $utility_bill->id,
+            'user_type' => 'supplier',
+            'is_primary' => 1,
+            'supplier_id' => $utility_bill->supplier_id,
+            'bill_id' => $utility_bill->id
+        ];
+        Transaction::create($dr_data);
+
+        // debit TAX
+        unset($dr_data['debit'], $dr_data['is_primary']);
+        if ($utility_bill->tax > 0) {
+            $account = Account::where('system', 'tax')->first(['id']);
+            $cr_data = array_replace($dr_data, [
+                'account_id' => $account->id,
+                'debit' => $utility_bill->tax,
+            ]);
+            Transaction::create($cr_data);
+        }
+
+        // credit Accounts Payable (creditors)
+        $account = Account::where('system', 'payable')->first(['id']);
+        $cr_data = array_replace($dr_data, [
+            'account_id' => $account->id,
+            'credit' => $utility_bill->total,
+        ]);    
+        Transaction::create($cr_data);
+        aggregate_account_transactions();
+    }  
 }
