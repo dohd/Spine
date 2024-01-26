@@ -16,7 +16,7 @@ trait UtilityBillRelationship
 {   
     public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'tr_ref')->where('tr_type', 'bill');
+        return $this->hasMany(Transaction::class, 'bill_id');
     }
 
     public function payments()
