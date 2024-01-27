@@ -5,16 +5,16 @@ namespace App\Repositories\Focus\charge;
 use DB;
 use App\Models\charge\Charge;
 use App\Exceptions\GeneralException;
-use App\Models\transaction\Transaction;
-use App\Models\transactioncategory\Transactioncategory;
+use App\Repositories\Accounting;
 use App\Repositories\BaseRepository;
-use net\authorize\api\contract\v1\TransactionSummaryType;
 
 /**
  * Class ChargeRepository.
  */
 class ChargeRepository extends BaseRepository
 {
+    use Accounting;
+
     /**
      * Associated Repository Model.
      */
@@ -50,13 +50,13 @@ class ChargeRepository extends BaseRepository
         ]);
         $result = Charge::create($input);
 
-        /** accounts */
-        $this->post_transaction($result);
+        /** accounting */
+        $this->post_account_charge($result);
         
-        DB::commit();
-        if ($result) return $result;
-        
-        throw new GeneralException(trans('exceptions.backend.charges.create_error'));
+        if ($result) {
+            DB::commit();
+            return true;
+        } 
     }
 
     /**
@@ -74,13 +74,14 @@ class ChargeRepository extends BaseRepository
         $input = array_map( 'strip_tags', $input);
         $result = $charge->update($input);
 
-        Transaction::where(['tr_ref' => $charge->id, 'tr_type' => 'chrg'])->delete();
-        $this->post_transaction($charge);
+        /** accounting */
+        $charge->transactions()->delete();
+        $this->post_account_charge($charge);
 
-        DB::commit();
-        if ($result) return true;
-
-        throw new GeneralException(trans('exceptions.backend.charges.update_error'));
+        if ($result) {
+            DB::commit();
+            return true;
+        } 
     }
 
     /**
@@ -93,45 +94,12 @@ class ChargeRepository extends BaseRepository
     public function delete(Charge $charge)
     {
         DB::beginTransaction();
-
-        Transaction::where(['tr_ref' => $charge->id, 'tr_type' => 'chrg'])->delete();
-        $result = $charge->delete();
-
-        DB::commit();
-        if ($result) return true;       
-
-        throw new GeneralException(trans('exceptions.backend.charges.delete_error'));
-    }
-
-    public function post_transaction($result)
-    {
-        // credit bank
-        $tr_category = Transactioncategory::where('code', 'chrg')->first(['id', 'code']);
-        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid');
-        $cr_data = [
-            'tid' => $tid +1,
-            'account_id' => $result->bank_id,
-            'trans_category_id' => $tr_category->id,
-            'credit' => $result['amount'],
-            'tr_date' => date('Y-m-d'),
-            'due_date' => $result['date'],
-            'user_id' => $result['user_id'],
-            'ins' => $result['ins'],
-            'tr_type' => $tr_category->code,
-            'tr_ref' => $result['id'],
-            'user_type' => 'customer',
-            'is_primary' => 1,
-            'note' => $result['note'],
-        ];
-        Transaction::create($cr_data);
-
-        // debit expense account (bank charge)
-        unset($cr_data['credit'], $cr_data['is_primary']);
-        $dr_data = array_replace($cr_data, [
-            'account_id' => $result['expense_id'],
-            'debit' => $result['amount'],
-        ]);
-        Transaction::create($dr_data);
+        $charge->transactions()->delete();
         aggregate_account_transactions();
+        $result = $charge->delete();
+        if ($result) {
+            DB::commit();
+            return true;
+        }       
     }
 }

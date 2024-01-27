@@ -3,7 +3,6 @@
 namespace App\Repositories\Focus\billpayment;
 
 use App\Exceptions\GeneralException;
-use App\Models\account\Account;
 use App\Models\billpayment\Billpayment;
 use App\Models\items\BillpaymentItem;
 use App\Models\transaction\Transaction;
@@ -11,7 +10,6 @@ use App\Repositories\Accounting;
 use App\Repositories\BaseRepository;
 use App\Repositories\CustomerSupplierBalance;
 use DB;
-use Error;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
@@ -41,73 +39,6 @@ class BillPaymentRepository extends BaseRepository
         });
         
         return $q;
-    }
-
-    /**
-     * Import Expenses from external array data
-     */
-    function expense_import_data($file_name = '') {
-        try {
-            $expense_data = [];
-
-            $file = base_path() . '/main_creditors/' . $file_name;
-            if (!file_exists($file)) return $expense_data;
-            // dd($file);
-
-            // convert csv to array
-            $export = [];
-            $csv_file = fopen($file, 'r');
-            while ($row = fgetcsv($csv_file)) $export[] = $row;
-            fclose($csv_file);
-            // dd($export);
-
-            // compatible database array
-            $import = [];
-            $headers = current($export);
-            $data_rows = array_slice($export, 1, count($export));
-            foreach ($data_rows as $i => $row) {
-                $new_row = [];
-                foreach ($row as $key => $val) {
-                    if (stripos($val, 'null') !== false) $val = null;
-                    $new_row[$headers[$key]] = $val; 
-                }
-                $import[] = $new_row;
-            }
-            // dd($import);
-
-            // expense and expense_items
-            foreach ($import as $key => $data) {
-                $is_payment = (stripos($data['status'], 'pmt') !== false);
-                if (!$is_payment) continue;
-                unset($data['id'], $data['created_at'], $data['updated_at']);
-                $data['date'] = date_for_database($data['date']);
-                // dd($data);
-
-                $account_name = current(explode(' ', $data['doc_ref_type']));
-                $account = Account::whereNull('system')
-                    ->whereHas('accountType', fn($q) =>  $q->where('system', 'bank'))
-                    ->where('holder', 'LIKE', "%{$account_name}%")->first();
-                    
-                $data = array_map(fn($v) => [
-                    'tid' => 1,
-                    'account_id' => $account? $account->id : 0,
-                    'payment_type' => 'on_account',
-                    'supplier_id' => $v['supplier_id'],
-                    'date' => $v['date'],
-                    'amount' => $v['grandttl'],
-                    'allocate_ttl' => 0,
-                    'reference' => $v['doc_ref'],
-                    'payment_mode' => 'eft',
-                    'note' => $v['note'],
-                ], [$data])[0];
-
-                $expense_data[] = $data;
-            }
-            return $expense_data;
-        } catch (\Throwable $th) {
-            $err = $th->getMessage();
-            throw new Error("{$err} on file {$file_name}");
-        }
     }
 
     /**

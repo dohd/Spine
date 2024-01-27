@@ -3,23 +3,22 @@
 namespace App\Repositories\Focus\goodsreceivenote;
 
 use App\Exceptions\GeneralException;
-use App\Models\account\Account;
 use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\items\GoodsreceivenoteItem;
 use App\Models\items\UtilityBillItem;
-use App\Models\transaction\Transaction;
-use App\Models\transactioncategory\Transactioncategory;
 use App\Models\utility_bill\UtilityBill;
+use App\Repositories\Accounting;
 use App\Repositories\BaseRepository;
 use DB;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Class ProductcategoryRepository.
+ * Class GoodsreceivenoteRepository.
  */
 class GoodsreceivenoteRepository extends BaseRepository
 {
+    use Accounting;
     /**
      * Associated Repository Model.
      */
@@ -124,9 +123,13 @@ class GoodsreceivenoteRepository extends BaseRepository
             else $result->purchaseorder->update(['status' => 'Complete']);
         } else throw ValidationException::withMessages(['Purchase order does not exist!']);
 
-        /**accounting */
-        if ($result->invoice_no) $this->generate_bill($result); // generate bill
-        else $this->post_transaction($result); 
+        /** accounting */
+        if ($result->invoice_no) {
+            $bill = $this->generate_bill($result);
+            $this->post_invoiced_grn_bill($bill);
+        } else {
+            $this->post_uninvoiced_grn($result); 
+        }
         
         if ($result) {
             DB::commit();
@@ -227,20 +230,17 @@ class GoodsreceivenoteRepository extends BaseRepository
 
         /**accounting */
         if ($goodsreceivenote->invoice_no) {
-            // generate bill
-            $this->generate_bill($goodsreceivenote); 
+            $bill = $this->generate_bill($goodsreceivenote); 
+            $this->post_invoiced_grn_bill($bill);
         } else {
-            // grn transaction
-            Transaction::where(['tr_type' => 'grn', 'tr_ref' => $goodsreceivenote->id, 'note' => $goodsreceivenote->prev_note])->delete();
-            $this->post_transaction($goodsreceivenote);
+            $goodsreceivenote->transactions()->delete();
+            $this->post_uninvoiced_grn($goodsreceivenote);
         }
 
         if ($result) {
             DB::commit();
             return $result;
         }
-        
-        throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
     /**
@@ -293,13 +293,13 @@ class GoodsreceivenoteRepository extends BaseRepository
         // clear transactions
         $goodsreceivenote->transactions()->delete();
         aggregate_account_transactions();
-          
-        if ($goodsreceivenote->delete()) {
+        $goodsreceivenote->items()->delete();
+        $result = $goodsreceivenote->delete();
+        if ($result) {
             DB::commit(); 
             return true;
         }
     }
-
 
     /**
      * Generate Bill For Goods Receive with invoice
@@ -309,6 +309,17 @@ class GoodsreceivenoteRepository extends BaseRepository
      */
     public function generate_bill($grn)
     {
+        $grn_items = $grn->items()->get()
+        ->map(fn($v) => [
+            'ref_id' => $v->id,
+            'note' => @$v->purchaseorder_item->description ?: '',
+            'qty' => $v->qty,
+            'subtotal' => $v->qty * $v->rate,
+            'tax' => $v->qty * $v->rate * ($v->tax_rate / 100),
+            'total' => $v->qty * $v->rate * (1 + $v->tax_rate / 100)
+        ])
+        ->toArray();       
+        
         $bill_data = [
             'supplier_id' => $grn->supplier_id,
             'reference' => $grn->invoice_no,
@@ -323,125 +334,27 @@ class GoodsreceivenoteRepository extends BaseRepository
             'total' => $grn->total,
             'note' => $grn->note,
         ];
-
-        $grn_items = $grn->items()->get()->map(fn($v) => [
-            'ref_id' => $v->id,
-            'note' => $v->purchaseorder_item? $v->purchaseorder_item->description : '',
-            'qty' => $v->qty,
-            'subtotal' => $v->qty * $v->rate,
-            'tax' => $v->qty * $v->rate * ($v->tax_rate / 100),
-            'total' => $v->qty * $v->rate * (1 + $v->tax_rate / 100)
-        ])->toArray();       
-        
         $bill = UtilityBill::where(['ref_id' => $grn->id, 'document_type' => 'goods_receive_note'])->first();
         if ($bill) {
-            Transaction::where(['tr_type' => 'bill', 'tr_ref' => $bill->id, 'note' => $bill->note])->delete();
             // update bill
             $bill->update($bill_data);
             foreach ($grn_items as $item) {
                 $new_item = UtilityBillItem::firstOrNew(['bill_id' => $bill->id,'ref_id' => $item['ref_id']]);
                 $new_item->fill($item);
                 $new_item->save();
-            }            
+            }       
+            $bill->transactions()->delete();     
         } else {
             // create bill
-            $bill_data['tid'] = UtilityBill::where('ins', auth()->user()->ins)->max('tid') + 1;
+            $bill_data['tid'] = UtilityBill::max('tid')+1;
             $bill = UtilityBill::create($bill_data);
-
+            // bill items
             $bill_items_data = array_map(function ($v) use($bill) {
                 $v['bill_id'] = $bill->id;
                 return $v;
             }, $grn_items);
             UtilityBillItem::insert($bill_items_data);
         }        
-        // accounting
-        $this->invoiced_grn_transaction($bill);
-    }
-
-    /**
-     * Post Goods Received With Invoice Transactions
-     */
-    public function invoiced_grn_transaction($utility_bill)
-    {
-        // debit Inventory Account
-        $account = Account::where('system', 'stock')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
-        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
-        $dr_data = [
-            'tid' => $tid,
-            'account_id' => $account->id,
-            'trans_category_id' => $tr_category->id,
-            'debit' => $utility_bill->subtotal,
-            'tr_date' => $utility_bill->date,
-            'due_date' => $utility_bill->due_date,
-            'user_id' => $utility_bill->user_id,
-            'note' => $utility_bill->note,
-            'ins' => $utility_bill->ins,
-            'tr_type' => $tr_category->code,
-            'tr_ref' => $utility_bill->id,
-            'user_type' => 'supplier',
-            'is_primary' => 1
-        ];
-        Transaction::create($dr_data);
-
-        // debit TAX
-        if ($utility_bill->tax > 0) {
-            $account = Account::where('system', 'tax')->first(['id']);
-            $cr_data = array_replace($dr_data, [
-                'account_id' => $account->id,
-                'debit' => $utility_bill->tax,
-            ]);
-            Transaction::create($cr_data);
-        }
-
-        // credit Accounts Payable (creditors)
-        unset($dr_data['debit'], $dr_data['is_primary']);
-        $account = Account::where('system', 'payable')->first(['id']);
-        $cr_data = array_replace($dr_data, [
-            'account_id' => $account->id,
-            'credit' => $utility_bill->total,
-        ]);    
-        Transaction::create($cr_data);
-        aggregate_account_transactions();
-    }
-
-    /**
-     * Post Goods Received Account transactions
-     * 
-     * @param \App\Models\goodsreceivenote\Goodsreceivenote $grn
-     * @return void
-     */
-    public function post_transaction($grn)
-    {
-        // credit Uninvoiced Goods Received Note (liability)
-        $account = Account::where('system', 'grn')->first(['id']);
-        $tr_category = Transactioncategory::where('code', 'grn')->first(['id', 'code']);
-        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
-        $cr_data = [
-            'tid' => $tid,
-            'account_id' => $account->id,
-            'trans_category_id' => $tr_category->id,
-            'credit' => $grn->subtotal,
-            'tr_date' => $grn->date,
-            'due_date' => $grn->date,
-            'user_id' => $grn->user_id,
-            'note' => $grn->note,
-            'ins' => $grn->ins,
-            'tr_type' => $tr_category->code,
-            'tr_ref' => $grn->id,
-            'user_type' => 'supplier',
-            'is_primary' => 1
-        ];
-        Transaction::create($cr_data);
-
-        // debit Inventory (Stock) Account
-        unset($cr_data['credit'], $cr_data['is_primary']);
-        $account = Account::where('system', 'stock')->first(['id']);
-        $dr_data = array_replace($cr_data, [
-            'account_id' => $account->id,
-            'debit' => $grn->subtotal,
-        ]);    
-        Transaction::create($dr_data);
-        aggregate_account_transactions();
-    }
+        return $bill;
+    }        
 }

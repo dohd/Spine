@@ -16,7 +16,7 @@ trait LoanRelationship
 
     public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'tr_ref')->where('tr_type', 'loan');
+        return $this->hasMany(Transaction::class, 'loan_id');
     }
 
     public function lender()

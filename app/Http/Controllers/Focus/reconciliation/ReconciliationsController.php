@@ -45,11 +45,11 @@ class ReconciliationsController extends Controller
      */
     public function create()
     {
-        $last_tid = Reconciliation::where('ins', auth()->user()->ins)->max('tid');
+        $last_tid = Reconciliation::max('tid');
         // banks
-        $accounts = Account::where(['account_type_id' => 6])->whereHas('transactions', function ($q) {
-            $q->where('reconciliation_id', 0);
-        })->get();
+        $accounts = Account::where('account_type_id', 6)
+        ->whereHas('transactions', fn ($q) => $q->where('reconciliation_id', 0))
+        ->get();
         
         return new ViewResponse('focus.reconciliations.create', compact('accounts', 'last_tid'));
     }

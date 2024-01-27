@@ -12,7 +12,7 @@ trait GoodsreceivenoteRelationship
 {
      public function transactions()
      {
-          return $this->hasMany(Transaction::class, 'tr_ref')->where('tr_type', 'grn');
+          return $this->hasMany(Transaction::class, 'grn_id');
      }
 
      public function bill()

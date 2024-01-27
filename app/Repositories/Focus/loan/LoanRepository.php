@@ -4,17 +4,18 @@ namespace App\Repositories\Focus\loan;
 
 use DB;
 use App\Exceptions\GeneralException;
-use App\Models\account\Account;
 use App\Models\loan\Loan;
-use App\Models\transaction\Transaction;
-use App\Models\transactioncategory\Transactioncategory;
+use App\Repositories\Accounting;
 use App\Repositories\BaseRepository;
 use Illuminate\Validation\ValidationException;
+
 /**
- * Class CustomerRepository.
+ * Class LoanRepository.
  */
 class LoanRepository extends BaseRepository
 {
+    use Accounting;
+
     /**
      * Associated Repository Model.
      */
@@ -57,8 +58,6 @@ class LoanRepository extends BaseRepository
             DB::commit();
             return $result;
         }
-
-        throw new GeneralException(trans('exceptions.backend.customers.create_error'));
     }
 
     /**
@@ -85,17 +84,15 @@ class LoanRepository extends BaseRepository
 
         if ($loan->approval_status == 'approved') {
             $loan->amount += $loan->fee; 
-
+            /** accounting */
             $loan->transactions()->delete();
-            $this->post_transaction($loan);
+            $this->post_loan_issuance($loan);
         }
 
         if ($result) {
             DB::commit();
             return $result;
         }        
-            
-        throw new GeneralException(trans('exceptions.backend.productcategories.update_error'));
     }
 
     /**
@@ -104,53 +101,11 @@ class LoanRepository extends BaseRepository
     public function delete($loan)
     {
         DB::beginTransaction();
-
         $loan->transactions()->delete();
         aggregate_account_transactions();
-        
         if ($loan->delete()) {
             DB::commit();
             return true;
         };
-    }
-
-    /**
-     * Approve loan transaction
-    */
-    public function post_transaction($loan)
-    {
-        // credit lender account (bank)
-        $tr_category = Transactioncategory::where('code', 'loan')->first(['id', 'code']);
-        $tid = Transaction::where('ins', auth()->user()->ins)->max('tid') + 1;
-        $cr_data = [
-            'tid' => $tid,
-            'account_id' => $loan->lender_id,
-            'trans_category_id' => $tr_category->id,
-            'credit' => $loan->amount,
-            'tr_date' => $loan->approval_date,
-            'due_date' => $loan->approval_date,
-            'user_id' => $loan->user_id,
-            'ins' => $loan->ins,
-            'tr_type' => $tr_category->code,
-            'tr_ref' => $loan->id,
-            'user_type' => 'employee',
-            'is_primary' => 1,
-            'note' => $loan->note,
-        ];
-        Transaction::create($cr_data);
-
-        unset($cr_data['credit'], $cr_data['is_primary']);
-        if ($loan->employee) {
-            // debit Loan Receivable
-            $account = Account::where('system', 'loan_receivable')->first();
-            $dr_data = array_replace($cr_data, [
-                'account_id' =>  $account->id,
-                'debit' => $loan->amount,
-            ]);
-            Transaction::create($dr_data);
-        } else {
-            // business loan
-        }
-        aggregate_account_transactions();    
     }
 }

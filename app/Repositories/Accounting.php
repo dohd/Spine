@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\account\Account;
 use App\Models\assetequipment\Assetequipment;
 use App\Models\invoice\Invoice;
+use App\Models\opening_stock\OpeningStock;
 use App\Models\quote\Quote;
 use App\Models\transaction\Transaction;
 use App\Models\transactioncategory\Transactioncategory;
@@ -617,4 +618,293 @@ trait Accounting
         Transaction::create($cr_data);
         aggregate_account_transactions();
     }  
+
+    /**
+     * Manual General Journal
+     * @param Journal $journal
+     */
+    public function post_gen_journal($journal)
+    {
+        $tr_category = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
+        $data = [
+            'tid' => Transaction::max('tid')+1,
+            'trans_category_id' => $tr_category->id,
+            'tr_date' => $journal->date,
+            'due_date' => $journal->date,
+            'user_id' => $journal->user_id,
+            'ins' => $journal->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $journal->id,
+            'user_type' => 'company',
+            'is_primary' => 1,
+            'note' => $journal->note,
+            'man_journal_id' => $journal->id,
+        ];
+
+        $tr_data = [];
+        foreach ($journal->items as $item) {
+            $i = count($tr_data) - 1;
+            if (isset($tr_data[$i])) {
+                if ($tr_data[$i]['is_primary'])
+                    $tr_data[$i]['is_primary'] = 0;
+            }
+            if ($item->debit > 0) {
+                $tr_data[] = array_replace($data, [
+                    'account_id' => $item->account_id,
+                    'debit' => $item->debit,
+                    'credit' => 0
+                ]);
+            } elseif ($item->credit > 0) {
+                $tr_data[] = array_replace($data, [
+                    'account_id' => $item->account_id,
+                    'credit' => $item->credit,
+                    'debit' => 0
+                ]);
+            }
+        }
+        Transaction::insert($tr_data);
+        aggregate_account_transactions();    
+    }
+
+    /**
+     * Account Charges
+     * @param Charge $charge
+     */
+    public function post_account_charge($charge)
+    {
+        // credit bank
+        $tr_category = Transactioncategory::where('code', 'chrg')->first(['id', 'code']);
+        $cr_data = [
+            'tid' => Transaction::max('tid')+1,
+            'account_id' => $charge->bank_id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $charge->amount,
+            'tr_date' => $charge->date,
+            'due_date' => $charge->date,
+            'user_id' => $charge->user_id,
+            'ins' => $charge->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $charge->id,
+            'user_type' => 'customer',
+            'is_primary' => 1,
+            'note' => $charge->note,
+            'charge_id' => $charge->id
+        ];
+        Transaction::create($cr_data);
+
+        // debit expense account (bank charge)
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $dr_data = array_replace($cr_data, [
+            'account_id' => $charge['expense_id'],
+            'debit' => $charge['amount'],
+        ]);
+        Transaction::create($dr_data);
+        aggregate_account_transactions();
+    }
+
+    /**
+     * Opening Product Stock Balance
+     * @param OpeningStock $opening_stock
+     */
+    public function post_opening_stock(OpeningStock $opening_stock)
+    {
+        // debit Inventory Account
+        $account = Account::where('system', 'stock')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'stock')->first(['id', 'code']);
+        $dr_data = [
+            'tid' => Transaction::max('tid')+1,
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'debit' => $opening_stock->total,
+            'tr_date' => $opening_stock->date,
+            'due_date' => $opening_stock->date,
+            'user_id' => $opening_stock->user_id,
+            'note' => $opening_stock->note,
+            'ins' => $opening_stock->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $opening_stock->id,
+            'user_type' => 'company',
+            'is_primary' => 1,
+            'opening_stock_id' => $opening_stock->id
+        ];
+        Transaction::create($dr_data);
+
+        // credit Retained Earnings
+        unset($dr_data['debit'], $dr_data['is_primary']);
+        $account = Account::where('system', 'retained_earning')->first(['id']);
+        $cr_data = array_replace($dr_data, [
+            'account_id' => $account->id,
+            'credit' => $opening_stock->total,
+        ]);
+        Transaction::create($cr_data);
+        aggregate_account_transactions();
+    }
+
+    /**
+     * Goods Received Without Invoice
+     * @param GoodsReceivedNote $grn
+     */
+    public function post_uninvoiced_grn($grn)
+    {
+        // credit Uninvoiced Goods Received Note (liability)
+        $account = Account::where('system', 'grn')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'grn')->first(['id', 'code']);
+        $cr_data = [
+            'tid' => Transaction::max('tid')+1,
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $grn->subtotal,
+            'tr_date' => $grn->date,
+            'due_date' => $grn->date,
+            'user_id' => $grn->user_id,
+            'note' => $grn->note,
+            'ins' => $grn->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $grn->id,
+            'user_type' => 'supplier',
+            'is_primary' => 1,
+            'supplier_id' => $grn->supplier,
+            'grn_id' => $grn->id
+        ];
+        Transaction::create($cr_data);
+
+        // debit Inventory (Stock) Account
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $account = Account::where('system', 'stock')->first(['id']);
+        $dr_data = array_replace($cr_data, [
+            'account_id' => $account->id,
+            'debit' => $grn->subtotal,
+        ]);    
+        Transaction::create($dr_data);
+        aggregate_account_transactions();
+    }
+
+    /**
+     * Goods Received With Invoice
+     * @param UtilityBill $utility_bill
+     */
+    public function post_invoiced_grn_bill($utility_bill)
+    {
+        // debit Inventory Account
+        $account = Account::where('system', 'stock')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'bill')->first(['id', 'code']);
+        $dr_data = [
+            'tid' => Transaction::max('tid')+1,
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'debit' => $utility_bill->subtotal,
+            'tr_date' => $utility_bill->date,
+            'due_date' => $utility_bill->due_date,
+            'user_id' => $utility_bill->user_id,
+            'note' => $utility_bill->note,
+            'ins' => $utility_bill->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $utility_bill->id,
+            'user_type' => 'supplier',
+            'is_primary' => 1,
+            'supplier_id' => $utility_bill->supplier_id,
+            'bill_id' => $utility_bill->id,
+        ];
+        Transaction::create($dr_data);
+
+        // debit TAX
+        if ($utility_bill->tax > 0) {
+            $account = Account::where('system', 'tax')->first(['id']);
+            $cr_data = array_replace($dr_data, [
+                'account_id' => $account->id,
+                'debit' => $utility_bill->tax,
+            ]);
+            Transaction::create($cr_data);
+        }
+
+        // credit Accounts Payable (creditors)
+        unset($dr_data['debit'], $dr_data['is_primary']);
+        $account = Account::where('system', 'payable')->first(['id']);
+        $cr_data = array_replace($dr_data, [
+            'account_id' => $account->id,
+            'credit' => $utility_bill->total,
+        ]);    
+        Transaction::create($cr_data);
+        aggregate_account_transactions();
+    }
+
+    /**
+     * Project Stock Issuance
+     * @param ProjectStock $projectstock
+     */
+    public function post_projectstock_issuance($projectstock)
+    {
+        // credit Inventory (stock) Account
+        $account = Account::where('system', 'stock')->first('id');
+        $tr_category = Transactioncategory::where('code', 'stock')->first(['id', 'code']);
+        $cr_data = [
+            'tid' => Transaction::max('tid')+1,
+            'account_id' => $account->id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $projectstock->total,
+            'tr_date' => $projectstock->date,
+            'due_date' => $projectstock->date,
+            'note' => $projectstock->note,
+            'user_id' => $projectstock->user_id,
+            'ins' => $projectstock->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $projectstock->id,
+            'user_type' => 'customer',
+            'is_primary' => 1,
+            'customer_id' => @$projectstock->quote->customer_id,
+            'projectstock_issuance_id' => $projectstock->id
+        ];
+        Transaction::create($cr_data);
+
+        // debit WIP Account
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        $account = Account::where('system', 'wip')->first('id');
+        $dr_data = array_replace($cr_data, [
+            'account_id' =>  $account->id,
+            'debit' => $projectstock['total'],
+        ]);
+        Transaction::create($dr_data);
+        aggregate_account_transactions();
+    }
+
+    /**
+     * Loan Issuance
+     * @param Loan $lost
+     */
+    public function post_loan_issuance($loan)
+    {
+        // credit lender account (bank)
+        $tr_category = Transactioncategory::where('code', 'loan')->first(['id', 'code']);
+        $cr_data = [
+            'tid' => Transaction::max('tid')+1,
+            'account_id' => $loan->lender_id,
+            'trans_category_id' => $tr_category->id,
+            'credit' => $loan->amount,
+            'tr_date' => $loan->approval_date,
+            'due_date' => $loan->approval_date,
+            'user_id' => $loan->user_id,
+            'ins' => $loan->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $loan->id,
+            'user_type' => 'employee',
+            'is_primary' => 1,
+            'note' => $loan->note,
+            'loan_id' => $loan->id,
+        ];
+        Transaction::create($cr_data);
+
+        unset($cr_data['credit'], $cr_data['is_primary']);
+        if ($loan->employee) {
+            // debit Loan Receivable
+            $account = Account::where('system', 'loan_receivable')->first();
+            $dr_data = array_replace($cr_data, [
+                'account_id' =>  $account->id,
+                'debit' => $loan->amount,
+            ]);
+            Transaction::create($dr_data);
+        } else {
+            // business loan
+        }
+        aggregate_account_transactions();    
+    }
 }
