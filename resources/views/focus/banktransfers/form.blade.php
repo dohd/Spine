@@ -6,7 +6,7 @@
                 <select name="account_id" class='form-control round' required>
                     <option value="">-- select account --</option>
                     @foreach($accounts as $row)
-                        <option value="{{ $row->id }}" {{ @$banktransfer_rel->account_id == $row->id? 'selected' : '' }}>
+                        <option value="{{ $row->id }}" {{ @$banktransfer->account_id == $row->id? 'selected' : '' }}>
                             {{ $row->holder }}
                         </option>
                     @endforeach
@@ -47,7 +47,7 @@
                 <select name="debit_account_id" class='form-control round' required>
                     <option value="">-- select account --</option>
                     @foreach($accounts as $row)
-                        <option value="{{ $row->id }}" {{ @$banktransfer->account_id == $row->id? 'selected' : '' }}>
+                        <option value="{{ $row->id }}" {{ @$banktransfer->debit_account_id == $row->id? 'selected' : '' }}>
                             {{ $row->holder }}
                         </option>
                     @endforeach
@@ -112,14 +112,12 @@
         $(this).val(accounting.formatNumber(amount));
     });
     
-    const xfer = @json(@$banktransfer);
-    if (xfer) {
-        $('.datepicker').datepicker('setDate', new Date(xfer.tr_date));
-        $('#amount').val(xfer.debit).focusout();
-
-        const note_parts = xfer.note.split(' ');
-        $('#refer_no').val(note_parts[2]);
-        $('#note').val(note_parts.splice(3).join(' '));
+    const banktransfer = @json(@$banktransfer);
+    if (banktransfer) {
+        $('.datepicker').datepicker('setDate', new Date(banktransfer.transaction_date));
+        $('#amount').val(banktransfer.amount).focusout();
+        $('#refer_no').val(banktransfer.refer_no);
+        $('#note').val(banktransfer.note);
     }
 </script>
 @endsection

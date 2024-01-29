@@ -31,10 +31,8 @@ class EditResponse implements Responsable
     public function toResponse($request)
     {
         $accounts = Account::whereHas('accountType', fn($q) => $q->where('system', 'bank'))->get(['id', 'holder']);
-        $banktransfer_rel = Banktransfer::where('tid', $this->banktransfer->tid)->where('credit', '>', 0)->first();
-        $pmt_mode = current(explode(' - ', $this->banktransfer->note));
         
-        return view('focus.banktransfers.edit', compact('banktransfer_rel', 'accounts', 'pmt_mode'))
+        return view('focus.banktransfers.edit', compact('accounts'))
             ->with([ 'banktransfer' => $this->banktransfer]);
     }
 }

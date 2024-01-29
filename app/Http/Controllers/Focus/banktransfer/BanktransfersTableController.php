@@ -52,28 +52,17 @@ class BanktransfersTableController extends Controller
     public function __invoke(ManageBanktransferRequest $request)
     {
         $core = $this->banktransfer->getForDataTable();
-        $core = $core->map(function($v, $i) use($core) {
-            if ($i && $i % 2 > 0) {
-                $credit_tr = $core[$i - 1];
-                $credit_account_holder = $credit_tr->account->holder;
-                $debit_account_holder = $v->account->holder;
-                $holder = $credit_account_holder . "<b> / </b>" . $debit_account_holder;
-                $v['holder'] = $holder;
-            }
-            return $v;
-        })->filter(fn($v) => $v['debit'] > 0);
-
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('account', function ($banktransfer) {
-                return $banktransfer->holder;
+                return @$banktransfer->source_account->holder;
             })
             ->addColumn('debit', function ($banktransfer) {
-                return amountFormat($banktransfer->debit);
+                return amountFormat($banktransfer->amount);
             })
             ->addColumn('transaction_date', function ($banktransfer) {
-                return dateFormat($banktransfer->tr_date);
+                return dateFormat($banktransfer->transaction_date);
             })
             ->addColumn('actions', function ($banktransfer) {
                 return $banktransfer->action_buttons;
