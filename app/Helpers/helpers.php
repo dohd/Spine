@@ -802,20 +802,9 @@ function aggregate_account_transactions()
 {
     $tr_totals = \App\Models\transaction\Transaction::selectRaw('account_id AS id, SUM(debit) AS debit, SUM(credit) AS credit')
         ->groupBy('account_id')
-        ->get()->toArray();
-
-    $model = new \App\Models\account\Account;
-    \Mavinoo\LaravelBatch\LaravelBatchFacade::update($model, $tr_totals, 'id');
-
-    // reset accounts without transactions
-    $account_ids = array_map(function ($v) {
-        return $v['id'];
-    }, $tr_totals);
-
-    \App\Models\account\Account::whereNotIn('id', $account_ids)
-        ->where(function ($q) {
-            $q->where('debit', '>', 0)->orWhere('credit', '>', 0);
-        })->update(['debit' => 0, 'credit' => 0]);
+        ->get()
+        ->toArray();
+    return $tr_totals;
 }
 // auto-generate a 4 digit number prefixed with a string e.g ID-0001 
 function gen4tid($prefix = '', $num = 0, $count = 4)
@@ -839,55 +828,7 @@ function accounts_numbering($account)
             return 300;
     }
 }
-// transaction double entry (debit, credit)
-function double_entry(
-    $tid,
-    $pr_account_id,
-    $sec_account_id,
-    $opening_balance,
-    $entry_type,
-    $trans_category_id,
-    $user_type,
-    $user_id,
-    $tr_date,
-    $duedate,
-    $tr_type,
-    $note,
-    $ins
-) {
-    $data = [
-        'tid' => $tid,
-        'trans_category_id' => $trans_category_id,
-        'tr_date' => $tr_date,
-        'due_date' => $duedate,
-        'user_type' => $user_type,
-        'user_id' => $user_id,
-        'tr_type' => $tr_type,
-        'note' => $note,
-        'ins' => $ins,
-    ];
-    $dr_data = $data + [
-        'account_id' => $pr_account_id,
-        'debit' => $opening_balance,
-        'tr_ref' => $pr_account_id,
-        'is_primary' => 1,
-    ];
-    $cr_data = $data + [
-        'account_id' => $sec_account_id,
-        'credit' => $opening_balance,
-        'tr_ref' => $sec_account_id,
-        'is_primary' => 0,
-    ];
-    if ($entry_type == 'cr') {
-        unset($dr_data['debit'], $cr_data['credit']);
-        $dr_data['credit'] = $opening_balance;
-        $cr_data['debit'] = $opening_balance;
-    }
-    \App\Models\transaction\Transaction::create($dr_data);
-    \App\Models\transaction\Transaction::create($cr_data);
-    aggregate_account_transactions();
-    return true;
-}
+
 // handle division by zero
 function div_num($numerator, $denominator)
 {

@@ -3,8 +3,12 @@
 namespace App\Repositories;
 
 use App\Models\account\Account;
+use App\Models\account\AccountType;
 use App\Models\assetequipment\Assetequipment;
+use App\Models\deposit\Deposit;
 use App\Models\invoice\Invoice;
+use App\Models\items\JournalItem;
+use App\Models\manualjournal\Journal;
 use App\Models\opening_stock\OpeningStock;
 use App\Models\quote\Quote;
 use App\Models\transaction\Transaction;
@@ -12,6 +16,63 @@ use App\Models\transactioncategory\Transactioncategory;
 
 trait Accounting
 {
+    /**
+     * Ledger Account Opening Balance
+     * @param object $account
+     */
+    public function post_ledger_opening_balance($manual_journal)
+    {
+        $account = Account::where('system', 'retained_earning')->first(['id']);
+        $tr_category = Transactioncategory::where('code', 'genjr')->first(['id', 'code']);
+        $tr_data = [
+            'tid' => Transaction::max('tid')+1,
+            'trans_category_id' => $tr_category->id,
+            'tr_date' => $manual_journal->date,
+            'due_date' => $manual_journal->date,
+            'user_id' => $manual_journal->user_id,
+            'note' => $manual_journal->note,
+            'ins' => $manual_journal->ins,
+            'tr_type' => $tr_category->code,
+            'tr_ref' => $manual_journal->id,
+            'user_type' => 'company',
+            'man_journal_id' => @$manual_journal->id,
+            'debit' => 0,
+            'credit' => 0,
+        ];
+
+        $account_type = @$manual_journal->ledger_account->account_type;
+        if (in_array($account_type, ['Asset', 'Expense'])) {
+            // debit [Asset | Expense] Account 
+            $dr_data = array_replace($tr_data, [
+                'account_id' => $manual_journal->account_id, 
+                'debit' => $manual_journal->opening_balance,
+                'is_primary' => 1,
+            ]);
+            Transaction::create($dr_data);
+            // credit Retained Earnings Account
+            $cr_data = array_replace($tr_data, [
+                'account_id' => $account->id, 
+                'credit' => $manual_journal->opening_balance,
+            ]);
+            Transaction::create($cr_data);
+        } else {
+            // credit "Other" Account
+            $cr_data = array_replace($tr_data, [
+                'account_id' => $manual_journal->account_id, 
+                'credit' => $manual_journal->opening_balance,
+                'is_primary' => 1,
+            ]);
+            Transaction::create($cr_data);
+            // debit Retained Earnings Account
+            $dr_data = array_replace($tr_data, [
+                'account_id' => $account->id, 
+                'credit' => $manual_journal->opening_balance,
+            ]);
+            Transaction::create($dr_data);
+        }
+        aggregate_account_transactions();
+    }
+
     /**
      * Customer Opening Balance
      * @param object $manual_journal
@@ -699,6 +760,44 @@ trait Accounting
             'debit' => $charge['amount'],
         ]);
         Transaction::create($dr_data);
+        aggregate_account_transactions();
+    }
+
+    /**
+     * Bank Transfer
+     * @param Bank $bank
+     */
+    public function post_bank_transfer($bank_transfer)
+    {
+        $tr_category = Transactioncategory::where('code', 'xfer')->first(['id', 'code']);
+        $tr_data = [
+            'tid' => Transaction::max('tid')+1,
+            'trans_category_id' => $tr_category->id,
+            'tr_date' => $bank_transfer->transaction_date,
+            'due_date' => $bank_transfer->transaction_date,
+            'user_id' => $bank_transfer->user_id,
+            'note' => $bank_transfer->note,
+            'ins' => $bank_transfer->ins,
+            'tr_type' => $tr_category->code,
+            'user_type' => 'employee',
+            'bank_transfer_id' => $bank_transfer->id,
+        ];
+
+        // debit Asset Account (Recipient)
+        $dr_data = array_replace($tr_data, [
+            'account_id' => $bank_transfer->debit_account_id ,
+            'debit' => $bank_transfer->amount,
+            'is_primary' => 1,
+        ]);
+        Transaction::create($dr_data);
+
+        // credit Asset Account (Source)
+        unset($tr_data['is_primary']);
+        $cr_data = array_replace($tr_data, [
+            'account_id' => $bank_transfer->account_id,
+            'credit' => $bank_transfer->amount,
+        ]);
+        Transaction::create($cr_data);
         aggregate_account_transactions();
     }
 

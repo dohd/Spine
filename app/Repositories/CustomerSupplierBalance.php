@@ -13,7 +13,6 @@ use App\Models\items\InvoicePaymentItem;
 use App\Models\items\JournalItem;
 use App\Models\manualjournal\Journal;
 use App\Models\supplier\Supplier;
-use App\Models\transaction\Transaction;
 use App\Models\utility_bill\UtilityBill;
 use App\Models\withholding\Withholding;
 
@@ -68,72 +67,30 @@ trait CustomerSupplierBalance
         } else {
             // update journal
             $journal = Journal::where('customer_id', $customer->id)->first();
-            if ($journal) {
-                $invoice = Invoice::where('man_journal_id', $journal->id)->first();
-                if ($invoice) {
-                    $invoice->update([
-                        'notes' => $customer->open_balance_note, 
-                        'subtotal' => $open_balance, 
-                        'total' => $open_balance,
-                    ]);   
-                }
-                // update manual journal
-                $journal->update([
-                    'note' => $customer->open_balance_note,
-                    'date' => $open_balance_date,
-                    'debit_ttl' => $open_balance,
-                    'credit_ttl' => $open_balance,
-                ]);
-                foreach ($journal->items as $item) {
-                    if ($item->debit > 0) $item->update(['debit' => $open_balance]);
-                    elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
-                }
-                $debtor_account = Account::where('system', 'receivable')->first(['id']); 
-                $tr_data = array_replace($journal->toArray(), [
-                    'open_balance' => $open_balance,
-                    'account_id' => $debtor_account->id,
-                ]);
-                Transaction::where('man_journal_id', $journal->id)->delete();
-            } else {
-                // create manual journal
-                $journal = Journal::create([
-                    'tid' => Journal::max('tid') + 1,
-                    'date' => $open_balance_date,
-                    'note' => $customer->open_balance_note,
-                    'debit_ttl' => $open_balance,
-                    'credit_ttl' => $open_balance,
-                    'ins' => $customer->ins,
-                    'user_id' => $customer->user_id,
-                    'customer_id' => @$customer->id,
-                ]);
-                $debtor_account = Account::where('system', 'receivable')->first(['id']);
-                foreach ([1,2] as $v) {
-                    $data = ['journal_id' => $journal->id,'account_id' => $debtor_account->id];
-                    if ($v == 1) {
-                        $data['debit'] = $open_balance;
-                    } else {
-                        $balance_account = Account::where('system', 'retained_earning')->first(['id']);
-                        $data['account_id'] = $balance_account->id;
-                        $data['credit'] = $open_balance;
-                    }   
-                    JournalItem::create($data);
-                }
-                Invoice::create([
-                    'invoicedate' => $open_balance_date,
-                    'invoiceduedate' => $open_balance_date,
-                    'subtotal' => $open_balance,
+            if (!$journal) return $this->customer_opening_balance($customer, 'create');
+
+            $invoice = Invoice::where('man_journal_id', $journal->id)->first();
+            if ($invoice) {
+                $invoice->update([
+                    'notes' => $customer->open_balance_note, 
+                    'subtotal' => $open_balance, 
                     'total' => $open_balance,
-                    'notes' => $customer->open_balance_note,
-                    'customer_id' => $customer->id,
-                    'user_id' => $customer->user_id,
-                    'ins' => $customer->ins,
-                    'man_journal_id' => $journal->id,
-                ]);
-                $tr_data = array_replace($journal->toArray(), [
-                    'open_balance' => $open_balance,
-                    'account_id' => $debtor_account->id
-                ]);
+                ]);   
             }
+            // update manual journal
+            $journal->update([
+                'note' => $customer->open_balance_note,
+                'date' => $open_balance_date,
+                'debit_ttl' => $open_balance,
+                'credit_ttl' => $open_balance,
+            ]);
+            foreach ($journal->items as $item) {
+                if ($item->debit > 0) $item->update(['debit' => $open_balance]);
+                elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
+            }
+            $debtor_account = Account::where('system', 'receivable')->first(['id']); 
+            $tr_data = array_replace($journal->toArray(), ['open_balance' => $open_balance,'account_id' => $debtor_account->id]);
+            $journal->transactions()->delete();
         }
         return $tr_data;
     }
@@ -188,81 +145,39 @@ trait CustomerSupplierBalance
         } else {
             // update journal
             $journal = Journal::where('supplier_id', $supplier->id)->first();
-            if ($journal) {
-                $bill = UtilityBill::where('man_journal_id', $journal->id)->first();
-                if ($bill) {
-                    $bill->update([
-                        'date' => $open_balance_date,
-                        'due_date' => $open_balance_date,
-                        'subtotal' => $open_balance,
-                        'total' => $open_balance,
-                        'note' => $supplier->open_balance_note,
-                    ]);   
-                    if ($bill->item) {
-                        $bill->item->update([
-                            'subtotal' => $open_balance,
-                            'total' => $open_balance,
-                            'note' => $supplier->open_balance_note,
-                        ]);
-                    } 
-                }
-                // update manual journal
-                $journal->update([
-                    'note' => $supplier->open_balance_note,
-                    'date' => $open_balance_date,
-                    'debit_ttl' => $open_balance,
-                    'credit_ttl' => $open_balance,
-                ]);
-                foreach ($journal->items as $item) {
-                    if ($item->debit > 0) $item->update(['debit' => $open_balance]);
-                    elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
-                }
-                $creditor_account = Account::where('system', 'payable')->first(['id']); 
-                $tr_data = array_replace($journal->toArray(), [
-                    'open_balance' => $open_balance,
-                    'account_id' => $creditor_account->id,
-                ]);
-                Transaction::where('man_journal_id', $journal->id)->delete();
-            } else {
-                // create manual journal
-                $journal = Journal::create([
-                    'tid' => Journal::max('tid')+1,
-                    'date' => $open_balance_date,
-                    'note' => $supplier->open_balance_note,
-                    'debit_ttl' => $open_balance,
-                    'credit_ttl' => $open_balance,
-                    'ins' => $supplier->ins,
-                    'user_id' => $supplier->user_id,
-                    'supplier_id' => $supplier->id,
-                ]);
-                $creditor_account = Account::where('system', 'payable')->first(['id']);
-                foreach ([1,2] as $v) {
-                    $data = ['journal_id' => $journal->id,'account_id' => $creditor_account->id];
-                    if ($v == 1) {
-                        $data['credit'] = $open_balance;
-                    } else {
-                        $balance_account = Account::where('system', 'retained_earning')->first(['id']);
-                        $data['account_id'] = $balance_account->id;
-                        $data['debit'] = $open_balance;
-                    }   
-                    JournalItem::create($data);
-                }
-                $bill = UtilityBill::create([
-                    'supplier_id' => $supplier->id,
-                    'document_type' => 'opening_balance',
+            if (!$journal) return $this->supplier_opening_balance($supplier, 'create');
+            
+            $bill = UtilityBill::where('man_journal_id', $journal->id)->first();
+            if ($bill) {
+                $bill->update([
                     'date' => $open_balance_date,
                     'due_date' => $open_balance_date,
                     'subtotal' => $open_balance,
                     'total' => $open_balance,
                     'note' => $supplier->open_balance_note,
-                    'user_id' => $supplier->user_id,
-                    'ins' => $supplier->ins,                
-                ]);
-                $tr_data = array_replace($journal->toArray(), [
-                    'open_balance' => $open_balance,
-                    'account_id' => $creditor_account->id
-                ]);
+                ]);   
+                if ($bill->item) {
+                    $bill->item->update([
+                        'subtotal' => $open_balance,
+                        'total' => $open_balance,
+                        'note' => $supplier->open_balance_note,
+                    ]);
+                } 
             }
+            // update manual journal
+            $journal->update([
+                'note' => $supplier->open_balance_note,
+                'date' => $open_balance_date,
+                'debit_ttl' => $open_balance,
+                'credit_ttl' => $open_balance,
+            ]);
+            foreach ($journal->items as $item) {
+                if ($item->debit > 0) $item->update(['debit' => $open_balance]);
+                elseif ($item->credit > 0) $item->update(['credit' => $open_balance]);
+            }
+            $creditor_account = Account::where('system', 'payable')->first(['id']); 
+            $tr_data = array_replace($journal->toArray(), ['open_balance' => $open_balance,'account_id' => $creditor_account->id]);
+            $journal->transacions()->delete();
         }
         return $tr_data;
     }
