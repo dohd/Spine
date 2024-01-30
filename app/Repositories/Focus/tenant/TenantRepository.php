@@ -60,7 +60,7 @@ class TenantRepository extends BaseRepository
             'maintenance_cost' => numberClean($package_data['maintenance_cost']),
             'extras_cost' => numberClean($package_data['extras_cost']),
             'total_cost' => numberClean($package_data['total_cost']),
-            'due_date' => (new Carbon(date('Y-m-d')))->addYear()->format('Y-m-d'),
+            'due_date' => (new Carbon(date('Y-m-d')))->addMonths(@$package_data['subscr_term'])->format('Y-m-d'),
         ]);
         unset($package_data['package_item_id']);
         $tenant_package = TenantPackage::create($package_data);
@@ -103,7 +103,7 @@ class TenantRepository extends BaseRepository
                 'maintenance_cost' => numberClean($package_data['maintenance_cost']),
                 'extras_cost' => numberClean($package_data['extras_cost']),
                 'total_cost' => numberClean($package_data['total_cost']),
-                'due_date' => (new Carbon(date('Y-m-d')))->addYear()->format('Y-m-d'),
+                'due_date' => (new Carbon(date('Y-m-d')))->addMonths(@$package_data['subscr_term'])->format('Y-m-d'),
             ]);
             unset($package_data['package_item_id']);
             $tenant_package->update($package_data);
@@ -138,6 +138,7 @@ class TenantRepository extends BaseRepository
             $package()->delete();
         }
         $result = $tenant->delete();
+        
         if ($result) {
             DB::commit();
             return true;
