@@ -1,13 +1,17 @@
 <div class="row">
     <div class="col-6">
-        <div class="card rounded pb-2">
-            <div class="card-content">
+        <div class="card rounded pb-5">
+            <div class="card-content pb-5">
                 <div class="card-body">
                     <h6 class="mb-2">Business Info</h6>
                     <div class='form-group'>
                         {{ Form::label('customer', 'Search Business', ['class' => 'col control-label']) }}
                         <div class='col'>
-                            <select id="customer" data-placeholder="Search Business"></select>
+                            <select name="customer_id" id="customer"  data-placeholder="Search Business">
+                                @if (isset($tenant->package->customer))
+                                    <option selected value="{{ @$tenant->package->customer_id }}">{{ $tenant->package->customer->company }}</option>
+                                @endif
+                            </select>
                         </div>
                     </div>
                     <div class="form-group">
@@ -59,63 +63,13 @@
         </div>
     </div>
 
-    {{-- User Info --}}
-    <div class="col-6">
-        <div class="card rounded">
-            <div class="card-content">
-                <div class="card-body">
-                    <h6 class="mb-2">User Info</h6>
-                    <div class='form-group'>
-                        {{ Form::label('first_name', 'First Name', ['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::text('first_name', @$user->first_name, ['class' => 'form-control box-size', 'placeholder' => 'First Name', 'required' => 'required']) }}
-                        </div>
-                    </div>
-                    <div class='form-group'>
-                        {{ Form::label('last_name', 'Last Name', ['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::text('last_name', @$user->last_name, ['class' => 'form-control box-size', 'placeholder' => 'Last Name', 'required' => 'required']) }}
-                        </div>
-                    </div>
-                    <div class='form-group'>
-                        {{ Form::label('user_email', 'User Email', ['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::text('user_email', @$user->email, ['class' => 'form-control box-size', 'placeholder' => 'User Email', 'required' => 'required']) }}
-                        </div>
-                    </div>
-                    <div class='form-group'>
-                        {{ Form::label('password', 'Password', ['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::password('password', ['class' => 'form-control box-size', 'placeholder' => 'Password', 'id' => 'password', 'required' => 'required']) }}
-                        </div>
-                    </div>
-                    <div class='form-group'>
-                        {{ Form::label('confirm_password', 'Confirm Password', ['class' => 'col control-label']) }}
-                        <div class='col'>
-                            {{ Form::password('confirm_password', ['class' => 'form-control box-size', 'placeholder' => 'Confirm Password', 'id' => 'confirm_password', 'required' => 'required']) }}
-                            <label for="password_match" class="text-danger d-none">Password does not match !</label>
-                        </div>
-                    </div>
-                    <div class="ml-2 password-condition">
-                        <h4>Password must have:</h4>
-                        <h5 class="text-danger"><i class="fa fa-check" aria-hidden="true"></i> At least 6 Characters</h5>
-                        <h5 class="text-danger"><i class="fa fa-check" aria-hidden="true"></i> Contain Upper and Lowercase letters</h5>
-                        <h5 class="text-danger"><i class="fa fa-check" aria-hidden="true"></i> At least one number</h5>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- Package Info --}}
-<div class="row">
-    <div class="col-12">
+    {{-- Package Info --}}
+    <div class="col-6 pl-0">
         <div class="card rounded">
             <div class="card-content">
                 <div class="card-body">
                     <div class="row mb-1">
-                        <div class="col-6">
+                        <div class="col-12">
                             <h6 class="mb-2">Package Info</h6>
                             <div class="row">
                                 <div class="col-12">
@@ -144,6 +98,21 @@
                                         </div>
                                     </div>
                                     <div class='form-group'>
+                                        {{ Form::label('subscr_term', 'Subscription Term', ['class' => 'col control-label']) }}
+                                        <div class='col'>
+                                            @php
+                                                $terms = ['12' => 'ANNUALLY', '6' => '6 MONTHS', '3' => '3 MONTHS'];
+                                            @endphp
+                                            <select name="subscr_term" id="subscr_term" class="custom-select">
+                                                @foreach ($terms as $key => $value)
+                                                    <option value="{{ $key }}" {{ @$tenant->package->subscr_term == $key ? 'selected' : '' }}>
+                                                        {{ $value }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
                                         {{ Form::label('maintenance_cost', 'Maintenance Cost', ['class' => 'col control-label']) }}
                                         <div class='col'>
                                             {{ Form::text('maintenance_cost', null, ['class' => 'form-control box-size', 'placeholder' => 'Maintenance Cost', 'id' => 'maintenance_cost', 'readonly' => 'readonly']) }}
@@ -152,16 +121,16 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-12">
                             <h6 class="mb-4 ml-1">Package Extras</h6>
                             <div class="table-responsive">
                                 <table class="table table-flush-spacing">
                                     <thead>
                                         <tr>
                                             <th>Module</th>
-                                            <th>Cost</th>
-                                            <th>Maintenance</th>
-                                            <th>Check</th>
+                                            <th>Pkg Cost</th>
+                                            <th>Mtn Cost.</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -238,35 +207,8 @@
             $('#country').val(data.country);
             $('#email').val(data.email);
             $('#phone').val(data.phone);
-        } else {
-            ['cname', 'country', 'email', 'phone'].forEach(v => $('#'+v).val(''));
-        }
-    });
-
-    $('#password').on('keyup', function() {
-        const div = $('.password-condition');
-       if (this.value.length >= 6) {
-        div.find('h5:first').removeClass('text-danger').addClass('text-success');
-       } else {
-        div.find('h5:first').removeClass('text-success').addClass('text-danger');
-       }
-       if (new RegExp("[a-z][A-Z]|[A-Z][a-z]").test(this.value)) {
-        div.find('h5:eq(1)').removeClass('text-danger').addClass('text-success');
-       } else {
-        div.find('h5:eq(1)').removeClass('text-success').addClass('text-danger');
-       }
-       if (new RegExp("[0-9]").test(this.value)) {
-        div.find('h5:last').removeClass('text-danger').addClass('text-success');
-       } else {
-        div.find('h5:last').removeClass('text-success').addClass('text-danger');
-       }
-    });
-    $('#confirm_password').on('keyup', function() {
-        if (this.value != $('#password').val()) {
-            $(this).next().removeClass('d-none');
-        } else {
-            $(this).next().addClass('d-none');
-        }
+        } 
+        else ['cname', 'country', 'email', 'phone'].forEach(v => $('#'+v).val(''));
     });
 
     $('#package').change(function() {
@@ -322,31 +264,11 @@
     }
 
     const tenant = @json(@$tenant);
-    $('#tenantForm').submit(function(e) {
-        const mustHaveErrElem = $('#password').parents('.card').find('h5.text-danger');
-        const mismatchErrElem = $('#password').parents('.card').find('label.d-none');
-        if (tenant) {
-            if ($('#password').val() || $('#confirm_password').val()) {
-                if (mustHaveErrElem.length || !mismatchErrElem.length) {
-                    e.preventDefault();
-                    return swal('Check errors on the password fields!');
-                }
-            }
-        } else {
-            if (mustHaveErrElem.length || !mismatchErrElem.length) {
-                e.preventDefault();
-                return swal('Check errors on the password fields!');
-            }
-        }
-    });
-
     /** Edit Mode */
     if (tenant) {
-        if (tenant.package) {
-            $('.datepicker').datepicker('setDate', new Date(tenant.package.date));
-        }
-        $('#password').attr('required', false);
-        $('#confirm_password').attr('required', false);
+        const date = tenant?.package.date
+        if (date) $('.datepicker').datepicker('setDate', new Date(date));
+
         let package_items = @json(@$tenant->package->items);
         if (package_items) {
             package_items = package_items.map(v => v.package_item_id);

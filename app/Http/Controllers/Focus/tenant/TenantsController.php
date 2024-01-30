@@ -87,13 +87,10 @@ class TenantsController extends Controller
             'postbox' => 'required',
             'email' => 'required',
             'phone' => 'required',
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'user_email' => 'required',
-            'password' => 'required',
             'package_id' => 'required',
             'maintenance_cost' => 'required',
             'date' => 'required',
+            'subscr_term' => 'required',
         ]);
 
         try {
@@ -133,17 +130,15 @@ class TenantsController extends Controller
             'postbox' => 'required',
             'email' => 'required',
             'phone' => 'required',
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'user_email' => 'required',
             'package_id' => 'required',
             'maintenance_cost' => 'required',
             'date' => 'required',
+            'subscr_term' => 'required'
         ]);
 
         try {
             $this->repository->update($tenant, $request->except(['_token']));
-        } catch (\Throwable $th) { dd($th);
+        } catch (\Throwable $th) {
             return errorHandler('Error Updating Account!', $th);
         }
         

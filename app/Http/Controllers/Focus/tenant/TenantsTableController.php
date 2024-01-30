@@ -54,7 +54,7 @@ class TenantsTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('tid', function ($tenant) {
-                return gen4tid('CL-', $tenant->tid);
+                return gen4tid('SP-', $tenant->tid);
             })
             ->editColumn('status', function ($tenant) {
                 $variant = 'badge-secondary';

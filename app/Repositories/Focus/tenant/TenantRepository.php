@@ -32,8 +32,7 @@ class TenantRepository extends BaseRepository
     public function getForDataTable()
     {
 
-        $q = $this->query();
-        $q->where('id', '>', 1);
+        $q = $this->query()->where('id', '>', 1);
 
         return $q->get();
     }
@@ -49,9 +48,8 @@ class TenantRepository extends BaseRepository
     {   
         DB::beginTransaction();
 
-        $user_data = Arr::only($input, ['first_name', 'last_name', 'user_email', 'password', 'confirm_password']);
-        $package_data = Arr::only($input, ['date', 'package_id', 'cost', 'maintenance_cost', 'extras_cost', 'total_cost', 'package_item_id']);
-        $tenant_data = array_diff_key($input, array_merge($user_data, $package_data));
+        $package_data = Arr::only($input, ['customer_id', 'subscr_term', 'date', 'package_id', 'cost', 'maintenance_cost', 'extras_cost', 'total_cost', 'package_item_id']);
+        $tenant_data = array_diff_key($input, $package_data);
 
         $tenant = Tenant::create($tenant_data);
 
@@ -62,7 +60,6 @@ class TenantRepository extends BaseRepository
             'maintenance_cost' => numberClean($package_data['maintenance_cost']),
             'extras_cost' => numberClean($package_data['extras_cost']),
             'total_cost' => numberClean($package_data['total_cost']),
-            'date' => date('Y-m-d'),
             'due_date' => (new Carbon(date('Y-m-d')))->addYear()->format('Y-m-d'),
         ]);
         unset($package_data['package_item_id']);
@@ -76,20 +73,6 @@ class TenantRepository extends BaseRepository
             ];
         }
         TenantPackageItem::insert($input['package_item_id']);
-
-        $user_data = array_replace($user_data, [
-            'email' => $user_data['user_email'],
-            'username' => Str::random(4),
-            'confirmed' => 1,
-            'ins' => $tenant->id,
-            'created_by' => auth()->user()->id,
-        ]);
-        unset($user_data['user_email'],$user_data['confirm_password']);
-        $hrm = Hrm::create($user_data);
-        // assign business owner role and permissions
-        RoleUser::create(['user_id' => $hrm->id, 'role_id' => 2]);
-        $permissions = PermissionRole::select('permission_id')->distinct()->where('role_id', 2)->pluck('permission_id');
-        $hrm->permissions()->attach($permissions->toArray());
 
         DB::commit();
         return $tenant;
@@ -107,9 +90,8 @@ class TenantRepository extends BaseRepository
     {
         DB::beginTransaction();
 
-        $user_data = Arr::only($input, ['first_name', 'last_name', 'user_email', 'password', 'confirm_password']);
-        $package_data = Arr::only($input, ['date', 'package_id', 'cost', 'maintenance_cost', 'extras_cost', 'total_cost', 'package_item_id']);
-        $tenant_data = array_diff_key($input, array_merge($user_data, $package_data));
+        $package_data = Arr::only($input, ['customer_id', 'subscr_term', 'date', 'package_id', 'cost', 'maintenance_cost', 'extras_cost', 'total_cost', 'package_item_id']);
+        $tenant_data = array_diff_key($input, $package_data);
         
         $tenant->update($tenant_data);
 
@@ -121,7 +103,6 @@ class TenantRepository extends BaseRepository
                 'maintenance_cost' => numberClean($package_data['maintenance_cost']),
                 'extras_cost' => numberClean($package_data['extras_cost']),
                 'total_cost' => numberClean($package_data['total_cost']),
-                'date' => date('Y-m-d'),
                 'due_date' => (new Carbon(date('Y-m-d')))->addYear()->format('Y-m-d'),
             ]);
             unset($package_data['package_item_id']);
@@ -137,29 +118,6 @@ class TenantRepository extends BaseRepository
             TenantPackageItem::insert($input['package_item_id']);
         }
 
-        $hrm = User::where('ins', $tenant->id)->where('created_at', $tenant->created_at)->first();
-        if ($hrm) {
-            if (empty($user_data['password'])) unset($user_data['password']);
-            $user_data['updated_by'] = auth()->user()->id;
-            $hrm->update($user_data);
-        } else {
-            $user_data = array_replace($user_data, [
-                'email' => $user_data['user_email'],
-                'username' => Str::random(4),
-                'confirmed' => 1,
-                'ins' => $tenant->id,
-                'created_by' => auth()->user()->id,
-                'updated_by' => auth()->user()->id,
-            ]);
-            unset($user_data['user_email'],$user_data['confirm_password']);
-            $hrm = Hrm::create($user_data);
-        }
-        
-        // assign business owner role and permissions
-        RoleUser::create(['user_id' => $hrm->id, 'role_id' => 2]);
-        $permissions = PermissionRole::select('permission_id')->distinct()->where('role_id', 2)->pluck('permission_id')->toArray();
-        $hrm->permissions()->sync($permissions);
-
         DB::commit();
         return true;
     }
@@ -173,6 +131,16 @@ class TenantRepository extends BaseRepository
      */
     public function delete(Tenant $tenant)
     {
-        return $tenant->delete();
+        DB::beginTransaction();
+        $package = $tenant->package;
+        if ($package) {
+            $package->items()->delete();
+            $package()->delete();
+        }
+        $result = $tenant->delete();
+        if ($result) {
+            DB::commit();
+            return true;
+        }
     }
 }
