@@ -34,7 +34,9 @@ class ClientProductsController extends Controller
      */
     public function index()
     {
-        $customers = Customer::whereHas('client_products')->get(['id', 'company']);
+        $customer_id = auth()->user()->customer_id;
+        $customers = Customer::when($customer_id, fn($q) => $q->where('id', $customer_id))
+        ->whereHas('client_products')->get(['id', 'company']);
         $contracts = ClientProduct::get(['contract', 'customer_id'])->unique('contract');
         $contracts = [...$contracts];
 

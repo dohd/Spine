@@ -34,7 +34,9 @@ class PriceListsController extends Controller
      */
     public function index()
     {
-        $suppliers = Supplier::whereHas('supplier_products')->get(['id', 'company']);
+        $supplier_id = auth()->user()->supplier_id;
+        $suppliers = Supplier::when($supplier_id, fn ($q) => $q->where('id', $supplier_id))
+        ->whereHas('supplier_products')->get(['id', 'company']);
         $contracts = SupplierProduct::get(['contract', 'supplier_id'])->unique('contract');
         $contracts = [...$contracts];
 
