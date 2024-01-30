@@ -24,12 +24,6 @@
                                     {{ Form::text('maintenance_cost', null, ['class' => 'form-control box-size', 'placeholder' => 'Maintenance Cost', 'id' => 'maintenance_cost', 'required' => 'required']) }}
                                 </div>
                             </div>
-                            <div class='form-group'>
-                                {{ Form::label('maintenance_term', 'Maintenance Term (Months)', ['class' => 'col control-label']) }}
-                                <div class='col'>
-                                    {{ Form::text('maintenance_term', 12, ['class' => 'form-control box-size', 'placeholder' => 'Maintenance Term', 'id' => 'maintenance_term', 'required' => 'required']) }}
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -42,7 +36,7 @@
 <div class="card rounded">
     <div class="card-content">
         <div class="card-body">
-            <h5 class="ml-1">Select Modules</h5>
+            <h5 class="ml-1">Active Modules</h5>
             <div class="table-responsive">
                 <table class="table table-flush-spacing" id="modulesTbl">
                     <tbody>
@@ -77,12 +71,6 @@
                 <div class="row mb-2">
                     <div class="col-12">
                         <h6 class="mb-2 ml-1">Package Extras</h6>
-                        <div class='form-group mb-2'>
-                            {{ Form::label('extras_term', 'Package Extras Term (Months)', ['class' => 'col control-label']) }}
-                            <div class='col'>
-                                {{ Form::text('extras_term', 12, ['class' => 'form-control box-size', 'placeholder' => 'Package Extras Term', 'id' => 'extras_term']) }}
-                            </div>
-                        </div>
                         <div class="row">
                             <div class="col-md-10 ml-auto mr-auto">
                                 <div class="table-responsive">
@@ -91,9 +79,9 @@
                                             @foreach ($package_extras as $package)
                                                 <tr>
                                                     <td class="text-nowrap fw-bolder">{{ $package->name }}</td>
-                                                    <td><input type="text" class="form-control col-10 pb-0 pt-0 extra-cost" placeholder="Cost" name="extra_cost[]" value="{{ $package->extra_cost }}"></td>
-                                                    <td><input type="text" class="form-control col-10 pb-0 pt-0 maint-cost" placeholder="Maintenance Cost" name="maint_cost[]" value="{{ $package->maint_cost }}"></td>
                                                     <td><input type="checkbox" class="form-check-input select" name="package_id[]" value="{{ $package->id }}" {{ $package->checked }}></td>
+                                                    <td><input type="text" class="form-control col-10 pb-0 pt-0 extra-cost" placeholder="Package Cost" name="extra_cost[]" value="{{ $package->extra_cost }}"></td>
+                                                    <td><input type="text" class="form-control col-10 pb-0 pt-0 maint-cost" placeholder="Maintenance Cost" name="maint_cost[]" value="{{ $package->maint_cost }}"></td>
                                                 </tr>
                                             @endforeach
                                         </tbody>

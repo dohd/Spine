@@ -81,7 +81,6 @@ class TenantServicesController extends Controller
             'name' => 'required',
             'cost' => 'required',
             'maintenance_cost' => 'required',
-            'maintenance_term' => 'required',
         ]);
 
         try {
@@ -126,7 +125,6 @@ class TenantServicesController extends Controller
             'name' => 'required',
             'cost' => 'required',
             'maintenance_cost' => 'required',
-            'maintenance_term' => 'required',
         ]);
         if (!$request->module_id) return errorHandler('Selected modules are required!');
         

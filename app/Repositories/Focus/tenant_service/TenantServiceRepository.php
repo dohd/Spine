@@ -45,7 +45,7 @@ class TenantServiceRepository extends BaseRepository
         DB::beginTransaction();
 
         foreach ($input as $key => $value) {
-            $keys = ['cost', 'maintenance_cost', 'total_cost', 'extras_total', 'maintenance_term', 'extras_term', 'extra_cost', 'maint_cost'];
+            $keys = ['cost', 'maintenance_cost', 'total_cost', 'extras_total', 'extra_cost', 'maint_cost'];
             if (in_array($key, $keys)) {
                 if (is_array($value)) {
                     $input[$key] = array_map(fn($v) => numberClean($v), $value);
@@ -83,7 +83,7 @@ class TenantServiceRepository extends BaseRepository
         DB::beginTransaction();
         
         foreach ($input as $key => $value) {
-            $keys = ['cost', 'maintenance_cost', 'total_cost', 'extras_total', 'maintenance_term', 'extras_term', 'extra_cost', 'maint_cost'];
+            $keys = ['cost', 'maintenance_cost', 'total_cost', 'extras_total', 'extra_cost', 'maint_cost'];
             if (in_array($key, $keys)) {
                 if (is_array($value)) {
                     $input[$key] = array_map(fn($v) => numberClean($v), $value);
