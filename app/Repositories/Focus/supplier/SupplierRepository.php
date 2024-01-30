@@ -98,19 +98,19 @@ class SupplierRepository extends BaseRepository
         $account_data = $input['account_data'];
         $data['open_balance'] = numberClean($account_data['open_balance']);
         $data['open_balance_date'] = date_for_database($account_data['open_balance_date']);
-        $result = Supplier::create($data);
+        $supplier = Supplier::create($data);
 
         // opening balance
-        if ($result->open_balance > 0) {
-            $tr_data = $this->supplier_opening_balance($result, 'create'); 
+        if ($supplier->open_balance > 0) {
+            $tr_data = $this->supplier_opening_balance($supplier, 'create'); 
             $this->post_supplier_opening_balance((object) $tr_data); 
         }
         // supplier authorize
-        $this->createAuth($result, $input['user_data'], 'supplier');
+        $this->createAuth($supplier, $input['user_data'], 'supplier');
 
-        if ($result) {
+        if ($supplier) {
             DB::commit();
-            return $result;
+            return $supplier;
         }
     }
 
@@ -155,7 +155,6 @@ class SupplierRepository extends BaseRepository
             'open_balance' => numberClean($account_data['open_balance']),
             'open_balance_date' => date_for_database($account_data['open_balance_date']),
             'open_balance_note' => $account_data['open_balance_note'],
-            'expense_account_id' => $account_data['expense_account_id'],
         ]);
         $result = $supplier->update($data);
 
@@ -164,18 +163,20 @@ class SupplierRepository extends BaseRepository
             $tr_data = $this->supplier_opening_balance($supplier, 'update'); 
             $this->post_supplier_opening_balance((object) $tr_data);    
         } else {
-            $journal = Journal::where('supplier_id', $supplier->id)->first();
-            $bill = UtilityBill::where('man_journal_id', @$journal->id)->first();
-            Transaction::where('man_journal_id', @$journal->id)->delete();
-            if ($bill && $bill->payments()->exists()) {
-                foreach ($bill->payments as $key => $item) {
-                    $tids[] = @$item->bill_payment->tid ?: '';
+            $journal = $supplier->journal;
+            if ($journal) {
+                $bill = $journal->bill;
+                if ($bill && $bill->payments()->exists()) {
+                    foreach ($bill->payments as $key => $item) {
+                        $tids[] = @$item->bill_payment->tid ?: '';
+                    }
+                    throw ValidationException::withMessages(['Supplier has attached Payments with Nos.: ('.implode(', ', $tids).')']);                 
+                } elseif ($bill) {
+                    $bill->delete();
                 }
-                throw ValidationException::withMessages(['Please delete associated payments: ('.implode(', ', $tids).')']);                 
-            } elseif ($bill) {
-                $bill->delete();
+                $journal->transactions()->delete();
+                $journal->delete();
             }
-            if ($journal) $journal->delete();
         }
 
         // supplier authorization

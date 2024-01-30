@@ -6,6 +6,7 @@ use App\Models\Access\User\User;
 use App\Models\creditnote\CreditNote;
 use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\items\PaidbillItem;
+use App\Models\manualjournal\Journal;
 use App\Models\purchaseorder\Purchaseorder;
 use App\Models\purchase\Purchase;
 use App\Models\utility_bill\UtilityBill;
@@ -16,6 +17,11 @@ use App\Models\supplier_product\SupplierProduct;
  */
 trait SupplierRelationship
 {
+    public function journal()
+    {
+        return $this->hasOne(Journal::class);
+    }
+
     public function user()
     {
         return $this->hasOne(User::class, 'supplier_id');

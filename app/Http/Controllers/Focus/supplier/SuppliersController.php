@@ -82,7 +82,17 @@ class SuppliersController extends Controller
      */
     public function store(StoreSupplierRequest $request)
     {
-        // extract request input
+        $request->validate([
+            'password' => request('password') ? 'required_with:user_email | min:7' : '',
+            'password_confirmation' => 'required_with:password | same:password'
+        ]);
+        if (request('password')) {
+            if (!preg_match("/[a-z][A-Z]|[A-Z][a-z]/i", $request->password)) 
+                throw ValidationException::withMessages(['password' => 'Password Must Contain Upper and Lowercase letters']);
+            if (!preg_match("/[0-9]/i", $request->password)) 
+                throw ValidationException::withMessages(['password' => 'Password Must Contain At Least One Number']);
+        }
+
         $data = $request->only([
             'name', 'phone', 'email', 'address', 'city', 'region', 'country', 'postbox', 'email', 'picture',
             'company', 'taxid', 'docid', 'custom1', 'employee_id', 'active', 'password', 'role_id', 'remember_token',
@@ -90,12 +100,10 @@ class SuppliersController extends Controller
         ]);
         $account_data = $request->only([
             'account_name', 'account_no', 'open_balance', 'open_balance_date', 'open_balance_note', 
-            'expense_account_id'
         ]);
         $payment_data = $request->only(['bank', 'bank_code', 'payment_terms', 'credit_limit', 'mpesa_payment']);
         $user_data = $request->only('first_name', 'last_name', 'email', 'password', 'picture');
         $user_data['email'] = $request->user_email;
-        $data['ins'] = auth()->user()->ins;
 
         try {
             $result = $this->repository->create(compact('data', 'account_data', 'payment_data', 'user_data'));
@@ -135,7 +143,17 @@ class SuppliersController extends Controller
      */
     public function update(StoreSupplierRequest $request, Supplier $supplier)
     {
-        // extract request input
+        $request->validate([
+            'password' => request('password') ? 'required_with:user_email | min:7' : '',
+            'password_confirmation' => 'required_with:password | same:password'
+        ]);
+        if (request('password')) {
+            if (!preg_match("/[a-z][A-Z]|[A-Z][a-z]/i", $request->password)) 
+                throw ValidationException::withMessages(['password' => 'Password Must Contain Upper and Lowercase letters']);
+            if (!preg_match("/[0-9]/i", $request->password)) 
+                throw ValidationException::withMessages(['password' => 'Password Must Contain At Least One Number']);
+        }
+
         $data = $request->only([
             'name', 'phone', 'email', 'address', 'city', 'region', 'country', 'postbox', 'email', 'picture',
             'company', 'taxid', 'docid', 'custom1', 'employee_id', 'active', 'password', 'role_id', 'remember_token',
@@ -143,7 +161,6 @@ class SuppliersController extends Controller
         ]);
         $account_data = $request->only([
             'account_name', 'account_no', 'open_balance', 'open_balance_date', 'open_balance_note', 
-            'expense_account_id'
         ]);
         $payment_data = $request->only(['bank', 'bank_code', 'payment_terms', 'credit_limit', 'mpesa_payment']);
         $user_data = $request->only('first_name', 'last_name', 'password', 'picture');

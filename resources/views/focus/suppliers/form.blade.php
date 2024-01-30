@@ -150,20 +150,7 @@
                     <div class='col-lg-10'>
                         {{ Form::text('open_balance_note', null, ['class' => 'form-control', 'id' => 'open_balance_note']) }}
                     </div>
-                </div>       
-                <div class='form-group'>
-                    {{ Form::label('expense_account', 'Recognise Expense on Account',['class' => 'col-lg-3 control-label']) }}
-                    <div class='col-lg-10'>
-                        <select name="expense_account_id" class="custom-select" id="expense_account">
-                            <option value="">-- Select Expense Account --</option>
-                            @foreach ($accounts as $row) 
-                                <option value="{{ $row->id }}" {{ $row->id == @$supplier->expense_account_id? 'selected' : '' }}>
-                                    {{ $row->holder }}
-                                </option>
-                            @endforeach
-                        </select>                        
-                    </div>
-                </div>          
+                </div>                
             </div>
 
             <!-- other details -->
@@ -193,11 +180,13 @@
                     </div>
                 </div>
                 <hr>
+
+                {{-- User Info --}}
                 <h6 class="mb-2">User Info</h6>
                 <div class="row">
-                    <div class="col-md-10">
+                    <div class="col-md-6">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class='form-group'>
                                     {{ Form::label('first_name', 'First Name',['class' => 'col-12 control-label']) }}
                                     <div class='col-12'>
@@ -205,7 +194,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
                                 <div class='form-group'>
                                     {{ Form::label('last_name', 'Last Name',['class' => 'col-12 control-label']) }}
                                     <div class='col-12'>
@@ -214,31 +205,49 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-10">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class='form-group'>
-                                    {{ Form::label('user_email', 'Email',['class' => 'col-12 control-label']) }}
+                                    {{ Form::label('user_email', 'Email', ['class' => 'col-12 control-label']) }}
                                     <div class='col-12'>
                                         {{ Form::text('user_email', @$supplier->user->email, ['class' => 'form-control box-size', 'placeholder' => 'Email']) }}
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="row">
+                            <div class="col-md-12">
                                 <div class='form-group'>
                                     {{ Form::label( 'password', trans('customers.password'),['class' => 'col-12 control-label']) }}
                                     <div class='col-12'>
-                                        {{ Form::password('password', ['class' => 'form-control box-size', 'placeholder' => trans('customers.password')]) }}
+                                        {{ Form::password('password', ['class' => 'form-control box-size', 'id' => 'password']) }}
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class='form-group'>
+                                    {{ Form::label('password_confirmation', 'Confirm Password',['class' => 'col-12 control-label']) }}
+                                    <div class='col-12'>
+                                        {{ Form::password('password_confirmation', ['class' => 'form-control box-size', 'id' => 'confirm_password']) }}
+                                        <label for="password_match" class="text-danger d-none">Password does not match !</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="ml-2 password-condition">
+                                    <h4>Password must have:</h4>
+                                    <h5 class="text-danger"><i class="fa fa-check" aria-hidden="true"></i> At least 7 Characters</h5>
+                                    <h5 class="text-danger"><i class="fa fa-check" aria-hidden="true"></i> Contain Upper and Lowercase letters</h5>
+                                    <h5 class="text-danger"><i class="fa fa-check" aria-hidden="true"></i> At least one number</h5>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
+                </div>                
             </div>
         </div>
     </div>
@@ -247,19 +256,19 @@
 @section("after-scripts")
 {{ Html::script('focus/js/select2.min.js') }}
 <script type="text/javascript">
+    config = {
+        date: {format: "{{config('core.user_date_format')}}", autoHide: true},
+    }
     // datepicker
-    $('.datepicker').datepicker({format: "{{config('core.user_date_format')}}", autoHide: true})
-    .datepicker('setDate', new Date());
+    $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
     
-    // default supplier
+    // edit supplier
     const supplier = @json(@$supplier);
     if (supplier) {
-        if (supplier.open_balance_date) {
-            $('#open_balance_date').datepicker('setDate', new Date(supplier.open_balance_date));
-        }
+        const date = supplier.date;
         const balance = parseFloat(supplier.open_balance);
+        if (date) $('#open_balance_date').datepicker('setDate', new Date(date));
         $('#open_balance').val(accounting.formatNumber(balance));
-        $('#expense_account').val(supplier.expense_account_id);
     }
 
     // on selecting groups
@@ -272,18 +281,41 @@
         $(this).trigger("change");
     });
 
-    // on changing opening balance
     $("#open_balance").change(function() {
         const value = accounting.unformat($(this).val());
-        if (value > 0) $('#expense_account').attr('required', true);
-        else $('#expense_account').attr('required', false);
         $(this).val(accounting.formatNumber(value));
     });
-
-    // on chnaging credit limit 
     $("#credit_limit").change(function() {
         const input_val = $(this).val();
         $("#credit_limit").val(accounting.formatNumber(input_val));
+    });
+
+    // password validation
+    $('#password').on('keyup', function() {
+        const div = $('.password-condition');
+        const value = $(this).val();
+        if (value.length >= 7) {
+            div.find('h5:first').removeClass('text-danger').addClass('text-success');
+        } else {
+            div.find('h5:first').removeClass('text-success').addClass('text-danger');
+        }
+        if (new RegExp("[a-z][A-Z]|[A-Z][a-z]").test(value)) {
+            div.find('h5:eq(1)').removeClass('text-danger').addClass('text-success');
+        } else {
+            div.find('h5:eq(1)').removeClass('text-success').addClass('text-danger');
+        }
+        if (new RegExp("[0-9]").test(value)) {
+            div.find('h5:last').removeClass('text-danger').addClass('text-success');
+        } else {
+            div.find('h5:last').removeClass('text-success').addClass('text-danger');
+        }
+    });
+    $('#confirm_password').on('keyup', function() {
+        if ($(this).val() != $('#password').val()) {
+            $(this).next().removeClass('d-none');
+        } else {
+            $(this).next().addClass('d-none');
+        }
     });
 </script>
 @endsection

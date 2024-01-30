@@ -85,7 +85,7 @@ class CustomerRepository extends BaseRepository
 
         $user_data = Arr::only($input, ['first_name', 'last_name', 'email', 'password', 'picture']);
         $user_data['email'] = @$input['user_email'];
-        unset($input['first_name'], $input['last_name'], $input['user_email']);
+        unset($input['first_name'], $input['last_name'], $input['user_email'], $input['password_confirmation']);
 
         if (isset($input['picture'])) $input['picture'] = $this->uploadPicture($input['picture']);
             
@@ -114,27 +114,27 @@ class CustomerRepository extends BaseRepository
         // create customer
         $input['open_balance'] = numberClean($input['open_balance']);
         $input['open_balance_date'] = date_for_database($input['open_balance_date']);  
-        $result = Customer::create($input);
+        $customer = Customer::create($input);
 
         // create branches
         $branches = [['name' => 'All Branches'], ['name' => 'Head Office']];
         foreach ($branches as $key => $branch) {
-            $branches[$key]['customer_id'] = $result->id;
-            $branches[$key]['ins'] = $result->ins;
+            $branches[$key]['customer_id'] = $customer->id;
+            $branches[$key]['ins'] = $customer->ins;
         }
         Branch::insert($branches);
 
         // opening balance
-        if ($result->open_balance > 0) {
-            $tr_data = $this->customer_opening_balance($result, 'create'); 
+        if ($customer->open_balance > 0) {
+            $tr_data = $this->customer_opening_balance($customer, 'create'); 
             $this->post_customer_opening_balance((object) $tr_data);    
         }
         // customer authorization
-        $this->createAuth($result, $user_data, 'client');
+        $this->createAuth($customer, $user_data, 'client');
 
-        if ($result) {
+        if ($customer) {
             DB::commit();
-            return $result;
+            return $customer;
         }
     }
 
@@ -152,14 +152,14 @@ class CustomerRepository extends BaseRepository
 
         $user_data = Arr::only($input, ['first_name', 'last_name', 'password', 'picture']);
         $user_data['email'] = @$input['user_email'];
-        unset($input['first_name'], $input['last_name'], $input['user_email']);
+        unset($input['first_name'], $input['last_name'], $input['user_email'], $input['password_confirmation']);
+        if (empty($input['password'])) unset($input['password']);
 
         if (isset($input['picture'])) {
             $this->removePicture($customer, 'picture');
             $input['picture'] = $this->uploadPicture($input['picture']);
         }
-        if (empty($input['password'])) unset($input['password']);
-
+    
         $is_company = Customer::where('id', '!=', $customer->id)->where('company', $input['company'])->exists();
         if ($is_company) throw ValidationException::withMessages(['Company already exists']);
         $email_exists = Customer::where('id', '!=', $customer->id)->where('email', $input['email'])->whereNotNull('email')->exists();
@@ -193,18 +193,20 @@ class CustomerRepository extends BaseRepository
             $tr_data = $this->customer_opening_balance($customer, 'update'); 
             $this->post_customer_opening_balance((object) $tr_data);    
         } else {
-            $journal = Journal::where('customer_id', $customer->id)->first();
-            $invoice = Invoice::where('man_journal_id', @$journal->id)->first();
-            Transaction::where('man_journal_id', @$journal->id)->delete();
-            if ($invoice && $invoice->payments()->exists()) {
-                foreach ($invoice->payments as $key => $item) {
-                    $tids[] = @$item->paid_invoice->tid ?: '';
+            $journal = $customer->journal;
+            if ($journal) {
+                $invoice = $journal->invoice;
+                if ($invoice && $invoice->payments()->exists()) {
+                    foreach ($invoice->payments as $key => $item) {
+                        $tids[] = @$item->paid_invoice->tid ?: '';
+                    }
+                    throw ValidationException::withMessages(['Customer has attached Payments: ('.implode(', ', $tids).')']);                 
+                } elseif ($invoice) {
+                    $invoice->delete();
                 }
-                throw ValidationException::withMessages(['Please delete associated payments: ('.implode(', ', $tids).')']);                 
-            } elseif ($invoice) {
-                $invoice->delete();
+                $journal->transactions()->delete();
+                $journal->delete();
             }
-            if ($journal) $journal->delete();
         }
         
         // customer authorization

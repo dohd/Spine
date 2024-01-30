@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Access\Permission\Permission;
+use App\Models\Access\Permission\PermissionRole;
 use App\Models\Access\Permission\PermissionUser;
 use App\Models\Access\User\User;
+use App\Models\employee\RoleUser;
 use App\Models\hrm\Hrm;
 
 trait ClientSupplierAuth
@@ -13,7 +15,6 @@ trait ClientSupplierAuth
     {
         if (!isset($input['first_name'], $input['last_name'], $input['email'], $input['password']))
             return false;
-
         if (isset($input['picture'])) {
             $input['picture'] = $this->uploadAuthImage($input['picture']);
         }
@@ -33,16 +34,24 @@ trait ClientSupplierAuth
         
         // assign permissions
         $perm_ids = [];
-        if ($user->customer_id) {
-            $perm_ids = Permission::whereIn('name', ['sale','manage-quote', 'crm', 'manage-client', 'maintenance-project', 'manage-project', 'manage-equipment', 'manage-pm-contract','manage-schedule',])
+        if ($user->customer_id && $user->ins == 1) {
+            // business owner role and permissions
+            RoleUser::create(['user_id' => $user->id, 'role_id' => 2]);
+            $perm_ids = PermissionRole::select('permission_id')->distinct()->where('role_id', 2)
+            ->pluck('permission_id')->toArray();
+        } elseif ($user->customer_id) {
+            $perms = ['sale','manage-quote', 'crm', 'manage-client', 'manage-pricelist', 'maintenance-project', 'manage-project', 'manage-equipment', 'manage-pm-contract','manage-schedule',];
+            $perm_ids = Permission::whereIn('name', $perms)
             ->pluck('id')->toArray();
         } elseif ($user->supplier_id) {
-            $perm_ids = Permission::whereIn('name', ['finance', 'manage-supplier', 'stock', 'manage-grn'])
+            $perms = ['finance', 'manage-supplier', 'manage-pricelist', 'stock', 'manage-grn'];
+            $perm_ids = Permission::whereIn('name', $perms)
             ->pluck('id')->toArray();
         } elseif ($user->client_vendor_id) {
             $perm_ids = Permission::whereIn('name', ['crm'])
                 ->pluck('id')->toArray(); 
-        }
+        } 
+        
         foreach ($perm_ids as $key => $value) {
             $perm_ids[$key] = ['permission_id' => $value, 'user_id' => $user->id];
         }
@@ -53,16 +62,14 @@ trait ClientSupplierAuth
 
     public function updateAuth($entity, $input, $user_type)
     {
-        $user = User::query()
-            ->when($user_type == 'client_vendor', fn($q) => $q->where('client_vendor_id', $entity->id))
-            ->when($user_type == 'client', fn($q) => $q->where('customer_id', $entity->id))
-            ->when($user_type == 'supplier', fn($q) => $q->where('supplier_id', $entity->id));
-        $user = $user->first();   
+        $user = null;
+        if ($user_type == 'client_vendor') $user = User::where('client_vendor_id', $entity->id)->first();
+        if ($user_type == 'client') $user = User::where('customer_id', $entity->id)->first();
+        if ($user_type == 'supplier') $user = User::where('supplier_id', $entity->id)->first();   
         if (!$user) return $this->createAuth($entity, $input, $user_type);
         
         if (!isset($input['first_name'], $input['last_name'], $input['email']))
             return false;
-
         if (isset($input['picture'])) {
             $this->removeAuthImage($user);
             $input['picture'] = $this->uploadAuthImage($input['picture']);
@@ -84,16 +91,25 @@ trait ClientSupplierAuth
 
         // assign permissions
         $perm_ids = [];
-        if ($user->customer_id) {
-            $perm_ids = Permission::whereIn('name', ['sale','manage-quote', 'crm', 'manage-client', 'maintenance-project', 'manage-project', 'manage-equipment', 'manage-pm-contract','manage-schedule',])
+        if ($user->customer_id && $user->ins == 1) {
+            // business owner role and permissions
+            $params = ['user_id' => $user->id, 'role_id' => 2];
+            if (!RoleUser::where($params)->first()) RoleUser::create($params);
+            $perm_ids = PermissionRole::select('permission_id')->distinct()->where('role_id', 2)
+            ->pluck('permission_id')->toArray();
+        } elseif ($user->customer_id) {
+            $perms = ['sale','manage-quote', 'crm', 'manage-client', 'manage-pricelist', 'maintenance-project', 'manage-project', 'manage-equipment', 'manage-pm-contract','manage-schedule',];
+            $perm_ids = Permission::whereIn('name', $perms)
                 ->pluck('id')->toArray();
         } elseif ($user->supplier_id) {
-            $perm_ids = Permission::whereIn('name', ['finance', 'manage-supplier', 'stock', 'manage-grn'])
+            $perms = ['finance', 'manage-supplier', 'manage-pricelist', 'stock', 'manage-grn'];
+            $perm_ids = Permission::whereIn('name', $perms)
             ->pluck('id')->toArray();
         } elseif ($user->client_vendor_id) {
             $perm_ids = Permission::whereIn('name', ['crm'])
                 ->pluck('id')->toArray();
         }
+         
         PermissionUser::where('user_id', $user->id)->whereIn('permission_id', $perm_ids)->delete();
         foreach ($perm_ids as $key => $value) {
             $perm_ids[$key] = ['permission_id' => $value, 'user_id' => $user->id];
@@ -105,13 +121,14 @@ trait ClientSupplierAuth
 
     public function deleteAuth($entity, $user_type)
     {
-        $query = User::query()
-            ->when($user_type == 'client_vendor', fn($q) => $q->where('client_vendor_id', $entity->id))
-            ->when($user_type == 'client', fn($q) => $q->where('customer_id', $entity->id))
-            ->when($user_type == 'supplier', fn($q) => $q->where('supplier_id', $entity->id));
-        $user = $query->first();
+        $user = null;
+        if ($user_type == 'client_vendor') $user = User::where('client_vendor_id', $entity->id)->first();
+        if ($user_type == 'client') $user = User::where('customer_id', $entity->id)->first();
+        if ($user_type == 'supplier') $user = User::where('supplier_id', $entity->id)->first();
+
         if ($user) {
             $this->removeAuthImage($user);
+            if ($user->ins == 1) RoleUser::where(['user_id' => $user->id, 'role_id' => 2])->delete();
             PermissionUser::where('user_id', $user->id)->delete();
             $user->delete(); 
             return true;
@@ -125,7 +142,6 @@ trait ClientSupplierAuth
         $this->storage->put($path . $image_name, file_get_contents($image->getRealPath()));
         return $image_name;
     } 
-
     public function removeAuthImage($entity)
     {
         $path = 'img' . DIRECTORY_SEPARATOR . 'users' . DIRECTORY_SEPARATOR;
