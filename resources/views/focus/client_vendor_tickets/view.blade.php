@@ -6,7 +6,7 @@
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Client Tickets Management</h4>
+            <h4 class="content-header-title">Client Ticket Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
@@ -21,23 +21,52 @@
                 <h5><span class="btn btn-warning round text-white"><b>Closed Ticket! Reply to the ticket to reopen it.</b></span></h5>
             </div>
         @endif
+        {{-- section 1 --}}
         <div class="card">
+            <div class="card-header pb-0 pt-1">
+                <a href="{{ route('biller.client_vendor_tickets.vendor_access', $client_vendor_ticket) }}" class="btn btn-warning btn-sm" id="vendorAccess">
+                    @if ($client_vendor_ticket->vendor_access)
+                        <i class="fa fa-times" aria-hidden="true"></i> Vendor Access
+                    @else
+                        <i class="fa fa-check"></i> Vendor Access
+                    @endif
+                </a>
+                <a href="#" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="modal" data-target="#statusModal"><span class="fa fa-retweet"></span> Progress Point</a>
+            </div>
             <div class="card-content">
                 <div class="card-body">
                     <a href="#" class="btn btn-danger float-right" id="close"><i class="fa fa-times" aria-hidden="true"></i> Closed</a>
                     {{ Form::open(['route' => ['biller.client_vendor_tickets.status', $client_vendor_ticket], 'method' => 'PATCH', 'id' => 'closeForm']) }} {{ Form::close() }}
                     <button type="button" class="btn btn-outline-secondary float-right mr-1" id="reply" onclick="window.scrollTo(0, document.body.scrollHeight)"><i class="fa fa-pencil" aria-hidden="true"></i> Reply</button>                    
+
                     <h3 class="text-success mb-1">{{ gen4tid('#TKT-', $client_vendor_ticket->tid) }}</h3>
                     <h5>Subject: <b>{{ $client_vendor_ticket->subject }}</b></h5>
                 </div>
             </div>
         </div>
+        
+        {{-- section 2 --}}
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
+                    {{-- Replies --}}
                     @foreach ($client_vendor_ticket->replies as $reply)
                         <div>
-                            <h5 class="float-right"><span class="badge badge-info">{{ 'Operator' }}</span></h5>
+                            <h5 class="float-right">
+                                <span class="badge badge-info">
+                                    @php
+                                        $business = @$reply->user->business;
+                                        $client_vendor = @$reply->user->client_vendor;
+                                        $customer = @$reply->user->customer;
+                                        $client_user = @$reply->user->client_user;
+                                        if ($client_user) $customer = $client_user->customer;
+                        
+                                        if ($client_vendor) echo @$client_vendor->company ?: @$client_vendor->name;
+                                        elseif ($customer) echo @$customer->company ?: @$customer->name;
+                                        else echo @$business->cname;                                        
+                                    @endphp
+                                </span>
+                            </h5>
                             <h5>Posted By <b>{{ @$reply->user->name }}</b></h5>
                             <h6 class="text-light">{{ date('D j, F, Y', strtotime($reply->date)) }}</h6>
                             <br>
@@ -45,6 +74,7 @@
                             <br><hr>
                         </div>
                     @endforeach
+                    {{-- Ticket --}}
                     <div>
                         <br>
                         <h5 class="float-right"><span class="badge badge-success">{{ @$client_vendor_ticket->customer->company }}</span></h5>
@@ -55,6 +85,8 @@
                 </div>
             </div>
         </div>
+
+        {{-- section 3 --}}
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
@@ -81,6 +113,7 @@
         </div>
     </div>
 </div>
+@include('focus.client_vendor_tickets.partials.status_modal')
 @endsection
 
 @section('extra-scripts')

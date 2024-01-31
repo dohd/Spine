@@ -64,6 +64,9 @@ class ClientVendorTicketsTableController extends Controller
             ->editColumn('date', function ($ticket) {
                 return date('d-M-Y', strtotime($ticket->date));
             })
+            ->addColumn('progress', function ($ticket) {
+                return @$ticket->tag->name;
+            })
             ->editColumn('status', function ($ticket) {
                 $variant = 'badge-secondary';
                 if ($ticket->status == 'Closed') $variant = 'badge-success';

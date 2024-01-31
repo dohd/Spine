@@ -30,6 +30,7 @@
                                         <th>Category</th>
                                         <th>Subject</th>
                                         <th>Date</th>
+                                        <th>Progress Point</th>
                                         <th>Status</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
@@ -77,7 +78,7 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['tid', 'customer_id',  'category', 'subject', 'date', 'status'].map(v => ({data: v, name: v})),
+                    ...['tid', 'customer_id',  'category', 'subject', 'date', 'progress', 'status'].map(v => ({data: v, name: v})),
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],

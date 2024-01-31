@@ -20,8 +20,11 @@ class ClientVendorTicketRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-
         $q = $this->query();
+
+        /** client vendor authorized tickets */
+        $client_vendor_id = auth()->user()->client_vendor_id;
+        $q->when($client_vendor_id, fn($q) => $q->where('vendor_access', 1));
 
         return $q->get();
     }

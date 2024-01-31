@@ -152,7 +152,9 @@ class ClientVendorTicketsController extends Controller
      */
     public function show(ClientVendorTicket $client_vendor_ticket, Request $request)
     {
-        return new ViewResponse('focus.client_vendor_tickets.view', compact('client_vendor_ticket'));
+        $tags = ClientVendorTag::get(['id', 'name']);
+
+        return new ViewResponse('focus.client_vendor_tickets.view', compact('client_vendor_ticket', 'tags'));
     }
 
     /**
@@ -170,8 +172,36 @@ class ClientVendorTicketsController extends Controller
     }
 
     /**
-     * Ticket Reply
-     * 
+     * Update Ticket Progress Point
+     */
+    public function update_progress(ClientVendorTicket $client_vendor_ticket, Request $request)
+    {
+        try {
+            $client_vendor_ticket->update(['tag_id' => $request->tag_id]);
+            $tag = @$client_vendor_ticket->tag->name;
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Progress Status', $th);
+        }
+        return redirect()->back()->with('flash_success', $tag . ' Status Updated Successfully');
+    }
+
+    /**
+     * Update Vendor Access
+     */
+    public function vendor_access(ClientVendorTicket $client_vendor_ticket, Request $request)
+    {
+        try {
+            if ($client_vendor_ticket->vendor_access) $vendor_access = 0;
+            else $vendor_access = 1;
+            $client_vendor_ticket->update(compact('vendor_access'));
+        } catch (\Throwable $th) {
+            return errorHandler('Error Updating Status', $th);
+        }
+        return redirect()->back()->with('flash_success', 'Vendor Access Updated Successfully');
+    }
+
+    /**
+     * Cilient Ticket Reply
      */
     public function reply(Request $request)
     { 
