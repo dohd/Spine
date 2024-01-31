@@ -49,10 +49,10 @@ trait ClientSupplierAuth
             $perm_ids = Permission::whereIn('name', $perms)
             ->pluck('id')->toArray();
         } elseif ($user->client_vendor_id) {
-            $perm_ids = Permission::whereIn('name', ['crm'])
+            $perm_ids = Permission::whereIn('name', ['crm','manage-client'])
                 ->pluck('id')->toArray(); 
         } elseif ($user->client_user_id) {
-            $perm_ids = Permission::whereIn('name', ['crm'])
+            $perm_ids = Permission::whereIn('name', ['crm','manage-client'])
                 ->pluck('id')->toArray(); 
         } 
         
@@ -111,10 +111,10 @@ trait ClientSupplierAuth
             $perm_ids = Permission::whereIn('name', $perms)
             ->pluck('id')->toArray();
         } elseif ($user->client_vendor_id) {
-            $perm_ids = Permission::whereIn('name', ['crm'])
+            $perm_ids = Permission::whereIn('name', ['crm', 'manage-client'])
                 ->pluck('id')->toArray();
         } elseif ($user->client_user_id) {
-            $perm_ids = Permission::whereIn('name', ['crm'])
+            $perm_ids = Permission::whereIn('name', ['crm', 'manage-client'])
                 ->pluck('id')->toArray();
         }
          
