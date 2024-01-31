@@ -40,13 +40,11 @@ class ClientVendorRepository extends BaseRepository
      */
     public function create(array $input)
     {  
+        DB::beginTransaction();
         $user_data = Arr::only($input, ['first_name', 'last_name', 'user_email', 'password']);
         $vendor_data = Arr::except($input, array_flip($user_data));
         
-        DB::beginTransaction();
-
         $vendor = ClientVendor::create($vendor_data);
-
         // authorize
         $user_data['email'] = $input['user_email'];
         unset($user_data['user_email']);
@@ -68,13 +66,11 @@ class ClientVendorRepository extends BaseRepository
      */
     public function update(ClientVendor $client_vendor, array $input)
     {   
+        DB::beginTransaction();
         $user_data = Arr::only($input, ['first_name', 'last_name', 'user_email', 'password']);
         $vendor_data = Arr::except($input, array_flip($user_data));
 
-        DB::beginTransaction();
-
         $result = $client_vendor->update($vendor_data);
-
         // authorize
         $user_data['email'] = $input['user_email'];
         unset($user_data['user_email']);
@@ -95,7 +91,11 @@ class ClientVendorRepository extends BaseRepository
      */
     public function delete(ClientVendor $client_vendor)
     {
-        if ($this->deleteAuth($client_vendor, 'client_vendor') && $client_vendor->delete()) {
+        DB::beginTransaction();
+        $this->deleteAuth($client_vendor, 'client_vendor');
+        $result = $client_vendor->delete();
+        if ($result) {
+            DB::commit();
             return true;
         }
     }
