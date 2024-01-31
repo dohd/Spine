@@ -21,7 +21,7 @@ trait TenantTicketRelationship
 
     public function replies()
     {
-        return $this->hasMany(TenantReply::class)->orderBy('index', 'ASC');
+        return $this->hasMany(TenantReply::class)->orderBy('index', 'DESC');
     }
 
     public function user()

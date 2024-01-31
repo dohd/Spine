@@ -35,6 +35,7 @@
         <div class="card">
             <div class="card-content">
                 <div class="card-body">
+                    {{-- Replies --}}
                     @foreach ($tenant_ticket->replies as $reply)
                         <div>
                             <h5 class="float-right"><span class="badge badge-info">{{ @$reply->tenant->cname }}</span></h5>
@@ -47,6 +48,7 @@
                             <br><hr>
                         </div>
                     @endforeach
+                    {{-- Ticket --}}
                     <div>
                         <br>
                         <h5 class="float-right"><span class="badge badge-success">{{ @$tenant_ticket->tenant->cname }}</span></h5>
