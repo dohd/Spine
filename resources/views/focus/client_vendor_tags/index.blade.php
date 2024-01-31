@@ -1,16 +1,16 @@
 @extends ('core.layouts.app')
 
-@section('title', 'Client Tickets Management')
+@section('title', 'Ticket Tags Management')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-1">
         <div class="content-header-left col-6">
-            <h4 class="content-header-title">Client Tickets Management</h4>
+            <h4 class="content-header-title">Ticket Tags Management</h4>
         </div>
         <div class="col-6">
             <div class="btn-group float-right">
-                @include('focus.client_vendor_tickets.partials.tickets-header-buttons')
+                @include('focus.client_vendor_tags.partials.tags-header-buttons')
             </div>
         </div>
     </div>
@@ -21,16 +21,11 @@
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
-                            <table id="servicesTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                            <table id="TagsTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Ticket No.</th>
-                                        <th>Customer</th>
-                                        <th>Category</th>
-                                        <th>Subject</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
+                                        <th>Name</th>
                                         <th>{{ trans('labels.general.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -62,22 +57,22 @@
 
     const Index = {
         init() {
-            Index.drawDataTable();
+            this.drawDataTable();
         },
 
         drawDataTable() {
-            $('#servicesTbl').dataTable({
+            $('#TagsTbl').dataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
                 language: {@lang('datatable.strings')},
                 ajax: {
-                    url: "{{ route('biller.client_vendor_tickets.get') }}",
+                    url: "{{ route('biller.client_vendor_tags.get') }}",
                     type: 'POST',
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
-                    ...['tid', 'customer_id',  'category', 'subject', 'date', 'status'].map(v => ({data: v, name: v})),
+                    {data: 'name', name: 'name'},                   
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],
                 order: [[0, "desc"]],
@@ -88,6 +83,6 @@
         }
     };
 
-    $(Index.init);
+    $(() => Index.init());
 </script>
 @endsection

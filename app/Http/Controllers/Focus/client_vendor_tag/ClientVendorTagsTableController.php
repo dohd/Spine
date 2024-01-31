@@ -16,26 +16,26 @@
  * ***********************************************************************
  */
 
-namespace App\Http\Controllers\Focus\client_vendor_ticket;
+namespace App\Http\Controllers\Focus\client_vendor_tag;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Focus\client_vendor_ticket\ClientVendorTicketRepository;
+use App\Repositories\Focus\client_vendor_tag\ClientVendorTagRepository;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
-class ClientVendorTicketsTableController extends Controller
+class ClientVendorTagsTableController extends Controller
 {
     /**
      * variable to store the repository object
-     * @var ProductcategoryRepository
+     * @var ClientVendorTagRepository
      */
     protected $repository;
 
     /**
      * contructor to initialize repository object
-     * @param ProductcategoryRepository $productcategory ;
+     * @param ClientVendorTagRepository $repository ;
      */
-    public function __construct(ClientVendorTicketRepository $repository)
+    public function __construct(ClientVendorTagRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -52,25 +52,8 @@ class ClientVendorTicketsTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
-            ->editColumn('customer_id', function ($ticket) {
-                return @$ticket->customer->company;
-            })
-            ->addColumn('category', function ($ticket) {
-                return @$ticket->category->name;
-            })
-            ->editColumn('tid', function ($ticket) {
-                return gen4tid('TKT-', $ticket->tid);
-            })
-            ->editColumn('date', function ($ticket) {
-                return date('d-M-Y', strtotime($ticket->date));
-            })
-            ->editColumn('status', function ($ticket) {
-                $variant = 'badge-secondary';
-                if ($ticket->status == 'Closed') $variant = 'badge-success';
-                return '<span class="badge '. $variant .'">'. $ticket->status .'</span>';
-            })
-            ->addColumn('actions', function ($ticket) {
-                return $ticket->action_buttons;
+            ->addColumn('actions', function ($tag) {
+                return $tag->action_buttons;
             })
             ->make(true);
     }

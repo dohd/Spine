@@ -22,8 +22,10 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\client_vendor_tag\ClientVendorTag;
 use App\Models\client_vendor_ticket\ClientVendorReply;
 use App\Models\client_vendor_ticket\ClientVendorTicket;
+use App\Models\equipmentcategory\EquipmentCategory;
 use App\Models\ticket_category\TicketCategory;
 use App\Repositories\Focus\client_vendor_ticket\ClientVendorTicketRepository;
 
@@ -63,9 +65,10 @@ class ClientVendorTicketsController extends Controller
      */
     public function create()
     {   
-        $categories = TicketCategory::where('module', 'CRM')->get();
+        $equip_categories = EquipmentCategory::get(['id', 'name']);
+        $tags = ClientVendorTag::get(['id', 'name']);
 
-        return view('focus.client_vendor_tickets.create', compact('categories'));
+        return view('focus.client_vendor_tickets.create', compact('equip_categories','tags'));
     }
 
     /**
@@ -101,9 +104,10 @@ class ClientVendorTicketsController extends Controller
      */
     public function edit(ClientVendorTicket $client_vendor_ticket, Request $request)
     {
-        $categories = TicketCategory::where('module', 'CRM')->get();
+        $equip_categories = EquipmentCategory::get(['id', 'name']);
+        $tags = ClientVendorTag::get(['id', 'name']);
 
-        return view('focus.client_vendor_tickets.edit', compact('client_vendor_ticket', 'categories'));
+        return view('focus.client_vendor_tickets.edit', compact('client_vendor_ticket', 'equip_categories', 'tags'));
     }
 
     /**
@@ -112,13 +116,6 @@ class ClientVendorTicketsController extends Controller
      */
     public function update(Request $request, ClientVendorTicket $client_vendor_ticket)
     {
-        $request->validate([
-            'category_id' => 'required',
-            'priority' => 'required',
-            'subject' => 'required',
-            'message' => 'required',
-        ]);
-
         try {
             $this->repository->update($client_vendor_ticket, $request->except(['_token']));
         } catch (\Throwable $th) { dd($th);

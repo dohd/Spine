@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Models\client_vendor_ticket;
+namespace App\Models\client_vendor_tag;
 
-use App\Models\client_vendor_ticket\Traits\ClientVendorTicketAttribute;
-use App\Models\client_vendor_ticket\Traits\ClientVendorTicketRelationship;
+use App\Models\client_vendor_tag\Traits\ClientVendorTagAttribute;
+use App\Models\client_vendor_tag\Traits\ClientVendorTagRelationship;
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class ClientVendorTicket extends Model
+class ClientVendorTag extends Model
 {
-    use ModelTrait, ClientVendorTicketAttribute, ClientVendorTicketRelationship;
+    use ModelTrait, ClientVendorTagAttribute, ClientVendorTagRelationship;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -20,7 +20,7 @@ class ClientVendorTicket extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'client_vendor_tickets';
+    protected $table = 'client_vendor_tags';
 
     /**
      * Mass Assignable fields of model
@@ -66,12 +66,9 @@ class ClientVendorTicket extends Model
         static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', auth()->user()->ins);
         });
-
+        
         static::creating(function ($instance) {
             $instance->fill([
-                'customer_id' => auth()->user()->customer_id,
-                'tid' => ClientVendorTicket::max('tid')+1,
-                'date' => date('Y-m-d'),
                 'ins' => auth()->user()->ins,
                 'user_id' => auth()->user()->id,
             ]);

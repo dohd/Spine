@@ -1,15 +1,5 @@
 <div class="form-group row">
-    <div class="col-md-6">
-        <label for="category">Ticket Category</label>
-        <select name="category_id" id="category" class="custom-select">
-            @foreach ($categories as $i => $item)
-                <option value="{{ $item->id }}" {{ @$client_vendor_ticket->category_id == $item->id? 'selected' : '' }}>
-                    {{ $item->name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-    <div class="col-md-6">
+    <div class="col-md-3">
         <label for="priority">Priority</label>
         <select name="priority" id="priority" class="custom-select">
             @foreach (['Low', 'Medium', 'High'] as $i => $value)
@@ -18,6 +8,39 @@
                 </option>
             @endforeach
         </select>
+    </div>
+
+    <div class="col-md-3">
+        <label for="tag">Ticket Level</label>
+        <select name="tag_id" id="tag" class="custom-select" required>
+            <option value="">-- Select Level --</option>
+            @foreach ($tags as $i => $item)
+                <option value="{{ $item->id }}" {{ @$client_vendor_ticket->tag_id == $item->id? 'selected' : '' }}>
+                    {{ $item->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+    
+    <div class="col-md-3">
+        <label for="category">Equipment Category</label>
+        <select name="equip_categ_id" id="equip_category" class="custom-select" required>
+            <option value="">-- Select Category --</option>
+            @foreach ($equip_categories as $i => $item)
+                <option value="{{ $item->id }}" {{ @$client_vendor_ticket->equip_categ_id == $item->id? 'selected' : '' }}>
+                    {{ $item->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <label for="location" class="caption">Equipment Location</label>
+        <div class="input-group">
+            <div class="w-100">
+                {{ Form::text('equip_location', null, ['class' => 'form-control']) }}
+            </div>
+        </div>
     </div>
 </div>
 <div class="form-group row">
