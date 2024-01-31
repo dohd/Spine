@@ -24,6 +24,7 @@ use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\client_vendor\ClientVendor;
 use App\Repositories\Focus\client_vendor\ClientVendorRepository;
+use Illuminate\Validation\ValidationException;
 
 class ClientVendorsController extends Controller
 {
@@ -73,14 +74,18 @@ class ClientVendorsController extends Controller
         $request->validate([
             'company' => 'required',
             'name' => 'required',
-            'phone' => 'required',
-            'email' => 'required',
-            'address' => 'required',
-            'postbox' => 'required',
             'first_name' => 'required',
             'last_name' => 'required',
-            'password' => 'required',
+            'user_email' => 'required',
+            'password' => request('password') ? 'required_with:user_email | min:7' : '',
+            'password_confirmation' => 'required_with:password | same:password',
         ]);
+        if (request('password')) {
+            if (!preg_match("/[a-z][A-Z]|[A-Z][a-z]/i", $request->password)) 
+                throw ValidationException::withMessages(['password' => 'Password Must Contain Upper and Lowercase letters']);
+            if (!preg_match("/[0-9]/i", $request->password)) 
+                throw ValidationException::withMessages(['password' => 'Password Must Contain At Least One Number']);
+        }
 
         try {
             $this->repository->create($request->except(['_token']));
@@ -113,17 +118,22 @@ class ClientVendorsController extends Controller
         $request->validate([
             'company' => 'required',
             'name' => 'required',
-            'phone' => 'required',
-            'email' => 'required',
-            'address' => 'required',
-            'postbox' => 'required',
             'first_name' => 'required',
             'last_name' => 'required',
+            'user_email' => 'required',
+            'password' => request('password') ? 'required_with:user_email | min:7' : '',
+            'password_confirmation' => 'required_with:password | same:password',
         ]);
+        if (request('password')) {
+            if (!preg_match("/[a-z][A-Z]|[A-Z][a-z]/i", $request->password)) 
+                throw ValidationException::withMessages(['password' => 'Password Must Contain Upper and Lowercase letters']);
+            if (!preg_match("/[0-9]/i", $request->password)) 
+                throw ValidationException::withMessages(['password' => 'Password Must Contain At Least One Number']);
+        }
         
         try {
-            $this->repository->update($client_vendor, $request->except('_token'));
-        } catch (\Throwable $th) { dd($th);
+            $this->repository->update($client_vendor, $request->except('_token', 'password_confirmation'));
+        } catch (\Throwable $th) {
             return errorHandler('Error Updating Vendor!', $th);
         }
         

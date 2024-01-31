@@ -18,25 +18,15 @@
     </div>
 
     <div class="content-body">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            {{ Form::model($client_vendor, ['route' => ['biller.client_vendors.update', $client_vendor], 'method' => 'PATCH']) }}
-                            <div class="form-group">                                    
-                                @include("focus.client_vendors.form")
-                                <div class="edit-form-btn">
-                                    {{ link_to_route('biller.client_vendors.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
-                                    {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
-                                </div>                                   
-                            </div>                              
-                            {{ Form::close() }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {{ Form::model($client_vendor, ['route' => ['biller.client_vendors.update', $client_vendor], 'method' => 'PATCH']) }}
+        <div class="form-group">                                    
+            @include("focus.client_vendors.form")
+            <div class="edit-form-btn">
+                {{ link_to_route('biller.client_vendors.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
+            </div>                                   
+        </div>                              
+        {{ Form::close() }}
     </div>
 </div>
 @endsection

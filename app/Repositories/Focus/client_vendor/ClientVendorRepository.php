@@ -39,15 +39,17 @@ class ClientVendorRepository extends BaseRepository
      * @return bool
      */
     public function create(array $input)
-    {
+    {  
+        $user_data = Arr::only($input, ['first_name', 'last_name', 'user_email', 'password']);
+        $vendor_data = Arr::except($input, array_flip($user_data));
+        
         DB::beginTransaction();
 
-        $user_data = Arr::only($input, ['first_name', 'last_name', 'email', 'password']);
-        $vendor_data = Arr::except($input, array_flip($user_data));
-        $vendor_data['email'] = $input['email'];
-
         $vendor = ClientVendor::create($vendor_data);
+
         // authorize
+        $user_data['email'] = $input['user_email'];
+        unset($user_data['user_email']);
         $this->createAuth($vendor, $user_data, 'client_vendor');
 
         if ($vendor) {
@@ -65,15 +67,17 @@ class ClientVendorRepository extends BaseRepository
      * return bool
      */
     public function update(ClientVendor $client_vendor, array $input)
-    {
+    {   
+        $user_data = Arr::only($input, ['first_name', 'last_name', 'user_email', 'password']);
+        $vendor_data = Arr::except($input, array_flip($user_data));
+
         DB::beginTransaction();
 
-        $user_data = Arr::only($input, ['first_name', 'last_name', 'email', 'password']);
-        $vendor_data = Arr::except($input, array_flip($user_data));
-        $vendor_data['email'] = $input['email'];
-
         $result = $client_vendor->update($vendor_data);
+
         // authorize
+        $user_data['email'] = $input['user_email'];
+        unset($user_data['user_email']);
         $this->updateAuth($client_vendor, $user_data, 'client_vendor');
 
         if ($result) {

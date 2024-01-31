@@ -18,23 +18,13 @@
     </div>
 
     <div class="content-body">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            {{ Form::open(['route' => 'biller.client_vendors.store', 'method' => 'post']) }}
-                                @include("focus.client_vendors.form")
-                                <div class="edit-form-btn ml-2">
-                                    {{ link_to_route('biller.client_vendors.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
-                                    {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md']) }}
-                                </div>                            
-                            {{ Form::close() }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {{ Form::open(['route' => 'biller.client_vendors.store', 'method' => 'post']) }}
+            @include("focus.client_vendors.form")
+            <div class="edit-form-btn ml-2">
+                {{ link_to_route('biller.client_vendors.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
+                {{ Form::submit(trans('buttons.general.crud.create'), ['class' => 'btn btn-primary btn-md']) }}
+            </div>                            
+        {{ Form::close() }}
     </div>
 </div>
 @endsection
