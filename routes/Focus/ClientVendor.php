@@ -21,3 +21,8 @@ Route::group(['namespace' => 'client_vendor_tag'], function () {
     //For Datatable
     Route::post('client_vendor_tags/get', 'ClientVendorTagsTableController')->name('client_vendor_tags.get');
 });
+Route::group(['namespace' => 'client_user'], function () {
+    Route::resource('client_users', 'ClientUsersController');
+    //For Datatable
+    Route::post('client_users/get', 'ClientUsersTableController')->name('client_users.get');
+});

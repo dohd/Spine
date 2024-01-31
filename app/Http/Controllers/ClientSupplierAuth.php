@@ -23,6 +23,7 @@ trait ClientSupplierAuth
             'customer_id' => ($user_type == 'client'? $entity->id : null),
             'supplier_id' => ($user_type == 'supplier'? $entity->id : null),
             'client_vendor_id' => ($user_type == 'client_vendor'? $entity->id : null),
+            'client_user_id' => ($user_type == 'client_user'? $entity->id : null),
             'first_name' => $input['first_name'],
             'last_name' => $input['last_name'],
             'email' => $input['email'],
@@ -48,6 +49,9 @@ trait ClientSupplierAuth
             $perm_ids = Permission::whereIn('name', $perms)
             ->pluck('id')->toArray();
         } elseif ($user->client_vendor_id) {
+            $perm_ids = Permission::whereIn('name', ['crm'])
+                ->pluck('id')->toArray(); 
+        } elseif ($user->client_user_id) {
             $perm_ids = Permission::whereIn('name', ['crm'])
                 ->pluck('id')->toArray(); 
         } 
@@ -79,6 +83,7 @@ trait ClientSupplierAuth
             'customer_id' => $user_type == 'client'? $entity->id : null,
             'supplier_id' => $user_type == 'supplier'? $entity->id : null,
             'client_vendor_id' => $user_type == 'client_vendor'? $entity->id : null,
+            'client_user_id' => $user_type == 'client_user'? $entity->id : null,
             'first_name' => $input['first_name'],
             'last_name' => $input['last_name'],
             'email' => $input['email'],
@@ -108,6 +113,9 @@ trait ClientSupplierAuth
         } elseif ($user->client_vendor_id) {
             $perm_ids = Permission::whereIn('name', ['crm'])
                 ->pluck('id')->toArray();
+        } elseif ($user->client_user_id) {
+            $perm_ids = Permission::whereIn('name', ['crm'])
+                ->pluck('id')->toArray();
         }
          
         PermissionUser::where('user_id', $user->id)->whereIn('permission_id', $perm_ids)->delete();
@@ -122,6 +130,7 @@ trait ClientSupplierAuth
     public function deleteAuth($entity, $user_type)
     {
         $user = null;
+        if ($user_type == 'client_user') $user = User::where('client_user_id', $entity->id)->first();
         if ($user_type == 'client_vendor') $user = User::where('client_vendor_id', $entity->id)->first();
         if ($user_type == 'client') $user = User::where('customer_id', $entity->id)->first();
         if ($user_type == 'supplier') $user = User::where('supplier_id', $entity->id)->first();
