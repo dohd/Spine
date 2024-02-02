@@ -35,7 +35,7 @@ trait ClientSupplierAuth
         
         // assign permissions
         $perm_ids = [];
-        if (auth()->user()->business->is_main) {
+        if (auth()->user()->business->is_main && $user->customer_id) {
             // business owner role and permissions
             RoleUser::create(['user_id' => $user->id, 'role_id' => 2]);
             $perm_ids = PermissionRole::select('permission_id')->distinct()->where('role_id', 2)
@@ -100,7 +100,7 @@ trait ClientSupplierAuth
 
         // assign permissions
         $perm_ids = [];
-        if (auth()->user()->business->is_main) {
+        if (auth()->user()->business->is_main && $user->customer_id) {
             // business owner role and permissions
             $params = ['user_id' => $user->id, 'role_id' => 2];
             if (!RoleUser::where($params)->first()) RoleUser::create($params);
@@ -121,7 +121,8 @@ trait ClientSupplierAuth
             $perm_ids = Permission::whereIn('name', $perms)
             ->pluck('id')->toArray();
         } elseif ($user->client_vendor_id) {
-            $perm_ids = Permission::whereIn('name', ['crm', 'manage-client'])
+            $perms = ['crm','manage-client','manage-crm-ticket', 'create-crm-ticket', 'edit-crm-ticket', 'delete-crm-ticket',];
+            $perm_ids = Permission::whereIn('name', $perms)
                 ->pluck('id')->toArray();
         }
          
@@ -144,7 +145,7 @@ trait ClientSupplierAuth
 
         if ($user) {
             $this->removeAuthImage($user);
-            if (@$user->business->is_main) RoleUser::where(['user_id' => $user->id, 'role_id' => 2])->delete();
+            if (auth()->user()->business->is_main) RoleUser::where(['user_id' => $user->id, 'role_id' => 2])->delete();
             PermissionUser::where('user_id', $user->id)->delete();
             $user->delete(); 
             return true;
