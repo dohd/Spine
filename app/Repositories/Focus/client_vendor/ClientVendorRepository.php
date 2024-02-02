@@ -26,7 +26,7 @@ class ClientVendorRepository extends BaseRepository
     public function getForDataTable()
     {
 
-        $q = $this->query();
+        $q = $this->query()->whereNull('deleted_at');
 
         return $q->get();
     }
@@ -91,12 +91,13 @@ class ClientVendorRepository extends BaseRepository
      */
     public function delete(ClientVendor $client_vendor)
     {
-        DB::beginTransaction();
-        $this->deleteAuth($client_vendor, 'client_vendor');
-        $result = $client_vendor->delete();
-        if ($result) {
-            DB::commit();
-            return true;
-        }
+        // DB::beginTransaction();
+        // $this->deleteAuth($client_vendor, 'client_vendor');
+        // $result = $client_vendor->delete();
+        // if ($result) {
+        //     DB::commit();
+        //     return true;
+        // }
+        return $client_vendor->update(['deleted_at' => now()]);
     }
 }

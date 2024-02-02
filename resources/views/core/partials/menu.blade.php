@@ -229,7 +229,7 @@
                 <a class="nav-link {{ (strpos(Route::currentRouteName(), 'biller.dashboard') === 0) ? 'active' : '' }}" href="{{route('biller.dashboard')}}"><i class="ft-home"></i><span>{{ trans('navs.frontend.dashboard') }}</span></a>
             </li>
 
-            {{-- customer relation management module --}}
+            {{-- CRM Module --}}
             @if(access()->allow('crm')) 
                 <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="icon-diamond"></i><span>{{trans('features.crm')}}</span></a>
                     <ul class="dropdown-menu">
@@ -298,35 +298,49 @@
                             </ul>
                         </li>
                         @endauth
-                        <hr>
-
+        
                         {{-- Client Vendor Management --}}
-                        @permission('manage-client')
+                        @permission('manage-crm-user')
+                            <hr>
                             <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-users" aria-hidden="true"></i> Client Users</a>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="{{ route('biller.client_users.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Users </a></li>
+                                    @permission('create-crm-user')
                                     <li><a class="dropdown-item" href="{{ route('biller.client_users.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create User</a></li>
+                                    @endauth
                                 </ul>
                             </li>
                         @endauth
+                        @permission('manage-crm-vendor')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-ship" aria-hidden="true"></i> Vendor Management</a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('biller.client_vendors.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Vendors </a></li>
+                                @permission('create-crm-vendor')
                                 <li><a class="dropdown-item" href="{{ route('biller.client_vendors.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Vendor</a></li>
+                                @endauth
                             </ul>
                         </li>
+                        @endauth
+                        @permission('manage-crm-ticket-tag')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-sun-o"></i> Ticket Tags</a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('biller.client_vendor_tags.index') }}" data-toggle="dropdown"> <i class="ft-list"></i> Manage Tags </a></li>
+                                @permission('create-crm-ticket-tag')
                                 <li><a class="dropdown-item" href="{{ route('biller.client_vendor_tags.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Tag</a></li>
+                                @endauth
                             </ul>
                         </li>
+                        @endauth
+                        @permission('manage-crm-ticket')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-comments-o" aria-hidden="true"></i> Support Tickets</a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('biller.client_vendor_tickets.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Support Tickets</a></li>
+                                @permission('manage-crm-ticket')
                                 <li><a class="dropdown-item" href="{{ route('biller.client_vendor_tickets.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Ticket</a></li>                                
+                                @endauth
                             </ul>
                         </li>
+                        @endauth
                     </ul>
                 </li>
             @endif 
@@ -1352,49 +1366,49 @@
             </li>
             @endauth
 
-            {{-- client-area module --}}
-            @php
-                $user = auth()->user();
-                $app_owner = $user->ins == 1 && !$user->customer_id && !$user->supplier_id && !$user->client_vendor_id;
-            @endphp
-            @if($app_owner)
+            {{-- Client Area Module --}}
+            @if (access()->allow('client-area') && (auth()->user()->business->is_main || auth()->user()->is_tenant))
             <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="fa fa-anchor"></i><span>Client Area</span></a>
                 <ul class="dropdown-menu">
+                    @permission('manage-account-service')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-check-square-o" aria-hidden="true"></i> Account Services</a>
                         <ul class="dropdown-menu">
-                            @permission('manage-note')
-                                <li><a class="dropdown-item" href="{{ route('biller.tenant_services.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Account Services</a></li>
-                                <li><a class="dropdown-item" href="{{ route('biller.tenant_services.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Account Service</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.tenant_services.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Account Services</a></li>
+                            @permission('create-account-service')
+                            <li><a class="dropdown-item" href="{{ route('biller.tenant_services.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Account Service</a></li>
                             @endauth
                         </ul>
                     </li>
+                    @endauth
+                    @permission('manage-business-account')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-university"></i> Business Accounts</a>
                         <ul class="dropdown-menu">
-                            @permission('manage-note')
-                                <li><a class="dropdown-item" href="{{ route('biller.tenants.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Business Accounts</a></li>
-                                <li><a class="dropdown-item" href="{{ route('biller.tenants.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Business Account</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.tenants.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Business Accounts</a></li>
+                            @permission('create-business-account')
+                            <li><a class="dropdown-item" href="{{ route('biller.tenants.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Business Account</a></li>
                             @endauth
                         </ul>
                     </li>
-                    
+                    @endauth
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-usd" aria-hidden="true"></i> Invoices & Deposits</a>
                         <ul class="dropdown-menu">
-                            @permission('manage-note')
+                            @permission('manage-invoice')
                                 <li><a class="dropdown-item" href="{{ route('biller.tenant_invoices.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Invoices</a></li>
                                 <li><a class="dropdown-item" href="{{ route('biller.tenant_deposits.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Deposits</a></li>
                                 <li><a class="dropdown-item" href="{{ route('biller.mpesa_deposits.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage M-PESA Deposits</a></li>
                             @endauth
                         </ul>
                     </li>
-
+                    @permission('manage-client-area-ticket')
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-comments-o" aria-hidden="true"></i> Support Tickets</a>
                         <ul class="dropdown-menu">
-                            @permission('manage-note')
-                                <li><a class="dropdown-item" href="{{ route('biller.tenant_tickets.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Support Tickets</a></li>
-                                <li><a class="dropdown-item" href="{{ route('biller.tenant_tickets.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Ticket</a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.tenant_tickets.index') }}" data-toggle="dropdown"><i class="ft-list"></i> Manage Support Tickets</a></li>
+                            @permission('create-client-area-ticket')
+                            <li><a class="dropdown-item" href="{{ route('biller.tenant_tickets.create') }}" data-toggle="dropdown"> <i class="fa fa-plus-circle"></i> Create Ticket</a></li>
                             @endauth
                         </ul>
                     </li>
+                    @endauth
                 </ul>
             </li>        
             @endif

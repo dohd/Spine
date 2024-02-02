@@ -3,10 +3,7 @@
 namespace App\Repositories\Focus\tenant;
 
 use App\Exceptions\GeneralException;
-use App\Models\Access\Permission\PermissionRole;
 use App\Models\Access\User\User;
-use App\Models\employee\RoleUser;
-use App\Models\hrm\Hrm;
 use App\Models\tenant\Tenant;
 use App\Models\tenant_package\TenantPackage;
 use App\Models\tenant_package\TenantPackageItem;
@@ -14,7 +11,6 @@ use App\Repositories\BaseRepository;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 class TenantRepository extends BaseRepository
 {
@@ -32,7 +28,7 @@ class TenantRepository extends BaseRepository
     public function getForDataTable()
     {
 
-        $q = $this->query()->where('id', '>', 1);
+        $q = $this->query()->whereNull('deleted_at')->where('id', '>', 1);
 
         return $q->get();
     }
@@ -74,8 +70,14 @@ class TenantRepository extends BaseRepository
         }
         TenantPackageItem::insert($input['package_item_id']);
 
-        DB::commit();
-        return $tenant;
+        // update tenant user
+        $user = User::where('customer_id', $tenant_package->customer_id)->first();
+        if ($user) $user->update(['ins' => $tenant->id, 'updated_by' => auth()->user()->id]);
+
+        if ($tenant) {
+            DB::commit();
+            return $tenant;
+        }
     }
 
     /**
@@ -93,7 +95,7 @@ class TenantRepository extends BaseRepository
         $package_data = Arr::only($input, ['customer_id', 'subscr_term', 'date', 'package_id', 'cost', 'maintenance_cost', 'extras_cost', 'total_cost', 'package_item_id']);
         $tenant_data = array_diff_key($input, $package_data);
         
-        $tenant->update($tenant_data);
+        $result = $tenant->update($tenant_data);
 
         $tenant_package = $tenant->package;
         if ($tenant_package) {
@@ -118,8 +120,14 @@ class TenantRepository extends BaseRepository
             TenantPackageItem::insert($input['package_item_id']);
         }
 
-        DB::commit();
-        return true;
+        // update tenant user
+        $user = User::where('customer_id', $tenant_package->customer_id)->first();
+        if ($user) $user->update(['ins' => $tenant->id, 'updated_by' => auth()->user()->id]);
+
+        if ($result) {
+            DB::commit();
+            return $result;
+        }
     }
 
     /**
@@ -131,17 +139,16 @@ class TenantRepository extends BaseRepository
      */
     public function delete(Tenant $tenant)
     {
-        DB::beginTransaction();
-        $package = $tenant->package;
-        if ($package) {
-            $package->items()->delete();
-            $package()->delete();
-        }
-        $result = $tenant->delete();
-        
-        if ($result) {
-            DB::commit();
-            return true;
-        }
+        // DB::beginTransaction();
+        // $package = $tenant->package;
+        // if ($package) {
+        //     $package->items()->delete();
+        //     $package()->delete();
+        // }
+        // if ($tenant->delete()) {
+        //     DB::commit();
+        //     return true;
+        // }
+        return $tenant->update(['deleted_at' => now()]);
     }
 }

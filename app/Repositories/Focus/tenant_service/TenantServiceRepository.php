@@ -28,7 +28,7 @@ class TenantServiceRepository extends BaseRepository
     public function getForDataTable()
     {
 
-        $q = $this->query();
+        $q = $this->query()->whereNull('deleted_at');
 
         return $q->get();
     }
@@ -119,7 +119,8 @@ class TenantServiceRepository extends BaseRepository
      */
     public function delete(TenantService $tenant_service)
     {  
-        if ($tenant_service->items()->delete() && $tenant_service->delete())
-        return true;
+        // $tenant_service->items()->delete();
+        // $tenant_service->delete();
+        return $tenant_service->update(['deleted_at' => now()]);
     }
 }

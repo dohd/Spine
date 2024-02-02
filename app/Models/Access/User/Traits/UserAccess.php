@@ -88,48 +88,46 @@ trait UserAccess
      */
     public function allow($nameOrId)
     {   
-        if (auth()->user()->ins == 1) {
+        // Service Provider Account or Alternate Non-Tenant Account
+        if (auth()->user()->business->is_main || !auth()->user()->is_tenant) {
             //Check permissions directly tied to user
             foreach ($this->permissions as $perm) {
-                if (is_numeric($nameOrId)) {
-                    if ($perm->id == $nameOrId) {
-                        return true;
-                    }
-                }
-                if ($perm->name == $nameOrId) {
-                    return true;
-                }
-            }
-            // See if role has all permissions
-            foreach ($this->roles as $role) {
-                if ($role->all) {
-                    return true;
-                }
-            }
-            return false;
-        } 
-
-        // grant permissions based on tenant service package i.e Basic or Standard
-        $tenant = auth()->user()->tenant;
-        $module_ids = @$tenant->package->service->module_id;
-        $module_ids = $module_ids? explode(',', $module_ids) : [];
-        foreach ($this->permissions as $perm) {
-            if (in_array($perm->module_id, $module_ids)) {
                 if (is_numeric($nameOrId) && $perm->id == $nameOrId) {
                     return true;
                 } elseif ($perm->name == $nameOrId) {
                     return true;
                 }
             }
-        }
-        // check role permssions
-        foreach ($this->roles as $role) {
-            foreach ($role->permissions as $perm) {
+            // See if role has all permissions
+            foreach ($this->roles as $role) {
+                if ($role->all) return true;
+            }
+            return false;
+        } 
+
+        // Permissions depending on service package i.e Basic or Standard
+        if (auth()->user()->tenant) {
+            $tenant = auth()->user()->tenant;
+            $module_ids = @$tenant->package->service->module_id;
+            $module_ids = $module_ids? explode(',', $module_ids) : [];
+            foreach ($this->permissions as $perm) {
                 if (in_array($perm->module_id, $module_ids)) {
                     if (is_numeric($nameOrId) && $perm->id == $nameOrId) {
                         return true;
                     } elseif ($perm->name == $nameOrId) {
                         return true;
+                    }
+                }
+            }
+            // check role permssions
+            foreach ($this->roles as $role) {
+                foreach ($role->permissions as $perm) {
+                    if (in_array($perm->module_id, $module_ids)) {
+                        if (is_numeric($nameOrId) && $perm->id == $nameOrId) {
+                            return true;
+                        } elseif ($perm->name == $nameOrId) {
+                            return true;
+                        }
                     }
                 }
             }

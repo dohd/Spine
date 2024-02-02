@@ -14,8 +14,8 @@ trait TenantServiceAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("manage-branch", "biller.tenant_services.show")
-            . ' ' . $this->getEditButtonAttribute("edit-branch", "biller.tenant_services.edit")
-            . ' ' . $this->getDeleteButtonAttribute("delete-branch", "biller.tenant_services.destroy");
+        return $this->getViewButtonAttribute("manage-account-service", "biller.tenant_services.show")
+            . ' ' . $this->getEditButtonAttribute("edit-account-service", "biller.tenant_services.edit")
+            . ' ' . $this->getDeleteButtonAttribute("delete-account-service", "biller.tenant_services.destroy");
     }
 }

@@ -21,7 +21,7 @@ class ClientVendorTagRepository extends BaseRepository
     public function getForDataTable()
     {
 
-        $q = $this->query();
+        $q = $this->query()->whereNull('deleted_at');
 
         return $q->get();
     }
@@ -61,6 +61,7 @@ class ClientVendorTagRepository extends BaseRepository
      */
     public function delete(ClientVendorTag $client_vendor_tag)
     {
-        return $client_vendor_tag->delete();
+        // return $client_vendor_tag->delete();
+        return $client_vendor_tag->update(['deleted_at' => now()]);
     }
 }

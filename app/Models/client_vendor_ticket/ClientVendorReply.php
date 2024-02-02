@@ -66,7 +66,7 @@ class ClientVendorReply extends Model
             $instance->fill([
                 'index' => ClientVendorReply::max('index')+1,
                 'date' => date('Y-m-d'),
-                'category' => auth()->user()->ins == 1? 'Operator' : 'Owner',
+                'category' => !auth()->user()->is_tenant? 'Operator' : 'Owner',
                 'ins' => auth()->user()->ins,
                 'user_id' => auth()->user()->id,
             ]);

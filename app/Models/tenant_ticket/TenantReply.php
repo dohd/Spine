@@ -66,7 +66,7 @@ class TenantReply extends Model
             $instance->fill([
                 'index' => TenantReply::max('index')+1,
                 'date' => date('Y-m-d'),
-                'category' => auth()->user()->ins == 1? 'Operator' : 'Owner',
+                'category' => auth()->user()->business->is_main? 'Operator' : 'Owner',
                 'ins' => auth()->user()->ins,
                 'user_id' => auth()->user()->id,
             ]);

@@ -2,11 +2,24 @@
 
 namespace App\Models\Access\User\Traits\Attribute;
 
+use App\Models\tenant_package\TenantPackage;
+
 /**
  * Class UserAttribute.
  */
 trait UserAttribute
 {
+    /**
+     * @return mixed
+     */
+    public function getIsTenantAttribute()
+    {
+        $has_package = TenantPackage::where('customer_id', auth()->user()->customer_id)
+        ->orWhere('company_id', auth()->user()->ins)
+        ->exists();
+        return $has_package;
+    }
+
     /**
      * @return mixed
      */

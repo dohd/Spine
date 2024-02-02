@@ -34,15 +34,13 @@ class CoreDashboard extends Controller
 {
     public function index()
     {   
-        $user = auth()->user();
-        if (!$user->password_updated_at) {
-            session()->put('flash_success', 'Please Update Your Password.');
-        }
+        if (!auth()->user()->password_updated_at) session()->put('flash_success', 'Please Update Your Password.');
         if (!access()->allow('dashboard-owner')) {
+            // dd(auth()->user());
             return view('focus.dashboard.common');
         }
-        
-            
+        // dd(auth()->user()->id, auth()->user());
+
         $start_date = date('Y-m') . '-01';
         $today = date('Y-m-d');
         // invoices

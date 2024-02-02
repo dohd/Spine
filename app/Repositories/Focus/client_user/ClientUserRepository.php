@@ -26,7 +26,7 @@ class ClientUserRepository extends BaseRepository
     public function getForDataTable()
     {
 
-        $q = $this->query();
+        $q = $this->query()->whereNull('deleted_at');
 
         return $q->get();
     }
@@ -87,12 +87,13 @@ class ClientUserRepository extends BaseRepository
      */
     public function delete(ClientUser $client_user)
     {
-        DB::beginTransaction();
-        $this->deleteAuth($client_user, 'client_user');
-        $result = $client_user->delete();
-        if ($result) {
-            DB::commit();
-            return true;
-        }
+        // DB::beginTransaction();
+        // $this->deleteAuth($client_user, 'client_user');
+        // $result = $client_user->delete();
+        // if ($result) {
+        //     DB::commit();
+        //     return true;
+        // }
+        return $client_user->update(['deleted_at' => now()]);
     }
 }

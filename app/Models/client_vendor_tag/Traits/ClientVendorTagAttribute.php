@@ -10,7 +10,7 @@ trait ClientVendorTagAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getEditButtonAttribute("manage-client", "biller.client_vendor_tags.edit")
-            . ' ' . $this->getDeleteButtonAttribute("manage-client", "biller.client_vendor_tags.destroy");
+        return $this->getEditButtonAttribute("edit-crm-ticket-tag", "biller.client_vendor_tags.edit")
+            . ' ' . $this->getDeleteButtonAttribute("delete-crm-ticket-tag", "biller.client_vendor_tags.destroy");
     }
 }

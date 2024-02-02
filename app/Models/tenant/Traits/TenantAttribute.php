@@ -10,8 +10,8 @@ trait TenantAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("manage-branch", "biller.tenants.show")
-            . ' ' . $this->getEditButtonAttribute("edit-branch", "biller.tenants.edit")
-            . ' ' . $this->getDeleteButtonAttribute("delete-branch", "biller.tenants.destroy");
+        return $this->getViewButtonAttribute("manage-business-account", "biller.tenants.show")
+            . ' ' . $this->getEditButtonAttribute("edit-business-account", "biller.tenants.edit")
+            . ' ' . $this->getDeleteButtonAttribute("delete-business-account", "biller.tenants.destroy");
     }
 }

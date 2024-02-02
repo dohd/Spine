@@ -21,7 +21,7 @@ class TenantTicketRepository extends BaseRepository
     public function getForDataTable()
     {
 
-        $q = $this->query();
+        $q = $this->query()->whereNull('deleted_at');
 
         return $q->get();
     }
@@ -61,6 +61,7 @@ class TenantTicketRepository extends BaseRepository
      */
     public function delete(TenantTicket $tenant_ticket)
     {
-        return $tenant_ticket->delete();
+        // return $tenant_ticket->delete();
+        return $tenant_ticket->update(['deleted_at' => now()]);
     }
 }

@@ -10,8 +10,8 @@ trait ClientVendorTicketAttribute
      */
     public function getActionButtonsAttribute()
     {
-        return $this->getViewButtonAttribute("manage-client", "biller.client_vendor_tickets.show")
-            . ' ' . $this->getEditButtonAttribute("manage-client", "biller.client_vendor_tickets.edit")
-            . ' ' . $this->getDeleteButtonAttribute("manage-client", "biller.client_vendor_tickets.destroy");
+        return $this->getViewButtonAttribute("manage-crm-ticket", "biller.client_vendor_tickets.show")
+            . ' ' . $this->getEditButtonAttribute("edit-crm-ticket", "biller.client_vendor_tickets.edit")
+            . ' ' . $this->getDeleteButtonAttribute("delete-crm-ticket", "biller.client_vendor_tickets.destroy");
     }
 }

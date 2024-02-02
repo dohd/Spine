@@ -20,7 +20,7 @@ class ClientVendorTicketRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query();
+        $q = $this->query()->whereNull('deleted_at');
 
         /** client vendor authorized tickets */
         $client_vendor_id = auth()->user()->client_vendor_id;
@@ -64,6 +64,7 @@ class ClientVendorTicketRepository extends BaseRepository
      */
     public function delete(ClientVendorTicket $client_vendor_ticket)
     {
-        return $client_vendor_ticket->delete();
+        // return $client_vendor_ticket->delete();
+        return $client_vendor_ticket->update(['deleted_at' => now()]);
     }
 }
