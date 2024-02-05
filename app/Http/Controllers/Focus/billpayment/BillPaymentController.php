@@ -35,21 +35,6 @@ class BillPaymentController extends Controller
      */
     public function index()
     {
-        // create purchases (frontfreeze, sahara)
-        foreach (new DirectoryIterator(base_path() . '/main_creditors') as $file) {
-            if ($file->isDot()) continue;
-            $expense_data = $this->repository->expense_import_data($file->getFilename());
-            // dd($expense_data);
-            foreach ($expense_data as $row) {
-                // $this->repository->create($row);
-            }
-        }
-        // delete purchases (frontfreeze, sahara)
-        $billpayments = Billpayment::whereIn('supplier_id', [8])->get();
-        foreach ($billpayments as $key => $payment) {
-            // $this->repository->delete($payment);
-        }
-
         $suppliers = Supplier::get(['id', 'name']);
         return view('focus.billpayments.index', compact('suppliers'));
     }

@@ -11,9 +11,9 @@ class Currency extends Model
 {
     use ModelTrait,
         CurrencyAttribute,
-    	CurrencyRelationship {
-            // CurrencyAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+        CurrencyRelationship {
+        // CurrencyAttribute::getEditButtonAttribute insteadof ModelTrait;
+    }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -30,17 +30,13 @@ class Currency extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -69,9 +65,16 @@ class Currency extends Model
     }
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
-            $builder->where('ins', '=', auth()->user()->ins);
-    });
+        parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->user_id = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+
+        static::addGlobalScope('ins', function ($builder) {
+            $builder->where('ins', auth()->user()->ins);
+        });
     }
 }

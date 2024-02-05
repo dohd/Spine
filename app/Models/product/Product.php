@@ -72,6 +72,7 @@ class Product extends Model
         parent::boot();
 
         static::creating(function ($instance) {
+            $instance->user_id = auth()->user()->id;
             $instance->ins = auth()->user()->ins;
             return $instance;
         });

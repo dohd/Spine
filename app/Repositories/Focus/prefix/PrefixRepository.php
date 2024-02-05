@@ -2,12 +2,9 @@
 
 namespace App\Repositories\Focus\prefix;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\prefix\Prefix;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class PrefixRepository.
@@ -27,9 +24,7 @@ class PrefixRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-
-        return $this->query()
-            ->get(['id','value','note']);
+        return $this->query()->get(['id','value','note']);
     }
 
 
@@ -42,13 +37,13 @@ class PrefixRepository extends BaseRepository
      * return bool
      */
     public function update(Prefix $prefix, array $input)
-    {
+    {   
         $input = array_map( 'strip_tags', $input);
-    	if ($prefix->update($input))
-            return true;
+        $input['class'] = $prefix->class;
+        $input['note'] = $prefix->note;
+    	if (auth()->user()->ins == 1) $result = $prefix->update($input);
+        else $result = Prefix::create($input);
 
-        throw new GeneralException(trans('exceptions.backend.prefixes.update_error'));
+        return $result;
     }
-
-
 }

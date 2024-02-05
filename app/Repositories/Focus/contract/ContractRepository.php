@@ -64,7 +64,9 @@ class ContractRepository extends BaseRepository
                 'contract_id' => $result->id,
                 'title' => $v['s_title'],
                 'start_date' => date_for_database($v['s_start_date']),
-                'end_date' => date_for_database($v['s_end_date'])
+                'end_date' => date_for_database($v['s_end_date']),
+                'ins' => auth()->user()->ins,
+                'user_id' => auth()->user()->id,
             ];
         }, $schedule_data);
         TaskSchedule::insert($schedule_data);
@@ -121,7 +123,11 @@ class ContractRepository extends BaseRepository
                 'start_date' => date_for_database($item['s_start_date']),
                 'end_date' => date_for_database($item['s_end_date'])
             ]);
-            if (!$new_item->id) unset($new_item->id);
+            if (!$new_item->id) {
+                $new_item['user_id'] = auth()->user()->id;
+                $new_item['ins'] = auth()->user()->ins;
+                unset($new_item->id);
+            }
             $new_item->save();
         }
 

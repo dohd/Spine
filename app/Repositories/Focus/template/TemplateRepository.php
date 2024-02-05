@@ -2,12 +2,9 @@
 
 namespace App\Repositories\Focus\template;
 
-use DB;
-use Carbon\Carbon;
 use App\Models\template\Template;
 use App\Exceptions\GeneralException;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class TemplateRepository.
@@ -27,12 +24,8 @@ class TemplateRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-
-        return $this->query()
-            ->get(['id','title','category','info']);
+        return $this->query()->get(['id', 'title', 'category', 'info']);
     }
-
-
 
     /**
      * For updating the respective Model in storage
@@ -44,12 +37,15 @@ class TemplateRepository extends BaseRepository
      */
     public function update(Template $template, array $input)
     {
-         $input['body'] = clean(html_entity_decode($input['body']),'purifier.settings.custom_definition');
-            $input['title'] = strip_tags( $input['title']);
-    	if ($template->update($input))
-            return true;
+        $input['body'] = clean(html_entity_decode($input['body']), 'purifier.settings.custom_definition');
+        $input['title'] = strip_tags($input['title']);
+        $input['category'] = $template->category;
+        $input['other'] = $template->other;
+        $input['info'] = $template->info;
+        if ($template->ins == auth()->user()->ins) $result = $template->update($input);
+        else $result = Template::create($input);
 
-        throw new GeneralException(trans('exceptions.backend.templates.update_error'));
+        return $result;
     }
 
     /**
@@ -64,7 +60,5 @@ class TemplateRepository extends BaseRepository
         if ($template->delete()) {
             return true;
         }
-
-        throw new GeneralException(trans('exceptions.backend.templates.delete_error'));
     }
 }

@@ -285,21 +285,17 @@ class CompanyController extends Controller
     }
 
     public function status(ManageCompanyRequest $request)
-    {
-
+    {   
         if ($request->post()) {
             $data = $this->repository->update_settings($request);
             return new RedirectResponse(route('biller.settings.status'), ['flash_success' => trans('business.billing_settings_update')]);
         }
 
         $defaults = \App\Models\Company\ConfigMeta::get()->groupBy('feature_id');
-
-
         $data['additionals'] = \App\Models\additional\Additional::all();
         $data['status'] = Misc::where('section', '=', 2)->get();
-
+        
         return view('focus.general.settings.status', compact('data', 'defaults'));
-
     }
 
     public function crm_hrm_section(ManageCompanyRequest $request)
