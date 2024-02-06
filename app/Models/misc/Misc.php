@@ -11,9 +11,9 @@ class Misc extends Model
 {
     use ModelTrait,
         MiscAttribute,
-    	MiscRelationship {
-            // MiscAttribute::getEditButtonAttribute insteadof ModelTrait;
-        }
+        MiscRelationship {
+        // MiscAttribute::getEditButtonAttribute insteadof ModelTrait;
+    }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -30,17 +30,13 @@ class Misc extends Model
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * Default values for model fields
      * @var array
      */
-    protected $attributes = [
-
-    ];
+    protected $attributes = [];
 
     /**
      * Dates
@@ -69,9 +65,16 @@ class Misc extends Model
     }
     protected static function boot()
     {
-            parent::boot();
-            static::addGlobalScope('ins', function($builder){
+        parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->user_id = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
+        
+        static::addGlobalScope('ins', function ($builder) {
             $builder->where('ins', auth()->user()->ins);
-    });
+        });
     }
 }

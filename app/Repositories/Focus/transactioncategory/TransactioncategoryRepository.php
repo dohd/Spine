@@ -3,12 +3,11 @@
 namespace App\Repositories\Focus\transactioncategory;
 
 use App\Models\Company\ConfigMeta;
-use DB;
-use Carbon\Carbon;
 use App\Models\transactioncategory\Transactioncategory;
 use App\Exceptions\GeneralException;
+use App\Models\transaction\Transaction;
 use App\Repositories\BaseRepository;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class TransactioncategoryRepository.
@@ -30,7 +29,7 @@ class TransactioncategoryRepository extends BaseRepository
     {
 
         return $this->query()
-            ->get(['id','name','note','sub_category','sub_category_id','created_at']);
+            ->get(['id', 'name', 'note', 'sub_category', 'sub_category_id', 'created_at']);
     }
 
     /**
@@ -42,11 +41,9 @@ class TransactioncategoryRepository extends BaseRepository
      */
     public function create(array $input)
     {
-        $input = array_map( 'strip_tags', $input);
-        if (Transactioncategory::create($input)) {
-            return true;
-        }
-        throw new GeneralException(trans('exceptions.backend.transactioncategories.create_error'));
+        $input = array_map('strip_tags', $input);
+        $tr_category = Transactioncategory::create($input);
+        return $tr_category;
     }
 
     /**
@@ -59,11 +56,11 @@ class TransactioncategoryRepository extends BaseRepository
      */
     public function update(Transactioncategory $transactioncategory, array $input)
     {
-        $input = array_map( 'strip_tags', $input);
-    	if ($transactioncategory->update($input))
-            return true;
-
-        throw new GeneralException(trans('exceptions.backend.transactioncategories.update_error'));
+        $input = array_map('strip_tags', $input);
+        $input['code'] = $transactioncategory->code;
+        if (auth()->user()->ins == 1) $result = $transactioncategory->update($input);
+        else $result = Transactioncategory::create($input);
+        return $result;
     }
 
     /**
@@ -75,23 +72,14 @@ class TransactioncategoryRepository extends BaseRepository
      */
     public function delete(Transactioncategory $transactioncategory)
     {
+        $has_tr_category = Transaction::where('trans_category_id', $transactioncategory->id)->exists();
+        if ($has_tr_category) throw ValidationException::withMessages(['Transaction Category has linked transactions']);
 
-        $feature=ConfigMeta::where('feature_id','=',8)->first('feature_value');
-        if($transactioncategory->id==$feature->feature_value){
-            return false;
+        $features = ConfigMeta::whereIn('feature_id', [8,10])->get();
+        foreach ($features as $key => $feature) {
+            if ($transactioncategory->id == $feature->feature_value)
+                return false;
         }
-         $feature=ConfigMeta::where('feature_id','=',10)->first('feature_value');
-        if($transactioncategory->id==$feature->feature_value){
-            return false;
-        }
-
-
-
-
-        if ($transactioncategory->delete()) {
-            return true;
-        }
-
-        throw new GeneralException(trans('exceptions.backend.transactioncategories.delete_error'));
+        return $transactioncategory->delete();
     }
 }

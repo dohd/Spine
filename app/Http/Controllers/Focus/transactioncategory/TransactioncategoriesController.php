@@ -19,7 +19,6 @@ namespace App\Http\Controllers\Focus\transactioncategory;
 
 use App\Http\Requests\Focus\general\ManageCompanyRequest;
 use App\Models\transactioncategory\Transactioncategory;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
@@ -78,16 +77,11 @@ class TransactioncategoriesController extends Controller
      */
     public function store(ManageCompanyRequest $request)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        $input['ins'] = auth()->user()->ins;
         try {
-            //Create the model using repository create method
-            $this->repository->create($input);
+            $this->repository->create( $request->except(['_token', 'ins']));
         } catch (\Throwable $th) {
             return errorHandler('Error Creating Transaction Category', $th);
         }
-        //return with successfull message
         return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_success' => trans('alerts.backend.transactioncategories.created')]);
     }
 
@@ -107,20 +101,16 @@ class TransactioncategoriesController extends Controller
      * Update the specified resource in storage.
      *
      * @param UpdateTransactioncategoryRequestNamespace $request
-     * @param App\Models\transactioncategory\Transactioncategory $transactioncategory
+     * @param Transactioncategory $transactioncategory
      * @return \App\Http\Responses\RedirectResponse
      */
     public function update(ManageCompanyRequest $request, Transactioncategory $transactioncategory)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
         try {
-            //Update the model using repository update method
-            $this->repository->update($transactioncategory, $input);
+            $this->repository->update($transactioncategory, $request->except(['_token', 'ins']));
         } catch (\Throwable $th) {
             return errorHandler('Error Updating Transaction Categories', $th);
         }
-        //return with successfull message
         return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_success' => trans('alerts.backend.transactioncategories.updated')]);
     }
 
@@ -128,21 +118,17 @@ class TransactioncategoriesController extends Controller
      * Remove the specified resource from storage.
      *
      * @param DeleteTransactioncategoryRequestNamespace $request
-     * @param App\Models\transactioncategory\Transactioncategory $transactioncategory
+     * @param Transactioncategory $transactioncategory
      * @return \App\Http\Responses\RedirectResponse
      */
     public function destroy(Transactioncategory $transactioncategory, ManageCompanyRequest $request)
     {
         try {
-            //Calling the delete method on repository
             $result = $this->repository->delete($transactioncategory);
+            if ($result) return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_success' => trans('alerts.backend.transactioncategories.deleted')]);
         } catch (\Throwable $th) {
             return errorHandler('Error Deleting Transaction Categories', $th);
         }
-        //returning with successfull message
-        if ($result) return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_success' => trans('alerts.backend.transactioncategories.deleted')]);
         return new RedirectResponse(route('biller.transactioncategories.index'), ['flash_error' => trans('meta.delete_error')]);
     }
-
-
 }

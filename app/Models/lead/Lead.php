@@ -72,9 +72,9 @@ class Lead extends Model
     protected static function boot()
     {
         parent::boot();
-
+        
         static::creating(function ($instance) {
-            // $instance->user_id = auth()->user()->id;
+            $instance->user_id = auth()->user()->id;
             $instance->ins = auth()->user()->ins;
             return $instance;
         });

@@ -2,13 +2,13 @@
 
 namespace App\Models\lpo;
 
-use App\Models\branch\Branch;
-use App\Models\customer\Customer;
-use App\Models\quote\Quote;
+use App\Models\lpo\Traits\LpoRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class Lpo extends Model
 {
+    use LpoRelationship;
+    
     /**
      * The database table used by the model.
      * @var string
@@ -23,18 +23,22 @@ class Lpo extends Model
         'id'
     ];
 
-    public function quotes()
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
+    protected static function boot()
     {
-        return $this->hasMany(Quote::class);
-    }
+        parent::boot();
+        
+        static::creating(function ($instance) {
+            $instance->user_id = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
 
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
-    }
-
-    public function branch()
-    {
-        return $this->belongsTo(Branch::class);
+        static::addGlobalScope('ins', function ($builder) {
+            $builder->where('ins', auth()->user()->ins);
+        });
     }
 }

@@ -56,6 +56,8 @@ class StockTransferRepository extends BaseRepository
                 'unit_price' => numberClean($v['unit_price']),
                 'amount' => numberClean($v['amount']),
                 'stock_transfer_id' => $result->id,
+                'user_id' => auth()->user()->id,
+                'ins' => auth()->user()->ins,
             ]);
         }, $data_items);    
         StockTransferItem::insert($data_items);
