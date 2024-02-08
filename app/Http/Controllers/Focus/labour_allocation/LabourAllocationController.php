@@ -488,7 +488,6 @@ class LabourAllocationController extends Controller
     {
         //dd($id);
         $labour = LabourAllocation::find($id);
-        dd($labour);
         $labour->delete();
         $labour->items->each->delete();
         return redirect()

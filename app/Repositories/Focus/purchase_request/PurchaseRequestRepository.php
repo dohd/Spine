@@ -60,7 +60,7 @@ class PurchaseRequestRepository extends BaseRepository
      */
     public function update(PurchaseRequest $purchase_request, array $input)
     {
-        dd($input);
+        //dd($input);
         foreach ($input as $key => $val) {
             if (in_array($key, ['date', 'expect_date'])) 
                 $input[$key] = date_for_database($val);

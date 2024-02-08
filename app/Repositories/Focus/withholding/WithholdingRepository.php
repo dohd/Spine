@@ -45,11 +45,10 @@ class WithholdingRepository extends BaseRepository
     public function create(array $input)
     {
         // dd($input);
-        DB::beginTransaction();
-
         $data = $input['data'];
         $data['rel_payment_id'] = @$data['withholding_tax_id'];
         unset($data['withholding_tax_id']);
+        $data_items = $input['data_items'];
 
         foreach ($data as $key => $val) {
             if (in_array($key, ['cert_date', 'tr_date']))
@@ -61,17 +60,17 @@ class WithholdingRepository extends BaseRepository
         if (@$input['data_items'] && $data['amount'] != $data['allocate_ttl']) 
             throw ValidationException::withMessages(['Total Amount Withheld must be equal to Total Amount Allocated']);
         
-        $is_whtax_allocation = boolval($data['rel_payment_id']);
-        if ($is_whtax_allocation) {
-            // create allocation withholding tax payment
-            $result = Withholding::create($data);
-            $data_items = $input['data_items'];
-            foreach ($data_items as $key => $item) {
-                $data_items[$key]['withholding_id'] = $result->id;
-                $data_items[$key]['paid'] = numberClean($item['paid']);
-            }
-            WithholdingItem::insert($data_items);
+        DB::beginTransaction();
 
+        $result = Withholding::create($data);
+        foreach ($data_items as $key => $item) {
+            $data_items[$key]['withholding_id'] = $result->id;
+            $data_items[$key]['paid'] = numberClean($item['paid']);
+        }
+        WithholdingItem::insert($data_items);
+        
+        $is_allocation_pmt = boolval($data['rel_payment_id']);
+        if ($is_allocation_pmt) {
             // increament allocated amount
             $wh_tax = Withholding::find($data['withholding_tax_id']);
             $wh_tax->increment('allocate_ttl', $data['allocate_ttl']);
@@ -83,7 +82,6 @@ class WithholdingRepository extends BaseRepository
             $invoice_ids = $wh_tax->items()->pluck('invoice_id')->toArray();
             $this->customer_deposit_balance($invoice_ids);
         } else {
-            $result = Withholding::create($data);
             // compute balances
             $this->customer_credit_balance($result->customer_id);
 
@@ -123,7 +121,7 @@ class WithholdingRepository extends BaseRepository
         $wht_id = $withholding->id;
         $rel_payment_id = $withholding->rel_payment_id;
         $is_income_cert = ($withholding->certificate == 'tax');
-        $is_allocation_pmt = $withholding->items->exist();
+        $is_allocation_pmt = $withholding->items()->exists();
         $invoice_ids = $withholding->items()->pluck('invoice_id')->toArray();
         $customer = $withholding->customer;
 

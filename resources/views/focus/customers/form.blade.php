@@ -310,9 +310,10 @@
                             <div class="col-md-12">
                                 <div class="ml-2 password-condition">
                                     <h4>Password must have:</h4>
-                                    <h5 class="text-danger"><i class="fa fa-check" aria-hidden="true"></i> At least 7 Characters</h5>
+                                    <h5 class="text-danger"><i class="fa fa-check" aria-hidden="true"></i> At least 7 characters</h5>
                                     <h5 class="text-danger"><i class="fa fa-check" aria-hidden="true"></i> Contain Upper and Lowercase letters</h5>
                                     <h5 class="text-danger"><i class="fa fa-check" aria-hidden="true"></i> At least one number</h5>
+                                    <h5 class="text-danger"><i class="fa fa-check" aria-hidden="true"></i> At least one symbol</h5>
                                 </div>
                             </div>
                         </div>
@@ -350,29 +351,19 @@
         passwordKeyUp() {
             const div = $('.password-condition');
             const value = $(this).val();
-            if (value.length >= 7) {
-                div.find('h5:first').removeClass('text-danger').addClass('text-success');
-            } else {
-                div.find('h5:first').removeClass('text-success').addClass('text-danger');
-            }
-            if (new RegExp("[a-z][A-Z]|[A-Z][a-z]").test(value)) {
-                div.find('h5:eq(1)').removeClass('text-danger').addClass('text-success');
-            } else {
-                div.find('h5:eq(1)').removeClass('text-success').addClass('text-danger');
-            }
-            if (new RegExp("[0-9]").test(value)) {
-                div.find('h5:last').removeClass('text-danger').addClass('text-success');
-            } else {
-                div.find('h5:last').removeClass('text-success').addClass('text-danger');
-            }
+            if (value.length >= 7) div.find('h5:first').removeClass('text-danger').addClass('text-success');
+            else div.find('h5:first').removeClass('text-success').addClass('text-danger');
+            if (new RegExp("[a-z][A-Z]|[A-Z][a-z]").test(value)) div.find('h5:eq(1)').removeClass('text-danger').addClass('text-success');
+            else div.find('h5:eq(1)').removeClass('text-success').addClass('text-danger');
+            if (new RegExp("[0-9]").test(value)) div.find('h5:eq(-2)').removeClass('text-danger').addClass('text-success');
+            else div.find('h5:eq(-2)').removeClass('text-success').addClass('text-danger');
+            if (new RegExp("[^A-Za-z 0-9]").test(value)) div.find('h5:last').removeClass('text-danger').addClass('text-success');
+            else div.find('h5:last').removeClass('text-success').addClass('text-danger');
         },
 
         confirmPasswordKeyUp() {
-            if ($(this).val() != $('#password').val()) {
-                $(this).next().removeClass('d-none');
-            } else {
-                $(this).next().addClass('d-none');
-            }
+            if ($(this).val() != $('#password').val()) $(this).next().removeClass('d-none');
+            else $(this).next().addClass('d-none');
         },
 
         openBalanceChange() {

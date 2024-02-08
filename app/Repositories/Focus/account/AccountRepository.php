@@ -7,6 +7,7 @@ use App\Exceptions\GeneralException;
 use App\Models\items\JournalItem;
 use App\Models\manualjournal\Journal;
 use App\Models\project\Project;
+use App\Models\transaction\Transaction;
 use App\Repositories\Accounting;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
@@ -107,6 +108,7 @@ class AccountRepository extends BaseRepository
    */
   public function update($account, array $input)
   {
+    DB::beginTransaction();
     $input['opening_balance'] = numberClean($input['opening_balance']);
     $input['opening_balance_date'] = date_for_database($input['date']);
     unset($input['date'], $input['is_multiple']);
@@ -116,7 +118,15 @@ class AccountRepository extends BaseRepository
     /** account opening balance */
     if ($account->opening_balance > 0) {
       $tr_data = $this->opening_balance($account, 'update');
-      $this->post_ledger_opening_balance((object) $tr_data);
+      $journal = new Journal($tr_data);
+      $journal->id = $tr_data['id'];
+      $this->post_ledger_opening_balance($journal);
+    } else {
+      $journal = $account->gen_journal;
+      if ($journal) {
+        $journal->transactions()->delete();
+        $journal->delete();
+      }
     }
 
     if ($result) {
@@ -159,7 +169,7 @@ class AccountRepository extends BaseRepository
     if ($method == 'create') {
       // create journal
       $journal = Journal::create([
-        'tid' => Journal::max('tid')+1,
+        'tid' => Journal::max('tid') + 1,
         'date' => $opening_balance_date,
         'note' => $ledger_account->note,
         'debit_ttl' => $opening_balance,

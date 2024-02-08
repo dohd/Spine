@@ -89,8 +89,10 @@ class SuppliersController extends Controller
         if (request('password')) {
             if (!preg_match("/[a-z][A-Z]|[A-Z][a-z]/i", $request->password)) 
                 throw ValidationException::withMessages(['password' => 'Password Must Contain Upper and Lowercase letters']);
-            if (!preg_match("/[0-9]/i", $request->password)) 
+            if (!preg_match("/[0-9]/", $request->password)) 
                 throw ValidationException::withMessages(['password' => 'Password Must Contain At Least One Number']);
+            if (!preg_match("/[^A-Za-z 0-9]/", $request->password)) 
+                throw ValidationException::withMessages(['password' => 'Password Must Contain A Symbol']);
         }
 
         $data = $request->only([
@@ -150,8 +152,10 @@ class SuppliersController extends Controller
         if (request('password')) {
             if (!preg_match("/[a-z][A-Z]|[A-Z][a-z]/i", $request->password)) 
                 throw ValidationException::withMessages(['password' => 'Password Must Contain Upper and Lowercase letters']);
-            if (!preg_match("/[0-9]/i", $request->password)) 
+            if (!preg_match("/[0-9]/", $request->password)) 
                 throw ValidationException::withMessages(['password' => 'Password Must Contain At Least One Number']);
+            if (!preg_match("/[^A-Za-z 0-9]/", $request->password)) 
+                throw ValidationException::withMessages(['password' => 'Password Must Contain A Symbol']);
         }
 
         $data = $request->only([
@@ -168,7 +172,7 @@ class SuppliersController extends Controller
 
         try {
             $result = $this->repository->update($supplier, compact('data', 'account_data', 'payment_data', 'user_data'));
-        } catch (\Throwable $th) { dd($th);
+        } catch (\Throwable $th) {
             if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Updating Supplier', $th);
         }        

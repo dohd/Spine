@@ -777,21 +777,6 @@
                         </ul>
                     </li>
                     @endauth
-
-                    @permission('manage-debit-note')
-                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Debit Note</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.index') }}?is_debit=1" data-toggle="dropdown"><i class="ft-list"></i> Manage Debit Notes
-                                </a>
-                            </li>
-                            @permission('create-debit-note')
-                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.create') }}?is_debit=1" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Debit Note
-                                </a>
-                            </li>
-                            @endauth
-                        </ul>
-                    </li>
-                    @endauth
                 </ul>
             </li>
             @endif
@@ -847,6 +832,21 @@
                             </li>
                             @permission('create-credit-note')
                             <li><a class="dropdown-item" href="{{ route('biller.creditnotes.create') }}" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> {{ trans('orders.credit_notes_create') }}
+                                </a>
+                            </li>
+                            @endauth
+                        </ul>
+                    </li>
+                    @endauth
+
+                    @permission('manage-debit-note')
+                    <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-money"></i> Debit Note</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.index') }}?is_debit=1" data-toggle="dropdown"><i class="ft-list"></i> Manage Debit Notes
+                                </a>
+                            </li>
+                            @permission('create-debit-note')
+                            <li><a class="dropdown-item" href="{{ route('biller.creditnotes.create') }}?is_debit=1" data-toggle="dropdown"><i class="fa fa-plus-circle"></i> Create Debit Note
                                 </a>
                             </li>
                             @endauth

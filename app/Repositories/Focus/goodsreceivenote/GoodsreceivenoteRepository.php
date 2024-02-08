@@ -6,6 +6,7 @@ use App\Exceptions\GeneralException;
 use App\Models\goodsreceivenote\Goodsreceivenote;
 use App\Models\items\GoodsreceivenoteItem;
 use App\Models\items\UtilityBillItem;
+use App\Models\product\ProductVariation;
 use App\Models\utility_bill\UtilityBill;
 use App\Repositories\Accounting;
 use App\Repositories\BaseRepository;
@@ -82,8 +83,7 @@ class GoodsreceivenoteRepository extends BaseRepository
         $data_items = Arr::only($input, ['qty', 'rate', 'purchaseorder_item_id', 'item_id']);
         $data_items = modify_array($data_items);
         $data_items = array_filter($data_items, fn($v) => $v['qty'] > 0);
-        if (!$data_items) throw ValidationException::withMessages(['Cannot generate GRN without product qty!']);
-
+        if (!$data_items) throw ValidationException::withMessages(['Cannot generate GRN without assigning product qty!']);
         foreach ($data_items as $i => $item) {
             $data_items[$i] = array_replace($item, [
                 'goods_receive_note_id' => $result->id,
@@ -97,8 +97,13 @@ class GoodsreceivenoteRepository extends BaseRepository
             $po_item = $item->purchaseorder_item;
             if (!$po_item) throw ValidationException::withMessages(['Line ' . strval($i+1) . ' related purchase order item does not exist!']);
             $po_item->increment('qty_received', $item->qty);
-
-            $prod_variation = $po_item->productvariation;
+            
+            // check if is default product variation or supplier product 
+            $prod_variation = $item->productvariation;
+            if (@$result->purchaseorder->pricegroup_id && $item->supplier_product) {
+                $prod_variation = ProductVariation::where('code', $item->supplier_product->product_code)->first();
+            }
+            // unit conversion
             if (isset($prod_variation->product->units)) {
                 foreach ($prod_variation->product->units as $unit) {
                     if ($unit->code == $po_item['uom']) {
@@ -158,7 +163,6 @@ class GoodsreceivenoteRepository extends BaseRepository
                 $input[$key] = array_map(fn($v) => numberClean($v), $val);
         }
 
-        $prev_note = $goodsreceivenote->note;
         $result = $goodsreceivenote->update($input);
 
         // reverse previous stock qty
@@ -167,8 +171,12 @@ class GoodsreceivenoteRepository extends BaseRepository
             if (!$po_item) throw ValidationException::withMessages(['Line ' . strval($i+1) . ' related purchase order item does not exist!']);
             $po_item->decrement('qty_received', $item->qty);
 
+            // check if is default product variation or supplier product 
+            $prod_variation = $item->productvariation;
+            if (@$goodsreceivenote->purchaseorder->pricegroup_id && $item->supplier_product) {
+                $prod_variation = ProductVariation::where('code', $item->supplier_product->product_code)->first();
+            }
             // apply unit conversion
-            $prod_variation = $po_item->productvariation;
             if (isset($prod_variation->product->units)) {
                 foreach ($prod_variation->product->units as $unit) {
                     if ($unit->code == $po_item['uom']) {
@@ -202,8 +210,12 @@ class GoodsreceivenoteRepository extends BaseRepository
             if (!$po_item) throw ValidationException::withMessages(['Line ' . strval($i+1) . ' related purchase order item does not exist!']);
             $po_item->increment('qty_received', $item->qty);
             
+            // check if is default product variation or supplier product 
+            $prod_variation = $item->productvariation;
+            if (@$goodsreceivenote->purchaseorder->pricegroup_id && $item->supplier_product) {
+                $prod_variation = ProductVariation::where('code', $item->supplier_product->product_code)->first();
+            }
             // apply unit conversion
-            $prod_variation = $po_item->productvariation;
             if (isset($prod_variation->product->units)) {
                 foreach ($prod_variation->product->units as $unit) {
                     if ($unit->code == $po_item['uom']) {
@@ -226,7 +238,6 @@ class GoodsreceivenoteRepository extends BaseRepository
         elseif (round($received_goods_qty) < round($order_goods_qty)) $goodsreceivenote->purchaseorder->update(['status' => 'Partial']);
         else $goodsreceivenote->purchaseorder->update(['status' => 'Complete']); 
         
-        $goodsreceivenote->prev_note = $prev_note;
 
         /**accounting */
         if ($goodsreceivenote->invoice_no) {
@@ -255,15 +266,25 @@ class GoodsreceivenoteRepository extends BaseRepository
         DB::beginTransaction();
 
         $grn_bill = $goodsreceivenote->bill;
-        if ($grn_bill) throw ValidationException::withMessages(['Goods Receive Note is attached to Bill No. ' . gen4tid('', $grn_bill->tid)]);
+        if ($grn_bill) {
+            if ($grn_bill->payments()->exists()) 
+                throw ValidationException::withMessages(['Not Allowed! Goods Receive Note is billed on Bill No. '. gen4tid('', $grn_bill->tid). 'with associated payments']);
+            $grn_bill->transactions()->delete();
+            $grn_bill->items()->delete();
+            $grn_bill->delete();
+        }
 
         // decrease inventory stock 
         foreach ($goodsreceivenote->items as $item) {
             $po_item = $item->purchaseorder_item;
             if ($po_item) {
                 $po_item->decrement('qty_received', $item->qty);
+                // check if is default product variation or supplier product 
+                $prod_variation = $item->productvariation;
+                if (@$goodsreceivenote->purchaseorder->pricegroup_id && $item->supplier_product) {
+                    $prod_variation = ProductVariation::where('code', $item->supplier_product->product_code)->first();
+                }
                 // apply unit conversion
-                $prod_variation = $po_item->productvariation;
                 if (isset($prod_variation->product->units)) {
                     foreach ($prod_variation->product->units as $unit) {
                         if ($unit->code == $po_item['uom']) {
@@ -290,12 +311,8 @@ class GoodsreceivenoteRepository extends BaseRepository
             else $goodsreceivenote->purchaseorder->update(['status' => 'Complete']); 
         }
         
-        // clear transactions
         $goodsreceivenote->transactions()->delete();
-        aggregate_account_transactions();
-        $goodsreceivenote->items()->delete();
-        $result = $goodsreceivenote->delete();
-        if ($result) {
+        if ($goodsreceivenote->delete()) {
             DB::commit(); 
             return true;
         }

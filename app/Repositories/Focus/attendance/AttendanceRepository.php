@@ -134,7 +134,6 @@ class AttendanceRepository extends BaseRepository
      */
     public function update(Attendance $attendance, array $input)
     {
-        dd($input);
         foreach ($input as $key => $val) {
             if ($key == 'start_date') $input[$key] = date_for_database($val);
             if (in_array($key, ['qty', 'viable_qty'])) $input[$key] = numberClean($val);

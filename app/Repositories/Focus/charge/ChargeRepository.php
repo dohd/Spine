@@ -95,9 +95,7 @@ class ChargeRepository extends BaseRepository
     {
         DB::beginTransaction();
         $charge->transactions()->delete();
-        aggregate_account_transactions();
-        $result = $charge->delete();
-        if ($result) {
+        if ($charge->delete()) {
             DB::commit();
             return true;
         }       

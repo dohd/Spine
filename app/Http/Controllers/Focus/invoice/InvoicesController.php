@@ -112,7 +112,7 @@ class InvoicesController extends Controller
      */
     public function store(CreateInvoiceRequest $request)
     {
-        dd($request->all());
+        //dd($request->all());
     }
 
     /**
@@ -427,7 +427,7 @@ class InvoicesController extends Controller
 
         try {
             $result = $this->inv_payment_repository->update($payment, compact('data', 'data_items'));
-        } catch (\Throwable $th) { dd($th);
+        } catch (\Throwable $th) {
             return errorHandler('Error Updating Payment', $th);
         }
 

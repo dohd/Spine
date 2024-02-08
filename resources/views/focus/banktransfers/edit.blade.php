@@ -28,7 +28,7 @@
                                     @include("focus.banktransfers.form")
                                     <div class="edit-form-btn ml-1">
                                         {{ link_to_route('biller.banktransfers.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
-                                        {{ Form::submit('Edit', ['class' => 'btn btn-primary btn-md']) }}
+                                        {{ Form::submit('Update', ['class' => 'btn btn-primary btn-md']) }}
                                     </div>                                    
                                 </div>
                             {{ Form::close() }}

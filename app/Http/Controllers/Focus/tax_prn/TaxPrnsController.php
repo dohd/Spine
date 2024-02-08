@@ -124,7 +124,7 @@ class TaxPrnsController extends Controller
     {
         try {
             $this->repository->delete($tax_prn);
-        } catch (\Throwable $th) { dd($th);
+        } catch (\Throwable $th) {
             if ($th instanceof ValidationException) throw $th;
             return errorHandler('Error Deleting Tax PRN', $th);
         }

@@ -61,7 +61,7 @@ class JournalRepository extends BaseRepository
             ]);
         }, $data_items);
         JournalItem::insert($data_items);
-
+        
         /** accounting */ 
         $this->post_gen_journal($result);
 

@@ -149,7 +149,16 @@ class PurchaseRepository extends BaseRepository
                 } else throw ValidationException::withMessages(['Please attach units to stock items']);
             }
         }
-        PurchaseItem::insert($data_items);        
+        PurchaseItem::insert($data_items); 
+        
+        // check if item totals match parent totals
+        $items_amount = 0;
+        foreach ($result->items as $key => $item) {
+            $items_amount += $item->amount;
+        } 
+        if (round($result->grandttl) != round($items_amount)) {
+            throw ValidationException::withMessages(['Server Error! Please check line item totals']);
+        }
 
         /** accounting **/
         $bill = $this->generate_bill($result);
@@ -217,7 +226,6 @@ class PurchaseRepository extends BaseRepository
                 throw ValidationException::withMessages(['Last character of Tax Pin must be a letter']);
         }
 
-        $prev_note = $purchase->note;
         $result = $purchase->update($data);
 
         $data_items = $input['data_items'];
@@ -277,6 +285,15 @@ class PurchaseRepository extends BaseRepository
             $purchase_item->save();
         }
         
+        // check if item totals match parent totals
+        $items_amount = 0;
+        foreach ($purchase->items as $key => $item) {
+            $items_amount += $item->amount;
+        } 
+        if (round($purchase->grandttl) != round($items_amount)) {
+            throw ValidationException::withMessages(['Server Error! Please check line item totals']);
+        }
+
         /** accounting */
         $bill = $this->generate_bill($purchase);
         $purchase->bill_id = $bill->id;
@@ -300,48 +317,37 @@ class PurchaseRepository extends BaseRepository
      */
     public function delete($purchase)
     {
-        if ($purchase->bill()->whereHas('payments')->exists()) 
-            throw ValidationException::withMessages(['Not allowed! Purchase is billed and has related payments']);
-        
+        $bill = $purchase->bill;
+        if ($bill && $bill->payments()->exists()) throw ValidationException::withMessages(['Not allowed! Purchase is billed and has related payments']);
+
         DB::beginTransaction();
-
-        try {
-            // reduce stock
-            foreach ($purchase->items as $i => $item) {
-                if ($item->type != 'Stock') continue;
-                $prod_variation = $item->productvariation;
-                // apply unit conversion
-                if (isset($prod_variation->product->units)) {
-                    $units = $prod_variation->product->units;
-                    foreach ($units as $unit) {
-                        if ($unit->code == $item['uom']) {
-                            if ($unit->unit_type == 'base') {
-                                $prod_variation->decrement('qty', $item['qty']);
-                            } else {
-                                $converted_qty = $item['qty'] * $unit->base_ratio;
-                                $prod_variation->decrement('qty', $converted_qty);
-                            }
+        // reduce stock
+        foreach ($purchase->items as $i => $item) {
+            if ($item->type != 'Stock') continue;
+            $prod_variation = $item->productvariation;
+            // apply unit conversion
+            if (isset($prod_variation->product->units)) {
+                $units = $prod_variation->product->units;
+                foreach ($units as $unit) {
+                    if ($unit->code == $item['uom']) {
+                        if ($unit->unit_type == 'base') {
+                            $prod_variation->decrement('qty', $item['qty']);
+                        } else {
+                            $converted_qty = $item['qty'] * $unit->base_ratio;
+                            $prod_variation->decrement('qty', $converted_qty);
                         }
-                    }     
-                } else if ($prod_variation) $prod_variation->decrement('qty', $item['qty']);      
-                else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' may not exist! Please update it from the Inventory']); 
-            }
-
-            // delete bill
-            UtilityBill::where(['document_type' => 'direct_purchase', 'ref_id' => $purchase->id])->delete();
-
-            // delete transactions
-            Transaction::where(['tr_type' => 'bill', 'tr_ref' => $purchase->id])->where('note', 'LIKE', "%{$purchase->note}%")->delete();
-            aggregate_account_transactions();
-
-            if ($purchase->delete()) {
-                DB::commit();
-                return true;
-            }
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            if ($th instanceof ValidationException) throw $th;
-            throw new GeneralException(trans('exceptions.backend.purchaseorders.delete_error'));
+                    }
+                }     
+            } else if ($prod_variation) $prod_variation->decrement('qty', $item['qty']);      
+            else throw ValidationException::withMessages(['Product on line ' . strval($i+1) . ' may not exist! Please update it from the Inventory']); 
+        }
+        if ($bill) {
+            $bill->transactions()->delete();
+            $bill->delete();
+        }
+        if ($purchase->delete()) {
+            DB::commit();
+            return true;
         }
     }
 

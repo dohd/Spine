@@ -118,7 +118,7 @@ class ClientVendorTicketsController extends Controller
     {
         try {
             $this->repository->update($client_vendor_ticket, $request->except(['_token']));
-        } catch (\Throwable $th) { dd($th);
+        } catch (\Throwable $th) {
             return errorHandler('Error Updating Ticket!', $th);
         }
         
@@ -212,7 +212,7 @@ class ClientVendorTicketsController extends Controller
             if ($client_vendor_reply->ticket) {
                 $client_vendor_reply->ticket->update(['status' => 'Open', 'closed_at' => null]);
             }
-        } catch (\Throwable $th) { dd($th);
+        } catch (\Throwable $th) {
             return errorHandler('Error Replying Ticket!', $th);
         }
         

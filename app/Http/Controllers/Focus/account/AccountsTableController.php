@@ -22,6 +22,7 @@ use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\account\AccountRepository;
 use App\Http\Requests\Focus\account\ManageAccountRequest;
+use App\Models\transaction\Transaction;
 
 /**
  * Class AccountsTableController.
@@ -51,23 +52,41 @@ class AccountsTableController extends Controller
      */
     public function __invoke(ManageAccountRequest $request)
     {
+        $tr_accounts = Transaction::selectRaw('account_id, SUM(debit) as debit, SUM(credit) as credit')
+        ->where('ins', auth()->user()->ins)
+        ->groupBy('account_id')
+        ->get();
+        
         $core = $this->account->getForDataTable();
-
         return Datatables::of($core)
             ->escapeColumns(['id', 'number', 'holder'])
             ->addIndexColumn()
-            ->addColumn('debit', function ($account) {
-                return numberFormat($account->debit);
+            ->addColumn('debit', function ($account) use($tr_accounts) {
+                foreach ($tr_accounts as $key => $tr_account) {
+                    if ($tr_account->account_id == $account->id) {
+                        return numberFormat($tr_account->debit);
+                    }
+                }
+                return numberFormat(0);
             })
-            ->addColumn('credit', function ($account) {
-                return numberFormat($account->credit);
+            ->addColumn('credit', function ($account) use($tr_accounts) {
+                foreach ($tr_accounts as $key => $tr_account) {
+                    if ($tr_account->account_id == $account->id) {
+                        return numberFormat($tr_account->credit);
+                    }
+                }
+                return numberFormat(0);
             })
-            ->addColumn('balance', function ($account) {
-                $balance = $account->credit - $account->debit;
-                if (in_array($account->account_type, ['Asset', 'Expense']))
-                    $balance = $account->debit - $account->credit;
-
-                return numberFormat($balance);
+            ->addColumn('balance', function ($account) use($tr_accounts) {
+                foreach ($tr_accounts as $key => $tr_account) {
+                    if ($tr_account->account_id == $account->id) {
+                        if (in_array($account->account_type, ['Asset', 'Expense'])) {
+                            return numberFormat($tr_account->debit - $tr_account->credit);
+                        } 
+                        return numberFormat($tr_account->credit - $tr_account->debit);
+                    }
+                }
+                return numberFormat(0);
             })
             ->addColumn('account_type', function ($account) {
                 return  $account->account_type;

@@ -50,6 +50,7 @@ class CreditNoteRepository extends BaseRepository
         }
 
         DB::beginTransaction();
+
         $result = CreditNote::create($input);
         // compute invoice balance
         $this->customer_deposit_balance([$result->invoice->id]);
@@ -76,11 +77,11 @@ class CreditNoteRepository extends BaseRepository
         $result = $creditnote->update($input);
 
         // compute invoice balance
-        $this->customer_deposit_balance([$result->invoice->id]);
+        $this->customer_deposit_balance([@$creditnote->invoice->id]);
         
         /** accounts  */
-        Transaction::when($creditnote->is_debit, fn($q) => $q->where('dnote_id', $creditnote->id)->delete())
-        ->when(!$creditnote->is_debit, fn($q) => $q->where('cnote_id', $creditnote->id)->delete());
+        if ($creditnote->is_debit) $creditnote->debitnote_transactions()->delete();
+        else $creditnote->creditnote_transactions()->delete();
         $this->post_creditnote_debitnote($creditnote);
 
         if ($result) {
@@ -101,11 +102,9 @@ class CreditNoteRepository extends BaseRepository
         DB::beginTransaction();
         $invoice_id = @$creditnote->invoice->id;
 
-        Transaction::when($creditnote->is_debit, fn($q) => $q->where('dnote_id', $creditnote->id)->delete())
-        ->when(!$creditnote->is_debit, fn($q) => $q->where('cnote_id', $creditnote->id)->delete());
-        aggregate_account_transactions();
+        if ($creditnote->is_debit) $creditnote->debitnote_transactions()->delete();
+        else $creditnote->creditnote_transactions()->delete();
         $result = $creditnote->delete();
-
         // compute invoice balance
         $this->customer_deposit_balance([$invoice_id]);
 

@@ -2,7 +2,7 @@
 
 namespace App\Models\charge\Traits;
 
-use App\Models\charge\Charge;
+use App\Models\transaction\Transaction;
 
 trait ChargeRelationship
 {
@@ -13,6 +13,6 @@ trait ChargeRelationship
 
     public function transactions()
     {
-        return $this->hasMany(Charge::class, 'charge_id');
+        return $this->hasMany(Transaction::class, 'charge_id');
     }
 }

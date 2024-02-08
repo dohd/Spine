@@ -12,7 +12,7 @@ trait WithholdingRelationship
 {
     public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'tr_ref')->where('tr_type', 'withholding');
+        return $this->hasMany(Transaction::class, 'tr_ref')->where('tr_type', 'wht');
     }
 
     public function items()

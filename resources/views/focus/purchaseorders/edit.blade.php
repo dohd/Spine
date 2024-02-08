@@ -68,7 +68,6 @@
             $('#pricegroup_id option').each(function () {
                 if (id == $(this).val())
                 priceCustomer = $(this).val();
-                console.log($(this).val());
             });
             
             $('#pricegroup_id').val(priceCustomer);
@@ -184,7 +183,6 @@
                 $('#pricegroup_id option').each(function () {
                     if ($('#supplierid').val() == $(this).val())
                     priceCustomer = $(this).val();
-                    console.log(priceCustomer);
                 });
                 
                 $('#pricegroup_id').val(priceCustomer);

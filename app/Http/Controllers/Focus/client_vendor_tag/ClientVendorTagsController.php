@@ -101,7 +101,7 @@ class ClientVendorTagsController extends Controller
     {
         try {
             $this->repository->update($client_vendor_tag, $request->except(['_token']));
-        } catch (\Throwable $th) { dd($th);
+        } catch (\Throwable $th) {
             return errorHandler('Error Updating Tag!', $th);
         }
         
