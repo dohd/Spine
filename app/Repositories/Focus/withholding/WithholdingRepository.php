@@ -6,6 +6,7 @@ use DB;
 use App\Models\withholding\Withholding;
 use App\Exceptions\GeneralException;
 use App\Models\items\WithholdingItem;
+use App\Repositories\Accounting;
 use App\Repositories\BaseRepository;
 use App\Repositories\CustomerSupplierBalance;
 use Illuminate\Validation\ValidationException;
@@ -15,7 +16,7 @@ use Illuminate\Validation\ValidationException;
  */
 class WithholdingRepository extends BaseRepository
 {
-    use CustomerSupplierBalance;
+    use CustomerSupplierBalance, Accounting;
 
     /**
      * Associated Repository Model.

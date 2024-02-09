@@ -164,7 +164,7 @@ class UtilityBillController extends Controller
     public function store_kra_bill(Request $request)
     {
         try {
-            $this->respository->create_kra($request->except('_token'));
+            //$this->respository->create_kra($request->except('_token'));
         } catch (\Throwable $th) {
             return errorHandler('Error Creating KRA Bill', $th);
         }

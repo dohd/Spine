@@ -800,11 +800,7 @@ function modify_array(array $input)
 // aggregate transaction credits and debits
 function aggregate_account_transactions()
 {
-    $tr_totals = \App\Models\transaction\Transaction::selectRaw('account_id AS id, SUM(debit) AS debit, SUM(credit) AS credit')
-        ->groupBy('account_id')
-        ->get()
-        ->toArray();
-    return $tr_totals;
+    return 1;
 }
 // auto-generate a 4 digit number prefixed with a string e.g ID-0001 
 function gen4tid($prefix = '', $num = 0, $count = 4)
